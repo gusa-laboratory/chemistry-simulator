@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>希薄溶液シミュレーター｜Interactive Lab</title>
+<meta name="description" content="沸点上昇・凝固点降下・浸透圧の束一的性質と、DLVO・電気泳動・塩析・保護コロイドを粒子モデルで学ぶ授業用シミュレーター。">
+<meta name="theme-color" content="#2563eb">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="希薄溶液">
+<style>
+  :root {
+    --curve: #2563eb;
+    --solution: #7c3aed;
+    --accent: #f97316;
+    --supercool: #ef4444;
+    --solid: #0ea5e9;
+    --extrap: #94a3b8;
+    --grid: #e8eef7;
+    --axis: #64748b;
+    --ink: #172033;
+    --ink2: #526078;
+    --ink3: #8995a9;
+    --bg: #f3f6fb;
+    --card: #fff;
+    --border: #dce4f0;
+    --blue-soft: #edf4ff;
+    --blue-deep: #173b75;
+    --shadow: 0 12px 32px rgba(28, 50, 87, .08);
+    --shadow-sm: 0 4px 14px rgba(28, 50, 87, .06);
+  }
+  * { box-sizing: border-box; }
+  html { min-width: 320px; background: var(--bg); }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    color: var(--ink);
+    background:
+      radial-gradient(circle at 8% -10%, rgba(37, 99, 235, .10), transparent 30rem),
+      radial-gradient(circle at 92% 5%, rgba(124, 58, 237, .07), transparent 28rem),
+      var(--bg);
+    font-family: Inter, 'Yu Gothic UI', 'Yu Gothic', Meiryo, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  header {
+    padding: 22px clamp(16px, 4vw, 54px) 0;
+    background: rgba(255,255,255,.78);
+    border-bottom: 1px solid rgba(220,228,240,.9);
+    backdrop-filter: blur(18px);
+  }
+  .header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    max-width: 1440px;
+    margin: 0 auto 16px;
+  }
+  h1 { margin: 0; color: var(--blue-deep); font-size: clamp(24px,3vw,34px); letter-spacing: -.035em; }
+  h1::before {
+    content: 'SOLUTION LAB'; display: block; width: max-content; margin-bottom: 6px;
+    padding: 4px 9px; border-radius: 99px; background: var(--blue-soft); color: var(--curve);
+    font: 800 10px/1 Inter,Arial,sans-serif; letter-spacing: .13em;
+  }
+  .subtitle { margin: 6px 0 0; color: var(--ink2); font-size: 13px; font-weight: 600; }
+  .fullscreen-btn {
+    flex: 0 0 auto; padding: 10px 14px; border: 1px solid var(--border); border-radius: 11px;
+    background: #fff; color: var(--blue-deep); box-shadow: var(--shadow-sm); cursor: pointer;
+    font-family: inherit; font-size: 13px; line-height: 1; font-weight: 800;
+  }
+  .fullscreen-btn::before { content: '⛶'; margin-right: 7px; font-size: 16px; }
+  .tabs { display: flex; gap: 6px; max-width: 1440px; margin: 0 auto; overflow-x: auto; }
+  .tabs button {
+    flex: 0 0 auto; padding: 11px 18px 13px; border: 1px solid transparent; border-bottom: 0;
+    border-radius: 10px 10px 0 0; background: transparent; color: var(--ink2); cursor: pointer;
+    font-family: inherit; font-size: 14px; line-height: 1.2; font-weight: 800;
+  }
+  .tabs button[aria-selected="true"] {
+    border-color: var(--border); background: var(--bg); color: var(--curve);
+    box-shadow: inset 0 3px 0 var(--curve);
+  }
+  main { max-width: 1550px; margin: 0 auto; padding: 20px clamp(14px,4vw,54px) 42px; }
+  .panel { display: none; }
+  .panel.active { display: block; animation: appear .2s ease-out; }
+  @keyframes appear { from { opacity: .3; transform: translateY(3px); } }
+  .panel-tools { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 8px; min-height: 36px; margin-bottom: 8px; }
+  .swap-btn {
+    padding: 8px 13px; border: 1px solid var(--border); border-radius: 99px; background: #fff;
+    color: var(--curve); box-shadow: var(--shadow-sm); cursor: pointer; font-family: inherit; font-size: 12px; line-height: 1; font-weight: 800;
+  }
+  .swap-btn::before { content: '⇄'; margin-right: 7px; font-size: 16px; }
+  .swap-btn:disabled { color: var(--ink3); background: #f8fafc; cursor: default; opacity: .55; }
+  .arrow-toggle {
+    padding: 8px 11px; border: 1px solid currentColor; border-radius: 99px; background: #fff;
+    cursor: pointer; font-family: inherit; font-size: 12px; line-height: 1; font-weight: 800;
+  }
+  .arrow-toggle::before { content: ''; display: inline-block; width: 8px; height: 8px; margin-right: 6px; border-radius: 50%; background: currentColor; }
+  .arrow-toggle.rise { color: #ea580c; background: #fff7ed; }
+  .arrow-toggle.drop { color: #0f766e; background: #f0fdfa; }
+  .arrow-toggle[aria-pressed="false"] { color: var(--ink3); border-color: var(--border); background: #fff; }
+  .freezing-toggle { color: var(--curve); background: var(--blue-soft); }
+  .freezing-toggle.extrapolation { color: #c2410c; background: #fff7ed; }
+  .freezing-toggle.supercooling { color: #dc2626; background: #fff1f2; }
+  .solution-series-toggle { color: #6d28d9; background: #f7f3ff; }
+  .boiling-toggle { color: var(--curve); background: var(--blue-soft); }
+  .boiling-toggle.vapor100 { color: #0f766e; background: #f0fdfa; }
+  .colloid-toggle.charge { color: #dc2626; background: #fff1f2; }
+  .colloid-toggle.ion { color: #0f766e; background: #f0fdfa; }
+  .colloid-toggle.dlvo { color: #7c3aed; background: #f7f3ff; }
+  .model-toggle::before { content: '▣'; }
+  .layout { display: grid; grid-template-columns: minmax(0,1fr) minmax(330px,405px); gap: 20px; align-items: start; }
+  .chart-card, .card {
+    background: rgba(255,255,255,.96); border: 1px solid rgba(210,221,236,.92);
+    box-shadow: var(--shadow); border-radius: 18px;
+  }
+  .chart-card { position: relative; min-width: 0; padding: 10px 14px 14px; overflow: hidden; }
+  .chart-card::before {
+    content: 'INTERACTIVE GRAPH'; display: block; margin: 1px 0 2px 3px;
+    color: var(--ink3); font: 800 9px/1 Inter,Arial,sans-serif; letter-spacing: .15em;
+  }
+  .chart-card svg { display: block; width: 100%; height: auto; }
+  .side { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  .card { padding: 12px 15px; box-shadow: var(--shadow-sm); }
+  .model-card { padding: 8px 10px; background: linear-gradient(135deg,#fafdff,#edf5ff); }
+  .model-card svg { display: block; width: 100%; max-width: 340px; height: auto; margin: 0 auto; }
+  .zoom-card { padding: 8px 10px; background: linear-gradient(135deg,#fff,#f7f9fd); }
+  .zoom-card svg { display: block; width: 100%; max-width: 390px; height: auto; margin: 0 auto; }
+  .dlvo-card { padding: 7px 9px; background: linear-gradient(135deg,#fff,#faf7ff); }
+  .dlvo-card svg { display: block; width: 100%; max-width: 405px; height: auto; margin: 0 auto; }
+  #panel-colloid .chart-card::before { content: 'COLLOID PARTICLE MODEL'; }
+  #panel-colloid .chart-stage > svg { max-height: 590px; }
+  #panel-colloid.dlvo-expanded .chart-card::before { content: 'DLVO INTERACTION ENERGY'; }
+  #panel-colloid.dlvo-expanded .chart-stage > #chart-dlvo { width: 100%; height: auto; max-height: 590px; }
+  #panel-colloid.dlvo-hidden .dlvo-card { display: none; }
+  #panel-colloid.dlvo-hidden .chart-card { grid-column: 1 / -1; }
+  #panel-salt .chart-card::before { content: 'HYDRATION MODEL'; }
+  #panel-protect .chart-card::before { content: 'PROTECTION MODEL'; }
+  #panel-electro .chart-card::before { content: 'ELECTROPHORESIS'; }
+  #panel-salt .chart-stage > svg, #panel-protect .chart-stage > svg { max-height: 560px; }
+  body.is-fullscreen #panel-salt .chart-card { grid-column: 1 / -1; grid-row: 1; }
+  body.is-fullscreen #panel-salt .controls { grid-column: 1; grid-row: 2; }
+  body.is-fullscreen #panel-salt .zoom-card { grid-column: 2; grid-row: 2; }
+  body.is-fullscreen #panel-salt .chart-stage > svg { max-height: calc(100vh - 220px); }
+  #panel-electro .chart-card { grid-column: 1 / -1; }
+  #panel-electro .chart-stage > #model-electro { max-height: 660px; }
+  body.is-fullscreen #panel-electro .chart-card { grid-column: 1 / -1; }
+  body.is-fullscreen #panel-electro .chart-stage > #model-electro { max-height: calc(100vh - 120px); }
+  .salt-water-toggle { color: var(--curve); background: var(--blue-soft); }
+  .salt-compare-toggle { color: #ea580c; background: #fff7ed; }
+  .protect-shell-toggle { color: #0f766e; background: #f0fdfa; }
+  .electro-polarity-toggle { color: #7c3aed; background: #f7f3ff; }
+  .toggle-row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .toggle-row button { flex: 1 1 auto; padding: 7px 9px; border: 1px solid var(--border); border-radius: 9px; background: #f8fafc; color: var(--ink2); cursor: pointer; font-family: inherit; font-size: 12px; font-weight: 800; }
+  .toggle-row button[aria-pressed="true"] { background: var(--curve); border-color: var(--curve); color: #fff; }
+  .card h2 { margin: 0 0 5px; color: var(--ink2); font-size: 11px; letter-spacing: .055em; }
+  .card h2::before { content: ''; display: inline-block; width: 4px; height: 13px; margin-right: 7px; border-radius: 4px; background: var(--curve); vertical-align: -2px; }
+  .ctrl { margin: 6px 0 2px; }
+  .ctrl label { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 1px; color: var(--ink2); font-size: 12px; }
+  .ctrl .val { color: var(--ink); font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .ctrl input[type=range] { width: 100%; height: 16px; margin: 0; accent-color: var(--curve); cursor: pointer; }
+  .stepper { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 31px; }
+  .stepper-label { color: var(--ink2); font-size: 12px; }
+  .stepper-controls { display: inline-flex; align-items: center; gap: 5px; }
+  .stepper-btn { width: 30px; height: 28px; padding: 0; border: 1px solid var(--border); border-radius: 8px; background: var(--blue-soft); color: var(--curve); cursor: pointer; font: 900 18px/1 Inter,Arial,sans-serif; }
+  .stepper-btn:disabled { background: #f8fafc; color: var(--ink3); cursor: default; opacity: .55; }
+  .stepper-value { min-width: 73px; text-align: center; color: var(--ink); font-size: 12px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .reset-btn { display: block; width: auto; margin: 5px 0 0 auto; padding: 5px 9px; border: 1px solid var(--border); border-radius: 7px; background: #f8fafc; color: var(--ink2); cursor: pointer; font-family: inherit; font-size: 11px; line-height: 1; font-weight: 800; }
+  .read-badges { display: flex; flex-wrap: wrap; gap: 6px; margin: 2px 3px 4px; }
+  .badge { padding: 5px 8px; border: 1px solid var(--border); border-radius: 8px; background: #fff; color: var(--ink2); font-size: 11px; font-weight: 700; }
+  .badge strong { color: var(--ink); font-size: 12px; }
+  .badge.solution { border-color: #ddd0fb; background: #f7f3ff; }
+  .badge.solution strong { color: var(--solution); }
+  .tooltip {
+    position: absolute; display: none; z-index: 10; pointer-events: none; padding: 7px 10px;
+    border-radius: 9px; background: rgba(23,32,51,.94); color: #fff; font-size: 12px;
+    line-height: 1.5; white-space: nowrap; box-shadow: 0 8px 24px rgba(15,23,42,.2);
+  }
+  .visual-slot { position: relative; width: 100%; }
+  .chart-stage > svg { width: 100%; }
+  .chart-stage > svg[id^="model-"] { max-width: none; margin: 12px auto; }
+  .model-stage > svg { width: 100%; max-width: 390px; margin: 0 auto; }
+  #panel-boiling.visuals-swapped .chart-card::before { content: 'BOILING POINT DETAIL'; }
+  #panel-freezing .model-card, #panel-osmosis .model-card { display: none; }
+  #panel-freezing.freezing-model-visible .model-card, #panel-osmosis.osmosis-model-visible .model-card { display: block; padding: 5px; }
+  #panel-freezing.freezing-model-visible .chart-card::before, #panel-osmosis.osmosis-model-visible .chart-card::before { content: 'PARTICLE MODEL'; }
+  #panel-freezing.freezing-model-visible .layout, #panel-osmosis.osmosis-model-visible .layout { grid-template-columns: minmax(320px,.72fr) minmax(520px,1.28fr); }
+  #panel-freezing.freezing-model-visible .chart-stage > #model-freezing, #panel-osmosis.osmosis-model-visible .chart-stage > #model-osmosis { width: min(100%,540px); aspect-ratio: 1; margin: 0 auto; }
+  #panel-freezing.freezing-model-visible .model-stage > #chart-freezing, #panel-osmosis.osmosis-model-visible .model-stage > #chart-osmosis { width: 100%; max-width: none; }
+  #panel-osmosis.osmosis-graph-hidden .model-card { display: none !important; }
+  #panel-osmosis.osmosis-graph-hidden .layout { grid-template-columns: minmax(0,1fr) minmax(330px,405px); }
+  #panel-osmosis.osmosis-graph-hidden .chart-stage > #model-osmosis { width: min(100%,560px); }
+
+  body.is-fullscreen { height: 100vh; overflow: hidden; }
+  body.is-fullscreen header { display: none; }
+  body.is-fullscreen main { width: 100%; height: 100vh; max-width: none; margin: 0; padding: 3px 7px 6px; overflow: hidden; }
+  body.is-fullscreen .panel.active { display: flex; height: 100%; min-height: 0; flex-direction: column; }
+  body.is-fullscreen .panel-tools { flex: 0 0 auto; min-height: 25px; margin-bottom: 2px; gap: 5px; }
+  body.is-fullscreen .panel-tools button { padding-block: 6px; }
+  body.is-fullscreen .layout { flex: 1 1 auto; height: 0; min-height: 0; grid-template-columns: minmax(0,1fr) minmax(310px,400px); grid-template-rows: minmax(0,1fr) auto; gap: 5px 7px; align-items: stretch; }
+  body.is-fullscreen .chart-card { grid-column: 1; grid-row: 1; min-height: 0; padding: 3px 6px 5px; display: flex; flex-direction: column; }
+  body.is-fullscreen .chart-card::before { flex: 0 0 auto; margin-bottom: 0; }
+  body.is-fullscreen .read-badges { flex: 0 0 auto; gap: 4px; margin: 1px 2px 2px; }
+  body.is-fullscreen .badge { padding: 3px 6px; }
+  body.is-fullscreen .chart-stage { flex: 1 1 auto; min-height: 0; display: grid; place-items: center; }
+  body.is-fullscreen .chart-stage > svg { width: 100%; height: 100%; max-height: 100%; }
+  body.is-fullscreen .side { display: contents; }
+  body.is-fullscreen .model-card, body.is-fullscreen .zoom-card, body.is-fullscreen .dlvo-card { grid-column: 2; grid-row: 1; min-height: 0; display: grid; place-items: center; padding: 3px 6px; overflow: hidden; }
+  body.is-fullscreen .model-stage { width: 100%; height: 100%; min-height: 0; display: grid; place-items: center; }
+  body.is-fullscreen .model-stage > svg { width: 100%; height: 100%; max-width: none; max-height: 100%; }
+  body.is-fullscreen .controls { grid-column: 1 / -1; grid-row: 2; display: grid; grid-template-columns: repeat(auto-fit,minmax(160px,1fr)) auto; gap: 1px 11px; align-items: end; padding: 3px 8px 4px; }
+  body.is-fullscreen .controls h2 { display: none; }
+  body.is-fullscreen .controls .ctrl, body.is-fullscreen .controls .reset-btn { margin-top: 0; margin-bottom: 0; }
+  body.is-fullscreen .controls .ctrl label { font-size: 11px; }
+  body.is-fullscreen .controls .stepper { justify-content: flex-start; gap: 12px; }
+  body.is-fullscreen .controls .stepper-label { font-size: 11px; }
+  body.is-fullscreen .controls .ctrl input[type=range] { height: 12px; }
+  body.is-fullscreen .model-stage > svg[id^="model-"] { width: 315px; height: auto; max-height: calc(100vh - 105px); }
+  body.is-fullscreen #panel-freezing:not(.freezing-model-visible) .chart-card, body.is-fullscreen #panel-osmosis:not(.osmosis-model-visible) .chart-card { grid-column: 1 / -1; }
+  body.is-fullscreen #panel-osmosis.osmosis-graph-hidden .chart-card { grid-column: 1 / -1; }
+  body.is-fullscreen #panel-osmosis.osmosis-graph-hidden .layout { grid-template-columns: minmax(0,1fr); }
+  body.is-fullscreen #panel-osmosis.osmosis-model-visible.osmosis-graph-hidden .chart-stage > #model-osmosis { width: auto; height: 100%; max-height: calc(100vh - 150px); }
+  .exit-fs-btn { display: none; padding: 8px 13px; border: 1px solid var(--border); border-radius: 99px; background: #fff; color: var(--blue-deep); box-shadow: var(--shadow-sm); cursor: pointer; font-family: inherit; font-size: 12px; line-height: 1; font-weight: 800; }
+  .exit-fs-btn::before { content: '⛶'; margin-right: 6px; font-size: 14px; }
+  body.is-fullscreen .exit-fs-btn { display: inline-block; }
+  body.is-fullscreen #panel-freezing.freezing-model-visible .layout, body.is-fullscreen #panel-osmosis.osmosis-model-visible .layout { grid-template-columns: minmax(330px,.68fr) minmax(0,1.32fr); }
+  body.is-fullscreen #panel-freezing.freezing-model-visible .chart-stage > #model-freezing, body.is-fullscreen #panel-osmosis.osmosis-model-visible .chart-stage > #model-osmosis { width: min(100%,calc(100vh - 82px)); height: auto; max-height: calc(100vh - 82px); }
+  body.is-fullscreen #panel-freezing.freezing-model-visible .model-stage > #chart-freezing, body.is-fullscreen #panel-osmosis.osmosis-model-visible .model-stage > #chart-osmosis { width: 100%; max-width: none; max-height: calc(100vh - 150px); }
+  body.is-fullscreen #panel-colloid .chart-stage > #model-colloid { width: 100%; height: 100%; max-height: calc(100vh - 78px); }
+  body.is-fullscreen #panel-colloid .dlvo-card svg { width: 100%; height: 100%; max-width: none; max-height: calc(100vh - 145px); }
+
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    #panel-freezing.freezing-model-visible .layout, #panel-osmosis.osmosis-model-visible .layout { grid-template-columns: 1fr; }
+    .header-row { align-items: flex-end; }
+    .subtitle { display: none; }
+    body.is-fullscreen .layout { grid-template-columns: minmax(0,1fr) minmax(280px,340px); }
+  }
+  @media (max-width: 620px) {
+    header { padding: 17px 12px 0; }
+    h1 { font-size: 23px; }
+    .fullscreen-btn { width: 42px; height: 42px; padding: 0; font-size: 0; }
+    .fullscreen-btn::before { margin: 0; }
+    main { padding: 14px 10px 28px; }
+    .tabs { margin-inline: -12px; padding-inline: 12px; }
+    .layout { gap: 12px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="header-row">
+    <div>
+      <a href="index.html" style="display:inline-flex;align-items:center;gap:5px;margin-bottom:6px;color:#526078;text-decoration:none;font-size:12px;font-weight:700">← 化学シミュレーター一覧</a>
+      <h1>希薄溶液シミュレーター</h1>
+      <p class="subtitle">濃度の変化を、蒸気圧・沸点・凝固点・浸透圧・コロイドの粒子モデルで観察しよう</p>
+    </div>
+    <button class="fullscreen-btn" id="fullscreen" type="button">全画面表示</button>
+  </div>
+  <nav class="tabs" role="tablist">
+    <button role="tab" aria-selected="true" data-tab="boiling">① 蒸気圧降下・沸点上昇</button>
+    <button role="tab" aria-selected="false" data-tab="freezing">② 凝固点降下</button>
+    <button role="tab" aria-selected="false" data-tab="osmosis">③ 浸透圧</button>
+    <button role="tab" aria-selected="false" data-tab="colloid">④ 疎水コロイド（凝析）</button>
+    <button role="tab" aria-selected="false" data-tab="electro">⑤ 電気泳動</button>
+    <button role="tab" aria-selected="false" data-tab="salt">⑥ 親水コロイド（塩析）</button>
+    <button role="tab" aria-selected="false" data-tab="protect">⑦ 保護コロイド</button>
+  </nav>
+</header>
+<main>
+  <section class="panel active" id="panel-boiling">
+    <div class="panel-tools">
+      <button class="arrow-toggle solution-series-toggle" id="toggle-boiling-solution" type="button" aria-pressed="true">希薄溶液：表示</button>
+      <button class="arrow-toggle boiling-toggle" id="toggle-boiling-points" type="button" aria-pressed="true">沸点：表示</button>
+      <button class="arrow-toggle boiling-toggle vapor100" id="toggle-vapor-pressure-100" type="button" aria-pressed="true">100℃蒸気圧：表示</button>
+      <button class="arrow-toggle rise" id="toggle-boiling-rise" type="button" aria-pressed="true">沸点上昇：表示</button>
+      <button class="arrow-toggle drop" id="toggle-vapor-drop" type="button" aria-pressed="true">蒸気圧降下：表示</button>
+    </div>
+    <div class="layout">
+      <div class="chart-card" id="chartwrap-boiling">
+        <div class="read-badges" id="badges-boiling"></div>
+        <svg id="chart-boiling" viewBox="0 0 780 500" role="img" aria-label="純水と希薄溶液の蒸気圧曲線"></svg>
+        <div class="tooltip" id="tip-boiling"></div>
+      </div>
+      <div class="side">
+        <div class="card zoom-card">
+          <svg id="chart-boiling-zoom" viewBox="0 0 520 360" role="img" aria-label="沸点付近を拡大した純水と希薄溶液の蒸気圧曲線"></svg>
+        </div>
+        <div class="card controls">
+          <h2>条件</h2>
+          <div class="ctrl"><label>水の質量 <span class="val"><span id="b-water-val">500</span> g</span></label><input id="b-water" type="range" min="200" max="1000" step="10" value="500"></div>
+          <div class="ctrl"><label>溶質の質量 <span class="val"><span id="b-solute-val">30</span> g</span></label><input id="b-solute" type="range" min="0" max="50" step="1" value="30"></div>
+          <div class="ctrl"><label>溶質の分子量 <span class="val"><span id="b-molar-val">60</span></span></label><input id="b-molar" type="range" min="60" max="360" step="5" value="60"></div>
+          <div class="ctrl"><label>外圧 <span class="val"><span id="b-pressure-val">101.3</span> kPa</span></label><input id="b-pressure" type="range" min="70" max="130" step="0.5" value="101.3"></div>
+          <button class="reset-btn" data-reset="boiling">初期値</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-freezing">
+    <div class="panel-tools">
+      <button class="arrow-toggle solution-series-toggle" id="toggle-freezing-solution" type="button" aria-pressed="true">希薄溶液：表示</button>
+      <button class="arrow-toggle freezing-toggle" id="toggle-freezing-guides" type="button" aria-pressed="true">凝固点の破線：表示</button>
+      <button class="arrow-toggle freezing-toggle extrapolation" id="toggle-freezing-extrapolation" type="button" aria-pressed="true">外挿の破線：表示</button>
+      <button class="arrow-toggle freezing-toggle supercooling" id="toggle-supercooling-region" type="button" aria-pressed="true">過冷却領域：表示</button>
+      <button class="swap-btn model-toggle" id="toggle-freezing-model" type="button" aria-pressed="false">模式図を表示</button>
+    </div>
+    <div class="layout">
+      <div class="chart-card" id="chartwrap-freezing">
+        <div class="read-badges" id="badges-freezing"></div>
+        <svg id="chart-freezing" viewBox="0 0 780 500" role="img" aria-label="純水と希薄溶液の冷却曲線"></svg>
+        <div class="tooltip" id="tip-freezing"></div>
+      </div>
+      <div class="side">
+        <div class="card model-card">
+          <svg id="model-freezing" viewBox="0 0 320 330" role="img" aria-label="希薄溶液が凝固する粒子模式図"></svg>
+        </div>
+        <div class="card controls">
+          <h2>条件</h2>
+          <div class="ctrl"><label>水の質量 <span class="val"><span id="f-water-val">500</span> g</span></label><input id="f-water" type="range" min="200" max="1000" step="10" value="500"></div>
+          <div class="ctrl"><label>溶質の質量 <span class="val"><span id="f-solute-val">30</span> g</span></label><input id="f-solute" type="range" min="0" max="50" step="1" value="30"></div>
+          <div class="ctrl"><label>溶質の分子量 <span class="val"><span id="f-molar-val">60</span></span></label><input id="f-molar" type="range" min="60" max="360" step="5" value="60"></div>
+          <div class="ctrl"><label>冷却時間 <span class="val"><span id="f-time-val">30</span> min</span></label><input id="f-time" type="range" min="0" max="60" step="1" value="30"></div>
+          <button class="reset-btn" data-reset="freezing">初期値</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-osmosis">
+    <div class="panel-tools">
+      <button class="arrow-toggle solution-series-toggle" id="toggle-osmosis-solution" type="button" aria-pressed="true">希薄溶液：表示</button>
+      <button class="swap-btn model-toggle" id="toggle-osmosis-model" type="button" aria-pressed="false">模式図を表示</button>
+    </div>
+    <div class="layout">
+      <div class="chart-card" id="chartwrap-osmosis">
+        <div class="read-badges" id="badges-osmosis"></div>
+        <svg id="chart-osmosis" viewBox="0 0 780 500" role="img" aria-label="モル濃度と浸透圧の関係"></svg>
+        <div class="tooltip" id="tip-osmosis"></div>
+      </div>
+      <div class="side">
+        <div class="card model-card">
+          <svg id="model-osmosis" viewBox="0 0 320 330" role="img" aria-label="半透膜を挟んだ純水と希薄溶液の浸透模式図"></svg>
+        </div>
+        <div class="card controls">
+          <h2>条件</h2>
+          <div class="ctrl"><label>溶液の体積 <span class="val"><span id="o-volume-val">1.00</span> L</span></label><input id="o-volume" type="range" min="0.5" max="2" step="0.05" value="1"></div>
+          <div class="ctrl"><label>溶質の質量 <span class="val"><span id="o-solute-val">6</span> g</span></label><input id="o-solute" type="range" min="0" max="30" step="1" value="6"></div>
+          <div class="ctrl"><label>溶質の分子量 <span class="val"><span id="o-molar-val">60</span></span></label><input id="o-molar" type="range" min="60" max="360" step="5" value="60"></div>
+          <div class="ctrl"><label>温度 <span class="val"><span id="o-temp-val">25</span> ℃</span></label><input id="o-temp" type="range" min="0" max="80" step="1" value="25"></div>
+          <button class="reset-btn" data-reset="osmosis">初期値</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-colloid">
+    <div class="panel-tools">
+      <button class="arrow-toggle colloid-toggle charge" id="toggle-colloid-charges" type="button" aria-pressed="true">表面電荷：表示</button>
+      <button class="arrow-toggle colloid-toggle ion" id="toggle-colloid-ions" type="button" aria-pressed="true">対イオン：表示</button>
+      <button class="arrow-toggle colloid-toggle dlvo" id="toggle-dlvo" type="button" aria-pressed="true">DLVO曲線：表示</button>
+      <button class="swap-btn" id="expand-dlvo" type="button" aria-pressed="false">DLVOを拡大</button>
+    </div>
+    <div class="layout">
+      <div class="chart-card" id="chartwrap-colloid">
+        <div class="read-badges" id="badges-colloid"></div>
+        <div class="visual-slot chart-stage"><svg id="model-colloid" viewBox="0 0 780 500" role="img" aria-label="疎水コロイドの分散と凝析の粒子模式図"></svg></div>
+      </div>
+      <div class="side">
+        <div class="card dlvo-card">
+          <svg id="chart-dlvo" viewBox="0 0 520 360" role="img" aria-label="粒子間距離と相互作用エネルギーのDLVO曲線"></svg>
+        </div>
+        <div class="card controls">
+          <h2>条件</h2>
+          <div class="ctrl stepper"><span class="stepper-label">表面電荷の大きさ</span><div class="stepper-controls"><button class="stepper-btn" id="c-charge-minus" type="button" aria-label="表面電荷を1小さくする">−</button><output class="stepper-value"><span id="c-charge-val">3</span>（相対値）</output><button class="stepper-btn" id="c-charge-plus" type="button" aria-label="表面電荷を1大きくする">＋</button></div><input id="c-charge" type="hidden" value="3"></div>
+          <div class="ctrl"><label>電解質濃度 <span class="val"><span id="c-conc-val">1.0</span> mmol/L</span></label><input id="c-conc" type="range" min="0" max="80" step="0.1" value="1"></div>
+          <div class="ctrl stepper"><span class="stepper-label">対イオンの価数</span><div class="stepper-controls"><button class="stepper-btn" id="c-valence-minus" type="button" aria-label="対イオンの価数を1小さくする">−</button><output class="stepper-value"><span id="c-valence-val">1</span> 価</output><button class="stepper-btn" id="c-valence-plus" type="button" aria-label="対イオンの価数を1大きくする">＋</button></div><input id="c-valence" type="hidden" value="1"></div>
+          <button class="reset-btn" data-reset="colloid">初期値</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-salt">
+    <div class="panel-tools">
+      <button class="arrow-toggle salt-water-toggle" id="toggle-salt-water" type="button" aria-pressed="true">水和水：表示</button>
+      <button class="arrow-toggle salt-compare-toggle" id="toggle-salt-compare" type="button" aria-pressed="true">疎水の凝析と比較：表示</button>
+    </div>
+    <div class="layout">
+      <div class="chart-card" id="chartwrap-salt">
+        <div class="read-badges" id="badges-salt"></div>
+        <div class="visual-slot chart-stage"><svg id="model-salt" viewBox="0 0 780 500" role="img" aria-label="親水コロイドの塩析の粒子模式図"></svg></div>
+      </div>
+      <div class="side">
+        <div class="card zoom-card">
+          <svg id="chart-salt" viewBox="0 0 520 360" role="img" aria-label="電解質濃度と凝集度の関係（凝析と塩析の比較）"></svg>
+        </div>
+        <div class="card controls">
+          <h2>条件</h2>
+          <div class="ctrl stepper"><span class="stepper-label">親水性の強さ</span><div class="stepper-controls"><button class="stepper-btn" id="s-hydro-minus" type="button" aria-label="親水性を1小さくする">−</button><output class="stepper-value"><span id="s-hydro-val">3</span>（相対値）</output><button class="stepper-btn" id="s-hydro-plus" type="button" aria-label="親水性を1大きくする">＋</button></div><input id="s-hydro" type="hidden" value="3"></div>
+          <div class="ctrl"><label>電解質濃度 <span class="val"><span id="s-conc-val">1.00</span> mol/L</span></label><input id="s-conc" type="range" min="0" max="5" step="0.05" value="1"></div>
+          <button class="reset-btn" data-reset="salt">初期値</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-protect">
+    <div class="panel-tools">
+      <button class="arrow-toggle protect-shell-toggle" id="toggle-protect-shell" type="button" aria-pressed="true">保護層：表示</button>
+    </div>
+    <div class="layout">
+      <div class="chart-card" id="chartwrap-protect">
+        <div class="read-badges" id="badges-protect"></div>
+        <div class="visual-slot chart-stage"><svg id="model-protect" viewBox="0 0 780 500" role="img" aria-label="保護コロイドが疎水コロイドを包む粒子模式図"></svg></div>
+      </div>
+      <div class="side">
+        <div class="card zoom-card">
+          <svg id="chart-protect" viewBox="0 0 520 360" role="img" aria-label="保護量と凝析に必要な電解質濃度の関係"></svg>
+        </div>
+        <div class="card controls">
+          <h2>条件</h2>
+          <div class="ctrl"><label>保護コロイドの量 <span class="val"><span id="p-protect-val">0</span> ％</span></label><input id="p-protect" type="range" min="0" max="100" step="1" value="0"></div>
+          <div class="ctrl"><label>電解質濃度 <span class="val"><span id="p-conc-val">5.0</span> mmol/L</span></label><input id="p-conc" type="range" min="0" max="80" step="0.5" value="5"></div>
+          <button class="reset-btn" data-reset="protect">初期値</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-electro">
+    <div class="panel-tools">
+      <button class="arrow-toggle electro-polarity-toggle" id="toggle-electro-polarity" type="button" aria-pressed="false">極性を反転</button>
+    </div>
+    <div class="layout">
+      <div class="chart-card" id="chartwrap-electro">
+        <div class="read-badges" id="badges-electro"></div>
+        <div class="visual-slot chart-stage"><svg id="model-electro" viewBox="0 0 780 500" role="img" aria-label="U字管による電気泳動の模式図"></svg></div>
+      </div>
+      <div class="side">
+        <div class="card controls">
+          <h2>条件</h2>
+          <div class="ctrl"><span class="stepper-label" style="display:block;margin-bottom:4px;">コロイドの種類</span><div class="toggle-row" id="e-colloid-row"></div></div>
+          <div class="ctrl"><label>電圧 <span class="val"><span id="e-volt-val">60</span> V</span></label><input id="e-volt" type="range" min="0" max="100" step="1" value="60"></div>
+          <div class="ctrl"><label>電解質濃度 <span class="val"><span id="e-conc-val">2.0</span> mmol/L</span></label><input id="e-conc" type="range" min="0" max="80" step="0.5" value="2"></div>
+          <div class="ctrl"><label>経過時間 <span class="val"><span id="e-time-val">30</span> s</span></label><input id="e-time" type="range" min="0" max="60" step="1" value="30"></div>
+          <button class="reset-btn" data-reset="electro">初期値</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const fmt = (x,d=1) => Number(x).toFixed(d);
+const SVGNS = 'http://www.w3.org/2000/svg';
+const W=780,H=500,ML=76,MR=24,MT=28,MB=62,PW=W-ML-MR,PH=H-MT-MB;
+const MW=18.015, KB=0.512, KF=1.86, R=8.314;
+const COLORS={pure:'var(--curve)',solution:'var(--solution)',accent:'var(--accent)',gray:'var(--extrap)'};
+let showBoilingRiseArrow=true,showVaporPressureArrow=true;
+let showBoilingPointGuides=true,showVaporPressureAt100=true;
+let showFreezingPointGuides=true,showFreezingExtrapolation=true,showSupercoolingRegion=true;
+let showBoilingSolution=true,showFreezingSolution=true,showOsmosisSolution=true;
+let showColloidCharges=true,showColloidIons=true,showDLVO=true;
+
+function scaleDomain(xMin,xMax,yMin,yMax){
+  return {sx:x=>ML+(x-xMin)/(xMax-xMin)*PW, sy:y=>MT+PH-(y-yMin)/(yMax-yMin)*PH};
+}
+function frame(o){
+  const {sx,sy}=scaleDomain(o.xMin,o.xMax,o.yMin,o.yMax); let s='';
+  o.xTicks.forEach(t=>{if(t.v!==o.xMin)s+=`<line x1="${sx(t.v)}" y1="${MT}" x2="${sx(t.v)}" y2="${MT+PH}" stroke="var(--grid)"/>`; s+=`<text x="${sx(t.v)}" y="${MT+PH+23}" text-anchor="middle" font-size="13" fill="var(--ink2)">${t.label}</text>`;});
+  o.yTicks.forEach(t=>{if(t.v!==o.yMin)s+=`<line x1="${ML}" y1="${sy(t.v)}" x2="${ML+PW}" y2="${sy(t.v)}" stroke="var(--grid)"/>`; s+=`<text x="${ML-10}" y="${sy(t.v)+4}" text-anchor="end" font-size="13" fill="var(--ink2)">${t.label}</text>`;});
+  s+=`<line x1="${ML}" y1="${MT+PH}" x2="${ML+PW}" y2="${MT+PH}" stroke="var(--axis)" stroke-width="1.5"/><line x1="${ML}" y1="${MT}" x2="${ML}" y2="${MT+PH}" stroke="var(--axis)" stroke-width="1.5"/>`;
+  s+=`<text x="${ML+PW/2}" y="${H-14}" text-anchor="middle" font-size="15" fill="var(--ink)">${o.xLabel}</text><text x="20" y="${MT+PH/2}" text-anchor="middle" font-size="15" fill="var(--ink)" transform="rotate(-90 20 ${MT+PH/2})">${o.yLabel}</text>`;
+  return {sx,sy,svg:s};
+}
+function path(pts,sx,sy,color,width=3,dash=''){
+  const d=pts.map((p,i)=>(i?'L':'M')+fmt(sx(p[0]),1)+' '+fmt(sy(p[1]),1)).join(' ');
+  return `<path d="${d}" fill="none" stroke="${color}" stroke-width="${width}" ${dash?`stroke-dasharray="${dash}"`:''} stroke-linecap="round" stroke-linejoin="round"/>`;
+}
+function areaBetween(upper,lower,x0,x1,sx,sy,opacity=.14,n=60){
+  const pts=[];
+  for(let i=0;i<=n;i++){const x=x0+(x1-x0)*i/n;pts.push([x,upper(x)]);}
+  for(let i=n;i>=0;i--){const x=x0+(x1-x0)*i/n;pts.push([x,lower(x)]);}
+  const d=pts.map((p,i)=>(i?'L':'M')+fmt(sx(p[0]),1)+' '+fmt(sy(p[1]),1)).join(' ')+' Z';
+  return `<path d="${d}" fill="var(--supercool)" fill-opacity="${opacity}" stroke="none"/>`;
+}
+function sampleUntilTop(fn,xMin,xMax,yMax,n=180){
+  const pts=[];let prev=null;
+  for(let i=0;i<=n;i++){
+    const x=xMin+(xMax-xMin)*i/n,y=fn(x);
+    if(y<=yMax){pts.push([x,y]);prev=[x,y];continue;}
+    if(prev){const f=(yMax-prev[1])/(y-prev[1]);pts.push([prev[0]+(x-prev[0])*f,yMax]);}
+    break;
+  }
+  return pts;
+}
+function waterPsat(tC){return Math.pow(10,8.07131-1730.63/(233.426+tC))*0.133322;}
+function inversePsat(kPa){let lo=40,hi=150;for(let i=0;i<60;i++){const m=(lo+hi)/2;waterPsat(m)<kPa?lo=m:hi=m;}return(lo+hi)/2;}
+function solutionState(prefix){
+  const water=+$(`${prefix}-water`).value, solute=+$(`${prefix}-solute`).value, molar=+$(`${prefix}-molar`).value;
+  const nWater=water/MW,nSolute=molar?solute/molar:0,molality=nSolute/(water/1000),xWater=nWater/(nWater+nSolute||1);
+  return{water,solute,molar,nWater,nSolute,molality,xWater};
+}
+function osmosisState(){
+  const volume=+$('o-volume').value,solute=+$('o-solute').value,molar=+$('o-molar').value,tempC=+$('o-temp').value;
+  const nSolute=molar?solute/molar:0,concentration=nSolute/volume,tempK=tempC+273.15,pressure=concentration*R*tempK;
+  return{volume,solute,molar,tempC,tempK,nSolute,concentration,pressure};
+}
+function dots(count,seed=17){let s=seed,out=[];for(let i=0;i<count;i++){s=s*16807%2147483647;const x=(s%1000)/1000;s=s*16807%2147483647;const y=(s%1000)/1000;out.push([x,y]);}return out;}
+const DOTS=dots(70);
+function attachHover(svgId,tipId,getState){
+  const svg=$(svgId),tip=$(tipId);
+  svg.addEventListener('pointermove',ev=>{
+    const st=getState(),r=svg.getBoundingClientRect(),px=(ev.clientX-r.left)/r.width*W;
+    const x=st.xMin+(px-ML)/PW*(st.xMax-st.xMin);
+    if(x<st.xMin||x>st.xMax){tip.style.display='none';return;}
+    tip.innerHTML=st.lines(x).join('<br>');tip.style.display='block';
+    const host=svg.parentElement,hr=host.getBoundingClientRect();let left=ev.clientX-hr.left+13,top=ev.clientY-hr.top-8;
+    if(left+tip.offsetWidth>hr.width-7)left-=tip.offsetWidth+25;
+    tip.style.left=left+'px';tip.style.top=top+'px';
+  });
+  svg.addEventListener('pointerleave',()=>tip.style.display='none');
+}
+
+function drawBoiling(){
+  const st=solutionState('b'),Pext=+$('b-pressure').value;
+  $('b-water-val').textContent=st.water;$('b-solute-val').textContent=st.solute;$('b-molar-val').textContent=st.molar;$('b-pressure-val').textContent=fmt(Pext,1);
+  const tbPure=inversePsat(Pext),tbSol=inversePsat(Pext/Math.max(st.xWater,.85)),delta=tbSol-tbPure,p100Pure=101.5,p100Sol=101.5*st.xWater;
+  const xMin=70,xMax=125,yMin=0,yMax=160;
+  const {sx,sy,svg}=frame({xMin,xMax,yMin,yMax,xTicks:[70,80,90,100,110,120].map(v=>({v,label:v})),yTicks:[0,40,80,120,160].map(v=>({v,label:v})),xLabel:'温度 t [℃]',yLabel:'蒸気圧 P [kPa]'});
+  let g=svg,pure=sampleUntilTop(waterPsat,xMin,xMax,yMax),sol=sampleUntilTop(t=>st.xWater*waterPsat(t),xMin,xMax,yMax);
+  g+=`<line x1="${sx(xMin)}" y1="${sy(Pext)}" x2="${sx(xMax)}" y2="${sy(Pext)}" stroke="var(--axis)" stroke-width="2" stroke-dasharray="7 5"/>`;
+  g+=`<text x="${sx(xMax)-8}" y="${sy(Pext)-8}" text-anchor="end" font-size="12" font-weight="bold" fill="var(--ink)" stroke="#fff" stroke-width="4" paint-order="stroke fill">外圧 ${fmt(Pext,1)} kPa</text>`;
+  g+=path(pure,sx,sy,COLORS.pure,3);
+  if(showBoilingSolution)g+=path(sol,sx,sy,COLORS.solution,3);
+  g+=`<text x="${sx(101.5)}" y="${sy(waterPsat(105))-18}" font-size="13" font-weight="bold" fill="var(--curve)" stroke="#fff" stroke-width="4" paint-order="stroke fill">純水</text>`;
+  if(showBoilingSolution)g+=`<text x="${sx(101)}" y="${sy(st.xWater*waterPsat(101))+20}" font-size="13" font-weight="bold" fill="var(--solution)">希薄溶液</text>`;
+  if(showBoilingPointGuides){
+    g+=`<line x1="${sx(tbPure)}" y1="${sy(Pext)}" x2="${sx(tbPure)}" y2="${sy(0)}" stroke="${COLORS.pure}" stroke-width="1.5" stroke-dasharray="4 4"/><circle cx="${sx(tbPure)}" cy="${sy(Pext)}" r="6" fill="${COLORS.pure}" stroke="#fff" stroke-width="2"/><text x="${sx(tbPure)-8}" y="${sy(0)-10}" text-anchor="end" font-size="12" font-weight="bold" fill="${COLORS.pure}">${fmt(tbPure,1)}℃</text>`;
+    if(showBoilingSolution)g+=`<line x1="${sx(tbSol)}" y1="${sy(Pext)}" x2="${sx(tbSol)}" y2="${sy(0)}" stroke="${COLORS.solution}" stroke-width="1.5" stroke-dasharray="4 4"/><circle cx="${sx(tbSol)}" cy="${sy(Pext)}" r="6" fill="${COLORS.solution}" stroke="#fff" stroke-width="2"/><text x="${sx(tbSol)+8}" y="${sy(0)-10}" text-anchor="start" font-size="12" font-weight="bold" fill="${COLORS.solution}">${fmt(tbSol,1)}℃</text>`;
+  }
+  if(showVaporPressureAt100){
+    g+=`<line x1="${sx(100)}" y1="${sy(0)}" x2="${sx(100)}" y2="${sy(p100Pure)}" stroke="var(--axis)" stroke-width="1.2" stroke-dasharray="4 4"/>`;
+    g+=`<line x1="${sx(xMin)}" y1="${sy(p100Pure)}" x2="${sx(100)}" y2="${sy(p100Pure)}" stroke="var(--curve)" stroke-width="1.5" stroke-dasharray="5 4"/><circle cx="${sx(100)}" cy="${sy(p100Pure)}" r="6" fill="var(--curve)" stroke="#fff" stroke-width="2"/><text x="${sx(xMin)+8}" y="${sy(p100Pure)-9}" font-size="12" font-weight="bold" fill="var(--curve)" stroke="#fff" stroke-width="4" paint-order="stroke fill">${fmt(p100Pure,1)} kPa</text>`;
+    if(showBoilingSolution&&Math.abs(p100Pure-p100Sol)>.05)g+=`<line x1="${sx(xMin)}" y1="${sy(p100Sol)}" x2="${sx(100)}" y2="${sy(p100Sol)}" stroke="var(--solution)" stroke-width="1.5" stroke-dasharray="5 4"/><circle cx="${sx(100)}" cy="${sy(p100Sol)}" r="6" fill="var(--solution)" stroke="#fff" stroke-width="2"/><text x="${sx(xMin)+8}" y="${sy(p100Sol)+17}" font-size="12" font-weight="bold" fill="var(--solution)" stroke="#fff" stroke-width="4" paint-order="stroke fill">${fmt(p100Sol,1)} kPa</text>`;
+  }
+  $('chart-boiling').innerHTML=g;
+  $('badges-boiling').innerHTML=`<span class="badge">水の沸点 <strong>${fmt(tbPure,1)} ℃</strong></span><span class="badge solution">溶液の沸点 <strong>${fmt(tbSol,1)} ℃</strong></span><span class="badge solution">沸点上昇 <strong>+${fmt(delta,2)} K</strong></span><span class="badge">水のモル分率 <strong>${fmt(st.xWater,4)}</strong></span>`;
+  drawBoilingZoom(st);
+}
+function drawBoilingZoom(st){
+  const ZW=520,ZH=360,ZL=66,ZR=22,ZT=40,ZB=58,zpw=ZW-ZL-ZR,zph=ZH-ZT-ZB;
+  const originT=100,originP=101.5,basePsat=waterPsat(originT);
+  const zoomPureP=t=>originP*waterPsat(t)/basePsat,zoomSolutionP=t=>st.xWater*zoomPureP(t);
+  const boilEndT=inversePsat(basePsat/Math.max(st.xWater,.85)),vaporEndP=originP*st.xWater;
+  const deltaT=boilEndT-originT,deltaP=originP-vaporEndP;
+  const xMin=97,xMax=103;
+  const yPad=Math.max(5,deltaP*2.4),yMin=originP-yPad,yMax=originP+yPad;
+  const sx=x=>ZL+(x-xMin)/(xMax-xMin)*zpw,sy=y=>ZT+zph-(y-yMin)/(yMax-yMin)*zph;
+  const pure=[],sol=[];for(let i=0;i<=160;i++){const t=xMin+(xMax-xMin)*i/160;pure.push([t,zoomPureP(t)]);sol.push([t,zoomSolutionP(t)]);}
+  const riseColor='#f97316',dropColor='#0f766e',tickTemps=[97,100,103];
+  let g=`<defs><clipPath id="boiling-zoom-clip"><rect x="${ZL}" y="${ZT}" width="${zpw}" height="${zph}"/></clipPath><marker id="boiling-rise-arrow" viewBox="0 0 9 9" refX="8" refY="4.5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 9 4.5 L 0 9 Z" fill="${riseColor}"/></marker><marker id="vapor-drop-arrow" viewBox="0 0 9 9" refX="8" refY="4.5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 9 4.5 L 0 9 Z" fill="${dropColor}"/></marker></defs>`;
+  g+=`<text x="${ZW/2}" y="20" text-anchor="middle" font-size="15" font-weight="bold" fill="var(--ink)">沸点付近の拡大</text>`;
+  for(const t of tickTemps)g+=`<line x1="${sx(t)}" y1="${ZT}" x2="${sx(t)}" y2="${ZT+zph}" stroke="var(--grid)"/><text x="${sx(t)}" y="${ZT+zph+22}" text-anchor="middle" font-size="12" fill="var(--ink2)">${fmt(t,1)}</text>`;
+  for(const p of [yMin,originP,yMax])g+=`<line x1="${ZL}" y1="${sy(p)}" x2="${ZL+zpw}" y2="${sy(p)}" stroke="${Math.abs(p-originP)<.001?'var(--axis)':'var(--grid)'}" ${Math.abs(p-originP)<.001?'stroke-width="1.7" stroke-dasharray="7 5"':''}/><text x="${ZL-9}" y="${sy(p)+4}" text-anchor="end" font-size="12" fill="var(--ink2)">${fmt(p,1)}</text>`;
+  g+=`<line x1="${ZL}" y1="${ZT+zph}" x2="${ZL+zpw}" y2="${ZT+zph}" stroke="var(--axis)" stroke-width="1.5"/><line x1="${ZL}" y1="${ZT}" x2="${ZL}" y2="${ZT+zph}" stroke="var(--axis)" stroke-width="1.5"/>`;
+  g+=`<g clip-path="url(#boiling-zoom-clip)">${path(pure,sx,sy,COLORS.pure,3)}${showBoilingSolution?path(sol,sx,sy,COLORS.solution,3):''}</g>`;
+  if(showBoilingPointGuides){
+    g+=`<line x1="${sx(originT)}" y1="${sy(originP)}" x2="${sx(originT)}" y2="${ZT+zph}" stroke="var(--curve)" stroke-width="1.3" stroke-dasharray="4 4"/><circle cx="${sx(originT)}" cy="${sy(originP)}" r="5" fill="var(--curve)" stroke="#fff" stroke-width="2"/><text x="${sx(originT)-7}" y="${ZT+zph-10}" text-anchor="end" font-size="11" font-weight="bold" fill="var(--curve)" stroke="#fff" stroke-width="4" paint-order="stroke fill">100.0 ℃</text>`;
+    if(showBoilingSolution)g+=`<line x1="${sx(boilEndT)}" y1="${sy(originP)}" x2="${sx(boilEndT)}" y2="${ZT+zph}" stroke="var(--solution)" stroke-width="1.3" stroke-dasharray="4 4"/><circle cx="${sx(boilEndT)}" cy="${sy(originP)}" r="5" fill="var(--solution)" stroke="#fff" stroke-width="2"/><text x="${sx(boilEndT)+7}" y="${ZT+zph-10}" text-anchor="start" font-size="11" font-weight="bold" fill="var(--solution)" stroke="#fff" stroke-width="4" paint-order="stroke fill">${fmt(boilEndT,1)} ℃</text>`;
+  }
+  if(showVaporPressureAt100){
+    g+=`<line x1="${sx(originT)}" y1="${ZT+zph}" x2="${sx(originT)}" y2="${sy(originP)}" stroke="var(--axis)" stroke-width="1.2" stroke-dasharray="4 4"/><line x1="${ZL}" y1="${sy(originP)}" x2="${sx(originT)}" y2="${sy(originP)}" stroke="var(--curve)" stroke-width="1.5" stroke-dasharray="5 4"/><circle cx="${sx(originT)}" cy="${sy(originP)}" r="5" fill="var(--curve)" stroke="#fff" stroke-width="2"/><text x="${ZL+8}" y="${sy(originP)-9}" font-size="11" font-weight="bold" fill="var(--curve)" stroke="#fff" stroke-width="4" paint-order="stroke fill">${fmt(originP,1)} kPa</text>`;
+    if(showBoilingSolution&&Math.abs(originP-vaporEndP)>.05)g+=`<line x1="${ZL}" y1="${sy(vaporEndP)}" x2="${sx(originT)}" y2="${sy(vaporEndP)}" stroke="var(--solution)" stroke-width="1.5" stroke-dasharray="5 4"/><circle cx="${sx(originT)}" cy="${sy(vaporEndP)}" r="5" fill="var(--solution)" stroke="#fff" stroke-width="2"/><text x="${ZL+8}" y="${sy(vaporEndP)+16}" font-size="11" font-weight="bold" fill="var(--solution)" stroke="#fff" stroke-width="4" paint-order="stroke fill">${fmt(vaporEndP,1)} kPa</text>`;
+  }
+  if(deltaT>.005){
+    if(showVaporPressureArrow)g+=`<line x1="${sx(originT)}" y1="${sy(originP)}" x2="${sx(originT)}" y2="${sy(vaporEndP)}" stroke="${dropColor}" stroke-width="3" marker-end="url(#vapor-drop-arrow)"/><text x="${sx(originT)-13}" y="${(sy(originP)+sy(vaporEndP))/2+4}" text-anchor="end" font-size="12" font-weight="bold" fill="${dropColor}" stroke="#fff" stroke-width="4" paint-order="stroke fill">蒸気圧降下</text>`;
+    if(showBoilingRiseArrow)g+=`<line x1="${sx(originT)}" y1="${sy(originP)}" x2="${sx(boilEndT)}" y2="${sy(originP)}" stroke="${riseColor}" stroke-width="3" marker-end="url(#boiling-rise-arrow)"/><text x="${(sx(originT)+sx(boilEndT))/2}" y="${sy(originP)-14}" text-anchor="middle" font-size="12" font-weight="bold" fill="${riseColor}" stroke="#fff" stroke-width="4" paint-order="stroke fill">沸点上昇</text>`;
+  }
+  g+=`<circle cx="${sx(originT)}" cy="${sy(originP)}" r="4" fill="var(--ink)" stroke="#fff" stroke-width="1.5"/>`;
+  g+=`<g font-size="11" font-weight="bold"><line x1="${ZL+10}" y1="31" x2="${ZL+36}" y2="31" stroke="var(--curve)" stroke-width="3"/><text x="${ZL+42}" y="35" fill="var(--ink)">純水</text>${showBoilingSolution?`<line x1="${ZL+92}" y1="31" x2="${ZL+118}" y2="31" stroke="var(--solution)" stroke-width="3"/><text x="${ZL+124}" y="35" fill="var(--ink)">希薄溶液</text>`:''}</g>`;
+  g+=`<text x="${ZL+zpw/2}" y="${ZH-10}" text-anchor="middle" font-size="13" fill="var(--ink)">温度 t [℃]</text><text x="17" y="${ZT+zph/2}" text-anchor="middle" font-size="13" fill="var(--ink)" transform="rotate(-90 17 ${ZT+zph/2})">蒸気圧 P [kPa]</text>`;
+  $('chart-boiling-zoom').innerHTML=g;
+}
+
+function hermite(y0,y1,m0,m1,u,dt){
+  const u2=u*u,u3=u2*u;
+  return(2*u3-3*u2+1)*y0+(u3-2*u2+u)*m0*dt+(-2*u3+3*u2)*y1+(u3-u2)*m1*dt;
+}
+// 14〜20分で滑らかに凝固点を下回り、24分までに凝固点へ戻る。
+function pureCooling(t){
+  const slope=-20/14;
+  if(t<14)return 20+slope*t;
+  if(t<20)return hermite(0,-3,slope,0,(t-14)/6,6);
+  if(t<24)return hermite(-3,0,0,0,(t-20)/4,4);
+  if(t<=42)return 0;
+  return-(t-42)*.34;
+}
+function solutionFreezeSlope(tf){
+  const dropAtComplete=Math.min(4,2*Math.abs(tf)/1.86);
+  return dropAtComplete/(42-14);
+}
+function solutionFreezeLine(t,tf){return tf-solutionFreezeSlope(tf)*(t-14);}
+function solutionCooling(t,tf){
+  if(Math.abs(tf)<1e-9)return pureCooling(t); // 濃度0では純水と完全に一致
+  const slope=(tf-20)/14;
+  if(t<14)return 20+slope*t;
+  if(t<20)return hermite(tf,tf-3,slope,0,(t-14)/6,6);
+  if(t<24)return hermite(tf-3,solutionFreezeLine(24,tf),0,-solutionFreezeSlope(tf),(t-20)/4,4);
+  if(t<=42)return solutionFreezeLine(t,tf);
+  return solutionFreezeLine(42,tf)-(t-42)*.34;
+}
+function drawFreezing(){
+  const st=solutionState('f'),time=+$('f-time').value,tf=-KF*st.molality;
+  $('f-water-val').textContent=st.water;$('f-solute-val').textContent=st.solute;$('f-molar-val').textContent=st.molar;$('f-time-val').textContent=time;
+  const xMin=0,xMax=60,yMin=-20,yMax=22;
+  const regularYTicks=[-20,-15,-10,-5,5,10,15,20].filter(v=>Math.abs(v-tf)>.7);
+  const {sx,sy,svg}=frame({xMin,xMax,yMin,yMax,xTicks:[0,10,20,30,40,50,60].map(v=>({v,label:v})),yTicks:regularYTicks.map(v=>({v,label:v})),xLabel:'冷却時間 [min]',yLabel:'温度 t [℃]'});
+  let g=svg,pure=[],sol=[];for(let t=0;t<=60;t+=.5){pure.push([t,pureCooling(t)]);sol.push([t,solutionCooling(t,tf)]);}
+  if(showSupercoolingRegion){
+    g+=areaBetween(()=>0,pureCooling,14,24,sx,sy,.11);
+    if(showFreezingSolution&&st.molality>=1e-9)g+=areaBetween(t=>solutionFreezeLine(t,tf),t=>solutionCooling(t,tf),14,24,sx,sy,.16);
+  }
+  g+=path(pure,sx,sy,COLORS.pure,3);
+  if(showFreezingSolution)g+=path(sol,sx,sy,COLORS.solution,3);
+  g+=`<text x="${sx(27)}" y="${sy(0)-10}" font-size="13" font-weight="bold" fill="var(--curve)">純水</text>`;
+  if(showFreezingSolution&&st.molality>=1e-9)g+=`<text x="${sx(25)}" y="${sy(solutionCooling(25,tf))+20}" font-size="13" font-weight="bold" fill="var(--solution)">希薄溶液</text>`;
+  // 凝固点は「過冷却がないと仮定した初期冷却線」が凝固点温度へ達する点。
+  const freezingPointTime=14;
+  if(showFreezingPointGuides){
+    g+=`<line x1="${sx(0)}" y1="${sy(0)}" x2="${sx(freezingPointTime)}" y2="${sy(0)}" stroke="var(--curve)" stroke-width="1.5" stroke-dasharray="5 4"/><circle cx="${sx(freezingPointTime)}" cy="${sy(0)}" r="6" fill="var(--curve)" stroke="#fff" stroke-width="2"/>`;
+    g+=`<text x="${ML-9}" y="${sy(0)+4}" text-anchor="end" font-size="12" font-weight="bold" fill="var(--curve)" stroke="#fff" stroke-width="4" paint-order="stroke fill">0.00 ℃</text>`;
+    if(showFreezingSolution&&st.molality>=1e-9){
+      g+=`<line x1="${sx(0)}" y1="${sy(tf)}" x2="${sx(freezingPointTime)}" y2="${sy(tf)}" stroke="var(--solution)" stroke-width="1.5" stroke-dasharray="5 4"/><circle cx="${sx(freezingPointTime)}" cy="${sy(tf)}" r="6" fill="var(--solution)" stroke="#fff" stroke-width="2"/>`;
+      g+=`<text x="${ML-9}" y="${sy(tf)+4}" text-anchor="end" font-size="12" font-weight="bold" fill="var(--solution)" stroke="#fff" stroke-width="4" paint-order="stroke fill">${fmt(tf,2)} ℃</text>`;
+    }
+  }
+  if(showFreezingExtrapolation){
+    g+=`<line x1="${sx(freezingPointTime)}" y1="${sy(0)}" x2="${sx(24)}" y2="${sy(0)}" stroke="var(--accent)" stroke-width="2" stroke-dasharray="5 4"/><text x="${sx(18)}" y="${sy(0)-9}" text-anchor="middle" font-size="11" font-weight="bold" fill="var(--accent)">外挿</text>`;
+    if(showFreezingSolution&&st.molality>=1e-9)g+=`<line x1="${sx(freezingPointTime)}" y1="${sy(tf)}" x2="${sx(24)}" y2="${sy(solutionFreezeLine(24,tf))}" stroke="var(--accent)" stroke-width="2" stroke-dasharray="5 4"/>`;
+  }
+  const current=solutionCooling(time,tf);if(showFreezingSolution)g+=`<line x1="${sx(time)}" y1="${sy(current)}" x2="${sx(time)}" y2="${sy(yMin)}" stroke="var(--accent)" stroke-dasharray="4 4"/><circle cx="${sx(time)}" cy="${sy(current)}" r="7" fill="var(--accent)" stroke="#fff" stroke-width="2"/>`;
+  $('chart-freezing').innerHTML=g;
+  $('badges-freezing').innerHTML=`<span class="badge">純水の凝固点 <strong>0.00 ℃</strong></span><span class="badge solution">溶液の凝固点 <strong>${fmt(tf,2)} ℃</strong></span><span class="badge solution">凝固点降下 <strong>${fmt(Math.abs(tf),2)} K</strong></span><span class="badge">現在温度 <strong>${fmt(current,1)} ℃</strong></span>`;
+  drawFreezingModel(st,time,tf,current);
+}
+function drawFreezingModel(st,time,tf,current){
+  const svg=$('model-freezing'),large=!!svg.closest('.chart-stage');svg.setAttribute('viewBox',large?'0 0 420 420':'0 0 320 330');
+  const w=large?420:320,h=large?420:330,bx=large?55:35,by=large?70:74,bw=large?310:250,bh=large?285:195;
+  const freezeU=Math.max(0,Math.min(1,(time-20)/(42-20)));
+  const frac=freezeU*freezeU*(3-2*freezeU),solidW=(bw-6)*frac;
+  let s=`<text x="${w/2}" y="20" text-anchor="middle" font-size="13" fill="var(--ink)"><tspan font-weight="bold">現在温度</tspan><tspan dx="6">${fmt(current,1)} ℃</tspan></text>`;
+  s+=`<text x="${w/2}" y="42" text-anchor="middle" font-size="12" fill="var(--solution)" font-weight="bold">質量モル濃度 m = ${fmt(st.molality,2)} mol/kg</text>`;
+  s+=`<rect x="${bx}" y="${by}" width="${bw}" height="${bh}" rx="8" fill="#dbeafe" stroke="var(--axis)" stroke-width="3"/>`;
+  if(solidW>2){s+=`<rect x="${bx+3}" y="${by+3}" width="${fmt(solidW,1)}" height="${bh-6}" rx="5" fill="#e0f2fe"/>`;for(let x=bx+14;x<bx+solidW-3;x+=18)for(let y=by+14;y<by+bh-5;y+=18)s+=`<circle cx="${x}" cy="${y}" r="3.5" fill="#0ea5e9"/>`;}
+  const liquidL=bx+3+solidW,liquidW=Math.max(0,bw-6-solidW);const solventN=frac>=.995?0:Math.max(5,Math.round(34*(1-frac)));
+  for(let i=0;i<solventN;i++){const d=DOTS[i];s+=`<circle cx="${fmt(liquidL+6+d[0]*Math.max(1,liquidW-12),1)}" cy="${fmt(by+8+d[1]*(bh-16),1)}" r="${large?4:3.5}" fill="#2563eb"/>`;}
+  const soluteN=Math.max(st.solute>0?2:0,Math.round(Math.min(16,st.nSolute/Math.max(st.nWater,.1)*170)));
+  for(let i=0;i<soluteN;i++){const d=DOTS[45+i];const px=frac>=.995?bx+10+d[0]*(bw-20):liquidL+7+d[0]*Math.max(1,liquidW-14);s+=`<circle cx="${fmt(px,1)}" cy="${fmt(by+9+d[1]*(bh-18),1)}" r="${large?6:5}" fill="#7c3aed" stroke="#fff"/>`;}
+  if(frac>0)s+=`<text x="${bx+Math.max(solidW,50)/2}" y="${by+bh/2}" text-anchor="middle" font-size="12" font-weight="bold" fill="#075985">${frac>=.995?'凝固完了':'氷'}</text>`;
+  s+=`<g font-size="11" fill="var(--ink2)"><circle cx="${bx+12}" cy="${h-13}" r="4" fill="#2563eb"/><text x="${bx+22}" y="${h-9}">水</text><circle cx="${bx+67}" cy="${h-13}" r="5" fill="#7c3aed"/><text x="${bx+78}" y="${h-9}">溶質（液相に残る）</text></g>`;
+  svg.innerHTML=s;
+}
+
+function drawOsmosis(){
+  const st=osmosisState();
+  $('o-volume-val').textContent=fmt(st.volume,2);$('o-solute-val').textContent=st.solute;$('o-molar-val').textContent=st.molar;$('o-temp-val').textContent=st.tempC;
+  const xMin=0,xMax=1,yMin=0,yMax=3200;
+  const {sx,sy,svg}=frame({xMin,xMax,yMin,yMax,xTicks:[0,.2,.4,.6,.8,1].map(v=>({v,label:fmt(v,1)})),yTicks:[0,800,1600,2400,3200].map(v=>({v,label:v})),xLabel:'モル濃度 c [mol/L]',yLabel:'浸透圧 π [kPa]'});
+  const line=[];for(let i=0;i<=120;i++){const c=i/120;line.push([c,c*R*st.tempK]);}
+  let g=svg;
+  g+=`<text x="${sx(.06)}" y="${sy(0)-11}" font-size="13" font-weight="bold" fill="var(--curve)" stroke="#fff" stroke-width="4" paint-order="stroke fill">純水 π = 0</text>`;
+  if(showOsmosisSolution){
+    g+=path(line,sx,sy,COLORS.solution,3.5);
+    g+=`<text x="${sx(.70)}" y="${sy(.70*R*st.tempK)-17}" font-size="13" font-weight="bold" fill="var(--solution)" stroke="#fff" stroke-width="4" paint-order="stroke fill">希薄溶液　π = cRT</text>`;
+    g+=`<line x1="${sx(st.concentration)}" y1="${sy(st.pressure)}" x2="${sx(st.concentration)}" y2="${sy(0)}" stroke="var(--solution)" stroke-width="1.5" stroke-dasharray="5 4"/><line x1="${sx(0)}" y1="${sy(st.pressure)}" x2="${sx(st.concentration)}" y2="${sy(st.pressure)}" stroke="var(--solution)" stroke-width="1.5" stroke-dasharray="5 4"/><circle cx="${sx(st.concentration)}" cy="${sy(st.pressure)}" r="7" fill="var(--solution)" stroke="#fff" stroke-width="2"/>`;
+  }
+  $('chart-osmosis').innerHTML=g;
+  $('badges-osmosis').innerHTML=`<span class="badge solution">浸透圧 <strong>${fmt(st.pressure,1)} kPa</strong></span><span class="badge solution">モル濃度 <strong>${fmt(st.concentration,3)} mol/L</strong></span><span class="badge">絶対温度 <strong>${fmt(st.tempK,1)} K</strong></span><span class="badge">溶質 <strong>${fmt(st.nSolute,3)} mol</strong></span>`;
+  drawOsmosisModel(st);
+}
+function drawOsmosisModel(st){
+  const svg=$('model-osmosis'),large=!!svg.closest('.chart-stage');svg.setAttribute('viewBox',large?'0 0 420 420':'0 0 320 330');
+  const w=large?420:320,h=large?420:330,leftX=large?55:40,colW=large?120:92,gap=large?70:56,rightX=leftX+colW+gap;
+  const top=large?84:72,bottom=large?345:270,baseLevel=large?165:138,connectorTop=bottom-(large?58:46),center=leftX+colW+gap/2;
+  const levelShift=Math.min(large?66:48,st.pressure/500*(large?34:25)),leftLevel=baseLevel+levelShift/2,rightLevel=baseLevel-levelShift/2;
+  let s=`<defs><marker id="osmosis-water-arrow" viewBox="0 0 9 9" refX="8" refY="4.5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 9 4.5 L 0 9 Z" fill="var(--curve)"/></marker></defs>`;
+  s+=`<text x="${w/2}" y="20" text-anchor="middle" font-size="13" fill="var(--ink)"><tspan font-weight="bold">浸透圧 π</tspan><tspan dx="6">${fmt(st.pressure,1)} kPa</tspan></text>`;
+  s+=`<text x="${w/2}" y="42" text-anchor="middle" font-size="12" fill="var(--solution)" font-weight="bold">モル濃度 c = ${fmt(st.concentration,3)} mol/L</text>`;
+  s+=`<text x="${w/2}" y="61" text-anchor="middle" font-size="11" fill="var(--ink2)">${fmt(st.tempK,1)} K</text>`;
+  s+=`<rect x="${leftX+3}" y="${leftLevel}" width="${colW-6}" height="${bottom-leftLevel-3}" fill="#bfdbfe" opacity=".88"/><rect x="${rightX+3}" y="${rightLevel}" width="${colW-6}" height="${bottom-rightLevel-3}" fill="#ddd6fe" opacity=".9"/><rect x="${leftX+colW}" y="${connectorTop}" width="${gap}" height="${bottom-connectorTop-3}" fill="#c7d2fe" opacity=".9"/>`;
+  s+=`<path d="M ${leftX} ${top} V ${bottom} H ${rightX+colW} V ${top}" fill="none" stroke="var(--axis)" stroke-width="3"/><line x1="${leftX+colW}" y1="${top}" x2="${leftX+colW}" y2="${connectorTop}" stroke="var(--axis)" stroke-width="3"/><line x1="${rightX}" y1="${top}" x2="${rightX}" y2="${connectorTop}" stroke="var(--axis)" stroke-width="3"/>`;
+  s+=`<line x1="${center}" y1="${connectorTop-2}" x2="${center}" y2="${bottom-2}" stroke="var(--ink2)" stroke-width="5" stroke-dasharray="5 4"/>`;
+  s+=`<text x="${leftX+colW/2}" y="${top-10}" text-anchor="middle" font-size="12" font-weight="bold" fill="var(--curve)">純水</text><text x="${rightX+colW/2}" y="${top-10}" text-anchor="middle" font-size="12" font-weight="bold" fill="var(--solution)">希薄溶液</text>`;
+  const waterN=large?22:16;
+  for(let i=0;i<waterN;i++){const d=DOTS[i],lx=leftX+10+d[0]*(colW-20),ly=leftLevel+8+d[1]*Math.max(10,connectorTop-leftLevel-12);s+=`<circle cx="${fmt(lx,1)}" cy="${fmt(ly,1)}" r="${large?4:3.4}" fill="#2563eb" opacity=".9"/>`;}
+  for(let i=0;i<waterN;i++){const d=DOTS[24+i],rx=rightX+10+d[0]*(colW-20),ry=rightLevel+8+d[1]*Math.max(10,connectorTop-rightLevel-12);s+=`<circle cx="${fmt(rx,1)}" cy="${fmt(ry,1)}" r="${large?4:3.4}" fill="#2563eb" opacity=".9"/>`;}
+  const soluteN=st.solute>0?Math.max(2,Math.min(14,Math.round(st.concentration*12)+2)):0;
+  for(let i=0;i<soluteN;i++){const d=DOTS[48+i],rx=rightX+11+d[0]*(colW-22),ry=rightLevel+10+d[1]*Math.max(10,connectorTop-rightLevel-14);s+=`<circle cx="${fmt(rx,1)}" cy="${fmt(ry,1)}" r="${large?6:5}" fill="#7c3aed" stroke="#fff" stroke-width="1"/>`;}
+  if(st.concentration>1e-9)s+=`<line x1="${center-(large?48:38)}" y1="${bottom-(large?29:23)}" x2="${center+(large?48:38)}" y2="${bottom-(large?29:23)}" stroke="var(--curve)" stroke-width="3" marker-end="url(#osmosis-water-arrow)"/><text x="${center}" y="${bottom-(large?38:31)}" text-anchor="middle" font-size="11" font-weight="bold" fill="var(--curve)" stroke="#fff" stroke-width="4" paint-order="stroke fill">水の移動</text>`;
+  s+=`<text x="${center}" y="${bottom+20}" text-anchor="middle" font-size="11" font-weight="bold" fill="var(--ink2)">半透膜</text><g font-size="11" fill="var(--ink2)"><circle cx="${leftX+8}" cy="${h-14}" r="4" fill="#2563eb"/><text x="${leftX+18}" y="${h-10}">水</text><circle cx="${leftX+58}" cy="${h-14}" r="5" fill="#7c3aed"/><text x="${leftX+69}" y="${h-10}">溶質（膜を通れない）</text></g>`;
+  svg.innerHTML=s;
+}
+
+function colloidState(){
+  const charge=+$('c-charge').value,conc=+$('c-conc').value,z=+$('c-valence').value;
+  const ccc=60*Math.pow(charge/3,2)/Math.pow(z,6),ratio=conc/ccc;
+  const ionName=z===1?'Na⁺':z===2?'Ca²⁺':'Al³⁺';
+  const repAmp=62*Math.pow(charge/3,2)/(1+1.6*Math.sqrt(ratio));
+  const kappa=.72+1.20*Math.sqrt(ratio);
+  const repulsion=h=>repAmp*Math.exp(-kappa*h);
+  const attraction=h=>-10/(h+.02);
+  const total=h=>repulsion(h)+attraction(h);
+  let barrier=-Infinity,barrierH=.5;
+  for(let i=0;i<=400;i++){const h=.12+4.38*i/400,e=total(h);if(e>barrier){barrier=e;barrierH=h;}}
+  const aggregation=Math.max(0,Math.min(1,(ratio-.35)/.9));
+  const status=ratio<.60?'分散':ratio<1?'凝析しやすい':'凝析';
+  return{charge,conc,z,ccc,ratio,ionName,repulsion,attraction,total,barrier,barrierH,aggregation,status};
+}
+function drawColloid(){
+  const st=colloidState();
+  $('c-charge-val').textContent=st.charge;$('c-conc-val').textContent=fmt(st.conc,1);$('c-valence-val').textContent=st.z;
+  $('c-charge-minus').disabled=st.charge<=1;$('c-charge-plus').disabled=st.charge>=5;
+  $('c-valence-minus').disabled=st.z<=1;$('c-valence-plus').disabled=st.z>=3;
+  const statusColor=st.status==='分散'?'#2563eb':st.status==='凝析しやすい'?'#f97316':'#dc2626';
+  $('badges-colloid').innerHTML=`<span class="badge"><strong style="color:${statusColor}">${st.status}</strong></span><span class="badge">対イオン <strong>${st.ionName}</strong></span><span class="badge solution">モデル上のCCC <strong>${st.ccc<.1?fmt(st.ccc,3):fmt(st.ccc,1)} mmol/L</strong></span><span class="badge">障壁 <strong>${fmt(Math.max(0,st.barrier),1)} kBT</strong></span><span class="badge">Schulze–Hardy <strong>CCC ∝ z⁻⁶</strong></span>`;
+  drawColloidModel(st,statusColor);
+  if(showDLVO)drawDLVO(st);
+}
+function drawColloidModel(st,statusColor){
+  const dispersed=[[105,145],[260,125],[420,155],[610,125],[690,245],[545,275],[365,260],[190,275],[100,390],[270,405],[465,390],[650,400]];
+  const clustered=[[250,190],[305,170],[276,235],[335,224],[485,185],[540,205],[505,245],[555,260],[370,335],[425,315],[398,370],[455,365]];
+  const a=st.aggregation,haloR=50-25*Math.min(1,Math.sqrt(st.ratio));
+  let s=`<defs><filter id="colloid-shadow" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#172033" flood-opacity=".16"/></filter></defs>`;
+  s+=`<rect x="32" y="72" width="716" height="390" rx="22" fill="#f8fbff" stroke="var(--border)" stroke-width="2"/>`;
+  s+=`<text x="390" y="42" text-anchor="middle" font-size="24" font-weight="900" fill="${statusColor}">${st.status}</text><text x="390" y="63" text-anchor="middle" font-size="12" font-weight="bold" fill="var(--ink2)">電気二重層が${st.ratio<.6?'粒子を離している':st.ratio<1?'圧縮され、障壁が低下':'圧縮され、引力が優勢'}</text>`;
+  for(let i=0;i<dispersed.length;i++){
+    const x=dispersed[i][0]*(1-a)+clustered[i][0]*a,y=dispersed[i][1]*(1-a)+clustered[i][1]*a;
+    s+=`<circle cx="${fmt(x,1)}" cy="${fmt(y,1)}" r="${fmt(haloR,1)}" fill="#60a5fa" fill-opacity=".10" stroke="#60a5fa" stroke-opacity=".45" stroke-width="2" stroke-dasharray="5 4"/>`;
+    s+=`<circle cx="${fmt(x,1)}" cy="${fmt(y,1)}" r="27" fill="#5b6578" stroke="#283244" stroke-width="3" filter="url(#colloid-shadow)"/>`;
+    if(showColloidCharges){for(const ang of [0,90,180,270]){const rad=ang*Math.PI/180,qx=x+21*Math.cos(rad),qy=y+21*Math.sin(rad);s+=`<text x="${fmt(qx,1)}" y="${fmt(qy+5,1)}" text-anchor="middle" font-size="17" font-weight="900" fill="#fff">−</text>`;}}
+    if(showColloidIons&&st.conc>=0.05){
+      const count=Math.max(1,Math.min(9,1+Math.round(Math.sqrt(st.conc)*1.6)));
+      for(let j=0;j<count;j++){const ang=(i*71+j*360/count)*Math.PI/180,rr=haloR+13+(j%2)*8,qx=Math.max(46,Math.min(734,x+rr*Math.cos(ang))),qy=Math.max(86,Math.min(448,y+rr*Math.sin(ang)));s+=`<circle cx="${fmt(qx,1)}" cy="${fmt(qy,1)}" r="11" fill="#14b8a6" stroke="#fff" stroke-width="2.5"/><text x="${fmt(qx,1)}" y="${fmt(qy+3.5,1)}" text-anchor="middle" font-size="9.5" font-weight="900" fill="#fff">${st.z}+</text>`;}
+    }
+  }
+  s+=`<g font-size="12" font-weight="bold" fill="var(--ink2)"><circle cx="62" cy="481" r="9" fill="#5b6578"/><text x="78" y="485">負に帯電した疎水コロイド</text><circle cx="282" cy="481" r="7" fill="#14b8a6"/><text x="296" y="485">対イオン ${st.ionName}</text><circle cx="430" cy="481" r="13" fill="#60a5fa" fill-opacity=".12" stroke="#60a5fa" stroke-dasharray="4 3"/><text x="451" y="485">電気二重層</text></g>`;
+  $('model-colloid').innerHTML=s;
+}
+function drawDLVO(st){
+  const w=520,hg=360,l=64,r=18,t=30,b=54,pw=w-l-r,ph=hg-t-b,xMin=.12,xMax=4.5;
+  const rep=[],att=[],tot=[];for(let i=0;i<=200;i++){const x=xMin+(xMax-xMin)*i/200;rep.push([x,st.repulsion(x)]);att.push([x,st.attraction(x)]);tot.push([x,st.total(x)]);}
+  const energies=[0,...rep.map(p=>p[1]),...att.map(p=>p[1]),...tot.map(p=>p[1])],rawMin=Math.min(...energies),rawMax=Math.max(...energies),rawSpan=Math.max(10,rawMax-rawMin);
+  const niceStep=range=>{const rough=range/5,pow=Math.pow(10,Math.floor(Math.log10(rough))),f=rough/pow;return(f<=1?1:f<=2?2:f<=5?5:10)*pow;};
+  const yStep=niceStep(rawSpan*1.18),yMin=Math.floor((rawMin-rawSpan*.08)/yStep)*yStep,yMax=Math.ceil((rawMax+rawSpan*.08)/yStep)*yStep;
+  const sx=x=>l+(x-xMin)/(xMax-xMin)*pw,sy=y=>t+ph-(Math.max(yMin,Math.min(yMax,y))-yMin)/(yMax-yMin)*ph;
+  let s='';
+  for(let v=Math.ceil(yMin/yStep)*yStep;v<=yMax+yStep*.01;v+=yStep){const vv=Math.abs(v)<yStep*.001?0:v;s+=`<line x1="${l}" y1="${sy(vv)}" x2="${l+pw}" y2="${sy(vv)}" stroke="var(--grid)"/><text x="${l-9}" y="${sy(vv)+4}" text-anchor="end" font-size="11" fill="var(--ink2)">${Number.isInteger(vv)?vv:fmt(vv,1)}</text>`;}
+  [.5,1,2,3,4].forEach(v=>{s+=`<line x1="${sx(v)}" y1="${t}" x2="${sx(v)}" y2="${t+ph}" stroke="var(--grid)"/><text x="${sx(v)}" y="${t+ph+21}" text-anchor="middle" font-size="11" fill="var(--ink2)">${v}</text>`;});
+  s+=`<line x1="${l}" y1="${t+ph}" x2="${l+pw}" y2="${t+ph}" stroke="var(--axis)" stroke-width="1.5"/><line x1="${l}" y1="${t}" x2="${l}" y2="${t+ph}" stroke="var(--axis)" stroke-width="1.5"/><text x="${l+pw/2}" y="346" text-anchor="middle" font-size="13" fill="var(--ink)">粒子表面間距離 h [nm]</text><text x="17" y="${t+ph/2}" text-anchor="middle" font-size="13" fill="var(--ink)" transform="rotate(-90 17 ${t+ph/2})">相互作用エネルギー [kBT]</text>`;
+  const makePath=(pts,color,width,dash='')=>`<path d="${pts.map((p,i)=>(i?'L':'M')+fmt(sx(p[0]),1)+' '+fmt(sy(p[1]),1)).join(' ')}" fill="none" stroke="${color}" stroke-width="${width}" ${dash?`stroke-dasharray="${dash}"`:''} stroke-linecap="round" stroke-linejoin="round"/>`;
+  s+=makePath(rep,'#2563eb',2.4,'2 6')+makePath(att,'#f97316',2.4,'2 6')+makePath(tot,'#7c3aed',4);
+  s+=`<text x="${sx(2.15)}" y="${sy(st.repulsion(2.15))-10}" font-size="11" font-weight="bold" fill="#2563eb" stroke="#fff" stroke-width="4" paint-order="stroke fill">電気二重層反発</text><text x="${sx(2.15)}" y="${sy(st.attraction(2.15))+17}" font-size="11" font-weight="bold" fill="#ea580c" stroke="#fff" stroke-width="4" paint-order="stroke fill">van der Waals引力</text><text x="${sx(2.85)}" y="${sy(st.total(2.85))-11}" font-size="12" font-weight="900" fill="#7c3aed" stroke="#fff" stroke-width="4" paint-order="stroke fill">合計</text>`;
+  if(st.barrier>0){s+=`<line x1="${sx(st.barrierH)}" y1="${sy(0)}" x2="${sx(st.barrierH)}" y2="${sy(st.barrier)}" stroke="#dc2626" stroke-width="2"/><circle cx="${sx(st.barrierH)}" cy="${sy(st.barrier)}" r="5" fill="#dc2626" stroke="#fff" stroke-width="2"/><text x="${sx(st.barrierH)+10}" y="${Math.max(20,sy(st.barrier)-8)}" font-size="11" font-weight="bold" fill="#dc2626" stroke="#fff" stroke-width="4" paint-order="stroke fill">エネルギー障壁 ${fmt(st.barrier,1)} kBT</text>`;}
+  s+=`<text x="${w-16}" y="17" text-anchor="end" font-size="10" font-weight="bold" fill="var(--ink3)">DLVO MODEL</text>`;
+  $('chart-dlvo').innerHTML=s;
+}
+
+function setDLVOExpanded(expanded){
+  const panel=$('panel-colloid'),mainStage=panel.querySelector('.chart-stage'),sideCard=panel.querySelector('.dlvo-card');
+  const model=$('model-colloid'),graph=$('chart-dlvo'),btn=$('expand-dlvo');
+  panel.classList.toggle('dlvo-expanded',expanded);
+  if(expanded){mainStage.append(graph);sideCard.append(model);}else{mainStage.append(model);sideCard.append(graph);}
+  btn.setAttribute('aria-pressed',String(expanded));btn.textContent=expanded?'模式図に戻す':'DLVOを拡大';
+  drawColloid();
+}
+
+function setupSwap(panelId,chartId,secondaryId,tipId,labels={normal:'グラフと模式図の位置を交換',swapped:'元の配置に戻す'}){
+  const panel=$(panelId),chart=$(chartId),secondary=$(secondaryId),tip=$(tipId),chartHost=chart.parentElement,secondaryHost=secondary.parentElement;
+  const chartStage=document.createElement('div');chartStage.className='visual-slot chart-stage';chartHost.insertBefore(chartStage,chart);chartStage.append(chart,tip);
+  const modelStage=document.createElement('div');modelStage.className='visual-slot model-stage';secondaryHost.insertBefore(modelStage,secondary);modelStage.append(secondary);
+  const btn=document.createElement('button');btn.type='button';btn.className='swap-btn';btn.textContent=labels.normal;
+  btn.addEventListener('click',()=>{const swapped=panel.classList.toggle('visuals-swapped');if(swapped){chartStage.append(secondary);modelStage.append(chart,tip);}else{chartStage.append(chart,tip);modelStage.append(secondary);}btn.textContent=swapped?labels.swapped:labels.normal;(panel.querySelector('input[type=range]'))?.dispatchEvent(new Event('input'));});
+  panel.querySelector('.panel-tools').append(btn);
+}
+function setupModelToggle(panelId,chartId,modelId,tipId,buttonId,visibleClass){
+  const panel=$(panelId),chart=$(chartId),model=$(modelId),tip=$(tipId),btn=$(buttonId);
+  const chartHost=chart.parentElement,modelHost=model.parentElement;
+  const chartStage=document.createElement('div');chartStage.className='visual-slot chart-stage';chartHost.insertBefore(chartStage,chart);chartStage.append(chart,tip);
+  const modelStage=document.createElement('div');modelStage.className='visual-slot model-stage';modelHost.insertBefore(modelStage,model);modelStage.append(model);
+  btn.addEventListener('click',()=>{
+    const visible=!panel.classList.contains(visibleClass);
+    panel.classList.toggle(visibleClass,visible);
+    if(visible){chartStage.append(model);modelStage.append(chart,tip);}else{chartStage.append(chart,tip);modelStage.append(model);}
+    btn.setAttribute('aria-pressed',String(visible));btn.textContent=visible?'模式図を非表示':'模式図を表示';
+    panel.querySelector('input[type=range]')?.dispatchEvent(new Event('input'));
+  });
+}
+setupSwap('panel-boiling','chart-boiling','chart-boiling-zoom','tip-boiling',{normal:'沸点付近を拡大',swapped:'全体表示に戻す'});
+setupModelToggle('panel-freezing','chart-freezing','model-freezing','tip-freezing','toggle-freezing-model','freezing-model-visible');
+// 浸透圧タブ: 模式図を常にメイン表示。ボタンはサブ枠のグラフを出し入れする
+function setupOsmosisView(){
+  const panel=$('panel-osmosis'),chart=$('chart-osmosis'),model=$('model-osmosis'),tip=$('tip-osmosis'),btn=$('toggle-osmosis-model');
+  const chartHost=chart.parentElement,modelHost=model.parentElement;
+  const chartStage=document.createElement('div');chartStage.className='visual-slot chart-stage';chartHost.insertBefore(chartStage,chart);
+  const modelStage=document.createElement('div');modelStage.className='visual-slot model-stage';modelHost.insertBefore(modelStage,model);
+  chartStage.append(model);modelStage.append(chart,tip);
+  panel.classList.add('osmosis-model-visible','osmosis-graph-hidden');
+  btn.textContent='グラフを表示';btn.setAttribute('aria-pressed','false');
+  btn.addEventListener('click',()=>{
+    const hidden=panel.classList.toggle('osmosis-graph-hidden');
+    btn.setAttribute('aria-pressed',String(!hidden));
+    btn.textContent=hidden?'グラフを表示':'グラフを非表示';
+    drawOsmosis();
+  });
+}
+setupOsmosisView();
+$('toggle-boiling-solution').addEventListener('click',ev=>{
+  showBoilingSolution=!showBoilingSolution;
+  ev.currentTarget.setAttribute('aria-pressed',String(showBoilingSolution));
+  ev.currentTarget.textContent=`希薄溶液：${showBoilingSolution?'表示':'非表示'}`;
+  drawBoiling();
+});
+$('toggle-boiling-points').addEventListener('click',ev=>{
+  showBoilingPointGuides=!showBoilingPointGuides;
+  ev.currentTarget.setAttribute('aria-pressed',String(showBoilingPointGuides));
+  ev.currentTarget.textContent=`沸点：${showBoilingPointGuides?'表示':'非表示'}`;
+  drawBoiling();
+});
+$('toggle-vapor-pressure-100').addEventListener('click',ev=>{
+  showVaporPressureAt100=!showVaporPressureAt100;
+  ev.currentTarget.setAttribute('aria-pressed',String(showVaporPressureAt100));
+  ev.currentTarget.textContent=`100℃蒸気圧：${showVaporPressureAt100?'表示':'非表示'}`;
+  drawBoiling();
+});
+$('toggle-freezing-solution').addEventListener('click',ev=>{
+  showFreezingSolution=!showFreezingSolution;
+  ev.currentTarget.setAttribute('aria-pressed',String(showFreezingSolution));
+  ev.currentTarget.textContent=`希薄溶液：${showFreezingSolution?'表示':'非表示'}`;
+  drawFreezing();
+});
+$('toggle-osmosis-solution').addEventListener('click',ev=>{
+  showOsmosisSolution=!showOsmosisSolution;
+  ev.currentTarget.setAttribute('aria-pressed',String(showOsmosisSolution));
+  ev.currentTarget.textContent=`希薄溶液：${showOsmosisSolution?'表示':'非表示'}`;
+  drawOsmosis();
+});
+$('toggle-boiling-rise').addEventListener('click',ev=>{
+  showBoilingRiseArrow=!showBoilingRiseArrow;
+  ev.currentTarget.setAttribute('aria-pressed',String(showBoilingRiseArrow));
+  ev.currentTarget.textContent=`沸点上昇：${showBoilingRiseArrow?'表示':'非表示'}`;
+  drawBoilingZoom(solutionState('b'));
+});
+$('toggle-vapor-drop').addEventListener('click',ev=>{
+  showVaporPressureArrow=!showVaporPressureArrow;
+  ev.currentTarget.setAttribute('aria-pressed',String(showVaporPressureArrow));
+  ev.currentTarget.textContent=`蒸気圧降下：${showVaporPressureArrow?'表示':'非表示'}`;
+  drawBoilingZoom(solutionState('b'));
+});
+$('toggle-freezing-guides').addEventListener('click',ev=>{
+  showFreezingPointGuides=!showFreezingPointGuides;
+  ev.currentTarget.setAttribute('aria-pressed',String(showFreezingPointGuides));
+  ev.currentTarget.textContent=`凝固点の破線：${showFreezingPointGuides?'表示':'非表示'}`;
+  drawFreezing();
+});
+$('toggle-freezing-extrapolation').addEventListener('click',ev=>{
+  showFreezingExtrapolation=!showFreezingExtrapolation;
+  ev.currentTarget.setAttribute('aria-pressed',String(showFreezingExtrapolation));
+  ev.currentTarget.textContent=`外挿の破線：${showFreezingExtrapolation?'表示':'非表示'}`;
+  drawFreezing();
+});
+$('toggle-supercooling-region').addEventListener('click',ev=>{
+  showSupercoolingRegion=!showSupercoolingRegion;
+  ev.currentTarget.setAttribute('aria-pressed',String(showSupercoolingRegion));
+  ev.currentTarget.textContent=`過冷却領域：${showSupercoolingRegion?'表示':'非表示'}`;
+  drawFreezing();
+});
+$('toggle-colloid-charges').addEventListener('click',ev=>{
+  showColloidCharges=!showColloidCharges;ev.currentTarget.setAttribute('aria-pressed',String(showColloidCharges));ev.currentTarget.textContent=`表面電荷：${showColloidCharges?'表示':'非表示'}`;drawColloid();
+});
+$('toggle-colloid-ions').addEventListener('click',ev=>{
+  showColloidIons=!showColloidIons;ev.currentTarget.setAttribute('aria-pressed',String(showColloidIons));ev.currentTarget.textContent=`対イオン：${showColloidIons?'表示':'非表示'}`;drawColloid();
+});
+$('toggle-dlvo').addEventListener('click',ev=>{
+  showDLVO=!showDLVO;
+  if(!showDLVO&&$('panel-colloid').classList.contains('dlvo-expanded'))setDLVOExpanded(false);
+  ev.currentTarget.setAttribute('aria-pressed',String(showDLVO));ev.currentTarget.textContent=`DLVO曲線：${showDLVO?'表示':'非表示'}`;
+  $('panel-colloid').classList.toggle('dlvo-hidden',!showDLVO);$('expand-dlvo').disabled=!showDLVO;drawColloid();
+});
+$('expand-dlvo').addEventListener('click',()=>setDLVOExpanded(!$('panel-colloid').classList.contains('dlvo-expanded')));
+attachHover('chart-boiling','tip-boiling',()=>{const st=solutionState('b');return{xMin:70,xMax:125,lines:t=>[`温度 ${fmt(t,1)} ℃`,`純水 ${fmt(waterPsat(t),1)} kPa`,...(showBoilingSolution?[`希薄溶液 ${fmt(st.xWater*waterPsat(t),1)} kPa`]:[])]};});
+attachHover('chart-freezing','tip-freezing',()=>{const st=solutionState('f'),tf=-KF*st.molality;return{xMin:0,xMax:60,lines:t=>[`冷却時間 ${fmt(t,1)} min`,`純水 ${fmt(pureCooling(t),1)} ℃`,...(showFreezingSolution?[`希薄溶液 ${fmt(solutionCooling(t,tf),1)} ℃`]:[])]};});
+attachHover('chart-osmosis','tip-osmosis',()=>{const st=osmosisState();return{xMin:0,xMax:1,lines:c=>[`モル濃度 ${fmt(c,3)} mol/L`,`純水 0.0 kPa`,...(showOsmosisSolution?[`希薄溶液 ${fmt(c*R*st.tempK,1)} kPa`]:[])]};});
+
+document.querySelectorAll('.tabs button').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-selected',b===btn));document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id==='panel-'+btn.dataset.tab));}));
+$('fullscreen').addEventListener('click',async()=>{try{document.fullscreenElement?await document.exitFullscreen():await document.documentElement.requestFullscreen();}catch(_){}});
+// 全画面中はヘッダーが消えるため、各タブのツール列に終了ボタンを置く（通常時はCSSで非表示）
+document.querySelectorAll('.panel .panel-tools').forEach(tools=>{
+  const b=document.createElement('button');b.type='button';b.className='exit-fs-btn';b.textContent='全画面を終了';
+  b.addEventListener('click',async()=>{try{await document.exitFullscreen();}catch(_){}});
+  tools.prepend(b);
+});
+document.addEventListener('fullscreenchange',()=>{document.body.classList.toggle('is-fullscreen',!!document.fullscreenElement);document.querySelector('.panel.active input[type=range]')?.dispatchEvent(new Event('input'));});
+['b-water','b-solute','b-molar','b-pressure'].forEach(id=>$(id).addEventListener('input',drawBoiling));
+['f-water','f-solute','f-molar','f-time'].forEach(id=>$(id).addEventListener('input',drawFreezing));
+['o-volume','o-solute','o-molar','o-temp'].forEach(id=>$(id).addEventListener('input',drawOsmosis));
+function stepDiscrete(id,delta,min,max){const input=$(id);input.value=Math.max(min,Math.min(max,+input.value+delta));drawColloid();}
+$('c-charge-minus').addEventListener('click',()=>stepDiscrete('c-charge',-1,1,5));
+$('c-charge-plus').addEventListener('click',()=>stepDiscrete('c-charge',1,1,5));
+$('c-valence-minus').addEventListener('click',()=>stepDiscrete('c-valence',-1,1,3));
+$('c-valence-plus').addEventListener('click',()=>stepDiscrete('c-valence',1,1,3));
+$('c-conc').addEventListener('input',drawColloid);
+const INIT={boiling:{'b-water':500,'b-solute':30,'b-molar':60,'b-pressure':101.3},freezing:{'f-water':500,'f-solute':30,'f-molar':60,'f-time':30},osmosis:{'o-volume':1,'o-solute':6,'o-molar':60,'o-temp':25},colloid:{'c-charge':3,'c-conc':1,'c-valence':1},salt:{'s-hydro':3,'s-conc':1},protect:{'p-protect':0,'p-conc':5},electro:{'e-volt':60,'e-conc':2,'e-time':30}};
+document.querySelectorAll('.reset-btn').forEach(btn=>btn.addEventListener('click',()=>{Object.entries(INIT[btn.dataset.reset]).forEach(([id,v])=>{$(id).value=v;});btn.closest('.panel').querySelector('input[type=range]').dispatchEvent(new Event('input'));}));
+
+// ===== ⑤ 親水コロイドの塩析（脱水機構：DLVOは使わない） =====
+let showSaltWater=true,showSaltCompare=true;
+function saltState(){
+  const hydro=+$('s-hydro').value,conc=+$('s-conc').value;
+  const cSalt=0.8+0.55*hydro,onset=cSalt*0.55;               // 塩析に要する濃度は親水性が強いほど大きい
+  const agg=Math.max(0,Math.min(1,(conc-onset)/(cSalt-onset)));
+  const shell=Math.max(0,Math.min(1,1-conc/(cSalt*1.05)));   // 水和水の保持率
+  const status=agg<0.05?'安定（水和で分散）':agg<0.85?'塩析が進行中':'塩析（沈殿）';
+  return{hydro,conc,cSalt,onset,agg,shell,status};
+}
+function drawSaltModel(st){
+  const box={x:32,y:74,w:716,h:388};
+  const dispersed=[[140,150],[300,135],[470,150],[640,140],[210,270],[390,255],[560,270],[690,275],[150,385],[330,390],[510,385],[660,390]];
+  const clustered=[[300,255],[352,238],[322,300],[382,288],[432,250],[472,298],[420,340],[360,350],[300,348],[500,258],[520,318],[460,358]];
+  // 電解質イオンが並ぶ位置（固定）。水和水はコロイドからここへ移動する。
+  const anchors=[[105,150],[250,112],[560,118],[702,175],[118,340],[300,185],[600,300],[696,372],[180,448],[406,128],[520,438],[642,256]];
+  const a=st.agg,frac=st.conc/st.cSalt;
+  let s=`<rect x="${box.x}" y="${box.y}" width="${box.w}" height="${box.h}" rx="22" fill="#f8fbff" stroke="var(--border)" stroke-width="2"/>`;
+  const sc=st.agg<0.05?'#2563eb':st.agg<0.85?'#f97316':'#dc2626';
+  s+=`<text x="390" y="44" text-anchor="middle" font-size="24" font-weight="900" fill="${sc}">${st.status}</text>`;
+  s+=`<text x="390" y="66" text-anchor="middle" font-size="12" font-weight="bold" fill="var(--ink2)">${st.agg<0.05?'水和水の殻がコロイドを分散させている':st.agg<0.85?'多量の電解質が水和水を引き寄せ、奪っていく':'水和水を失って凝集・沈殿した'}</text>`;
+  // コロイド本体（水和殻の水は下の水和水で描画。移動した分だけ殻から減る）
+  const parts=[];
+  for(let i=0;i<dispersed.length;i++){const x=dispersed[i][0]*(1-a)+clustered[i][0]*a,y=dispersed[i][1]*(1-a)+clustered[i][1]*a;parts.push([x,y]);
+    if(showSaltWater)s+=`<circle cx="${fmt(x,1)}" cy="${fmt(y,1)}" r="37" fill="#60a5fa" fill-opacity="0.16" stroke="#60a5fa" stroke-opacity="0.5" stroke-width="2" stroke-dasharray="4 4"/>`;
+    s+=`<circle cx="${fmt(x,1)}" cy="${fmt(y,1)}" r="24" fill="#6b7f9e" stroke="#41506a" stroke-width="3"/>`;
+  }
+  // 電解質イオン（濃度とともにフェードイン）
+  for(let i=0;i<12;i++){const aPt=anchors[i],ionOp=Math.max(0,Math.min(1,frac*1.6-i*0.08));
+    if(ionOp>0.02){const cat=i%2===0;s+=`<circle cx="${aPt[0]}" cy="${aPt[1]}" r="8" fill="${cat?'#14b8a6':'#f59e0b'}" opacity="${fmt(ionOp,2)}"/><text x="${aPt[0]}" y="${aPt[1]+3}" text-anchor="middle" font-size="9" font-weight="900" fill="#fff" opacity="${fmt(ionOp,2)}">${cat?'＋':'−'}</text>`;}
+  }
+  // 水和水：各コロイドの殻の水が1粒ずつイオンへ移動する。移動した水はその分だけ殻から消える（保存）
+  if(showSaltWater)for(let i=0;i<12;i++){const cen=parts[i],aPt=anchors[i];
+    for(let k=0;k<6;k++){
+      const ang=(i*40+k*60)*Math.PI/180,sx0=cen[0]+34*Math.cos(ang),sy0=cen[1]+34*Math.sin(ang);
+      const tx=aPt[0]+Math.cos(k*1.7)*7,ty=aPt[1]+Math.sin(k*1.7)*7;
+      const p=Math.max(0,Math.min(1,frac*1.5-i*0.08-k*0.14));
+      s+=`<circle cx="${fmt(sx0+(tx-sx0)*p,1)}" cy="${fmt(sy0+(ty-sy0)*p,1)}" r="4.5" fill="#3b82f6"/>`;
+    }
+  }
+  s+=`<g font-size="12" font-weight="bold" fill="var(--ink2)"><circle cx="62" cy="481" r="9" fill="#6b7f9e"/><text x="78" y="485">親水コロイド</text><circle cx="232" cy="481" r="5" fill="#3b82f6"/><text x="244" y="485">水和水</text><circle cx="342" cy="481" r="7" fill="#14b8a6"/><text x="356" y="485">電解質イオン</text></g>`;
+  $('model-salt').innerHTML=s;
+}
+function drawSaltGraph(st){
+  const w=520,hg=360,l=64,r=20,t=40,b=54,pw=w-l-r,ph=hg-t-b,xMax=5;
+  const sx=x=>l+x/xMax*pw,sy=y=>t+ph-Math.max(0,Math.min(1,y))*ph;
+  let s=`<text x="${w/2}" y="22" text-anchor="middle" font-size="15" font-weight="bold" fill="var(--ink)">凝集度と電解質濃度</text>`;
+  for(const v of [0,0.5,1])s+=`<line x1="${l}" y1="${sy(v)}" x2="${l+pw}" y2="${sy(v)}" stroke="var(--grid)"/><text x="${l-9}" y="${sy(v)+4}" text-anchor="end" font-size="11" fill="var(--ink2)">${Math.round(v*100)}</text>`;
+  for(const v of [1,2,3,4,5])s+=`<line x1="${sx(v)}" y1="${t}" x2="${sx(v)}" y2="${t+ph}" stroke="var(--grid)"/><text x="${sx(v)}" y="${t+ph+20}" text-anchor="middle" font-size="11" fill="var(--ink2)">${v}</text>`;
+  s+=`<line x1="${l}" y1="${t+ph}" x2="${l+pw}" y2="${t+ph}" stroke="var(--axis)" stroke-width="1.5"/><line x1="${l}" y1="${t}" x2="${l}" y2="${t+ph}" stroke="var(--axis)" stroke-width="1.5"/>`;
+  s+=`<text x="${l+pw/2}" y="${hg-8}" text-anchor="middle" font-size="13" fill="var(--ink)">電解質濃度 [mol/L]</text><text x="16" y="${t+ph/2}" text-anchor="middle" font-size="13" fill="var(--ink)" transform="rotate(-90 16 ${t+ph/2})">凝集度 [％]</text>`;
+  const mk=(f,color,dash)=>{const pts=[];for(let i=0;i<=100;i++){const c=xMax*i/100;pts.push([c,f(c)]);}return`<path d="${pts.map((p,i)=>(i?'L':'M')+fmt(sx(p[0]),1)+' '+fmt(sy(p[1]),1)).join(' ')}" fill="none" stroke="${color}" stroke-width="3" ${dash?`stroke-dasharray="${dash}"`:''} stroke-linejoin="round"/>`;};
+  const hydrophobic=c=>Math.max(0,Math.min(1,(c-0.02)/0.12)),hydrophilic=c=>Math.max(0,Math.min(1,(c-st.onset)/(st.cSalt-st.onset)));
+  if(showSaltCompare){s+=mk(hydrophobic,'#f97316');s+=`<text x="${sx(0.35)}" y="${sy(1)-6}" font-size="11" font-weight="bold" fill="#ea580c">疎水（凝析）少量で凝集</text>`;}
+  s+=mk(hydrophilic,'#7c3aed');
+  s+=`<text x="${sx(Math.min(4.2,st.cSalt))}" y="${sy(0.55)-8}" font-size="11" font-weight="bold" fill="#7c3aed">親水（塩析）多量が必要</text>`;
+  const cy=hydrophilic(st.conc);
+  s+=`<line x1="${sx(st.conc)}" y1="${t+ph}" x2="${sx(st.conc)}" y2="${sy(cy)}" stroke="var(--accent)" stroke-dasharray="4 4"/><circle cx="${sx(st.conc)}" cy="${sy(cy)}" r="6" fill="var(--accent)" stroke="#fff" stroke-width="2"/>`;
+  $('chart-salt').innerHTML=s;
+}
+function drawSalt(){
+  const st=saltState();
+  $('s-hydro-val').textContent=st.hydro;$('s-conc-val').textContent=fmt(st.conc,2);
+  $('s-hydro-minus').disabled=st.hydro<=1;$('s-hydro-plus').disabled=st.hydro>=5;
+  const sc=st.agg<0.05?'#2563eb':st.agg<0.85?'#f97316':'#dc2626';
+  $('badges-salt').innerHTML=`<span class="badge"><strong style="color:${sc}">${st.status}</strong></span><span class="badge">電解質濃度 <strong>${fmt(st.conc,2)} mol/L</strong></span><span class="badge solution">塩析の目安 <strong>${fmt(st.cSalt,1)} mol/L</strong></span><span class="badge">水和の保持 <strong>${Math.round(st.shell*100)} ％</strong></span><span class="badge">例：豆腐・セッケン</span>`;
+  drawSaltModel(st);drawSaltGraph(st);
+}
+
+// ===== ⑥ 保護コロイド（親水性の保護層で疎水コロイドを守る） =====
+let showProtectShell=true;
+function protectState(){
+  const protect=+$('p-protect').value,conc=+$('p-conc').value,cov=protect/100;
+  const baseCCC=8,effCCC=baseCCC*(1+0.9*protect/10);          // 保護量に応じて実効CCCが上昇
+  const ratio=conc/effCCC,agg=Math.max(0,Math.min(1,(ratio-0.6)/0.5));
+  const status=ratio<0.6?'分散（保護されている）':ratio<1?'凝析しやすい':'凝析';
+  return{protect,conc,cov,baseCCC,effCCC,ratio,agg,status};
+}
+function drawProtectModel(st){
+  const box={x:32,y:74,w:716,h:388};
+  const dispersed=[[150,150],[320,135],[500,150],[650,150],[210,275],[400,260],[580,275],[690,285],[160,390],[350,395],[540,390],[670,395]];
+  const clustered=[[330,250],[380,235],[350,295],[300,270],[430,250],[470,290],[420,335],[360,345],[500,260],[520,320],[300,340],[560,300]];
+  const a=st.agg,cov=st.cov;let s='';
+  s+=`<rect x="${box.x}" y="${box.y}" width="${box.w}" height="${box.h}" rx="22" fill="#f8fbff" stroke="var(--border)" stroke-width="2"/>`;
+  const sc=st.status==='分散（保護されている）'?'#2563eb':st.status==='凝析しやすい'?'#f97316':'#dc2626';
+  s+=`<text x="390" y="44" text-anchor="middle" font-size="24" font-weight="900" fill="${sc}">${st.status}</text>`;
+  s+=`<text x="390" y="66" text-anchor="middle" font-size="12" font-weight="bold" fill="var(--ink2)">${cov<0.05?'保護コロイドなし：少量の電解質で凝析する':st.status==='凝析'?'保護しきれず凝析した':'親水性の保護層が疎水コロイドを凝析から守る'}</text>`;
+  for(let i=0;i<dispersed.length;i++){
+    const x=dispersed[i][0]*(1-a)+clustered[i][0]*a,y=dispersed[i][1]*(1-a)+clustered[i][1]*a;
+    if(showProtectShell&&cov>0.02)s+=`<circle cx="${fmt(x,1)}" cy="${fmt(y,1)}" r="${fmt(26+18*cov,1)}" fill="#34d399" fill-opacity="${fmt(0.16*cov+0.05,3)}" stroke="#10b981" stroke-opacity=".55" stroke-width="2"/>`;
+    s+=`<circle cx="${fmt(x,1)}" cy="${fmt(y,1)}" r="22" fill="#5b6578" stroke="#283244" stroke-width="3"/>`;
+  }
+  s+=`<g font-size="12" font-weight="bold" fill="var(--ink2)"><circle cx="62" cy="481" r="9" fill="#5b6578"/><text x="78" y="485">疎水コロイド</text><circle cx="248" cy="481" r="10" fill="#34d399" fill-opacity=".3" stroke="#10b981"/><text x="264" y="485">保護コロイド（親水）</text></g>`;
+  $('model-protect').innerHTML=s;
+}
+function drawProtectGraph(st){
+  const w=520,hg=360,l=64,r=24,t=48,b=54,pw=w-l-r,ph=hg-t-b,xMax=80;
+  const sx=x=>l+Math.min(x,xMax)/xMax*pw,barY=t+ph/2-26,barH=52;
+  let s=`<text x="${w/2}" y="24" text-anchor="middle" font-size="15" font-weight="bold" fill="var(--ink)">凝析に必要な電解質濃度</text>`;
+  s+=`<text x="${w/2}" y="42" text-anchor="middle" font-size="11" fill="var(--ink2)">保護コロイドを増やすほど、凝析には多量の電解質が要る</text>`;
+  s+=`<rect x="${l}" y="${barY}" width="${fmt(sx(st.effCCC)-l,1)}" height="${barH}" fill="#d1fae5" stroke="#10b981" stroke-width="1.5"/>`;
+  s+=`<rect x="${fmt(sx(st.effCCC),1)}" y="${barY}" width="${fmt(l+pw-sx(st.effCCC),1)}" height="${barH}" fill="#fee2e2" stroke="#ef4444" stroke-width="1.5"/>`;
+  s+=`<text x="${fmt((l+sx(st.effCCC))/2,1)}" y="${barY+barH/2+4}" text-anchor="middle" font-size="12" font-weight="bold" fill="#047857">分散域</text>`;
+  s+=`<text x="${fmt((sx(st.effCCC)+l+pw)/2,1)}" y="${barY+barH/2+4}" text-anchor="middle" font-size="12" font-weight="bold" fill="#b91c1c">凝析域</text>`;
+  s+=`<line x1="${fmt(sx(st.effCCC),1)}" y1="${barY-8}" x2="${fmt(sx(st.effCCC),1)}" y2="${barY+barH+8}" stroke="#0f766e" stroke-width="2"/><text x="${fmt(sx(st.effCCC),1)}" y="${barY-12}" text-anchor="middle" font-size="11" font-weight="bold" fill="#0f766e">実効CCC ${fmt(st.effCCC,0)} mmol/L</text>`;
+  s+=`<circle cx="${fmt(sx(st.conc),1)}" cy="${barY+barH+12}" r="5" fill="var(--accent)" stroke="#fff" stroke-width="2"/><line x1="${fmt(sx(st.conc),1)}" y1="${barY+barH+2}" x2="${fmt(sx(st.conc),1)}" y2="${barY+barH+12}" stroke="var(--accent)" stroke-width="2"/><text x="${fmt(sx(st.conc),1)}" y="${barY+barH+30}" text-anchor="middle" font-size="11" font-weight="bold" fill="var(--accent)">現在 ${fmt(st.conc,1)}</text>`;
+  s+=`<line x1="${l}" y1="${barY+barH+2}" x2="${l+pw}" y2="${barY+barH+2}" stroke="var(--axis)" stroke-width="1"/>`;
+  for(const v of [0,20,40,60,80])s+=`<text x="${sx(v)}" y="${barY+barH+48}" text-anchor="middle" font-size="11" fill="var(--ink2)">${v}</text>`;
+  s+=`<text x="${l+pw/2}" y="${hg-6}" text-anchor="middle" font-size="12" fill="var(--ink)">電解質濃度 [mmol/L]</text>`;
+  $('chart-protect').innerHTML=s;
+}
+function drawProtect(){
+  const st=protectState();
+  $('p-protect-val').textContent=st.protect;$('p-conc-val').textContent=fmt(st.conc,1);
+  const sc=st.status==='分散（保護されている）'?'#2563eb':st.status==='凝析しやすい'?'#f97316':'#dc2626';
+  $('badges-protect').innerHTML=`<span class="badge"><strong style="color:${sc}">${st.status}</strong></span><span class="badge">保護量 <strong>${st.protect} ％</strong></span><span class="badge solution">実効CCC <strong>${fmt(st.effCCC,0)} mmol/L</strong></span><span class="badge">電解質 <strong>${fmt(st.conc,1)} mmol/L</strong></span><span class="badge">例：墨汁・金コロイド</span>`;
+  drawProtectModel(st);drawProtectGraph(st);
+}
+
+// ===== ⑦ 電気泳動（荷電した疎水コロイドの移動） =====
+const ECOLLOIDS={fe:{name:'水酸化鉄(III)',sign:1,color:'#b45309',charge:'正'},clay:{name:'粘土',sign:-1,color:'#6b7280',charge:'負'},sulfur:{name:'硫黄',sign:-1,color:'#ca8a04',charge:'負'}};
+let eColloid='fe',ePolarityReversed=false;
+function electroState(){
+  const volt=+$('e-volt').value,conc=+$('e-conc').value,time=+$('e-time').value,c=ECOLLOIDS[eColloid];
+  const mobility=1/(1+0.05*conc);          // 電解質が増えると二重層が圧縮され移動度が低下
+  const speed=mobility*volt/100,disp=Math.min(1,speed*(time/60));
+  const anodeRight=!ePolarityReversed;      // 既定は右が陽極(＋)
+  const goesRight=(c.sign<0)?anodeRight:!anodeRight; // 負→陽極、正→陰極
+  return{volt,conc,time,c,mobility,speed,disp,anodeRight,goesRight};
+}
+// U字管に沿った移動経路（源の腕→底のチャンネル→目的の腕）
+function ePathPt(t,sx,tx,armTopY,chY){
+  if(t<0.30)return [sx,armTopY+(chY-armTopY)*(t/0.30)];
+  if(t<0.70)return [sx+(tx-sx)*((t-0.30)/0.40),chY];
+  return [tx,chY+(armTopY-chY)*((t-0.70)/0.30)];
+}
+// 板状の電極（薄い金属板を溶液に差し込む）
+function ePlate(cx,color,sign,label){
+  return `<rect x="${cx-13}" y="118" width="26" height="150" rx="3" fill="#b6bcc6" stroke="#4b5563" stroke-width="2"/><rect x="${cx-9}" y="123" width="6" height="141" rx="2" fill="#d8dce3"/><circle cx="${cx}" cy="101" r="14" fill="${color}"/><text x="${cx}" y="106" text-anchor="middle" font-size="17" font-weight="900" fill="#fff">${sign}</text><text x="${cx}" y="81" text-anchor="middle" font-size="13" font-weight="bold" fill="${color}">${label}</text>`;
+}
+function drawElectroModel(st){
+  const c=st.c,col=c.color,sign=c.sign,ch=sign<0?'−':'＋',disp=st.disp;
+  const lx0=200,lx1=330,rx0=450,rx1=580,topY=150,chTop=395,botY=452,baseline=290,travel=96;
+  const d=disp*travel;let lB,rB;
+  if(st.goesRight){rB=baseline-d;lB=baseline+d;}else{lB=baseline-d;rB=baseline+d;}
+  const clamp=v=>Math.max(topY+14,Math.min(chTop-14,v));lB=clamp(lB);rB=clamp(rB);
+  const Lx=(lx0+lx1)/2,Rx=(rx0+rx1)/2,chY=(chTop+botY)/2;
+  let s=`<defs><marker id="electro-arrow" viewBox="0 0 9 9" refX="8" refY="4.5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 9 4.5 L 0 9 Z" fill="${col}"/></marker></defs>`;
+  s+=`<text x="390" y="34" text-anchor="middle" font-size="22" font-weight="900" fill="${col}">${c.name}（${c.charge}コロイド）</text>`;
+  s+=`<text x="390" y="58" text-anchor="middle" font-size="13" font-weight="bold" fill="var(--ink2)">${st.volt<=0?'電圧 0：移動しない':(sign>0?'正コロイドは陰極(−)へ移動':'負コロイドは陽極(＋)へ移動')}</text>`;
+  // 溶媒（無色）と色付きコロイド溶液（境界が移動）
+  s+=`<rect x="${lx0}" y="${topY}" width="${lx1-lx0}" height="${botY-topY}" fill="#f4f8fd"/><rect x="${rx0}" y="${topY}" width="${rx1-rx0}" height="${botY-topY}" fill="#f4f8fd"/>`;
+  s+=`<rect x="${lx0}" y="${chTop}" width="${rx1-lx0}" height="${botY-chTop}" fill="${col}" opacity="0.24"/>`;
+  s+=`<rect x="${lx0}" y="${fmt(lB,1)}" width="${lx1-lx0}" height="${fmt(chTop-lB,1)}" fill="${col}" opacity="0.24"/>`;
+  s+=`<rect x="${rx0}" y="${fmt(rB,1)}" width="${rx1-rx0}" height="${fmt(chTop-rB,1)}" fill="${col}" opacity="0.24"/>`;
+  s+=`<line x1="${lx0}" y1="${fmt(lB,1)}" x2="${lx1}" y2="${fmt(lB,1)}" stroke="${col}" stroke-width="2.5"/><line x1="${rx0}" y1="${fmt(rB,1)}" x2="${rx1}" y2="${fmt(rB,1)}" stroke="${col}" stroke-width="2.5"/>`;
+  // 移動する粒子（同じ粒子が経路上を連続移動：消えたり現れたりしない）
+  const srcX=st.goesRight?Lx:Rx,tgtX=st.goesRight?Rx:Lx,N=12;
+  for(let i=0;i<N;i++){
+    const base=0.06+0.82*(i/(N-1));
+    const t=Math.max(0.03,Math.min(0.97,base+disp*0.9));
+    const p=ePathPt(t,srcX,tgtX,baseline-4,chY);
+    const px=p[0]+((i%5)-2)*11,py=p[1]+(((i*7)%5)-2)*7;
+    s+=`<circle cx="${fmt(px,1)}" cy="${fmt(py,1)}" r="8" fill="${col}" stroke="#1f2937" stroke-width="1.5"/><text x="${fmt(px,1)}" y="${fmt(py+3.4,1)}" text-anchor="middle" font-size="10" font-weight="900" fill="#fff">${ch}</text>`;
+  }
+  // 管の外形と仕切り
+  s+=`<path d="M ${lx0} ${topY} V ${botY} H ${rx1} V ${topY}" fill="none" stroke="#334155" stroke-width="3"/><path d="M ${lx1} ${topY} V ${chTop} H ${rx0} V ${topY}" fill="none" stroke="#334155" stroke-width="3"/>`;
+  // 板状の電極
+  const anodeRight=st.anodeRight;
+  const leftColor=anodeRight?'#2563eb':'#dc2626',rightColor=anodeRight?'#dc2626':'#2563eb';
+  s+=ePlate(Lx,leftColor,anodeRight?'−':'＋',anodeRight?'陰極':'陽極')+ePlate(Rx,rightColor,anodeRight?'＋':'−',anodeRight?'陽極':'陰極');
+  // 移動方向の矢印（腕の間の空きスペースに表示）
+  if(st.volt>0&&disp>0.01){const dir=st.goesRight?1:-1;s+=`<line x1="${390-dir*40}" y1="250" x2="${390+dir*40}" y2="250" stroke="${col}" stroke-width="4" marker-end="url(#electro-arrow)"/><text x="390" y="236" text-anchor="middle" font-size="12" font-weight="bold" fill="${col}">コロイドが移動</text>`;}
+  s+=`<text x="390" y="${botY+30}" text-anchor="middle" font-size="13" font-weight="bold" fill="var(--ink2)">${c.name}（表面電荷 ${c.charge}）を含む溶液の色が ${st.volt<=0?'—':(st.goesRight?'右':'左')}の電極側へ移動する</text>`;
+  $('model-electro').innerHTML=s;
+}
+function buildEColloidRow(){
+  const row=$('e-colloid-row');row.innerHTML='';
+  Object.entries(ECOLLOIDS).forEach(([key,c])=>{
+    const b=document.createElement('button');b.type='button';b.textContent=c.name;b.dataset.key=key;b.setAttribute('aria-pressed',String(key===eColloid));
+    b.addEventListener('click',()=>{eColloid=key;[...row.children].forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.key===eColloid)));drawElectro();});
+    row.appendChild(b);
+  });
+}
+function drawElectro(){
+  const st=electroState();
+  $('e-volt-val').textContent=st.volt;$('e-conc-val').textContent=fmt(st.conc,1);$('e-time-val').textContent=st.time;
+  $('badges-electro').innerHTML=`<span class="badge">コロイド <strong style="color:${st.c.color}">${st.c.name}</strong></span><span class="badge">電荷 <strong>${st.c.charge}</strong></span><span class="badge solution">移動先 <strong>${st.volt<=0?'—':(st.c.sign>0?'陰極(−)':'陽極(＋)')}</strong></span><span class="badge">移動速度 <strong>${fmt(st.mobility*st.volt/100,2)}（相対）</strong></span>`;
+  drawElectroModel(st);
+}
+
+// 新タブのイベント配線
+$('toggle-salt-water').addEventListener('click',ev=>{showSaltWater=!showSaltWater;ev.currentTarget.setAttribute('aria-pressed',String(showSaltWater));ev.currentTarget.textContent=`水和水：${showSaltWater?'表示':'非表示'}`;drawSalt();});
+$('toggle-salt-compare').addEventListener('click',ev=>{showSaltCompare=!showSaltCompare;ev.currentTarget.setAttribute('aria-pressed',String(showSaltCompare));ev.currentTarget.textContent=`疎水の凝析と比較：${showSaltCompare?'表示':'非表示'}`;drawSalt();});
+$('toggle-protect-shell').addEventListener('click',ev=>{showProtectShell=!showProtectShell;ev.currentTarget.setAttribute('aria-pressed',String(showProtectShell));ev.currentTarget.textContent=`保護層：${showProtectShell?'表示':'非表示'}`;drawProtect();});
+$('toggle-electro-polarity').addEventListener('click',ev=>{ePolarityReversed=!ePolarityReversed;ev.currentTarget.setAttribute('aria-pressed',String(ePolarityReversed));ev.currentTarget.textContent=ePolarityReversed?'極性：反転中':'極性を反転';drawElectro();});
+$('s-hydro-minus').addEventListener('click',()=>{const i=$('s-hydro');i.value=Math.max(1,+i.value-1);drawSalt();});
+$('s-hydro-plus').addEventListener('click',()=>{const i=$('s-hydro');i.value=Math.min(5,+i.value+1);drawSalt();});
+$('s-conc').addEventListener('input',drawSalt);
+['p-protect','p-conc'].forEach(id=>$(id).addEventListener('input',drawProtect));
+['e-volt','e-conc','e-time'].forEach(id=>$(id).addEventListener('input',drawElectro));
+document.querySelector('.reset-btn[data-reset="electro"]').addEventListener('click',()=>{eColloid='fe';ePolarityReversed=false;$('toggle-electro-polarity').setAttribute('aria-pressed','false');$('toggle-electro-polarity').textContent='極性を反転';buildEColloidRow();drawElectro();});
+
+drawBoiling();drawFreezing();drawOsmosis();drawColloid();
+buildEColloidRow();drawSalt();drawProtect();drawElectro();
+</script>
+<script>
+  // PWA: Service Worker 登録（オフライン起動・ホーム追加）
+  if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+</script>
+</body>
+</html>

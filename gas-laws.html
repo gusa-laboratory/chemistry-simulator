@@ -1,0 +1,2103 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>気体の法則シミュレーター｜Interactive Lab</title>
+<meta name="description" content="ボイル・シャルル・ゲイリュサック・理想気体・蒸気圧・圧縮係数を粒子モデルと連動して学ぶ授業用シミュレーター。">
+<meta name="theme-color" content="#2563eb">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="気体の法則">
+<style>
+  :root {
+    --curve: #2563eb;
+    --accent: #f97316;
+    --family1: #93c5fd;
+    --family2: #dbeafe;
+    --extrap: #94a3b8;
+    --grid: #e8eef7;
+    --axis: #64748b;
+    --ink: #172033;
+    --ink2: #526078;
+    --ink3: #8995a9;
+    --bg: #f3f6fb;
+    --card: #ffffff;
+    --border: #dce4f0;
+    --blue-soft: #edf4ff;
+    --blue-deep: #173b75;
+    --shadow: 0 12px 32px rgba(28, 50, 87, .08);
+    --shadow-sm: 0 4px 14px rgba(28, 50, 87, .06);
+  }
+  * { box-sizing: border-box; }
+  html { min-width: 320px; background: var(--bg); }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background:
+      radial-gradient(circle at 8% -10%, rgba(37, 99, 235, .10), transparent 30rem),
+      radial-gradient(circle at 92% 5%, rgba(14, 165, 233, .08), transparent 28rem),
+      var(--bg);
+    color: var(--ink);
+    font-family: Inter, 'Yu Gothic UI', 'Yu Gothic', Meiryo, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  header {
+    padding: 28px clamp(18px, 4vw, 56px) 0;
+    background: rgba(255, 255, 255, .76);
+    border-bottom: 1px solid rgba(220, 228, 240, .8);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+  }
+  header h1 {
+    max-width: 1440px;
+    margin: 0 auto 22px;
+    font-size: clamp(24px, 3vw, 34px);
+    line-height: 1.25;
+    font-weight: 800;
+    letter-spacing: -.035em;
+    color: var(--blue-deep);
+  }
+  header h1::before {
+    content: 'CHEMISTRY LAB';
+    display: block;
+    width: max-content;
+    margin-bottom: 7px;
+    padding: 4px 9px;
+    border-radius: 999px;
+    background: var(--blue-soft);
+    color: var(--curve);
+    font-family: Inter, Arial, sans-serif;
+    font-size: 10px;
+    line-height: 1;
+    font-weight: 800;
+    letter-spacing: .13em;
+  }
+  .tabs {
+    display: flex;
+    gap: 6px;
+    max-width: 1440px;
+    margin: 0 auto;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+    overscroll-behavior-inline: contain;
+  }
+  .tabs button {
+    appearance: none;
+    flex: 0 0 auto;
+    border: 1px solid transparent;
+    border-bottom: 0;
+    border-radius: 10px 10px 0 0;
+    background: transparent;
+    cursor: pointer;
+    padding: 11px 15px 13px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink2);
+    font-family: inherit;
+    transition: color .18s ease, background .18s ease, transform .18s ease;
+  }
+  .tabs button[aria-selected="true"] {
+    border-color: var(--border);
+    background: var(--bg);
+    color: var(--curve);
+    box-shadow: inset 0 3px 0 var(--curve);
+  }
+  .tabs button:hover { color: var(--curve); background: rgba(237, 244, 255, .8); }
+  .tabs button:focus-visible,
+  button:focus-visible,
+  input:focus-visible { outline: 3px solid rgba(37, 99, 235, .28); outline-offset: 2px; }
+
+  main { max-width: 1552px; margin: 0 auto; padding: 28px clamp(18px, 4vw, 56px) 48px; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(320px, 390px); gap: 24px; align-items: start; }
+  .chart-card {
+    min-width: 0;
+    overflow: hidden;
+    position: relative;
+    background: linear-gradient(145deg, #fff 0%, #fbfdff 100%);
+    border: 1px solid rgba(210, 221, 236, .9);
+    border-radius: 20px;
+    padding: clamp(10px, 2vw, 22px);
+    box-shadow: var(--shadow);
+  }
+  .chart-card svg { width: 100%; height: auto; display: block; }
+  .side { min-width: 0; display: flex; flex-direction: column; gap: 14px; }
+  .card {
+    background: rgba(255, 255, 255, .94);
+    border: 1px solid rgba(210, 221, 236, .88);
+    border-radius: 16px;
+    padding: 18px 20px;
+    box-shadow: var(--shadow-sm);
+  }
+  .card h2 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 12px;
+    font-size: 13px;
+    color: var(--ink2);
+    font-weight: 800;
+    letter-spacing: .055em;
+  }
+  .card h2::before { content: ''; width: 4px; height: 16px; border-radius: 4px; background: var(--curve); }
+  .law {
+    position: relative;
+    overflow: hidden;
+    border-color: rgba(147, 197, 253, .68);
+    background: linear-gradient(135deg, #f7fbff, #edf5ff);
+    color: #334155;
+    font-size: 16px;
+    line-height: 1.8;
+  }
+  .law::after { content: ''; position: absolute; right: -28px; top: -34px; width: 110px; height: 110px; border: 20px solid rgba(37, 99, 235, .055); border-radius: 50%; }
+  .law b { color: var(--blue-deep); font-size: 18px; }
+  .law .const-val { font-size: 21px; font-weight: 800; color: var(--curve); font-variant-numeric: tabular-nums; }
+  .ctrl { margin: 16px 0 6px; }
+  .ctrl label { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; margin-bottom: 7px; color: #475569; }
+  .ctrl label .val { font-weight: 800; color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .ctrl input[type=range] {
+    width: 100%; height: 22px; margin: 0;
+    accent-color: var(--curve); cursor: pointer;
+  }
+  .ctrl.dep label .val { color: var(--accent); }
+  .readout {
+    display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0; font-size: 14px;
+  }
+  .readout .k, .readout .v { padding: 7px 0; border-bottom: 1px solid #edf1f6; }
+  .readout .k { color: var(--ink2); }
+  .readout .v { padding-left: 18px; font-weight: 800; font-variant-numeric: tabular-nums; text-align: right; }
+  .readout > :nth-last-child(-n+2) { border-bottom: 0; }
+  .readout .v.dep { color: var(--accent); }
+  .toggle-row { display: flex; gap: 8px; margin-top: 10px; }
+  .toggle-row button {
+    flex: 1; padding: 9px 10px; border-radius: 10px; border: 1px solid var(--border);
+    background: #f8fafc; cursor: pointer; font-size: 13px; font-weight: 700; color: var(--ink2);
+    font-family: inherit; transition: .18s ease;
+  }
+  .toggle-row button[aria-pressed="true"] { background: var(--curve); border-color: var(--curve); color: #fff; box-shadow: 0 4px 10px rgba(37, 99, 235, .22); }
+  .toggle-row button:hover { border-color: #93b4ed; }
+  .note { font-size: 12px; color: #748198; margin: 10px 0 0; line-height: 1.7; }
+  .reset-btn {
+    margin-top: 16px; width: 100%; padding: 10px 14px; border-radius: 10px;
+    border: 1px solid var(--border); background: #f8fafc; cursor: pointer;
+    font-size: 13px; font-weight: 800; color: var(--ink2); font-family: inherit; transition: .18s ease;
+  }
+  .reset-btn:hover { background: var(--blue-soft); border-color: #93b4ed; color: var(--curve); transform: translateY(-1px); }
+  .reset-btn:active { transform: translateY(0); }
+  .chk { display: flex; align-items: flex-start; gap: 9px; font-size: 13px; color: var(--ink2); margin-top: 13px; cursor: pointer; line-height: 1.5; }
+  .chk input { flex: 0 0 auto; width: 17px; height: 17px; margin-top: 1px; accent-color: var(--curve); }
+  .fig-cap { font-size: 13px; font-weight: 800; color: var(--ink2); margin: 18px 0 2px; border-top: 1px solid var(--border); padding-top: 15px; letter-spacing: .04em; }
+  .fig-svg { width: 100%; max-width: 520px; display: block; margin: 4px auto 0; }
+  .tooltip {
+    position: absolute; pointer-events: none; display: none; z-index: 10;
+    background: rgba(23, 32, 51, .94); color: #fff; border: 1px solid rgba(255,255,255,.15); border-radius: 10px;
+    padding: 8px 11px; font-size: 12px; line-height: 1.55; white-space: nowrap;
+    font-variant-numeric: tabular-nums; box-shadow: 0 8px 24px rgba(15, 23, 42, .2); backdrop-filter: blur(8px);
+  }
+  .piston-wrap { margin-top: 4px; }
+
+  @media (max-width: 1050px) {
+    .layout { grid-template-columns: 1fr; }
+    .side { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+    .side .law { grid-column: 1 / -1; }
+  }
+  @media (max-width: 680px) {
+    header { padding: 20px 14px 0; }
+    header h1 { margin-bottom: 16px; font-size: 24px; }
+    .tabs { margin-inline: -14px; padding-inline: 14px; }
+    .tabs button { padding: 10px 12px 12px; font-size: 13px; }
+    main { padding: 18px 12px 32px; }
+    .layout { gap: 14px; }
+    .chart-card { border-radius: 14px; padding: 4px; }
+    .side { display: flex; gap: 12px; }
+    .card { border-radius: 14px; padding: 16px; }
+    .law { font-size: 15px; }
+    .readout { font-size: 13px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
+  }
+
+  /* ---------- Classroom UI refinement ---------- */
+  :root {
+    --curve: #2563eb;
+    --accent: #ea580c;
+    --ink: #162033;
+    --ink2: #526079;
+    --ink3: #8794a8;
+    --bg: #eef3f9;
+    --card: #ffffff;
+    --border: #d8e1ed;
+    --blue-soft: #eaf2ff;
+    --blue-deep: #173b75;
+    --shadow: 0 18px 45px rgba(31, 55, 89, .10);
+    --shadow-sm: 0 7px 22px rgba(31, 55, 89, .075);
+  }
+  body {
+    background:
+      radial-gradient(circle at 5% -4%, rgba(37, 99, 235, .13), transparent 27rem),
+      radial-gradient(circle at 97% 2%, rgba(14, 165, 233, .09), transparent 25rem),
+      linear-gradient(180deg, #f6f9fd 0, var(--bg) 30rem);
+  }
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    padding-top: 19px;
+    background: rgba(250, 252, 255, .91);
+    border-bottom-color: rgba(203, 215, 230, .92);
+    box-shadow: 0 4px 18px rgba(31, 55, 89, .05);
+  }
+  .header-row {
+    display: flex;
+    max-width: 1440px;
+    margin: 0 auto 15px;
+    gap: 24px;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .title-block { min-width: 0; }
+  header h1 {
+    margin: 0;
+    font-size: clamp(23px, 2.45vw, 32px);
+  }
+  header h1::before { margin-bottom: 5px; }
+  .header-subtitle {
+    margin: 6px 0 0;
+    color: var(--ink2);
+    font-size: 13px;
+    line-height: 1.55;
+    font-weight: 600;
+  }
+  .classroom-btn {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border: 1px solid #bfd0e7;
+    border-radius: 12px;
+    background: #fff;
+    color: var(--blue-deep);
+    box-shadow: 0 4px 12px rgba(31, 55, 89, .07);
+    font-family: inherit;
+    font-size: 13px;
+    line-height: 1;
+    font-weight: 800;
+    cursor: pointer;
+    transition: .18s ease;
+  }
+  .classroom-btn::before { content: '⛶'; font-size: 17px; line-height: 1; }
+  .classroom-btn:hover { color: var(--curve); border-color: #8fb0df; transform: translateY(-1px); }
+  .tabs { gap: 7px; }
+  .tabs button {
+    position: relative;
+    padding: 10px 15px 12px;
+    border-radius: 11px 11px 0 0;
+    color: #59677c;
+    letter-spacing: .005em;
+  }
+  .tabs button[aria-selected="true"] {
+    border-color: #cfd9e6;
+    background: var(--bg);
+    box-shadow: inset 0 3px 0 var(--curve), 0 -3px 12px rgba(31, 55, 89, .04);
+  }
+  main { padding-top: 25px; }
+  .panel.active { animation: panel-in .22s ease-out; }
+  @keyframes panel-in { from { opacity: .25; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+  .layout {
+    grid-template-columns: minmax(0, 1fr) minmax(330px, 405px);
+    gap: 22px;
+  }
+  .chart-card {
+    border-color: #cfdae8;
+    border-radius: 22px;
+    padding: clamp(12px, 2vw, 24px);
+    box-shadow: var(--shadow);
+  }
+  .chart-card::before {
+    content: 'INTERACTIVE GRAPH';
+    display: block;
+    width: max-content;
+    margin: 0 0 3px 4px;
+    color: #7890ae;
+    font: 800 10px/1 Inter, Arial, sans-serif;
+    letter-spacing: .14em;
+  }
+  .chart-card svg[id^="chart-"] { min-height: 360px; }
+  .side { gap: 12px; }
+  .card {
+    border-color: #d5dfeb;
+    border-radius: 17px;
+    padding: 17px 19px;
+    box-shadow: var(--shadow-sm);
+  }
+  .card h2 {
+    margin-bottom: 11px;
+    font-size: 12px;
+    color: #60708a;
+  }
+  .law {
+    border-left: 5px solid var(--curve);
+    padding: 18px 20px;
+    background: linear-gradient(135deg, #fafdff 0%, #ebf3ff 100%);
+    box-shadow: 0 8px 24px rgba(37, 99, 235, .09);
+  }
+  .law b { font-size: 19px; }
+  .law .const-val {
+    display: inline-block;
+    margin-top: 2px;
+    padding: 0 5px;
+    border-radius: 6px;
+    background: rgba(255,255,255,.72);
+    font-size: 22px;
+  }
+  .ctrl { margin: 13px 0 7px; }
+  .ctrl label { margin-bottom: 5px; font-size: 13px; }
+  .ctrl label .val {
+    min-width: 90px;
+    padding: 3px 8px;
+    border-radius: 7px;
+    background: #f0f5fb;
+    color: #1e3555;
+    text-align: right;
+  }
+  .ctrl.dep label .val { background: #fff1e9; color: #c2410c; }
+  .ctrl input[type=range] {
+    appearance: none;
+    height: 24px;
+    padding: 0;
+    background: transparent;
+  }
+  .ctrl input[type=range]::-webkit-slider-runnable-track {
+    height: 7px;
+    border-radius: 99px;
+    background: linear-gradient(90deg, #b9d2fb, #dce7f5);
+    box-shadow: inset 0 1px 2px rgba(31,55,89,.12);
+  }
+  .ctrl input[type=range]::-webkit-slider-thumb {
+    appearance: none;
+    width: 19px;
+    height: 19px;
+    margin-top: -6px;
+    border: 3px solid #fff;
+    border-radius: 50%;
+    background: var(--curve);
+    box-shadow: 0 2px 8px rgba(37,99,235,.38);
+  }
+  .ctrl input[type=range]::-moz-range-track { height: 7px; border-radius: 99px; background: #cfdef2; }
+  .ctrl input[type=range]::-moz-range-thumb { width: 15px; height: 15px; border: 3px solid #fff; border-radius: 50%; background: var(--curve); box-shadow: 0 2px 8px rgba(37,99,235,.38); }
+  .readout { border-top: 1px solid #e8eef5; }
+  .readout .k, .readout .v { padding: 8px 0; }
+  .readout .v { color: #263752; }
+  .readout .v.dep {
+    color: var(--accent);
+    font-size: 15px;
+  }
+  .toggle-row button { padding: 10px; }
+  .reset-btn { margin-top: 13px; }
+  .note {
+    margin-top: 9px;
+    padding-left: 10px;
+    border-left: 2px solid #cbd8e8;
+    color: #687791;
+    line-height: 1.65;
+  }
+  .tooltip { font-size: 13px; }
+  body.is-fullscreen header { position: static; padding-top: 12px; }
+  body.is-fullscreen .header-subtitle { display: none; }
+  body.is-fullscreen main { max-width: 1700px; padding-top: 16px; padding-bottom: 18px; }
+
+  @media (max-width: 1050px) {
+    header { position: static; }
+    .layout { grid-template-columns: 1fr; }
+    .side { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .side .law { grid-column: 1 / -1; }
+  }
+  @media (max-width: 680px) {
+    .header-row { align-items: flex-end; gap: 10px; margin-bottom: 13px; }
+    .header-subtitle { display: none; }
+    .classroom-btn { width: 42px; height: 42px; padding: 0; justify-content: center; font-size: 0; }
+    .tabs button { padding-inline: 12px; }
+    .chart-card::before { margin-top: 8px; }
+    .chart-card svg[id^="chart-"] { min-height: 0; }
+    .side { display: flex; }
+    .law { border-left-width: 4px; }
+  }
+
+  /* ---------- LAB DASHBOARD v2 ---------- */
+  body {
+    background: #ffffff;
+  }
+  header {
+    position: relative;
+    top: auto;
+    padding-top: 26px;
+    border-bottom: 1px solid rgba(148, 190, 219, .18);
+    background:
+      linear-gradient(115deg, rgba(11, 35, 57, .98), rgba(8, 25, 42, .98)),
+      #081a2c;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  header h1 { color: #f4f9ff; letter-spacing: -.025em; }
+  header h1::before {
+    background: rgba(45, 212, 191, .13);
+    color: #5eead4;
+    border: 1px solid rgba(94, 234, 212, .2);
+  }
+  .header-subtitle { color: #9eb4c8; }
+  .classroom-btn {
+    border-color: rgba(148, 190, 219, .25);
+    background: rgba(255, 255, 255, .07);
+    color: #d9e9f6;
+    box-shadow: none;
+  }
+  .classroom-btn:hover { border-color: #5eead4; background: rgba(45,212,191,.1); color: #5eead4; }
+  .tabs { padding-top: 4px; gap: 4px; }
+  .tabs button {
+    border: 0;
+    border-radius: 10px 10px 0 0;
+    color: #a9bbcc;
+    background: transparent;
+  }
+  .tabs button:hover { color: #fff; background: rgba(255,255,255,.07); }
+  .tabs button[aria-selected="true"] {
+    border: 0;
+    color: #071421;
+    background: #edf4fa;
+    box-shadow: inset 0 4px 0 #14b8a6;
+  }
+  main {
+    max-width: 1600px;
+    padding-top: 20px;
+    background: transparent;
+  }
+  .panel-tools {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    min-height: 38px;
+    margin-bottom: 12px;
+  }
+  .panel-tools span {
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .12em;
+  }
+  .swap-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 13px;
+    border: 1px solid rgba(94, 234, 212, .34);
+    border-radius: 999px;
+    background: rgba(20, 184, 166, .10);
+    color: #0f766e;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: .18s ease;
+  }
+  .swap-btn::before { content: '⇄'; font-size: 17px; }
+  .swap-btn:hover { background: #14b8a6; color: #04231f; transform: translateY(-1px); }
+  .layout { gap: 20px; transition: grid-template-columns .28s ease; }
+  .layout.view-swapped { grid-template-columns: minmax(330px, 405px) minmax(0, 1fr); }
+  .layout.view-swapped .chart-card { order: 2; }
+  .layout.view-swapped .side { order: 1; }
+  .chart-card {
+    border: 1px solid rgba(147, 184, 210, .5);
+    border-top: 4px solid #14b8a6;
+    border-radius: 18px;
+    background: #fbfdff;
+    box-shadow: 0 28px 70px rgba(0, 0, 0, .25);
+  }
+  .chart-card::before { color: #0f766e; }
+  .card {
+    border-color: rgba(189, 208, 222, .7);
+    border-radius: 14px;
+    box-shadow: 0 14px 32px rgba(0, 0, 0, .16);
+  }
+  .law {
+    display: block;
+    padding: 0;
+    border: 1px solid rgba(94, 234, 212, .22);
+    border-left: 0;
+    background: linear-gradient(145deg, #0d2b3e, #0a2032);
+    color: #c9d8e5;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, .25);
+  }
+  .law::after {
+    right: -38px;
+    top: -44px;
+    border-color: rgba(45, 212, 191, .07);
+  }
+  .law-copy { padding: 20px 21px 16px; position: relative; z-index: 1; }
+  .law b { color: #fff; font-size: 20px; }
+  .law .const-val {
+    margin-top: 7px;
+    padding: 2px 8px;
+    background: rgba(45, 212, 191, .12);
+    color: #5eead4;
+  }
+  .diagram-block {
+    position: relative;
+    z-index: 1;
+    padding: 14px 15px 13px;
+    border-top: 1px solid rgba(148, 190, 219, .15);
+    background: rgba(1, 12, 22, .22);
+  }
+  .diagram-label {
+    display: block;
+    margin: 0 0 8px 3px;
+    color: #5eead4;
+    font: 800 9px/1 Inter, Arial, sans-serif;
+    letter-spacing: .16em;
+  }
+  .diagram-block svg { display: block; width: 100%; max-width: 330px; margin: 0 auto; }
+  .diagram-block svg text[fill="var(--ink2)"] { fill: #b7c9d8; }
+  .diagram-block p {
+    margin: 7px 4px 0;
+    color: #9eb4c8;
+    font-size: 11px;
+    line-height: 1.55;
+    text-align: center;
+  }
+  .diagram-block p b { color: #dffbf6; font-size: inherit; }
+  .card:not(.law) h2::before { background: #14b8a6; }
+  .ctrl input[type=range]::-webkit-slider-runnable-track { background: linear-gradient(90deg, #63cfc1, #dbe7ee); }
+  .ctrl input[type=range]::-webkit-slider-thumb { background: #0f766e; box-shadow: 0 2px 8px rgba(15,118,110,.42); }
+  .ctrl input[type=range]::-moz-range-thumb { background: #0f766e; }
+  .toggle-row button[aria-pressed="true"] { background: #0f766e; border-color: #0f766e; }
+  .reset-btn:hover { background: #e9fbf8; border-color: #72cfc3; color: #0f766e; }
+  .readout .v.dep { color: #e4571f; }
+  body.is-fullscreen header { position: relative; }
+
+  @media (max-width: 1050px) {
+    .layout.view-swapped { grid-template-columns: 1fr; }
+    .layout.view-swapped .chart-card { order: 2; }
+    .layout.view-swapped .side { order: 1; }
+  }
+  @media (max-width: 680px) {
+    header { padding-top: 18px; }
+    .panel-tools { justify-content: space-between; }
+    .layout, .layout.view-swapped { gap: 14px; }
+    .law-copy { padding: 17px 17px 13px; }
+    .diagram-block { padding-inline: 10px; }
+  }
+
+  /* ---------- Original color palette ---------- */
+  :root {
+    --curve: #2563eb;
+    --accent: #f97316;
+    --family1: #93c5fd;
+    --family2: #dbeafe;
+    --extrap: #94a3b8;
+    --grid: #e8eef7;
+    --axis: #64748b;
+    --ink: #172033;
+    --ink2: #526078;
+    --ink3: #8995a9;
+    --bg: #f3f6fb;
+    --card: #ffffff;
+    --border: #dce4f0;
+    --blue-soft: #edf4ff;
+    --blue-deep: #173b75;
+    --shadow: 0 12px 32px rgba(28, 50, 87, .08);
+    --shadow-sm: 0 4px 14px rgba(28, 50, 87, .06);
+  }
+  body {
+    background:
+      radial-gradient(circle at 8% -10%, rgba(37, 99, 235, .10), transparent 30rem),
+      radial-gradient(circle at 92% 5%, rgba(14, 165, 233, .08), transparent 28rem),
+      var(--bg);
+  }
+  header {
+    position: relative;
+    top: auto;
+    background: rgba(255, 255, 255, .76);
+    border-bottom: 1px solid rgba(220, 228, 240, .8);
+    box-shadow: none;
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+  }
+  header h1 { color: var(--blue-deep); }
+  header h1::before {
+    border: 0;
+    background: var(--blue-soft);
+    color: var(--curve);
+  }
+  .header-subtitle { color: var(--ink2); }
+  .classroom-btn {
+    border-color: var(--border);
+    background: #fff;
+    color: var(--blue-deep);
+    box-shadow: var(--shadow-sm);
+  }
+  .classroom-btn:hover { border-color: #93b4ed; background: var(--blue-soft); color: var(--curve); }
+  .tabs { gap: 6px; }
+  .tabs button {
+    border: 1px solid transparent;
+    border-bottom: 0;
+    background: transparent;
+    color: var(--ink2);
+  }
+  .tabs button:hover { color: var(--curve); background: rgba(237, 244, 255, .8); }
+  .tabs button[aria-selected="true"] {
+    border: 1px solid var(--border);
+    border-bottom: 0;
+    background: var(--bg);
+    color: var(--curve);
+    box-shadow: inset 0 3px 0 var(--curve);
+  }
+  .panel-tools span { color: var(--ink3); }
+  .swap-btn {
+    border-color: var(--border);
+    background: #fff;
+    color: var(--curve);
+    box-shadow: var(--shadow-sm);
+  }
+  .swap-btn:hover { border-color: #93b4ed; background: var(--blue-soft); color: var(--blue-deep); }
+  .layout { grid-template-columns: minmax(0, 1fr) minmax(330px, 405px); }
+  .chart-card {
+    border: 1px solid rgba(210, 221, 236, .9);
+    border-radius: 20px;
+    background: linear-gradient(145deg, #fff 0%, #fbfdff 100%);
+    box-shadow: var(--shadow);
+  }
+  .chart-card::before { color: var(--ink3); }
+  .card {
+    border-color: rgba(210, 221, 236, .88);
+    background: rgba(255, 255, 255, .94);
+    box-shadow: var(--shadow-sm);
+  }
+  .law {
+    border: 1px solid rgba(147, 197, 253, .68);
+    background: linear-gradient(135deg, #f7fbff, #edf5ff);
+    color: #334155;
+    box-shadow: var(--shadow-sm);
+  }
+  .law::after { border-color: rgba(37, 99, 235, .055); }
+  .law b { color: var(--blue-deep); }
+  .law .const-val { background: rgba(255,255,255,.72); color: var(--curve); }
+  .ctrl label .val { padding: 0; border-radius: 0; background: transparent; color: var(--ink); }
+  .ctrl.dep label .val { background: transparent; color: var(--accent); }
+  .readout { border-top: 0; }
+  .diagram-block {
+    border-top-color: var(--border);
+    background: rgba(237, 244, 255, .46);
+  }
+  .diagram-label { color: var(--curve); }
+  .diagram-block p { color: var(--ink2); }
+  .diagram-block p b { color: var(--blue-deep); }
+  .diagram-block svg text[fill="var(--ink2)"] { fill: var(--ink2); }
+  .card:not(.law) h2::before { background: var(--curve); }
+  .ctrl input[type=range] {
+    appearance: auto;
+    -webkit-appearance: auto;
+    height: 22px;
+    accent-color: var(--curve);
+  }
+  .ctrl input[type=range]::-webkit-slider-runnable-track,
+  .ctrl input[type=range]::-webkit-slider-thumb,
+  .ctrl input[type=range]::-moz-range-track,
+  .ctrl input[type=range]::-moz-range-thumb { all: revert; }
+  .toggle-row button[aria-pressed="true"] { background: var(--curve); border-color: var(--curve); }
+  .reset-btn:hover { background: var(--blue-soft); border-color: #93b4ed; color: var(--curve); }
+  .readout .v.dep { color: var(--accent); }
+  .visual-slot { position: relative; width: 100%; }
+  .chart-stage > svg { display: block; width: 100%; height: auto; }
+  .chart-stage > svg[id^="cont-"] { width: 100%; max-width: none; margin: 22px auto; }
+  .diagram-stage > svg { display: block; width: 100%; max-width: 330px; height: auto; margin: 0 auto; }
+  .diagram-stage > svg[id^="cont-"] { width: 230px; max-width: 100%; }
+  .diagram-stage > svg[id^="chart-"] { max-width: 100%; }
+  .visuals-swapped .chart-card::before { content: 'PARTICLE MODEL'; }
+  /* 教師説明用の簡潔表示：模式図以外の解説と計算結果は一時的に隠す */
+  .law-copy,
+  .diagram-label,
+  .diagram-block p,
+  .result-card,
+  .text-only-law { display: none; }
+  .diagram-block { padding: 18px 15px 15px; border-top: 0; background: transparent; }
+  /* 右カラムを圧縮し、縦型模式図へできるだけ高さを渡す */
+  .side .card:not(.law) { padding: 10px 14px; }
+  .side .card:not(.law) h2 { margin-bottom: 4px; font-size: 11px; }
+  .side .ctrl { margin: 5px 0 2px; }
+  .side .ctrl label { margin-bottom: 1px; font-size: 12px; }
+  .side .ctrl label .val { font-size: 12px; }
+  .side .ctrl input[type=range] { height: 16px; }
+  .side .toggle-row { margin-top: 5px; }
+  .side .toggle-row button { padding: 6px 8px; font-size: 11px; }
+  .side .chk { margin-top: 6px; font-size: 11px; }
+  .side .reset-btn {
+    display: block;
+    width: auto;
+    margin: 5px 0 0 auto;
+    padding: 5px 9px;
+    border-radius: 7px;
+    font-size: 11px;
+  }
+  .diagram-block { padding: 8px 10px 6px; }
+
+  @media (max-width: 1050px) {
+    .layout { grid-template-columns: 1fr; }
+  }
+
+  /* 全画面授業モード：ヘッダーを消し、投影面積を図とグラフへ集中する */
+  body.is-fullscreen header { display: none; }
+  body.is-fullscreen main {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 6px 10px 10px;
+  }
+  body.is-fullscreen .panel-tools {
+    min-height: 30px;
+    margin-bottom: 5px;
+  }
+  body.is-fullscreen .layout,
+  body.is-fullscreen .layout.view-swapped {
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 390px);
+    gap: 10px;
+  }
+  body.is-fullscreen .chart-card { padding: 6px 8px 8px; }
+  body.is-fullscreen .chart-card::before { margin: 0 0 0 3px; }
+  body.is-fullscreen .side { gap: 7px; }
+  body.is-fullscreen .diagram-stage > svg[id^="cont-"] { width: 250px; }
+  body.is-fullscreen .panel.has-diagram .layout,
+  body.is-fullscreen .panel.has-diagram .layout.view-swapped {
+    grid-template-columns: minmax(0, 1fr) minmax(350px, 430px);
+    grid-template-rows: minmax(0, 1fr) auto;
+    align-items: stretch;
+  }
+  body.is-fullscreen .panel.has-diagram .chart-card {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  body.is-fullscreen .panel.has-diagram .side { display: contents; }
+  body.is-fullscreen .panel.has-diagram .side > .law {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: stretch;
+  }
+  body.is-fullscreen .panel.has-diagram .side > .card:not(.law):not(.result-card) {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)) auto;
+    gap: 4px 14px;
+    align-items: end;
+    padding: 7px 12px;
+  }
+  body.is-fullscreen .panel.has-diagram .side > .card:not(.law):not(.result-card) h2 { display: none; }
+  body.is-fullscreen .panel.has-diagram .side .ctrl,
+  body.is-fullscreen .panel.has-diagram .side .toggle-row,
+  body.is-fullscreen .panel.has-diagram .side .chk,
+  body.is-fullscreen .panel.has-diagram .side .reset-btn { margin-top: 0; margin-bottom: 0; }
+  body.is-fullscreen .panel.has-diagram .diagram-block {
+    display: grid;
+    height: 100%;
+    place-items: center;
+    padding: 3px 8px;
+  }
+  body.is-fullscreen .panel.has-diagram .diagram-stage > svg[id^="cont-"] {
+    width: 290px;
+    max-height: calc(100vh - 125px);
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="header-row">
+    <div class="title-block">
+      <a href="index.html" style="display:inline-flex;align-items:center;gap:5px;margin-bottom:6px;color:#526078;text-decoration:none;font-size:12px;font-weight:700">← 化学シミュレーター一覧</a>
+      <h1>気体の法則シミュレーター</h1>
+      <p class="header-subtitle">スライダーを動かして、グラフ・数値・粒子モデルの変化を同時に観察しよう</p>
+    </div>
+    <button class="classroom-btn" id="classroom-mode" type="button" title="全画面で表示">全画面表示</button>
+  </div>
+  <nav class="tabs" role="tablist">
+    <button role="tab" aria-selected="true"  data-tab="boyle">① ボイルの法則</button>
+    <button role="tab" aria-selected="false" data-tab="charles">② シャルルの法則</button>
+    <button role="tab" aria-selected="false" data-tab="gaylussac">③ ゲイリュサックの法則</button>
+    <button role="tab" aria-selected="false" data-tab="ideal">④ 理想気体 PV = nRT</button>
+    <button role="tab" aria-selected="false" data-tab="boylevap">⑤ ボイル＋蒸気圧</button>
+    <button role="tab" aria-selected="false" data-tab="charlesvap">⑥ シャルル＋蒸気圧</button>
+    <button role="tab" aria-selected="false" data-tab="z">⑦ 圧縮係数 Z–P</button>
+    <button role="tab" aria-selected="false" data-tab="gvap">⑧ ゲイリュサック＋蒸気圧</button>
+  </nav>
+</header>
+<main>
+
+  <!-- ①ボイル -->
+  <section class="panel active" id="panel-boyle">
+    <div class="layout">
+      <div class="chart-card" id="chartwrap-boyle">
+        <svg id="chart-boyle" viewBox="0 0 760 480" role="img" aria-label="ボイルの法則 P-Vグラフ"></svg>
+        <div class="tooltip" id="tip-boyle"></div>
+      </div>
+      <div class="side">
+        <div class="card law">
+          <div class="law-copy">
+            温度 T と物質量 n が一定のとき<br>
+            <b>PV = 一定</b>（反比例）<br>
+            <span>PV = </span><span class="const-val" id="boyle-const">—</span>
+          </div>
+          <div class="diagram-block">
+            <span class="diagram-label">PARTICLE MODEL</span>
+            <svg id="cont-boyle" viewBox="0 0 300 130" width="100%" role="img" aria-label="ボイルの容器の模式図"></svg>
+            <p>押し縮めると分子密度が上がり、圧力が増える。</p>
+          </div>
+        </div>
+        <div class="card">
+          <h2>変数（スライダーで操作）</h2>
+          <div class="ctrl">
+            <label>温度 T <span class="val"><span id="boyle-T-val">273</span> K</span></label>
+            <input type="range" id="boyle-T" min="200" max="600" step="1" value="273">
+          </div>
+          <div class="ctrl">
+            <label>物質量 n <span class="val"><span id="boyle-n-val">1.0</span> mol</span></label>
+            <input type="range" id="boyle-n" min="0.5" max="3" step="0.1" value="1">
+          </div>
+          <div class="ctrl">
+            <label>体積 V <span class="val"><span id="boyle-V-val">10.0</span> L</span></label>
+            <input type="range" id="boyle-V" min="2" max="50" step="0.5" value="10">
+          </div>
+          <label class="chk"><input type="checkbox" id="boyle-showfamily" checked> 参考の等温線（他の温度）を表示</label>
+          <button class="reset-btn" data-reset="boyle">初期値</button>
+        </div>
+        <div class="card">
+          <h2>現在の状態</h2>
+          <div class="readout" id="boyle-readout"></div>
+          <p class="note">V を動かすと点が等温線上を移動。T を動かすと等温線そのものが外側／内側へ移る。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ②シャルル -->
+  <section class="panel" id="panel-charles">
+    <div class="layout">
+      <div class="chart-card" id="chartwrap-charles">
+        <svg id="chart-charles" viewBox="0 0 760 480" role="img" aria-label="シャルルの法則 V-Tグラフ"></svg>
+        <div class="tooltip" id="tip-charles"></div>
+      </div>
+      <div class="side">
+        <div class="card law">
+          <div class="law-copy">
+            圧力 P と物質量 n が一定のとき<br>
+            <b>V / T = 一定</b>（絶対温度に比例）<br>
+            <span>V/T = </span><span class="const-val" id="charles-const">—</span>
+          </div>
+          <div class="diagram-block">
+            <span class="diagram-label">PARTICLE MODEL</span>
+            <svg id="cont-charles" viewBox="0 0 300 130" width="100%" role="img" aria-label="シャルルの容器の模式図"></svg>
+            <p>圧力一定のまま温めると、ピストンが動いて体積が増える。</p>
+          </div>
+        </div>
+        <div class="card">
+          <h2>変数（スライダーで操作）</h2>
+          <div class="ctrl">
+            <label>圧力 P <span class="val"><span id="charles-P-val">1.01</span> ×10⁵ Pa</span></label>
+            <input type="range" id="charles-P" min="0.5" max="3" step="0.01" value="1.01">
+          </div>
+          <div class="ctrl">
+            <label>物質量 n <span class="val"><span id="charles-n-val">1.0</span> mol</span></label>
+            <input type="range" id="charles-n" min="0.5" max="3" step="0.1" value="1">
+          </div>
+          <div class="ctrl">
+            <label>温度 T <span class="val"><span id="charles-T-val">273</span> K</span></label>
+            <input type="range" id="charles-T" min="100" max="600" step="1" value="273">
+          </div>
+          <div class="toggle-row" role="group" aria-label="温度軸の単位">
+            <button id="charles-unit-K" aria-pressed="true">K（絶対温度）</button>
+            <button id="charles-unit-C" aria-pressed="false">℃（セ氏）</button>
+          </div>
+          <button class="reset-btn" data-reset="charles">初期値</button>
+        </div>
+        <div class="card">
+          <h2>現在の状態</h2>
+          <div class="readout" id="charles-readout"></div>
+          <p class="note">破線は外挿。直線を伸ばすと <b>−273 ℃（絶対零度）で V = 0</b> に向かう。℃表示に切り替えると軸の原点の意味が変わるのに注目。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ③ゲイリュサック -->
+  <section class="panel" id="panel-gaylussac">
+    <div class="layout">
+      <div class="chart-card" id="chartwrap-gaylussac">
+        <svg id="chart-gaylussac" viewBox="0 0 760 480" role="img" aria-label="ゲイリュサックの法則 P-Tグラフ"></svg>
+        <div class="tooltip" id="tip-gaylussac"></div>
+      </div>
+      <div class="side">
+        <div class="card law">
+          <div class="law-copy">
+            体積 V と物質量 n が一定のとき<br>
+            <b>P / T = 一定</b>（絶対温度に比例）<br>
+            <span>P/T = </span><span class="const-val" id="gaylussac-const">—</span>
+          </div>
+          <div class="diagram-block">
+            <span class="diagram-label">PARTICLE MODEL</span>
+            <svg id="cont-gaylussac" viewBox="0 0 300 130" width="100%" role="img" aria-label="ゲイリュサックの容器の模式図"></svg>
+            <p>体積を固定して温めると、分子の衝突が激しくなり圧力が増える。</p>
+          </div>
+        </div>
+        <div class="card">
+          <h2>変数（スライダーで操作）</h2>
+          <div class="ctrl">
+            <label>体積 V <span class="val"><span id="gaylussac-V-val">10.0</span> L</span></label>
+            <input type="range" id="gaylussac-V" min="5" max="50" step="0.5" value="10">
+          </div>
+          <div class="ctrl">
+            <label>物質量 n <span class="val"><span id="gaylussac-n-val">1.0</span> mol</span></label>
+            <input type="range" id="gaylussac-n" min="0.5" max="3" step="0.1" value="1">
+          </div>
+          <div class="ctrl">
+            <label>温度 T <span class="val"><span id="gaylussac-T-val">273</span> K</span></label>
+            <input type="range" id="gaylussac-T" min="100" max="600" step="1" value="273">
+          </div>
+          <div class="toggle-row" role="group" aria-label="温度軸の単位">
+            <button id="gaylussac-unit-K" aria-pressed="true">K（絶対温度）</button>
+            <button id="gaylussac-unit-C" aria-pressed="false">℃（セ氏）</button>
+          </div>
+          <button class="reset-btn" data-reset="gaylussac">初期値</button>
+        </div>
+        <div class="card">
+          <h2>現在の状態</h2>
+          <div class="readout" id="gaylussac-readout"></div>
+          <p class="note">密閉容器（V一定）を温めると圧力が絶対温度に比例して上がる。−273 ℃ で P = 0 に外挿される。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ④理想気体 -->
+  <section class="panel" id="panel-ideal">
+    <div class="layout">
+      <div class="chart-card" id="chartwrap-ideal">
+        <svg id="chart-ideal" viewBox="0 0 760 480" role="img" aria-label="理想気体の状態方程式 P-Vグラフ"></svg>
+        <div class="tooltip" id="tip-ideal"></div>
+      </div>
+      <div class="side">
+        <div class="card law">
+          <div class="law-copy">
+            <b>PV = nRT</b>　（R = 8.31×10³ Pa·L/(K·mol)）<br>
+            n・T・V を決めると P が決まる：<br>
+            <span>P = nRT / V = </span><span class="const-val" id="ideal-P-big">—</span>
+          </div>
+          <div class="diagram-block">
+            <span class="diagram-label">PARTICLE MODEL</span>
+            <svg id="cont-ideal" viewBox="0 0 300 130" width="100%" role="img" aria-label="理想気体の容器の模式図"></svg>
+            <p>体積・分子数・温度・圧力の4量を一つのモデルで観察。</p>
+          </div>
+        </div>
+        <div class="card">
+          <h2>変数（スライダーで操作）</h2>
+          <div class="ctrl">
+            <label>物質量 n <span class="val"><span id="ideal-n-val">1.0</span> mol</span></label>
+            <input type="range" id="ideal-n" min="0.1" max="3" step="0.1" value="1">
+          </div>
+          <div class="ctrl">
+            <label>温度 T <span class="val"><span id="ideal-T-val">273</span> K</span></label>
+            <input type="range" id="ideal-T" min="100" max="600" step="1" value="273">
+          </div>
+          <div class="ctrl">
+            <label>体積 V <span class="val"><span id="ideal-V-val">10.0</span> L</span></label>
+            <input type="range" id="ideal-V" min="1" max="50" step="0.5" value="10">
+          </div>
+          <button class="reset-btn" data-reset="ideal">初期値</button>
+        </div>
+        <div class="card">
+          <h2>検算</h2>
+          <div class="readout" id="ideal-readout"></div>
+          <p class="note">どの状態でも PV ÷ (nT) = R = 8.31×10³ になることを確認できる。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑤ボイル＋蒸気圧 -->
+  <section class="panel" id="panel-boylevap">
+    <div class="layout">
+      <div class="chart-card" id="chartwrap-boylevap">
+        <svg id="chart-boylevap" viewBox="0 0 760 480" role="img" aria-label="蒸気圧を考慮したボイルの法則 P-Vグラフ"></svg>
+        <div class="tooltip" id="tip-boylevap"></div>
+      </div>
+      <div class="side">
+        <div class="card law">
+          <div class="law-copy">
+            水蒸気を一定温度 T で圧縮する。<br>
+            圧力が<b>飽和蒸気圧 P<sub>sat</sub></b> に達すると凝縮が始まり、<br>
+            以降は圧力一定のまま液体になっていく。<br>
+            <span>P<sub>sat</sub>(T) = </span><span class="const-val" id="bvap-psat">—</span>
+          </div>
+          <div class="diagram-block">
+            <span class="diagram-label">PHASE MODEL</span>
+            <svg id="cont-bvap" class="fig-svg" viewBox="0 0 300 130" role="img" aria-label="ボイル＋蒸気圧の容器の模式図"></svg>
+            <p>青い部分＝<b>液体</b>。高さは実体積ではなく液化した割合を表す。</p>
+          </div>
+        </div>
+        <div class="card">
+          <h2>変数（スライダーで操作）</h2>
+          <div class="ctrl">
+            <label>温度 T <span class="val"><span id="bvap-T-val">100</span> ℃</span></label>
+            <input type="range" id="bvap-T" min="60" max="160" step="1" value="100">
+          </div>
+          <div class="ctrl">
+            <label>物質量 n <span class="val"><span id="bvap-n-val">1.0</span> mol</span></label>
+            <input type="range" id="bvap-n" min="0.5" max="3" step="0.1" value="1">
+          </div>
+          <div class="ctrl">
+            <label>体積 V <span class="val"><span id="bvap-V-val">40.0</span> L</span></label>
+            <input type="range" id="bvap-V" min="2" max="50" step="0.5" value="40">
+          </div>
+          <button class="reset-btn" data-reset="boylevap">初期値</button>
+        </div>
+        <div class="card">
+          <h2>現在の状態</h2>
+          <div class="readout" id="bvap-readout"></div>
+          <p class="note">V を小さくして圧力が P<sub>sat</sub> に届くとグラフが水平になり（凝縮）、気体と液体が共存する。破線＝P<sub>sat</sub>。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑥シャルル＋蒸気圧 -->
+  <section class="panel" id="panel-charlesvap">
+    <div class="layout">
+      <div class="chart-card" id="chartwrap-charlesvap">
+        <svg id="chart-charlesvap" viewBox="0 0 760 480" role="img" aria-label="蒸気圧を考慮したシャルルの法則 V-Tグラフ"></svg>
+        <div class="tooltip" id="tip-charlesvap"></div>
+      </div>
+      <div class="side">
+        <div class="card law">
+          水を一定圧力 P で加熱する。<br>
+          <b>沸点 T<sub>b</sub></b>（P<sub>sat</sub>=P となる温度）で気化して<br>
+          体積が一気に増える。以降は気体としてシャルルの法則に従う。<br>
+          <span>沸点 T<sub>b</sub> = </span><span class="const-val" id="cvap-tb">—</span>
+        </div>
+        <div class="card">
+          <h2>変数（スライダーで操作）</h2>
+          <div class="ctrl">
+            <label>圧力 P <span class="val"><span id="cvap-P-val">1.01</span> ×10⁵ Pa</span></label>
+            <input type="range" id="cvap-P" min="0.5" max="3" step="0.01" value="1.01">
+          </div>
+          <div class="ctrl">
+            <label>物質量 n <span class="val"><span id="cvap-n-val">1.0</span> mol</span></label>
+            <input type="range" id="cvap-n" min="0.5" max="3" step="0.1" value="1">
+          </div>
+          <div class="ctrl">
+            <label>温度 T <span class="val"><span id="cvap-T-val">373</span> K</span></label>
+            <input type="range" id="cvap-T" min="273" max="520" step="1" value="373">
+          </div>
+          <button class="reset-btn" data-reset="charlesvap">初期値</button>
+        </div>
+        <div class="card">
+          <h2>現在の状態</h2>
+          <div class="readout" id="cvap-readout"></div>
+          <p class="note">圧力 P を上げると沸点 T<sub>b</sub> が上がる（圧力なべの原理）。破線は気体のシャルルの法則を 0 K へ外挿した線。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑦圧縮係数 Z–P -->
+  <section class="panel" id="panel-z">
+    <div class="layout">
+      <div class="chart-card" id="chartwrap-z">
+        <svg id="chart-z" viewBox="0 0 760 480" role="img" aria-label="圧縮係数 Z と圧力 P の関係"></svg>
+        <div class="tooltip" id="tip-z"></div>
+      </div>
+      <div class="side">
+        <div class="card law">
+          <b>圧縮係数 Z = PV / (nRT)</b><br>
+          理想気体なら Z = 1（破線）。実在気体は分子間引力（Z&lt;1）と<br>
+          分子自身の体積（Z&gt;1）でずれる。van der Waals 式で計算。<br>
+          <span>現在の Z = </span><span class="const-val" id="z-zval">—</span>
+        </div>
+        <div class="card">
+          <h2>気体を選ぶ</h2>
+          <div class="toggle-row" id="z-gasrow" role="group" aria-label="気体の種類"></div>
+        </div>
+        <div class="card">
+          <h2>変数（スライダーで操作）</h2>
+          <div class="ctrl">
+            <label>温度 T <span class="val"><span id="z-T-val">273</span> K</span></label>
+            <input type="range" id="z-T" min="200" max="1000" step="1" value="273">
+          </div>
+          <div class="ctrl dep">
+            <label>圧力 P（測定点） <span class="val"><span id="z-P-val">200</span> atm</span></label>
+            <input type="range" id="z-P" min="10" max="1000" step="10" value="200">
+          </div>
+          <button class="reset-btn" data-reset="z">初期値</button>
+        </div>
+        <div class="card">
+          <h2>読み取り</h2>
+          <div class="readout" id="z-readout"></div>
+          <p class="note">選んだ気体だけを表示。ボイル温度 T<sub>B</sub> より高い温度だと Z は最初から 1 以上、低いと一度 1 未満に下がる。理想気体は常に Z = 1。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑧ゲイリュサック＋蒸気圧 -->
+  <section class="panel" id="panel-gvap">
+    <div class="layout">
+      <div class="chart-card" id="chartwrap-gvap">
+        <svg id="chart-gvap" viewBox="0 0 760 480" role="img" aria-label="蒸気圧を考慮したゲイリュサックの法則 P-Tグラフ"></svg>
+        <div class="tooltip" id="tip-gvap"></div>
+      </div>
+      <div class="side">
+        <div class="card law">
+          <div class="law-copy">
+            水を<b>体積一定</b>の密閉容器で加熱する。<br>
+            液体があるうちは圧力 = 飽和蒸気圧 P<sub>sat</sub>(T)（急な曲線）。<br>
+            液体が尽きると気体のゲイリュサック則 P = nRT/V（直線）に乗る。<br>
+            <span>P<sub>sat</sub>(T) = </span><span class="const-val" id="gvap-psat">—</span>
+          </div>
+          <div class="diagram-block">
+            <span class="diagram-label">PHASE MODEL</span>
+            <svg id="cont-gvap" class="fig-svg" viewBox="0 0 300 130" role="img" aria-label="ゲイリュサック＋蒸気圧の容器の模式図"></svg>
+            <p>体積を固定して加熱。液体が蒸発するにつれて圧力が上がる。</p>
+          </div>
+        </div>
+        <div class="card">
+          <h2>変数（スライダーで操作）</h2>
+          <div class="ctrl">
+            <label>体積 V <span class="val"><span id="gvap-V-val">10.0</span> L</span></label>
+            <input type="range" id="gvap-V" min="5" max="50" step="0.5" value="10">
+          </div>
+          <div class="ctrl">
+            <label>物質量 n <span class="val"><span id="gvap-n-val">1.0</span> mol</span></label>
+            <input type="range" id="gvap-n" min="0.5" max="3" step="0.1" value="1">
+          </div>
+          <div class="ctrl">
+            <label>温度 T <span class="val"><span id="gvap-T-val">373</span> K</span></label>
+            <input type="range" id="gvap-T" min="273" max="500" step="1" value="373">
+          </div>
+          <button class="reset-btn" data-reset="gvap">初期値</button>
+        </div>
+        <div class="card">
+          <h2>現在の状態</h2>
+          <div class="readout" id="gvap-readout"></div>
+          <p class="note">破線＝凝縮しない場合の理論ゲイリュサック（0 K を通る直線）。実線は低温側で蒸気圧曲線に沿って緩やかに、液体が尽きると直線に切り替わる。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+'use strict';
+const R = 8.31e3; // Pa·L/(K·mol)
+const SVGNS = 'http://www.w3.org/2000/svg';
+
+// ---------- 共通ユーティリティ ----------
+const $ = id => document.getElementById(id);
+const fmt = (x, d) => x.toFixed(d);
+const fmtP = pa => fmt(pa / 1e5, 2) + '×10⁵ Pa';   // 圧力の表示は ×10⁵ Pa
+const kToC = k => k - 273;
+
+// 軸つきチャート枠を描く。戻り値: {sx, sy, svgOpen, gridAxes, close}
+// opts: {xMax, xTicks:[{v,label}], xLabel, yMax, yTicks:[{v,label}], yLabel}
+const W = 760, H = 480, ML = 78, MR = 24, MT = 24, MB = 62;
+const PW = W - ML - MR, PH = H - MT - MB;
+
+function scales(xMax, yMax) {
+  return {
+    sx: x => ML + (x / xMax) * PW,
+    sy: y => MT + PH - (y / yMax) * PH,
+  };
+}
+
+function frame(opts) {
+  const { sx, sy } = scales(opts.xMax, opts.yMax);
+  let s = '';
+  // グリッド（控えめ）
+  for (const t of opts.xTicks) {
+    if (t.v === 0) continue;
+    s += `<line x1="${sx(t.v)}" y1="${MT}" x2="${sx(t.v)}" y2="${MT + PH}" stroke="var(--grid)" stroke-width="1"/>`;
+  }
+  for (const t of opts.yTicks) {
+    if (t.v === 0) continue;
+    s += `<line x1="${ML}" y1="${sy(t.v)}" x2="${ML + PW}" y2="${sy(t.v)}" stroke="var(--grid)" stroke-width="1"/>`;
+  }
+  // 軸
+  s += `<line x1="${ML}" y1="${MT + PH}" x2="${ML + PW}" y2="${MT + PH}" stroke="var(--axis)" stroke-width="1.5"/>`;
+  s += `<line x1="${ML}" y1="${MT}" x2="${ML}" y2="${MT + PH}" stroke="var(--axis)" stroke-width="1.5"/>`;
+  // 目盛ラベル
+  for (const t of opts.xTicks) {
+    s += `<text x="${sx(t.v)}" y="${MT + PH + 22}" text-anchor="middle" font-size="14" fill="var(--ink2)">${t.label}</text>`;
+  }
+  for (const t of opts.yTicks) {
+    s += `<text x="${ML - 10}" y="${sy(t.v) + 5}" text-anchor="end" font-size="14" fill="var(--ink2)">${t.label}</text>`;
+  }
+  // 軸タイトル
+  s += `<text x="${ML + PW / 2}" y="${H - 14}" text-anchor="middle" font-size="16" fill="var(--ink)">${opts.xLabel}</text>`;
+  s += `<text x="20" y="${MT + PH / 2}" text-anchor="middle" font-size="16" fill="var(--ink)" transform="rotate(-90 20 ${MT + PH / 2})">${opts.yLabel}</text>`;
+  return { sx, sy, axesSvg: s };
+}
+
+function polyline(pts, sx, sy, stroke, width, dash) {
+  const d = pts.map((p, i) => (i ? 'L' : 'M') + fmt(sx(p[0]), 1) + ' ' + fmt(sy(p[1]), 1)).join(' ');
+  return `<path d="${d}" fill="none" stroke="${stroke}" stroke-width="${width}"${dash ? ` stroke-dasharray="${dash}"` : ''} stroke-linejoin="round"/>`;
+}
+
+// 単調に上がる直線分を y≤yMax の範囲へクリップ。両端とも超えていれば null。片端だけ超えていれば境界で交点を作る
+function clipSeg(a, b, yMax) {
+  const inA = a[1] <= yMax, inB = b[1] <= yMax;
+  if (inA && inB) return [a, b];
+  if (!inA && !inB) return null;
+  const t = (yMax - a[1]) / (b[1] - a[1]);
+  const cx = a[0] + t * (b[0] - a[0]);
+  return inA ? [a, [cx, yMax]] : [[cx, yMax], b];
+}
+
+// 曲線を矩形 [0,xMax]×[0,yMax] にクリップ。枠を出た所で境界と交点を作って打ち切る（上端で水平化させない）
+function clipZcurve(pts, xMax, yMax) {
+  const out = [];
+  for (let i = 0; i < pts.length; i++) {
+    const p = pts[i];
+    if (p[0] <= xMax && p[1] <= yMax) { out.push(p); continue; }
+    if (out.length) {
+      const q = out[out.length - 1];
+      let bx = p[0], by = p[1];
+      if (by > yMax) { const t = (yMax - q[1]) / (p[1] - q[1]); bx = q[0] + t * (p[0] - q[0]); by = yMax; }
+      if (bx > xMax) { const t = (xMax - q[0]) / (p[0] - q[0]); by = q[1] + t * (p[1] - q[1]); bx = xMax; }
+      out.push([Math.min(bx, xMax), Math.min(by, yMax)]);
+    }
+    break;
+  }
+  return out;
+}
+
+// 現在点＋両軸への破線ガイド
+function currentPoint(x, y, sx, sy, clampedNote) {
+  let s = '';
+  s += `<line x1="${sx(x)}" y1="${sy(y)}" x2="${sx(x)}" y2="${MT + PH}" stroke="var(--accent)" stroke-width="1" stroke-dasharray="4 4"/>`;
+  s += `<line x1="${ML}" y1="${sy(y)}" x2="${sx(x)}" y2="${sy(y)}" stroke="var(--accent)" stroke-width="1" stroke-dasharray="4 4"/>`;
+  s += `<circle cx="${sx(x)}" cy="${sy(y)}" r="7" fill="var(--accent)" stroke="#fff" stroke-width="2"/>`;
+  if (clampedNote) {
+    const px = sx(x);
+    const anchor = px > ML + PW * 0.78 ? 'end' : px < ML + PW * 0.22 ? 'start' : 'middle';
+    s += `<text x="${px}" y="${sy(y) - 12}" text-anchor="${anchor}" font-size="13" fill="var(--accent)">${clampedNote}</text>`;
+  }
+  return s;
+}
+
+function setReadout(el, rows) {
+  el.innerHTML = rows.map(r =>
+    `<span class="k">${r[0]}</span><span class="v${r[2] ? ' dep' : ''}">${r[1]}</span>`).join('');
+}
+
+// ホバー（曲線上の値をツールチップ表示）
+function attachHover(svgId, wrapId, tipId, getState) {
+  const svg = $(svgId), tip = $(tipId);
+  svg.addEventListener('pointermove', ev => {
+    const st = getState(); // {xMax, yMax, domain:[x0,x1], f:x=>y, fmtLines:(x,y)=>[str]}
+    const rect = svg.getBoundingClientRect();
+    const px = (ev.clientX - rect.left) / rect.width * W;
+    const xData = (px - ML) / PW * st.xMax;
+    if (xData < st.domain[0] || xData > st.domain[1]) { tip.style.display = 'none'; return; }
+    const yData = st.f(xData);
+    if (yData < 0 || yData > st.yMax) { tip.style.display = 'none'; return; }
+    tip.innerHTML = st.fmtLines(xData, yData).join('<br>');
+    tip.style.display = 'block';
+    const wr = svg.parentElement.getBoundingClientRect();
+    let left = ev.clientX - wr.left + 14, top = ev.clientY - wr.top - 10;
+    if (left + tip.offsetWidth > wr.width - 8) left -= tip.offsetWidth + 28;
+    tip.style.left = left + 'px'; tip.style.top = top + 'px';
+  });
+  svg.addEventListener('pointerleave', () => { tip.style.display = 'none'; });
+}
+
+// 温度軸の目盛（K/℃切替対応）
+function tempTicks(unit, tMaxK) {
+  if (unit === 'K') {
+    const ticks = [];
+    for (let t = 0; t <= tMaxK; t += 100) ticks.push({ v: t, label: String(t) });
+    return ticks;
+  }
+  // ℃モード: −273℃(=0K) と、キリのいい℃を目盛に
+  const ticks = [{ v: 0, label: '−273' }];
+  for (let c = -200; c + 273 <= tMaxK; c += 100) ticks.push({ v: c + 273, label: String(c) });
+  return ticks;
+}
+
+// ---------- 容器＋ピストン模式図（全タブ共通） ----------
+// 温度→色（寒色→暖色）の線形補間
+function lerpColor(a, b, t) {
+  t = Math.max(0, Math.min(1, t));
+  const c = i => Math.round(a[i] + (b[i] - a[i]) * t);
+  return `rgb(${c(0)},${c(1)},${c(2)})`;
+}
+const COOL = [191, 219, 254], WARM = [253, 186, 116];
+// 分子の相対配置（決定的：再描画で飛び跳ねない）
+const PARTS = [];
+(() => { let s = 987654321; const r = () => { s = (s * 16807) % 2147483647; return (s % 1000) / 1000; };
+  for (let i = 0; i < 30; i++) PARTS.push([r(), r()]); })();
+
+// opts: {V, P, T, n, locked}
+//   幅=体積 / ●の数と密度=物質量と圧縮 / Pの数値=圧力 / 色と温度計=温度
+//   locked は既存呼び出しとの互換用。見た目は全タブで同じ注射器型ピストンに統一する。
+function drawContainer(svgId, o) {
+  const Vmax = 50, Tmin = 100, Tmax = 600;
+  const svg = $(svgId);
+  const vertical = !!svg.closest('.diagram-stage');
+  const liqFrac = Math.max(0, Math.min(1, o.liqFrac || 0));
+  const tf = (o.T - Tmin) / (Tmax - Tmin);
+  const gasColor = lerpColor(COOL, WARM, tf);
+
+  // 右上の小表示では縦型注射器にして、限られた横幅を高さとして活用する。
+  if (vertical) {
+    const fullscreen = document.body.classList.contains('is-fullscreen');
+    const viewH = fullscreen ? 400 : 280;
+    const cylinderH = fullscreen ? 330 : 214;
+    const tempY = fullscreen ? 387 : 267;
+    svg.setAttribute('viewBox', `0 0 190 ${viewH}`);
+    const cx = 42, cy = 28, cw = 106, ch = cylinderH;
+    const centerX = cx + cw / 2;
+    const innerL = cx + 6, innerT = cy + 6, innerW = cw - 12, innerH = ch - 12;
+    const innerBottom = innerT + innerH;
+    const gasH = Math.max(24, (Math.min(o.V, Vmax) / Vmax) * innerH);
+    const gasTop = innerBottom - gasH;
+    const liqH = liqFrac * gasH, vaporH = gasH - liqH;
+    let s = '';
+    s += `<text x="${centerX}" y="15" text-anchor="middle" font-size="11.5" fill="#172033"><tspan font-weight="bold">P</tspan><tspan dx="5">= ${fmtP(o.P)}</tspan></text>`;
+    s += `<rect x="${cx}" y="${cy}" width="${cw}" height="${ch}" rx="7" fill="#f8fafc" stroke="var(--axis)" stroke-width="2"/>`;
+    s += `<rect x="${innerL}" y="${fmt(gasTop,1)}" width="${innerW}" height="${fmt(gasH,1)}" rx="3" fill="${gasColor}"/>`;
+    if (liqFrac > 0.002) {
+      s += `<rect x="${innerL}" y="${fmt(gasTop + vaporH,1)}" width="${innerW}" height="${fmt(liqH,1)}" rx="2" fill="#1d4ed8"/>`;
+      if (liqH > 22) s += `<text x="${innerL + innerW / 2}" y="${fmt(innerBottom - liqH / 2 + 4,1)}" text-anchor="middle" font-size="11" fill="#fff">${o.liquidLabel || '凝縮した割合'}</text>`;
+    }
+    const count = liqFrac > 0.998 ? 0 : Math.max(2, Math.round(o.n * (1 - liqFrac) * 9));
+    for (let i = 0; i < count && i < PARTS.length && vaporH > 14; i++) {
+      const px = innerL + 5 + PARTS[i][0] * (innerW - 10);
+      const py = gasTop + 5 + PARTS[i][1] * (vaporH - 10);
+      s += `<circle cx="${fmt(px,1)}" cy="${fmt(py,1)}" r="2.8" fill="#1e3a8a"/>`;
+    }
+    // 横向きのピストン板と上向きの押し棒。どちらも容器内に収める。
+    const pistonY = Math.max(innerT - 3, gasTop - 4);
+    const rodX = innerL + innerW / 2 - 3;
+    s += `<rect x="${fmt(rodX,1)}" y="${innerT}" width="6" height="${fmt(Math.max(0, pistonY - innerT),1)}" rx="2" fill="#94a3b8"/>`;
+    s += `<rect x="${innerL - 1}" y="${fmt(pistonY,1)}" width="${innerW + 2}" height="8" rx="2" fill="#94a3b8" stroke="var(--axis)" stroke-width="1.5"/>`;
+    s += `<text x="${centerX}" y="${tempY}" text-anchor="middle" font-size="11.5" fill="#172033"><tspan font-weight="bold">T</tspan><tspan dx="5">= ${fmt(o.T, 0)} K（${fmt(kToC(o.T), 0)} ℃）</tspan></text>`;
+    svg.innerHTML = s;
+    return;
+  }
+
+  // 左側へ拡大した場合は従来どおり横型で描く。
+  svg.setAttribute('viewBox', '0 0 300 130');
+  const cx = 12, cy = 20, cw = 250, ch = 78;
+  const innerL = cx + 6, innerT = cy + 4, innerH = ch - 8, innerWmax = 226;
+  const gasW = Math.max(12, (Math.min(o.V, Vmax) / Vmax) * innerWmax);
+  const pistonX = innerL + gasW, rightWall = innerL + innerWmax + 12;
+  let s = '';
+  // 外筒
+  s += `<rect x="${cx}" y="${cy}" width="${cw}" height="${ch}" rx="6" fill="#f8fafc" stroke="var(--axis)" stroke-width="2"/>`;
+  // 気体領域
+  s += `<rect x="${innerL}" y="${innerT}" width="${fmt(gasW,1)}" height="${innerH}" rx="3" fill="${gasColor}"/>`;
+  // 液体（凝縮した分）を下部に。※高さは「凝縮した割合」を表す模式表現で、実際の液体の体積ではない
+  //   （本物の液体体積は気体の千分の一ほどで、そのまま描くと見えないため割合で示す）
+  const liqH = liqFrac * innerH, vaporH = innerH - liqH;
+  if (liqFrac > 0.002) {
+    s += `<rect x="${innerL}" y="${fmt(innerT + vaporH,1)}" width="${fmt(gasW,1)}" height="${fmt(liqH,1)}" rx="2" fill="#1d4ed8"/>`;
+    if (liqH > 16) s += `<text x="${innerL + gasW / 2}" y="${fmt(innerT + innerH - liqH / 2 + 4,1)}" text-anchor="middle" font-size="11" fill="#fff">${o.liquidLabel || '凝縮した割合'}</text>`;
+  }
+  // 分子（気体分 n(1-liqFrac) に比例・液面より上）
+  const count = liqFrac > 0.998 ? 0 : Math.max(2, Math.round(o.n * (1 - liqFrac) * 9));
+  for (let i = 0; i < count && i < PARTS.length && vaporH > 14; i++) {
+    const px = innerL + 5 + PARTS[i][0] * (gasW - 10);
+    const py = innerT + 5 + PARTS[i][1] * (vaporH - 10);
+    s += `<circle cx="${fmt(px,1)}" cy="${fmt(py,1)}" r="2.6" fill="#1e3a8a"/>`;
+  }
+  // 圧力は矢印を使わず、具体的な計算値を黒文字で表示する
+  s += `<text x="${cx}" y="11" text-anchor="start" font-size="11.5" fill="#172033"><tspan font-weight="bold">P</tspan><tspan dx="5">= ${fmtP(o.P)}</tspan></text>`;
+  // 全タブ共通の注射器型ピストン。板も押し棒も容器の内側に収める。
+  const pistonW = 8, pistonY = cy + 2, pistonH = ch - 4;
+  const rodX = pistonX + pistonW, rodEnd = Math.min(rightWall, cx + cw - 4);
+  s += `<rect x="${fmt(pistonX,1)}" y="${pistonY}" width="${pistonW}" height="${pistonH}" rx="2" fill="#94a3b8" stroke="var(--axis)" stroke-width="1.5"/>`;
+  s += `<rect x="${fmt(rodX,1)}" y="${fmt(cy + ch/2 - 3,1)}" width="${fmt(Math.max(0, rodEnd - rodX),1)}" height="6" rx="2" fill="#94a3b8"/>`;
+  // 温度バーの代わりに具体的な数値を表示する。
+  s += `<text x="${cx}" y="119" text-anchor="start" font-size="11.5" fill="#172033"><tspan font-weight="bold">T</tspan><tspan dx="5">= ${fmt(o.T, 0)} K（${fmt(kToC(o.T), 0)} ℃）</tspan></text>`;
+  svg.innerHTML = s;
+}
+
+// ---------- タブ切替 ----------
+// 教師が口頭で補うため、計算結果カードと模式図を持たない説明カードは非表示にする。
+document.querySelectorAll('.readout').forEach(el => el.closest('.card')?.classList.add('result-card'));
+document.querySelectorAll('.law').forEach(card => {
+  if (!card.querySelector('.diagram-block')) card.classList.add('text-only-law');
+});
+
+document.querySelectorAll('.tabs button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-selected', b === btn));
+    document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + btn.dataset.tab));
+    btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  });
+});
+
+// 授業投影向けの全画面表示。ブラウザが全画面APIに非対応でも通常表示は維持する。
+const classroomBtn = $('classroom-mode');
+classroomBtn.addEventListener('click', async () => {
+  try {
+    if (!document.fullscreenElement) await document.documentElement.requestFullscreen();
+    else await document.exitFullscreen();
+  } catch (_) { /* 全画面が許可されない環境では何もしない */ }
+});
+document.addEventListener('fullscreenchange', () => {
+  const active = !!document.fullscreenElement;
+  document.body.classList.toggle('is-fullscreen', active);
+  classroomBtn.textContent = active ? '全画面を終了' : '全画面表示';
+  classroomBtn.title = active ? '全画面表示を終了' : '全画面で表示';
+  // 全画面専用の縦長寸法へ切り替えるため、現在タブの模式図を再描画する。
+  document.querySelector('.panel.active input[type="range"]')?.dispatchEvent(new Event('input'));
+});
+
+// タブは左右キーでも移動できるようにする。
+const tabButtons = [...document.querySelectorAll('.tabs button')];
+tabButtons.forEach((btn, index) => {
+  btn.tabIndex = btn.getAttribute('aria-selected') === 'true' ? 0 : -1;
+  btn.addEventListener('keydown', ev => {
+    if (ev.key !== 'ArrowLeft' && ev.key !== 'ArrowRight') return;
+    ev.preventDefault();
+    const next = (index + (ev.key === 'ArrowRight' ? 1 : -1) + tabButtons.length) % tabButtons.length;
+    tabButtons.forEach((b, i) => { b.tabIndex = i === next ? 0 : -1; });
+    tabButtons[next].focus();
+    tabButtons[next].click();
+  });
+  btn.addEventListener('click', () => tabButtons.forEach(b => { b.tabIndex = b === btn ? 0 : -1; }));
+});
+
+// 模式図を持つタブでは、グラフ側と説明・模式図側の左右を入れ替えられる。
+document.querySelectorAll('.panel').forEach(panel => {
+  const layout = panel.querySelector('.layout');
+  const chart = panel.querySelector('svg[id^="chart-"]');
+  const diagram = panel.querySelector('svg[id^="cont-"]');
+  if (!layout || !chart || !diagram) return;
+  panel.classList.add('has-diagram');
+  const tip = panel.querySelector('.tooltip');
+  const chartHost = chart.parentElement;
+  const diagramHost = diagram.parentElement;
+  const diagramLabel = diagramHost.querySelector('.diagram-label');
+  const originalDiagramLabel = diagramLabel ? diagramLabel.textContent : '';
+  const chartStage = document.createElement('div');
+  chartStage.className = 'visual-slot chart-stage';
+  chartHost.insertBefore(chartStage, chart);
+  chartStage.appendChild(chart);
+  if (tip) chartStage.appendChild(tip);
+  const diagramStage = document.createElement('div');
+  diagramStage.className = 'visual-slot diagram-stage';
+  diagramHost.insertBefore(diagramStage, diagram);
+  diagramStage.appendChild(diagram);
+  const tools = document.createElement('div');
+  tools.className = 'panel-tools';
+  tools.innerHTML = '<span>VIEW LAYOUT</span>';
+  const swap = document.createElement('button');
+  swap.type = 'button';
+  swap.className = 'swap-btn';
+  swap.textContent = 'グラフと模式図の位置を交換';
+  swap.setAttribute('aria-pressed', 'false');
+  swap.addEventListener('click', () => {
+    const active = panel.classList.toggle('visuals-swapped');
+    if (active) {
+      chartStage.appendChild(diagram);
+      diagramStage.appendChild(chart);
+      if (tip) diagramStage.appendChild(tip);
+      if (diagramLabel) diagramLabel.textContent = 'INTERACTIVE GRAPH';
+    } else {
+      chartStage.appendChild(chart);
+      if (tip) chartStage.appendChild(tip);
+      diagramStage.appendChild(diagram);
+      if (diagramLabel) diagramLabel.textContent = originalDiagramLabel;
+    }
+    swap.setAttribute('aria-pressed', String(active));
+    swap.textContent = active ? '元の配置に戻す' : 'グラフと模式図の位置を交換';
+    // 移動先に応じて、模式図を縦型／横型へ即座に描き直す。
+    panel.querySelector('input[type="range"]')?.dispatchEvent(new Event('input'));
+  });
+  tools.appendChild(swap);
+  layout.before(tools);
+});
+
+// ---------- ①ボイル ----------
+const BOYLE = { xMax: 50, yMax: 10e5 }; // V: 0–50 L, P: 0–10×10⁵ Pa
+function drawBoyle() {
+  const T = +$('boyle-T').value, n = +$('boyle-n').value, V = +$('boyle-V').value;
+  $('boyle-T-val').textContent = T;
+  $('boyle-n-val').textContent = fmt(n, 1);
+  $('boyle-V-val').textContent = fmt(V, 1);
+
+  const f = (temp) => (v) => n * R * temp / v; // P(V)
+  const { sx, sy, axesSvg } = frame({
+    xMax: BOYLE.xMax, yMax: BOYLE.yMax,
+    xTicks: [0, 10, 20, 30, 40, 50].map(v => ({ v, label: String(v) })),
+    yTicks: [0, 2, 4, 6, 8, 10].map(v => ({ v: v * 1e5, label: String(v) })),
+    xLabel: '体積 V [L]', yLabel: '圧力 P [×10⁵ Pa]',
+  });
+  let g = axesSvg;
+
+  // 曲線サンプル: P が軸上限に収まる V から右端まで
+  const sample = (temp) => {
+    const pts = [];
+    const vStart = Math.max(n * R * temp / BOYLE.yMax, 0.8);
+    for (let i = 0; i <= 120; i++) {
+      const v = vStart + (BOYLE.xMax - vStart) * i / 120;
+      pts.push([v, f(temp)(v)]);
+    }
+    return pts;
+  };
+  // 参考等温線（薄・直接ラベル）※チェックボックスで表示切替
+  if ($('boyle-showfamily').checked) {
+    for (const [temp, col] of [[200, 'var(--family2)'], [400, 'var(--family1)'], [600, 'var(--family1)']]) {
+      if (temp === T) continue;
+      const pts = sample(temp);
+      g += polyline(pts, sx, sy, col, 2);
+      const last = pts[pts.length - 1];
+      g += `<text x="${sx(last[0]) - 6}" y="${sy(last[1]) - 8}" text-anchor="end" font-size="13" fill="var(--ink3)">${temp} K</text>`;
+    }
+  }
+  // 現在の等温線（太）＋ラベル
+  const cur = sample(T);
+  g += polyline(cur, sx, sy, 'var(--curve)', 3);
+  const mid = cur[Math.floor(cur.length * 0.25)];
+  g += `<text x="${sx(mid[0]) + 10}" y="${sy(mid[1]) - 10}" font-size="15" font-weight="bold" fill="var(--ink)">T = ${T} K</text>`;
+
+  // 現在点
+  const P = f(T)(V);
+  const clamped = P > BOYLE.yMax;
+  g += currentPoint(V, Math.min(P, BOYLE.yMax), sx, sy, clamped ? '▲ 軸の範囲外（P = ' + fmtP(P) + '）' : '');
+
+  $('chart-boyle').innerHTML = g;
+  $('boyle-const').textContent = fmt(P * V / 1e5, 1) + '×10⁵ Pa·L';
+  drawContainer('cont-boyle', { V, P, T, n });
+  setReadout($('boyle-readout'), [
+    ['体積 V', fmt(V, 1) + ' L'],
+    ['圧力 P', fmtP(P), true],
+    ['PV', fmt(P * V / 1e5, 1) + '×10⁵ Pa·L'],
+  ]);
+}
+['boyle-T', 'boyle-n', 'boyle-V'].forEach(id => $(id).addEventListener('input', drawBoyle));
+$('boyle-showfamily').addEventListener('change', drawBoyle);
+attachHover('chart-boyle', 'chartwrap-boyle', 'tip-boyle', () => {
+  const T = +$('boyle-T').value, n = +$('boyle-n').value;
+  return {
+    xMax: BOYLE.xMax, yMax: BOYLE.yMax, domain: [1, 50],
+    f: v => n * R * T / v,
+    fmtLines: (v, p) => ['V = ' + fmt(v, 1) + ' L', 'P = ' + fmtP(p)],
+  };
+});
+
+// ---------- ②シャルル／③ゲイリュサック（同型: T比例の直線） ----------
+// cfg: {key, yMax, yTicks, yLabel, f(T)=y, 依存変数の表示}
+function makeLinearTempTab(cfg) {
+  const state = { unit: 'K' };
+  const TMAX = 600;
+
+  function draw() {
+    const vals = cfg.readInputs();
+    const T = vals.T;
+    const y = cfg.f(vals, T);
+    const { sx, sy, axesSvg } = frame({
+      xMax: TMAX, yMax: cfg.yMax,
+      xTicks: tempTicks(state.unit, TMAX),
+      yTicks: cfg.yTicks,
+      xLabel: state.unit === 'K' ? '絶対温度 T [K]' : '温度 t [℃]',
+      yLabel: cfg.yLabel,
+    });
+    let g = axesSvg;
+
+    // 絶対零度マーカー（℃モードで意味が出る）
+    g += `<line x1="${sx(0)}" y1="${MT}" x2="${sx(0)}" y2="${MT + PH}" stroke="var(--extrap)" stroke-width="1" stroke-dasharray="2 4"/>`;
+    g += `<text x="${sx(0) + 6}" y="${MT + 16}" font-size="13" fill="var(--ink3)">絶対零度 ${state.unit === 'K' ? '0 K' : '−273 ℃'}</text>`;
+
+    // 直線: 0K→150K は外挿（破線・グレー）、150K→600K は実線
+    const SPLIT = 150;
+    const yAt = t => cfg.f(vals, t);
+    // 軸上限を超える端点は「除外」でなく「軸境界で交点クリップ」する（急勾配で線が消えるのを防ぐ）
+    const ex = clipSeg([0, 0], [SPLIT, yAt(SPLIT)], cfg.yMax);
+    if (ex) g += polyline(ex, sx, sy, 'var(--extrap)', 2, '7 6');
+    const solid = clipSeg([SPLIT, yAt(SPLIT)], [TMAX, yAt(TMAX)], cfg.yMax);
+    if (solid) g += polyline(solid, sx, sy, 'var(--curve)', 3);
+
+    // 直線の式ラベル
+    const lx = Math.min(TMAX * 0.72, cfg.yMax / yAt(1) * 0.72);
+    g += `<text x="${sx(lx) + 14}" y="${sy(Math.min(yAt(lx), cfg.yMax)) - 20}" font-size="15" font-weight="bold" fill="var(--ink)">${cfg.lineLabel(vals)}</text>`;
+
+    // 現在点
+    const clamped = y > cfg.yMax;
+    g += currentPoint(T, Math.min(y, cfg.yMax), sx, sy, clamped ? '▲ 軸の範囲外' : '');
+
+    $('chart-' + cfg.key).innerHTML = g;
+    cfg.updateSide(vals, y);
+  }
+
+  cfg.inputIds.forEach(id => $(id).addEventListener('input', draw));
+  $(cfg.key + '-unit-K').addEventListener('click', () => { state.unit = 'K'; syncUnit(); draw(); });
+  $(cfg.key + '-unit-C').addEventListener('click', () => { state.unit = 'C'; syncUnit(); draw(); });
+  function syncUnit() {
+    $(cfg.key + '-unit-K').setAttribute('aria-pressed', state.unit === 'K');
+    $(cfg.key + '-unit-C').setAttribute('aria-pressed', state.unit === 'C');
+  }
+  attachHover('chart-' + cfg.key, 'chartwrap-' + cfg.key, 'tip-' + cfg.key, () => {
+    const vals = cfg.readInputs();
+    return {
+      xMax: TMAX, yMax: cfg.yMax, domain: [0, TMAX],
+      f: t => cfg.f(vals, t),
+      fmtLines: (t, y) => [
+        'T = ' + fmt(t, 0) + ' K（' + fmt(kToC(t), 0) + ' ℃）',
+        cfg.hoverY(y),
+      ],
+    };
+  });
+  return draw;
+}
+
+const drawCharles = makeLinearTempTab({
+  key: 'charles',
+  yMax: 60, // V: 0–60 L
+  yTicks: [0, 10, 20, 30, 40, 50, 60].map(v => ({ v, label: String(v) })),
+  yLabel: '体積 V [L]',
+  inputIds: ['charles-P', 'charles-n', 'charles-T'],
+  readInputs() {
+    const P = +$('charles-P').value * 1e5, n = +$('charles-n').value, T = +$('charles-T').value;
+    $('charles-P-val').textContent = fmt(P / 1e5, 2);
+    $('charles-n-val').textContent = fmt(n, 1);
+    $('charles-T-val').textContent = T;
+    return { P, n, T };
+  },
+  f: (vals, T) => vals.n * R * T / vals.P,      // V(T)
+  lineLabel: vals => 'P = ' + fmt(vals.P / 1e5, 2) + '×10⁵ Pa',
+  hoverY: y => 'V = ' + fmt(y, 1) + ' L',
+  updateSide(vals, V) {
+    drawContainer('cont-charles', { V: V, P: vals.P, T: vals.T, n: vals.n });
+    $('charles-const').textContent = fmt(V / vals.T * 1000, 1) + '×10⁻³ L/K';
+    setReadout($('charles-readout'), [
+      ['温度 T', vals.T + ' K（' + fmt(kToC(vals.T), 0) + ' ℃）'],
+      ['体積 V', fmt(V, 1) + ' L', true],
+      ['V / T', fmt(V / vals.T * 1000, 1) + '×10⁻³ L/K'],
+    ]);
+  },
+});
+
+const drawGaylussac = makeLinearTempTab({
+  key: 'gaylussac',
+  yMax: 10e5, // P: 0–10×10⁵ Pa
+  yTicks: [0, 2, 4, 6, 8, 10].map(v => ({ v: v * 1e5, label: String(v) })),
+  yLabel: '圧力 P [×10⁵ Pa]',
+  inputIds: ['gaylussac-V', 'gaylussac-n', 'gaylussac-T'],
+  readInputs() {
+    const V = +$('gaylussac-V').value, n = +$('gaylussac-n').value, T = +$('gaylussac-T').value;
+    $('gaylussac-V-val').textContent = fmt(V, 1);
+    $('gaylussac-n-val').textContent = fmt(n, 1);
+    $('gaylussac-T-val').textContent = T;
+    return { V, n, T };
+  },
+  f: (vals, T) => vals.n * R * T / vals.V,      // P(T)
+  lineLabel: vals => 'V = ' + fmt(vals.V, 1) + ' L',
+  hoverY: y => 'P = ' + fmtP(y),
+  updateSide(vals, P) {
+    drawContainer('cont-gaylussac', { V: vals.V, P: P, T: vals.T, n: vals.n, locked: true });
+    $('gaylussac-const').textContent = fmt(P / vals.T, 0) + ' Pa/K';
+    setReadout($('gaylussac-readout'), [
+      ['温度 T', vals.T + ' K（' + fmt(kToC(vals.T), 0) + ' ℃）'],
+      ['圧力 P', fmtP(P), true],
+      ['P / T', fmt(P / vals.T, 0) + ' Pa/K'],
+    ]);
+  },
+});
+
+// ---------- ④理想気体 ----------
+const IDEAL = { xMax: 50, yMax: 10e5 };
+function drawIdeal() {
+  const n = +$('ideal-n').value, T = +$('ideal-T').value, V = +$('ideal-V').value;
+  $('ideal-n-val').textContent = fmt(n, 1);
+  $('ideal-T-val').textContent = T;
+  $('ideal-V-val').textContent = fmt(V, 1);
+  const P = n * R * T / V;
+
+  const { sx, sy, axesSvg } = frame({
+    xMax: IDEAL.xMax, yMax: IDEAL.yMax,
+    xTicks: [0, 10, 20, 30, 40, 50].map(v => ({ v, label: String(v) })),
+    yTicks: [0, 2, 4, 6, 8, 10].map(v => ({ v: v * 1e5, label: String(v) })),
+    xLabel: '体積 V [L]', yLabel: '圧力 P [×10⁵ Pa]',
+  });
+  let g = axesSvg;
+
+  const pts = [];
+  const vStart = Math.max(n * R * T / IDEAL.yMax, 0.6);
+  for (let i = 0; i <= 120; i++) {
+    const v = vStart + (IDEAL.xMax - vStart) * i / 120;
+    pts.push([v, n * R * T / v]);
+  }
+  g += polyline(pts, sx, sy, 'var(--curve)', 3);
+  const mid = pts[Math.floor(pts.length * 0.3)];
+  g += `<text x="${sx(mid[0]) + 10}" y="${sy(mid[1]) - 10}" font-size="15" font-weight="bold" fill="var(--ink)">n = ${fmt(n, 1)} mol, T = ${T} K の等温線</text>`;
+
+  const clamped = P > IDEAL.yMax;
+  g += currentPoint(V, Math.min(P, IDEAL.yMax), sx, sy, clamped ? '▲ 軸の範囲外（P = ' + fmtP(P) + '）' : '');
+  $('chart-ideal').innerHTML = g;
+
+  $('ideal-P-big').textContent = fmtP(P);
+  setReadout($('ideal-readout'), [
+    ['圧力 P', fmtP(P), true],
+    ['PV', fmt(P * V / 1e5, 2) + '×10⁵ Pa·L'],
+    ['nRT', fmt(n * R * T / 1e5, 2) + '×10⁵ Pa·L'],
+    ['PV ÷ (nT)', fmt(P * V / (n * T), 0) + ' = R ✓'],
+  ]);
+
+  drawContainer('cont-ideal', { V, P, T, n });
+}
+['ideal-n', 'ideal-T', 'ideal-V'].forEach(id => $(id).addEventListener('input', drawIdeal));
+attachHover('chart-ideal', 'chartwrap-ideal', 'tip-ideal', () => {
+  const n = +$('ideal-n').value, T = +$('ideal-T').value;
+  return {
+    xMax: IDEAL.xMax, yMax: IDEAL.yMax, domain: [0.6, 50],
+    f: v => n * R * T / v,
+    fmtLines: (v, p) => ['V = ' + fmt(v, 1) + ' L', 'P = ' + fmtP(p)],
+  };
+});
+
+// ---------- 物理: 水の飽和蒸気圧（アントワネの式） ----------
+// P[mmHg] = 10^(A - B/(C+t℃))。1気圧=760mmHg=101.3kPa を再現する定数。
+function pSatWater(Tk) { // 返り値: Pa
+  const t = Tk - 273.15;
+  const antoine = (A, B, C) => Math.pow(10, A - B / (C + t)) * 133.322;
+  const pA = antoine(8.07131, 1730.63, 233.426); // 1–100℃
+  const pB = antoine(8.14019, 1810.94, 244.485); // 99–374℃
+  // 100℃で係数を切替えると P_sat が段差になるので 95–105℃ を線形ブレンドして連続化
+  if (t <= 95) return pA;
+  if (t >= 105) return pB;
+  const w = (t - 95) / 10;
+  return pA * (1 - w) + pB * w;
+}
+function tBoilWater(Pa) { // P に対する沸点 [K]。pSatWater は単調増加なので二分法で逆算（前式と厳密に整合）
+  let lo = 250, hi = 600;
+  for (let i = 0; i < 60; i++) { const mid = (lo + hi) / 2; if (pSatWater(mid) < Pa) lo = mid; else hi = mid; }
+  return (lo + hi) / 2;
+}
+
+// 目盛りを「きれい」な間隔で作る
+function niceTicks(max, n) {
+  const raw = max / n, mag = Math.pow(10, Math.floor(Math.log10(raw))), norm = raw / mag;
+  let step = norm < 1.5 ? 1 : norm < 3 ? 2 : norm < 7 ? 5 : 10;
+  step *= mag;
+  const ticks = [];
+  for (let v = 0; v <= max * 1.0001; v += step) ticks.push(v);
+  return { step, ticks };
+}
+function ticksKPa(max) { const { ticks, step } = niceTicks(max, 4); return ticks.map(v => ({ v, label: fmt(v / 1000, step < 1000 ? 1 : 0) })); }
+function ticksL(max) { const { ticks, step } = niceTicks(max, 5); return ticks.map(v => ({ v, label: fmt(v, step < 1 ? 1 : 0) })); }
+
+// ---------- ⑤ ボイル＋蒸気圧 ----------
+function drawBoyleVap() {
+  const Tc = +$('bvap-T').value, n = +$('bvap-n').value, V = +$('bvap-V').value;
+  $('bvap-T-val').textContent = Tc; $('bvap-n-val').textContent = fmt(n, 1); $('bvap-V-val').textContent = fmt(V, 1);
+  const Tk = Tc + 273.15, Psat = pSatWater(Tk), yMax = Psat / 0.72, Vsat = n * R * Tk / Psat, xMax = 50;
+  const { sx, sy, axesSvg } = frame({
+    xMax, yMax,
+    xTicks: [0, 10, 20, 30, 40, 50].map(v => ({ v, label: String(v) })),
+    yTicks: ticksKPa(yMax),
+    xLabel: '体積 V [L]', yLabel: '圧力 P [kPa]',
+  });
+  let g = axesSvg;
+  // 飽和蒸気圧ライン
+  g += `<line x1="${sx(0)}" y1="${sy(Psat)}" x2="${sx(xMax)}" y2="${sy(Psat)}" stroke="var(--extrap)" stroke-width="1.5" stroke-dasharray="6 5"/>`;
+  g += `<text x="${sx(xMax) - 6}" y="${sy(Psat) - 6}" text-anchor="end" font-size="13" fill="var(--ink3)">飽和蒸気圧 P_sat = ${fmt(Psat / 1000, 1)} kPa</text>`;
+  // 凝縮開始の境界
+  if (Vsat > 0 && Vsat <= xMax) {
+    g += `<line x1="${sx(Vsat)}" y1="${MT}" x2="${sx(Vsat)}" y2="${MT + PH}" stroke="var(--extrap)" stroke-width="1" stroke-dasharray="2 4"/>`;
+    g += `<text x="${sx(Vsat) - 6}" y="${MT + PH - 8}" text-anchor="end" font-size="12" fill="var(--ink2)">← 気液共存</text>`;
+    g += `<text x="${sx(Vsat) + 6}" y="${MT + PH - 8}" font-size="12" fill="var(--ink2)">気体 →</text>`;
+  }
+  // 曲線 P(V) = min(nRT/V, Psat)
+  const xs = [];
+  for (let i = 0; i <= 140; i++) xs.push(2 + (xMax - 2) * i / 140);
+  if (Vsat > 2 && Vsat < xMax) xs.push(Vsat);
+  xs.sort((a, b) => a - b);
+  // 理論上のボイル（凝縮しない場合）の双曲線を破線で
+  const vHi = Math.min(Vsat, xMax);
+  if (vHi > 2.5) {
+    const ideal = [];
+    // 理論値は単調増加。軸上限を超える部分は描かず、上端を突き抜けさせる（水平にしない）
+    for (let i = 0; i <= 90; i++) { const v = 2 + (vHi - 2) * i / 90; const pi = n * R * Tk / v; if (pi <= yMax) ideal.push([v, pi]); }
+    g += polyline(ideal, sx, sy, 'var(--extrap)', 2, '7 5');
+    const idealTop = ideal[0];
+    g += `<text x="${sx(idealTop[0]) + 8}" y="${MT + 14}" font-size="12" fill="var(--ink)" font-weight="bold">理想気体</text>`;
+  }
+  // 実際の曲線 P(V)=min(nRT/V, Psat)
+  g += polyline(xs.map(v => [v, Math.min(n * R * Tk / v, Psat)]), sx, sy, 'var(--curve)', 3);
+  // 現在点
+  const P = Math.min(n * R * Tk / V, Psat);
+  const phase = V < Vsat ? '気液共存（凝縮中）' : '気体（不飽和）';
+  g += currentPoint(V, Math.min(P, yMax), sx, sy, '');
+  $('chart-boylevap').innerHTML = g;
+  // 模式図（凝縮した分は液体プールに）
+  const nGas = Math.min(n, Psat * V / (R * Tk));
+  drawContainer('cont-bvap', { V, P, T: Tk, n, liqFrac: 1 - nGas / n, pMax: yMax, liquidLabel: '液体' });
+  $('bvap-psat').textContent = fmt(Psat / 1000, 1) + ' kPa';
+  setReadout($('bvap-readout'), [
+    ['温度 T', Tc + ' ℃（' + fmt(Tk, 0) + ' K）'],
+    ['体積 V', fmt(V, 1) + ' L'],
+    ['圧力 P', fmt(P / 1000, 1) + ' kPa', true],
+    ['飽和蒸気圧', fmt(Psat / 1000, 1) + ' kPa'],
+    ['凝縮開始 V', Vsat <= xMax ? fmt(Vsat, 1) + ' L' : '> 50 L'],
+    ['状態', phase],
+  ]);
+}
+['bvap-T', 'bvap-n', 'bvap-V'].forEach(id => $(id).addEventListener('input', drawBoyleVap));
+attachHover('chart-boylevap', 'chartwrap-boylevap', 'tip-boylevap', () => {
+  const Tk = +$('bvap-T').value + 273.15, n = +$('bvap-n').value, Psat = pSatWater(Tk);
+  return {
+    xMax: 50, yMax: Psat / 0.72, domain: [2, 50],
+    f: v => Math.min(n * R * Tk / v, Psat),
+    fmtLines: (v, p) => ['V = ' + fmt(v, 1) + ' L', 'P = ' + fmt(p / 1000, 1) + ' kPa'],
+  };
+});
+
+// ---------- ⑥ シャルル＋蒸気圧 ----------
+function drawCharlesVap() {
+  const P = +$('cvap-P').value * 1e5, n = +$('cvap-n').value, T = +$('cvap-T').value;
+  $('cvap-P-val').textContent = fmt(P / 1e5, 2); $('cvap-n-val').textContent = fmt(n, 1); $('cvap-T-val').textContent = T;
+  const Tb = tBoilWater(P), Tmax = 520, Vgas = t => n * R * t / P, yMax = Math.max(Vgas(Tmax) * 1.08, 1), Vliq = n * 0.018;
+  const { sx, sy, axesSvg } = frame({
+    xMax: Tmax, yMax,
+    xTicks: [0, 100, 200, 300, 400, 500].map(v => ({ v, label: String(v) })),
+    yTicks: ticksL(yMax),
+    xLabel: '絶対温度 T [K]', yLabel: '体積 V [L]',
+  });
+  let g = axesSvg;
+  // 外挿（気体のシャルル則を 0K へ）
+  g += polyline([[0, 0], [Tb, Vgas(Tb)]], sx, sy, 'var(--extrap)', 2, '7 6');
+  // 液体域（ほぼ 0）
+  g += polyline([[273, Vliq], [Tb, Vliq]], sx, sy, 'var(--curve)', 3);
+  g += `<text x="${sx((273 + Tb) / 2)}" y="${sy(Vliq) - 8}" text-anchor="middle" font-size="13" fill="var(--ink2)">液体（V ≈ 0）</text>`;
+  // 沸騰の縦ジャンプ
+  g += polyline([[Tb, Vliq], [Tb, Vgas(Tb)]], sx, sy, 'var(--accent)', 3);
+  g += `<text x="${sx(Tb) + 8}" y="${sy(Vgas(Tb) / 2)}" font-size="13" fill="var(--accent)">沸騰（気化）</text>`;
+  // 気体域
+  g += polyline([[Tb, Vgas(Tb)], [Tmax, Vgas(Tmax)]], sx, sy, 'var(--curve)', 3);
+  // 沸点マーカー
+  g += `<line x1="${sx(Tb)}" y1="${MT}" x2="${sx(Tb)}" y2="${MT + PH}" stroke="var(--extrap)" stroke-width="1" stroke-dasharray="2 4"/>`;
+  g += `<text x="${sx(Tb)}" y="${MT + PH + 40}" text-anchor="middle" font-size="12" fill="var(--ink2)">T_b = ${fmt(Tb, 0)} K</text>`;
+  // 現在点。沸点ちょうど（±0.6K）は定圧沸騰中＝気液共存でVが Vliq→Vgas の途中にある
+  let Vcur, phase, boiling = false;
+  if (Math.abs(T - Tb) <= 0.6) { boiling = true; phase = '沸騰中（気液共存）'; Vcur = (Vliq + Vgas(Tb)) / 2; }
+  else if (T < Tb) { Vcur = Vliq; phase = '液体'; }
+  else { Vcur = Vgas(T); phase = '気体'; }
+  g += currentPoint(boiling ? Tb : T, Math.min(Vcur, yMax), sx, sy, '');
+  $('chart-charlesvap').innerHTML = g;
+  $('cvap-tb').textContent = fmt(Tb, 0) + ' K（' + fmt(Tb - 273.15, 0) + ' ℃）';
+  const vRow = boiling ? fmt(Vliq, 1) + ' → ' + fmt(Vgas(Tb), 1) + ' L（気化中）'
+    : phase === '液体' ? '≈ 0（液体）' : fmt(Vcur, 1) + ' L';
+  setReadout($('cvap-readout'), [
+    ['圧力 P', fmtP(P)],
+    ['温度 T', T + ' K（' + fmt(T - 273.15, 0) + ' ℃）'],
+    ['沸点 T_b', fmt(Tb, 0) + ' K'],
+    ['体積 V', vRow, true],
+    ['状態', phase],
+  ]);
+}
+['cvap-P', 'cvap-n', 'cvap-T'].forEach(id => $(id).addEventListener('input', drawCharlesVap));
+attachHover('chart-charlesvap', 'chartwrap-charlesvap', 'tip-charlesvap', () => {
+  const P = +$('cvap-P').value * 1e5, n = +$('cvap-n').value, Tb = tBoilWater(P), Vgas = t => n * R * t / P;
+  return {
+    xMax: 520, yMax: Math.max(Vgas(520) * 1.08, 1), domain: [273, 520],
+    f: t => t < Tb ? n * 0.018 : Vgas(t),
+    fmtLines: (t, v) => ['T = ' + fmt(t, 0) + ' K', t < Tb ? '液体（V ≈ 0）' : 'V = ' + fmt(v, 1) + ' L'],
+  };
+});
+
+// ---------- ⑦ 圧縮係数 Z–P（van der Waals） ----------
+// a[L²·atm/mol²], b[L/mol]。SIへ: a×0.101325 [Pa·m⁶/mol²], b×1e-3 [m³/mol]
+const GASES = { '理想気体': { a: 0, b: 0 }, 'H₂': { a: 0.2476, b: 0.02661 }, 'N₂': { a: 1.370, b: 0.0387 }, 'CO₂': { a: 3.640, b: 0.04267 }, 'CH₄': { a: 2.283, b: 0.04278 } };
+const RSI = 8.314, ZP_PMAX_ATM = 1000;
+let zGas = 'N₂';
+function vdwSI(g) { return { a: g.a * 0.101325, b: g.b * 1e-3 }; }
+// Vm を大→小に振り、気体枝（P 単調増加）だけを返す。[Patm, Z] の配列
+function zCurve(name, Tk) {
+  const { a, b } = vdwSI(GASES[name]), pts = [], VmMax = 2.0, VmMin = Math.max(b * 1.02, 1e-5), N = 800;
+  let prevP = -Infinity, spinodal = false;
+  for (let i = 0; i <= N; i++) {
+    const Vm = Math.exp(Math.log(VmMax) + (i / N) * (Math.log(VmMin) - Math.log(VmMax)));
+    const P = RSI * Tk / (Vm - b) - a / (Vm * Vm);
+    if (P <= 0) { prevP = P; continue; }
+    if (P < prevP) { spinodal = true; break; } // vdW ループ入口＝この温度は臨界温度以下（液化域）
+    prevP = P;
+    const Patm = P / 101325;
+    if (Patm > ZP_PMAX_ATM * 1.03) break; // 軸上限に到達（液化とは別の打ち切り）
+    pts.push([Patm, P * Vm / (RSI * Tk)]);
+  }
+  return { pts, spinodal };
+}
+function zAt(pts, Patm) {
+  if (!pts.length) return null;
+  if (Patm <= pts[0][0]) return pts[0][1];
+  for (let i = 1; i < pts.length; i++) {
+    if (pts[i][0] >= Patm) { const [p0, z0] = pts[i - 1], [p1, z1] = pts[i]; return z0 + (z1 - z0) * (Patm - p0) / (p1 - p0); }
+  }
+  return pts[pts.length - 1][1];
+}
+function buildGasRow() {
+  const row = $('z-gasrow'); row.innerHTML = '';
+  Object.keys(GASES).forEach(name => {
+    const b = document.createElement('button');
+    b.textContent = name; b.dataset.gas = name; b.setAttribute('aria-pressed', name === zGas);
+    b.addEventListener('click', () => { zGas = name; [...row.children].forEach(c => c.setAttribute('aria-pressed', c.dataset.gas === zGas)); drawZ(); });
+    row.appendChild(b);
+  });
+}
+function drawZ() {
+  const T = +$('z-T').value, Pmark = +$('z-P').value, zMax = 2.0;
+  $('z-T-val').textContent = T; $('z-P-val').textContent = Pmark;
+  const { sx, sy, axesSvg } = frame({
+    xMax: ZP_PMAX_ATM, yMax: zMax,
+    xTicks: [0, 200, 400, 600, 800, 1000].map(v => ({ v, label: String(v) })),
+    yTicks: [0, 0.5, 1, 1.5, 2].map(v => ({ v, label: fmt(v, 1) })),
+    xLabel: '圧力 P [atm]', yLabel: '圧縮係数 Z',
+  });
+  let g = axesSvg;
+  // 理想気体 Z=1
+  g += `<line x1="${sx(0)}" y1="${sy(1)}" x2="${sx(ZP_PMAX_ATM)}" y2="${sy(1)}" stroke="var(--extrap)" stroke-width="2" stroke-dasharray="7 6"/>`;
+  g += `<text x="${sx(ZP_PMAX_ATM) - 6}" y="${sy(1) - 8}" text-anchor="end" font-size="13" fill="var(--ink3)">理想気体 Z = 1</text>`;
+  // 選択気体（太）※選んだ気体だけ。Z>zMax は水平化せず軸境界で切り、上端を突き抜けさせる
+  const { pts, spinodal } = zCurve(zGas, T);
+  const drawn = clipZcurve(pts, ZP_PMAX_ATM, zMax);
+  if (drawn.length >= 2) {
+    g += polyline(drawn, sx, sy, 'var(--curve)', 3);
+    const l = drawn[drawn.length - 1];
+    g += `<text x="${sx(l[0]) - 12}" y="${sy(l[1]) + 28}" text-anchor="end" font-size="14" font-weight="bold" fill="var(--ink)">${zGas}</text>`;
+  }
+  // 測定点マーカー。打ち切り理由で文言を分ける（液化域 vs 軸上限）
+  const Zc = zAt(pts, Pmark), curveMaxP = pts.length ? pts[pts.length - 1][0] : 0, beyond = Pmark > curveMaxP;
+  const beyondMsg = spinodal ? '▲ 高圧側は液化域（vdW近似の気体解の限界）' : '▲ 軸範囲外（1000 atm 超）';
+  if (Zc != null) g += currentPoint(Math.min(Pmark, curveMaxP), Math.min(Zc, zMax), sx, sy, beyond ? beyondMsg : '');
+  $('chart-z').innerHTML = g;
+  const { a, b } = vdwSI(GASES[zGas]), TB = a / (RSI * b);
+  const tbStr = (isFinite(TB) && TB > 0) ? fmt(TB, 0) + ' K（vdW推定）' : '—（引力・体積なし）';
+  $('z-zval').textContent = Zc != null ? fmt(Zc, 3) : '—';
+  const interp = Zc == null ? '—' : Zc > 1.02 ? 'Z>1：分子自身の体積が優勢' : Zc < 0.98 ? 'Z<1：分子間引力が優勢' : 'Z≈1：ほぼ理想的';
+  setReadout($('z-readout'), [
+    ['気体', zGas],
+    ['温度 T', T + ' K'],
+    ['ボイル温度 T_B', tbStr],
+    ['測定圧 P', beyond ? fmt(curveMaxP, 0) + ' atm（上限）' : Pmark + ' atm'],
+    ['圧縮係数 Z', Zc != null ? fmt(Zc, 3) : '—', true],
+    ['解釈', interp],
+  ]);
+}
+['z-T', 'z-P'].forEach(id => $(id).addEventListener('input', drawZ));
+
+// ---------- ⑧ ゲイリュサック＋蒸気圧 ----------
+// 定積で加熱。液体があるうちは P=Psat(T)、尽きると P=nRT/V。実際の圧力 = min(Psat, nRT/V)。
+function drawGaylussacVap() {
+  const V = +$('gvap-V').value, n = +$('gvap-n').value, T = +$('gvap-T').value;
+  $('gvap-V-val').textContent = fmt(V, 1); $('gvap-n-val').textContent = fmt(n, 1); $('gvap-T-val').textContent = T;
+  const Tmax = 500, Pideal = t => n * R * t / V, Pact = t => Math.min(pSatWater(t), Pideal(t)), yMax = Pideal(Tmax) * 1.1;
+  const { sx, sy, axesSvg } = frame({
+    xMax: Tmax, yMax,
+    xTicks: [0, 100, 200, 300, 400, 500].map(v => ({ v, label: String(v) })),
+    yTicks: ticksKPa(yMax),
+    xLabel: '絶対温度 T [K]', yLabel: '圧力 P [kPa]',
+  });
+  let g = axesSvg;
+  // 凝縮しない場合の理論ゲイリュサック（原点を通る直線）破線
+  g += polyline([[0, 0], [Tmax, Pideal(Tmax)]], sx, sy, 'var(--extrap)', 2, '7 5');
+  const idealLabelT = 55;
+  g += `<text x="${sx(idealLabelT) + 6}" y="${sy(Pideal(idealLabelT)) + 20}" text-anchor="start" font-size="12" font-weight="bold" fill="var(--ink)">理想気体</text>`;
+  // 全て気体になる温度 T*（Psat と直線の交点）
+  let Tstar = null;
+  const xs = [];
+  for (let i = 0; i <= 160; i++) xs.push(273 + (Tmax - 273) * i / 160);
+  for (let i = 1; i < xs.length; i++) {
+    const d0 = pSatWater(xs[i - 1]) - Pideal(xs[i - 1]), d1 = pSatWater(xs[i]) - Pideal(xs[i]);
+    if (d0 < 0 && d1 >= 0) { Tstar = xs[i]; break; }
+  }
+  if (Tstar) xs.push(Tstar);
+  xs.sort((a, b) => a - b);
+  // 実際の曲線
+  g += polyline(xs.map(t => [t, Pact(t)]), sx, sy, 'var(--curve)', 3);
+  if (Tstar) {
+    g += `<line x1="${sx(Tstar)}" y1="${MT}" x2="${sx(Tstar)}" y2="${MT + PH}" stroke="var(--extrap)" stroke-width="1" stroke-dasharray="2 4"/>`;
+    g += `<text x="${sx(Tstar)}" y="${MT + PH + 40}" text-anchor="middle" font-size="12" fill="var(--ink2)">全て気体 ${fmt(Tstar, 0)}K</text>`;
+  }
+  // 現在点
+  const P = Pact(T), nGas = Math.min(n, pSatWater(T) * V / (R * T)), liqFrac = 1 - nGas / n;
+  const phase = liqFrac > 0.002 ? '気液共存' : '気体（不飽和）';
+  g += currentPoint(T, Math.min(P, yMax), sx, sy, '');
+  $('chart-gvap').innerHTML = g;
+  drawContainer('cont-gvap', { V, P, T, n, locked: true, liqFrac, pMax: yMax, liquidLabel: '液体' });
+  $('gvap-psat').textContent = fmt(pSatWater(T) / 1000, 1) + ' kPa';
+  setReadout($('gvap-readout'), [
+    ['体積 V', fmt(V, 1) + ' L'],
+    ['温度 T', T + ' K（' + fmt(T - 273.15, 0) + ' ℃）'],
+    ['圧力 P', fmt(P / 1000, 1) + ' kPa', true],
+    ['飽和蒸気圧', fmt(pSatWater(T) / 1000, 1) + ' kPa'],
+    ['全て気体になる T', Tstar ? fmt(Tstar, 0) + ' K' : '—'],
+    ['状態', phase],
+  ]);
+}
+['gvap-V', 'gvap-n', 'gvap-T'].forEach(id => $(id).addEventListener('input', drawGaylussacVap));
+attachHover('chart-gvap', 'chartwrap-gvap', 'tip-gvap', () => {
+  const V = +$('gvap-V').value, n = +$('gvap-n').value, Tmax = 500;
+  return {
+    xMax: Tmax, yMax: (n * R * Tmax / V) * 1.1, domain: [273, Tmax],
+    f: t => Math.min(pSatWater(t), n * R * t / V),
+    fmtLines: (t, p) => ['T = ' + fmt(t, 0) + ' K', 'P = ' + fmt(p / 1000, 1) + ' kPa'],
+  };
+});
+
+// ---------- リセット（初期値＝273 K・1.01×10⁵ Pa・1.0 mol・10 L） ----------
+// 各タブは持っているスライダーだけ初期化。従属変数（例: ボイルの P）は再計算で追従する。
+const INIT = {
+  boyle:     { 'boyle-T': 273, 'boyle-n': 1.0, 'boyle-V': 10 },
+  charles:   { 'charles-P': 1.01, 'charles-n': 1.0, 'charles-T': 273 },
+  gaylussac: { 'gaylussac-V': 10, 'gaylussac-n': 1.0, 'gaylussac-T': 273 },
+  ideal:     { 'ideal-n': 1.0, 'ideal-T': 273, 'ideal-V': 10 },
+  boylevap:  { 'bvap-T': 100, 'bvap-n': 1.0, 'bvap-V': 40 },
+  charlesvap:{ 'cvap-P': 1.01, 'cvap-n': 1.0, 'cvap-T': 373 },
+  z:         { 'z-T': 273, 'z-P': 200 },
+  gvap:      { 'gvap-V': 10, 'gvap-n': 1.0, 'gvap-T': 373 },
+};
+document.querySelectorAll('.reset-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const tab = btn.dataset.reset;
+    for (const [id, v] of Object.entries(INIT[tab])) {
+      const el = $(id); el.value = v; el.dispatchEvent(new Event('input'));
+    }
+    if ($(tab + '-unit-K')) $(tab + '-unit-K').click(); // 温度軸は K に戻す
+    if (tab === 'boyle') { $('boyle-showfamily').checked = true; drawBoyle(); } // 参考等温線の表示も既定に
+    if (tab === 'z') { zGas = 'N₂'; buildGasRow(); drawZ(); } // 気体も既定に
+  });
+});
+
+// 初期描画
+drawBoyle();
+drawCharles();
+drawGaylussac();
+drawIdeal();
+drawBoyleVap();
+drawCharlesVap();
+buildGasRow();
+drawZ();
+drawGaylussacVap();
+</script>
+<script>
+  // PWA: Service Worker 登録（オフライン起動・ホーム追加）
+  if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+</script>
+</body>
+</html>
