@@ -771,7 +771,7 @@
   body.is-fullscreen .diagram-stage > svg[id^="cont-"] { width: 250px; }
   body.is-fullscreen .panel.has-diagram .layout,
   body.is-fullscreen .panel.has-diagram .layout.view-swapped {
-    grid-template-columns: 3fr 2fr;   /* グラフ : 模式図 ≈ 3 : 2 */
+    grid-template-columns: minmax(0, 1fr) 340px;   /* 模式図は幅を絞り、余白を減らしてグラフを大きく */
     grid-template-rows: minmax(0, 1fr) auto;
     align-items: stretch;
   }
@@ -806,9 +806,9 @@
     padding: 3px 8px;
   }
   body.is-fullscreen .panel.has-diagram .diagram-stage > svg[id^="cont-"] {
-    width: min(100%, 400px);   /* 模式図を 2fr 枠に収まる限り大きく */
+    width: 320px;
     height: auto;
-    max-height: calc(100vh - 190px);
+    max-height: calc(100vh - 120px);
     margin: 0 auto;
   }
   /* スマホ調整：見出し圧縮・タブ小型化・模式図が縦に長くなりすぎないよう高さ制限 */
@@ -1369,25 +1369,35 @@ function drawContainer(svgId, o) {
   // 右上の小表示では縦型注射器にして、限られた横幅を高さとして活用する。
   if (vertical) {
     const fullscreen = document.body.classList.contains('is-fullscreen');
-    const viewH = fullscreen ? 400 : 280;
-    const lblFont = fullscreen ? 15 : 11.5;   // 全画面では模式図中の数値を大きく
-    const cylinderH = fullscreen ? 330 : 214;
-    const tempY = fullscreen ? 387 : 267;
-    svg.setAttribute('viewBox', `0 0 190 ${viewH}`);
-    const cx = 42, cy = 28, cw = 106, ch = cylinderH;
-    const centerX = cx + cw / 2;
+    const viewW = fullscreen ? 230 : 190;
+    const viewH = fullscreen ? 470 : 280;
+    const numFont = fullscreen ? 28 : 11.5;   // 全画面では模式図中の数値を約2倍に
+    const cw = fullscreen ? 118 : 106;
+    const cy = fullscreen ? 116 : 28;          // 全画面は数値ブロックのぶんピストンを下げる
+    const ch = fullscreen ? (viewH - cy - 20) : 214;
+    const tempY = 267;                          // 非全画面時の下部T表示位置
+    svg.setAttribute('viewBox', `0 0 ${viewW} ${viewH}`);
+    const cx = (viewW - cw) / 2;
+    const centerX = viewW / 2;
     const innerL = cx + 6, innerT = cy + 6, innerW = cw - 12, innerH = ch - 12;
     const innerBottom = innerT + innerH;
     const gasH = Math.max(24, (Math.min(o.V, Vmax) / Vmax) * innerH);
     const gasTop = innerBottom - gasH;
     const liqH = liqFrac * gasH, vaporH = gasH - liqH;
     let s = '';
-    s += `<text x="${centerX}" y="15" text-anchor="middle" font-size="${lblFont}" fill="#172033"><tspan font-weight="bold">P</tspan><tspan dx="5">= ${fmtP(o.P)}</tspan></text>`;
+    const pTxt = `<tspan font-weight="bold">P</tspan><tspan dx="5">= ${fmtP(o.P)}</tspan>`;
+    const tTxt = `<tspan font-weight="bold">T</tspan><tspan dx="5">= ${fmt(o.T, 0)} K（${fmt(kToC(o.T), 0)} ℃）</tspan>`;
+    if (fullscreen) {   // 全画面：P・T をピストン上部にまとめて大きく表示
+      s += `<text x="${centerX}" y="46" text-anchor="middle" font-size="${numFont}" fill="#172033">${pTxt}</text>`;
+      s += `<text x="${centerX}" y="88" text-anchor="middle" font-size="${numFont}" fill="#172033">${tTxt}</text>`;
+    } else {
+      s += `<text x="${centerX}" y="15" text-anchor="middle" font-size="${numFont}" fill="#172033">${pTxt}</text>`;
+    }
     s += `<rect x="${cx}" y="${cy}" width="${cw}" height="${ch}" rx="7" fill="#f8fafc" stroke="var(--axis)" stroke-width="2"/>`;
     s += `<rect x="${innerL}" y="${fmt(gasTop,1)}" width="${innerW}" height="${fmt(gasH,1)}" rx="3" fill="${gasColor}"/>`;
     if (liqFrac > 0.002) {
       s += `<rect x="${innerL}" y="${fmt(gasTop + vaporH,1)}" width="${innerW}" height="${fmt(liqH,1)}" rx="2" fill="#1d4ed8"/>`;
-      if (liqH > 22) s += `<text x="${innerL + innerW / 2}" y="${fmt(innerBottom - liqH / 2 + 4,1)}" text-anchor="middle" font-size="11" fill="#fff">${o.liquidLabel || '凝縮した割合'}</text>`;
+      if (liqH > 22) s += `<text x="${innerL + innerW / 2}" y="${fmt(innerBottom - liqH / 2 + 4,1)}" text-anchor="middle" font-size="${fullscreen ? 13 : 11}" font-weight="bold" fill="#fff" stroke="none">${o.liquidLabel || '凝縮した割合'}</text>`;
     }
     const count = liqFrac > 0.998 ? 0 : Math.max(2, Math.round(o.n * (1 - liqFrac) * 9));
     for (let i = 0; i < count && i < PARTS.length && vaporH > 14; i++) {
@@ -1400,7 +1410,7 @@ function drawContainer(svgId, o) {
     const rodX = innerL + innerW / 2 - 3;
     s += `<rect x="${fmt(rodX,1)}" y="${innerT}" width="6" height="${fmt(Math.max(0, pistonY - innerT),1)}" rx="2" fill="#94a3b8"/>`;
     s += `<rect x="${innerL - 1}" y="${fmt(pistonY,1)}" width="${innerW + 2}" height="8" rx="2" fill="#94a3b8" stroke="var(--axis)" stroke-width="1.5"/>`;
-    s += `<text x="${centerX}" y="${tempY}" text-anchor="middle" font-size="${lblFont}" fill="#172033"><tspan font-weight="bold">T</tspan><tspan dx="5">= ${fmt(o.T, 0)} K（${fmt(kToC(o.T), 0)} ℃）</tspan></text>`;
+    if (!fullscreen) s += `<text x="${centerX}" y="${tempY}" text-anchor="middle" font-size="${numFont}" fill="#172033">${tTxt}</text>`;
     svg.innerHTML = s;
     return;
   }
