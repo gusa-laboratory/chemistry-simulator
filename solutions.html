@@ -136,14 +136,9 @@
   #panel-protect .chart-card::before { content: 'PROTECTION MODEL'; }
   #panel-electro .chart-card::before { content: 'ELECTROPHORESIS'; }
   #panel-salt .chart-stage > svg, #panel-protect .chart-stage > svg { max-height: 560px; }
-  body.is-fullscreen #panel-salt .chart-card { grid-column: 1 / -1; grid-row: 1; }
-  body.is-fullscreen #panel-salt .controls { grid-column: 1; grid-row: 2; }
-  body.is-fullscreen #panel-salt .zoom-card { grid-column: 2; grid-row: 2; }
-  body.is-fullscreen #panel-salt .chart-stage > svg { max-height: calc(100vh - 220px); }
   #panel-electro .chart-card { grid-column: 1 / -1; }
   #panel-electro .chart-stage > #model-electro { max-height: 660px; }
-  body.is-fullscreen #panel-electro .chart-card { grid-column: 1 / -1; }
-  body.is-fullscreen #panel-electro .chart-stage > #model-electro { max-height: calc(100vh - 120px); }
+  body.is-fullscreen #panel-electro .chart-card { grid-column: 1; }
   .salt-water-toggle { color: var(--curve); background: var(--blue-soft); }
   .salt-compare-toggle { color: #ea580c; background: #fff7ed; }
   .protect-shell-toggle { color: #0f766e; background: #f0fdfa; }
@@ -195,37 +190,30 @@
   body.is-fullscreen .panel.active { display: flex; height: 100%; min-height: 0; flex-direction: column; }
   body.is-fullscreen .panel-tools { flex: 0 0 auto; min-height: 25px; margin-bottom: 2px; gap: 5px; }
   body.is-fullscreen .panel-tools button { padding-block: 6px; }
-  body.is-fullscreen .layout { flex: 1 1 auto; height: 0; min-height: 0; grid-template-columns: minmax(0,1fr) minmax(310px,400px); grid-template-rows: minmax(0,1fr) auto; gap: 5px 7px; align-items: stretch; }
-  body.is-fullscreen .chart-card { grid-column: 1; grid-row: 1; min-height: 0; padding: 3px 6px 5px; display: flex; flex-direction: column; }
+  body.is-fullscreen .layout { flex: 1 1 auto; height: 0; min-height: 0; grid-template-columns: minmax(0,1fr) 340px; grid-template-rows: minmax(0,1fr); gap: 6px 8px; align-items: stretch; }
+  body.is-fullscreen .chart-card { grid-column: 1; grid-row: 1; min-height: 0; padding: 4px 7px 6px; display: flex; flex-direction: column; }
   body.is-fullscreen .chart-card::before { flex: 0 0 auto; margin-bottom: 0; }
   body.is-fullscreen .read-badges { flex: 0 0 auto; gap: 4px; margin: 1px 2px 2px; }
   body.is-fullscreen .badge { padding: 3px 6px; }
   body.is-fullscreen .chart-stage { flex: 1 1 auto; min-height: 0; display: grid; place-items: center; }
   body.is-fullscreen .chart-stage > svg { width: 100%; height: 100%; max-height: 100%; }
-  body.is-fullscreen .side { display: contents; }
-  body.is-fullscreen .model-card, body.is-fullscreen .zoom-card, body.is-fullscreen .dlvo-card { grid-column: 2; grid-row: 1; min-height: 0; display: grid; place-items: center; padding: 3px 6px; overflow: hidden; }
+  body.is-fullscreen .side { grid-column: 2; grid-row: 1; display: flex; flex-direction: column; gap: 7px; min-height: 0; min-width: 0; }
+  body.is-fullscreen .side > .card:not(.controls) { flex: 1 1 auto; min-height: 0; display: grid; place-items: center; padding: 3px 6px; overflow: hidden; }
   body.is-fullscreen .model-stage { width: 100%; height: 100%; min-height: 0; display: grid; place-items: center; }
   body.is-fullscreen .model-stage > svg { width: 100%; height: 100%; max-width: none; max-height: 100%; }
-  body.is-fullscreen .controls { grid-column: 1 / -1; grid-row: 2; display: grid; grid-template-columns: repeat(auto-fit,minmax(160px,1fr)) auto; gap: 1px 11px; align-items: end; padding: 3px 8px 4px; }
+  body.is-fullscreen .side > .controls { flex: 0 0 auto; display: flex; flex-direction: column; gap: 4px; padding: 6px 9px; overflow: auto; }   /* スライダーは右カラム・副ビューの下に縦積み */
   body.is-fullscreen .controls h2 { display: none; }
   body.is-fullscreen .controls .ctrl, body.is-fullscreen .controls .reset-btn { margin-top: 0; margin-bottom: 0; }
   body.is-fullscreen .controls .ctrl label { font-size: 11px; }
   body.is-fullscreen .controls .stepper { justify-content: flex-start; gap: 12px; }
   body.is-fullscreen .controls .stepper-label { font-size: 11px; }
   body.is-fullscreen .controls .ctrl input[type=range] { height: 12px; }
-  body.is-fullscreen .model-stage > svg[id^="model-"] { width: 315px; height: auto; max-height: calc(100vh - 105px); }
-  body.is-fullscreen #panel-freezing:not(.freezing-model-visible) .chart-card, body.is-fullscreen #panel-osmosis:not(.osmosis-model-visible) .chart-card { grid-column: 1 / -1; }
-  body.is-fullscreen #panel-osmosis.osmosis-graph-hidden .chart-card { grid-column: 1 / -1; }
-  body.is-fullscreen #panel-osmosis.osmosis-graph-hidden .layout { grid-template-columns: minmax(0,1fr); }
-  body.is-fullscreen #panel-osmosis.osmosis-model-visible.osmosis-graph-hidden .chart-stage > #model-osmosis { width: auto; height: 100%; max-height: calc(100vh - 150px); }
+  body.is-fullscreen .zoom-card svg, body.is-fullscreen .model-card svg, body.is-fullscreen .dlvo-card svg { width: auto; height: 100%; max-width: 100%; max-height: 100%; margin: 0 auto; }
+  body.is-fullscreen #panel-colloid.dlvo-hidden .chart-card { grid-column: 1; }
   .exit-fs-btn { display: none; padding: 8px 13px; border: 1px solid var(--border); border-radius: 99px; background: #fff; color: var(--blue-deep); box-shadow: var(--shadow-sm); cursor: pointer; font-family: inherit; font-size: 12px; line-height: 1; font-weight: 800; }
   .exit-fs-btn::before { content: '⛶'; margin-right: 6px; font-size: 14px; }
   body.is-fullscreen .exit-fs-btn { display: inline-block; }
-  body.is-fullscreen #panel-freezing.freezing-model-visible .layout, body.is-fullscreen #panel-osmosis.osmosis-model-visible .layout { grid-template-columns: minmax(330px,.68fr) minmax(0,1.32fr); }
-  body.is-fullscreen #panel-freezing.freezing-model-visible .chart-stage > #model-freezing, body.is-fullscreen #panel-osmosis.osmosis-model-visible .chart-stage > #model-osmosis { width: min(100%,calc(100vh - 82px)); height: auto; max-height: calc(100vh - 82px); }
-  body.is-fullscreen #panel-freezing.freezing-model-visible .model-stage > #chart-freezing, body.is-fullscreen #panel-osmosis.osmosis-model-visible .model-stage > #chart-osmosis { width: 100%; max-width: none; max-height: calc(100vh - 150px); }
-  body.is-fullscreen #panel-colloid .chart-stage > #model-colloid { width: 100%; height: 100%; max-height: calc(100vh - 78px); }
-  body.is-fullscreen #panel-colloid .dlvo-card svg { width: 100%; height: 100%; max-width: none; max-height: calc(100vh - 145px); }
+  /* 全画面のスワップ特例は撤去し、統一レイアウト（主ビュー＋右カラムに副ビュー＋スライダー）に一本化 */
 
   @media (max-width: 900px) {
     .layout { grid-template-columns: 1fr; }

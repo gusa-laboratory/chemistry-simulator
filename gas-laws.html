@@ -1359,11 +1359,11 @@ function drawContainer(svgId, o) {
   // 右上の小表示では縦型注射器にして、限られた横幅を高さとして活用する。
   if (vertical) {
     const fullscreen = document.body.classList.contains('is-fullscreen');
-    const viewW = fullscreen ? 200 : 190;
+    const viewW = fullscreen ? 250 : 190;
     const viewH = fullscreen ? 360 : 280;
-    const numFont = fullscreen ? 25 : 11.5;   // 全画面では模式図中の数値を大きく
-    const cw = fullscreen ? 132 : 106;         // 全画面は容器を広めにして横の余白を減らす
-    const cy = fullscreen ? 98 : 28;           // 全画面は数値ブロックのぶんピストンを下げる
+    const numFont = fullscreen ? 23 : 11.5;   // 全画面では模式図中の数値を大きく（桁が増えても切れない幅で）
+    const cw = fullscreen ? 150 : 106;         // 全画面は容器を広めにして横の余白を減らす
+    const cy = fullscreen ? 96 : 28;           // 全画面は数値ブロックのぶんピストンを下げる
     const ch = fullscreen ? (viewH - cy - 14) : 214;
     const tempY = 267;                          // 非全画面時の下部T表示位置
     svg.setAttribute('viewBox', `0 0 ${viewW} ${viewH}`);
