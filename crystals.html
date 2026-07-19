@@ -17,7 +17,7 @@
   header{padding:22px clamp(18px,4vw,56px) 0;background:rgba(250,252,255,.91);border-bottom:1px solid rgba(203,215,230,.92);box-shadow:0 4px 18px rgba(31,55,89,.05);}
   .header-row{display:flex;max-width:1440px;margin:0 auto 14px;gap:24px;align-items:center;justify-content:space-between;}
   header h1{margin:0;font-size:clamp(23px,2.45vw,32px);line-height:1.25;font-weight:800;letter-spacing:-.03em;color:var(--blue-deep);}
-  header h1::before{content:'CHEMISTRY LAB';display:block;width:max-content;margin-bottom:5px;padding:4px 9px;border-radius:999px;background:var(--blue-soft);color:var(--curve);font:800 10px/1 Inter,Arial,sans-serif;letter-spacing:.13em;}
+  header h1::before{content:none;}
   .header-subtitle{margin:6px 0 0;color:var(--ink2);font-size:13px;line-height:1.55;font-weight:600;}
   .classroom-btn,.exit-fs-btn{flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border:1px solid #bfd0e7;border-radius:12px;background:#fff;color:var(--blue-deep);box-shadow:var(--shadow-sm);font-family:inherit;font-size:13px;line-height:1;font-weight:800;cursor:pointer;transition:.18s ease;}
   .classroom-btn::before{content:'⛶';font-size:17px;}
@@ -89,8 +89,8 @@
 <header>
   <div class="header-row">
     <div class="title-block">
+      <a href="index.html" style="display:inline-flex;align-items:center;gap:5px;margin-bottom:6px;color:#526078;text-decoration:none;font-size:12px;font-weight:700">← 化学シミュレーター一覧</a>
       <h1>結晶格子シミュレーター</h1>
-      <p class="header-subtitle">ドラッグで回転・ホイールで拡大。単位格子で切り取ると、頂点＝1/8球・面＝半球の「切り口」が見えます。</p>
     </div>
     <button class="classroom-btn" id="classroom-mode" type="button">全画面表示</button>
   </div>

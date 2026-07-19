@@ -40,9 +40,9 @@
   main { padding: 34px clamp(18px, 5vw, 60px) 60px; }
   .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 22px; }
   .sim {
-    display: flex; flex-direction: column; text-decoration: none; color: inherit;
+    display: flex; flex-direction: row; align-items: center; gap: 18px; text-decoration: none; color: inherit;
     background: var(--card); border: 1px solid var(--border); border-radius: 22px;
-    padding: 26px 26px 24px; box-shadow: var(--shadow); position: relative; overflow: hidden;
+    padding: 22px 26px; box-shadow: var(--shadow); position: relative; overflow: hidden;
     transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
   }
   .sim::after {
@@ -51,8 +51,8 @@
   }
   .sim:hover { transform: translateY(-4px); border-color: #b7cdf0; box-shadow: 0 26px 60px rgba(31,55,89,.16); }
   .sim:focus-visible { outline: 3px solid rgba(37,99,235,.32); outline-offset: 3px; }
-  .sim .ico { font-size: 42px; line-height: 1; margin-bottom: 14px; }
-  .sim h2 { margin: 0 0 4px; font-size: 21px; font-weight: 800; color: var(--blue-deep); }
+  .sim .ico { font-size: 40px; line-height: 1; flex: 0 0 auto; }
+  .sim h2 { margin: 0; font-size: 20px; font-weight: 800; color: var(--blue-deep); }
   .sim .eyebrow { font: 800 11px/1 Inter, Arial, sans-serif; letter-spacing: .12em; color: var(--curve); margin-bottom: 10px; }
   .sim p { margin: 8px 0 16px; color: var(--ink2); font-size: 14px; line-height: 1.7; }
   .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; }
@@ -84,44 +84,17 @@
 </header>
 <main class="wrap">
   <div class="grid">
+    <a class="sim" href="crystals.html">
+      <div class="ico">💎</div>
+      <h2>結晶格子シミュレーター</h2>
+    </a>
     <a class="sim" href="gas-laws.html">
       <div class="ico">🎈</div>
-      <div class="eyebrow">8 TABS</div>
       <h2>気体の法則シミュレーター</h2>
-      <p>ボイル・シャルル・ゲイリュサック・理想気体から、蒸気圧を含む状態変化、圧縮係数 Z–P（実在気体）まで。粒子モデルと連動。</p>
-      <div class="chips">
-        <span class="chip">ボイル / シャルル</span>
-        <span class="chip">PV=nRT</span>
-        <span class="chip">蒸気圧・凝縮</span>
-        <span class="chip">圧縮係数 Z</span>
-      </div>
-      <span class="go">開く</span>
     </a>
     <a class="sim" href="solutions.html">
       <div class="ico">🧪</div>
-      <div class="eyebrow">7 TABS</div>
       <h2>希薄溶液・コロイド シミュレーター</h2>
-      <p>沸点上昇・凝固点降下・浸透圧の束一的性質から、DLVO による疎水コロイドの凝析、電気泳動、塩析、保護コロイドまで。</p>
-      <div class="chips">
-        <span class="chip">沸点上昇 / 凝固点降下</span>
-        <span class="chip">浸透圧 π=cRT</span>
-        <span class="chip">DLVO・凝析</span>
-        <span class="chip">電気泳動 / 塩析</span>
-      </div>
-      <span class="go">開く</span>
-    </a>
-    <a class="sim" href="crystals.html">
-      <div class="ico">💎</div>
-      <div class="eyebrow">6 TABS</div>
-      <h2>結晶格子シミュレーター</h2>
-      <p>体心・面心立方、六方最密、ダイヤモンド、NaCl／CsCl 型を本物の3Dで。単位格子で「切り取った」断面、4分割での1辺の導出、限界半径比まで。</p>
-      <div class="chips">
-        <span class="chip">BCC / FCC / HCP</span>
-        <span class="chip">充填率</span>
-        <span class="chip">ダイヤモンド</span>
-        <span class="chip">限界半径比</span>
-      </div>
-      <span class="go">開く</span>
     </a>
   </div>
 </main>
