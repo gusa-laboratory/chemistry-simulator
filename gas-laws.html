@@ -771,28 +771,21 @@
   body.is-fullscreen .diagram-stage > svg[id^="cont-"] { width: 250px; }
   body.is-fullscreen .panel.has-diagram .layout,
   body.is-fullscreen .panel.has-diagram .layout.view-swapped {
-    grid-template-columns: minmax(0, 1fr) 340px;   /* 模式図は幅を絞り、余白を減らしてグラフを大きく */
-    grid-template-rows: minmax(0, 1fr) auto;
+    grid-template-columns: 4fr 1fr;   /* グラフ : 右カラム（模式図＋スライダー）≈ 4 : 1 */
+    grid-template-rows: minmax(0, 1fr);
     align-items: stretch;
+    gap: 12px;
   }
-  body.is-fullscreen .panel.has-diagram .chart-card {
-    grid-column: 1;
-    grid-row: 1;
+  body.is-fullscreen .panel.has-diagram .chart-card { grid-column: 1; grid-row: 1; min-height: 0; }
+  body.is-fullscreen .panel.has-diagram .side {
+    grid-column: 2; grid-row: 1;
+    display: flex; flex-direction: column; gap: 8px; min-height: 0; min-width: 0;
   }
-  body.is-fullscreen .panel.has-diagram .side { display: contents; }
-  body.is-fullscreen .panel.has-diagram .side > .law {
-    grid-column: 2;
-    grid-row: 1;
-    align-self: stretch;
-  }
+  body.is-fullscreen .panel.has-diagram .side > .law { flex: 0 0 auto; margin: 0; }
   body.is-fullscreen .panel.has-diagram .side > .card:not(.law):not(.result-card) {
-    grid-column: 1 / -1;
-    grid-row: 2;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)) auto;
-    gap: 4px 14px;
-    align-items: end;
-    padding: 7px 12px;
+    flex: 1 1 auto; min-height: 0;
+    display: flex; flex-direction: column; justify-content: flex-start; gap: 7px;
+    padding: 8px 12px; overflow: auto;   /* スライダーは模式図の下・カラム幅に収める */
   }
   body.is-fullscreen .panel.has-diagram .side > .card:not(.law):not(.result-card) h2 { display: none; }
   body.is-fullscreen .panel.has-diagram .side .ctrl,
@@ -800,15 +793,12 @@
   body.is-fullscreen .panel.has-diagram .side .chk,
   body.is-fullscreen .panel.has-diagram .side .reset-btn { margin-top: 0; margin-bottom: 0; }
   body.is-fullscreen .panel.has-diagram .diagram-block {
-    display: grid;
-    height: 100%;
-    place-items: center;
-    padding: 3px 8px;
+    display: grid; place-items: center; padding: 2px;
   }
   body.is-fullscreen .panel.has-diagram .diagram-stage > svg[id^="cont-"] {
-    width: 320px;
+    width: 100%;
     height: auto;
-    max-height: calc(100vh - 120px);
+    max-height: 56vh;   /* 模式図の高さを抑え、下にスライダーを収める */
     margin: 0 auto;
   }
   /* スマホ調整：見出し圧縮・タブ小型化・模式図が縦に長くなりすぎないよう高さ制限 */
@@ -818,7 +808,7 @@
     .diagram-block svg { width: auto; max-width: 100%; max-height: 46vh; margin: 0 auto; }
   }
   /* グラフ内の文字が線と重なっても読めるよう、明示的な stroke 指定がない text に白い縁取り */
-  svg text:not([stroke]) { paint-order: stroke; stroke: #fff; stroke-width: 2.4px; stroke-linejoin: round; }
+  svg text:not([stroke]):not([fill="#fff"]) { paint-order: stroke; stroke: #fff; stroke-width: 2.2px; stroke-linejoin: round; }
 </style>
 </head>
 <body>
@@ -1369,12 +1359,12 @@ function drawContainer(svgId, o) {
   // 右上の小表示では縦型注射器にして、限られた横幅を高さとして活用する。
   if (vertical) {
     const fullscreen = document.body.classList.contains('is-fullscreen');
-    const viewW = fullscreen ? 230 : 190;
-    const viewH = fullscreen ? 470 : 280;
-    const numFont = fullscreen ? 28 : 11.5;   // 全画面では模式図中の数値を約2倍に
-    const cw = fullscreen ? 118 : 106;
-    const cy = fullscreen ? 116 : 28;          // 全画面は数値ブロックのぶんピストンを下げる
-    const ch = fullscreen ? (viewH - cy - 20) : 214;
+    const viewW = fullscreen ? 200 : 190;
+    const viewH = fullscreen ? 360 : 280;
+    const numFont = fullscreen ? 25 : 11.5;   // 全画面では模式図中の数値を大きく
+    const cw = fullscreen ? 132 : 106;         // 全画面は容器を広めにして横の余白を減らす
+    const cy = fullscreen ? 98 : 28;           // 全画面は数値ブロックのぶんピストンを下げる
+    const ch = fullscreen ? (viewH - cy - 14) : 214;
     const tempY = 267;                          // 非全画面時の下部T表示位置
     svg.setAttribute('viewBox', `0 0 ${viewW} ${viewH}`);
     const cx = (viewW - cw) / 2;
@@ -1388,8 +1378,8 @@ function drawContainer(svgId, o) {
     const pTxt = `<tspan font-weight="bold">P</tspan><tspan dx="5">= ${fmtP(o.P)}</tspan>`;
     const tTxt = `<tspan font-weight="bold">T</tspan><tspan dx="5">= ${fmt(o.T, 0)} K（${fmt(kToC(o.T), 0)} ℃）</tspan>`;
     if (fullscreen) {   // 全画面：P・T をピストン上部にまとめて大きく表示
-      s += `<text x="${centerX}" y="46" text-anchor="middle" font-size="${numFont}" fill="#172033">${pTxt}</text>`;
-      s += `<text x="${centerX}" y="88" text-anchor="middle" font-size="${numFont}" fill="#172033">${tTxt}</text>`;
+      s += `<text x="${centerX}" y="38" text-anchor="middle" font-size="${numFont}" fill="#172033">${pTxt}</text>`;
+      s += `<text x="${centerX}" y="72" text-anchor="middle" font-size="${numFont}" fill="#172033">${tTxt}</text>`;
     } else {
       s += `<text x="${centerX}" y="15" text-anchor="middle" font-size="${numFont}" fill="#172033">${pTxt}</text>`;
     }

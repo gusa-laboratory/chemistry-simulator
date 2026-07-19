@@ -249,7 +249,7 @@
     .toggle-row button { font-size: 11px; padding: 7px 7px; }
   }
   /* グラフ内の文字が線と重なっても読めるよう、明示的な stroke 指定がない text に白い縁取り */
-  svg text:not([stroke]) { paint-order: stroke; stroke: #fff; stroke-width: 2.4px; stroke-linejoin: round; }
+  svg text:not([stroke]):not([fill="#fff"]) { paint-order: stroke; stroke: #fff; stroke-width: 2.2px; stroke-linejoin: round; }
 </style>
 </head>
 <body>
