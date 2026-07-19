@@ -2,12 +2,13 @@
  * ⚠️ HTML/JS/アイコンを変更したら CACHE のバージョン番号を必ず上げること。
  *    上げ忘れると利用者端末に旧版が残り続ける（badminton系と同じ運用）。
  */
-const CACHE = 'chem-sim-v2';
+const CACHE = 'chem-sim-v3';
 const ASSETS = [
   './',
   './index.html',
   './gas-laws.html',
   './solutions.html',
+  './crystals.html',
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png',
