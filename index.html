@@ -49,7 +49,13 @@
   .sim:focus-visible { outline: 3px solid rgba(37,99,235,.32); outline-offset: 3px; }
   .sim .ico { font-size: 40px; line-height: 1; flex: 0 0 auto; }
   .sim h2 { margin: 0; font-size: 20px; font-weight: 800; color: var(--blue-deep); }
-  @media (max-width: 560px) { header { padding-top: 28px; } main { padding-top: 24px; } }
+  @media (max-width: 560px) {
+    header { padding-top: 28px; } main { padding-top: 24px; }
+    .grid { gap: 14px; }
+    .sim { padding: 18px 20px; gap: 14px; }
+    .sim .ico { font-size: 34px; }
+    .sim h2 { font-size: 17px; }
+  }
 </style>
 </head>
 <body>

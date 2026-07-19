@@ -809,6 +809,12 @@
     width: 290px;
     max-height: calc(100vh - 125px);
   }
+  /* スマホ調整：見出し圧縮・タブ小型化・模式図が縦に長くなりすぎないよう高さ制限 */
+  @media (max-width: 560px) {
+    header h1 { font-size: 21px; }
+    .tabs button { padding: 9px 12px; font-size: 13px; }
+    .diagram-block svg { width: auto; max-width: 100%; max-height: 46vh; margin: 0 auto; }
+  }
 </style>
 </head>
 <body>
