@@ -6,11 +6,7 @@
 <title>希薄溶液シミュレーター｜Interactive Lab</title>
 <meta name="description" content="沸点上昇・凝固点降下・浸透圧の束一的性質と、DLVO・電気泳動・塩析・保護コロイドを粒子モデルで学ぶ授業用シミュレーター。">
 <meta name="theme-color" content="#2563eb">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="希薄溶液">
+<link rel="icon" href="icons/icon-192.png">
 <style>
   :root {
     --curve: #2563eb;
@@ -1166,10 +1162,6 @@ document.querySelector('.reset-btn[data-reset="electro"]').addEventListener('cli
 
 drawBoiling();drawFreezing();drawOsmosis();drawColloid();
 buildEColloidRow();drawSalt();drawProtect();drawElectro();
-</script>
-<script>
-  // PWA: Service Worker 登録（オフライン起動・ホーム追加）
-  if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
 </script>
 </body>
 </html>
