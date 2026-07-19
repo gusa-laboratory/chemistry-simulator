@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>希薄溶液シミュレーター｜Interactive Lab</title>
+<title>希薄溶液｜Interactive Lab</title>
 <meta name="description" content="沸点上昇・凝固点降下・浸透圧の束一的性質と、DLVO・電気泳動・塩析・保護コロイドを粒子モデルで学ぶ授業用シミュレーター。">
 <meta name="theme-color" content="#2563eb">
 <link rel="icon" href="icons/icon-192.png">
@@ -248,14 +248,16 @@
     header h1 { font-size: 21px; }
     .toggle-row button { font-size: 11px; padding: 7px 7px; }
   }
+  /* グラフ内の文字が線と重なっても読めるよう、明示的な stroke 指定がない text に白い縁取り */
+  svg text:not([stroke]) { paint-order: stroke; stroke: #fff; stroke-width: 2.4px; stroke-linejoin: round; }
 </style>
 </head>
 <body>
 <header>
   <div class="header-row">
     <div>
-      <a href="index.html" style="display:inline-flex;align-items:center;gap:5px;margin-bottom:6px;color:#526078;text-decoration:none;font-size:12px;font-weight:700">← 化学シミュレーター一覧</a>
-      <h1>希薄溶液シミュレーター</h1>
+      <a href="index.html" style="display:inline-flex;align-items:center;gap:6px;margin-bottom:8px;padding:7px 14px;border:1px solid #cdd9ea;border-radius:10px;background:#fff;color:#3a4d6b;text-decoration:none;font-size:13.5px;font-weight:800;box-shadow:0 2px 8px rgba(31,55,89,.06)">← 一覧に戻る</a>
+      <h1>希薄溶液</h1>
     </div>
     <button class="fullscreen-btn" id="fullscreen" type="button">全画面表示</button>
   </div>
@@ -302,7 +304,7 @@
             </div>
             <input id="b-i" type="hidden" value="1">
           </div>
-          <div class="ctrl"><label>外圧 <span class="val"><span id="b-pressure-val">101.3</span> kPa</span></label><input id="b-pressure" type="range" min="70" max="130" step="0.5" value="101.3"></div>
+          <div class="ctrl"><label>外圧 <span class="val" id="b-pressure-val">1.01×10⁵ Pa</span></label><input id="b-pressure" type="range" min="70" max="130" step="0.5" value="101.3"></div>
           <button class="reset-btn" data-reset="boiling">初期値</button>
         </div>
       </div>
@@ -484,6 +486,8 @@
 'use strict';
 const $ = id => document.getElementById(id);
 const fmt = (x,d=1) => Number(x).toFixed(d);
+// 圧力を Pa の科学表記（有効数字3桁・指数は上付き）に整形。引数は kPa。例: 101.5 → "1.02×10⁵ Pa"
+function paSci(kPa){let pa=(+kPa)*1000;if(!isFinite(pa))return'– Pa';if(pa===0)return'0 Pa';const sign=pa<0?'-':'';pa=Math.abs(pa);let e=Math.floor(Math.log10(pa)),ms=(pa/Math.pow(10,e)).toPrecision(3);if(+ms>=10){ms=(+ms/10).toPrecision(3);e++;}const S='⁰¹²³⁴⁵⁶⁷⁸⁹',es=(''+e).split('').map(c=>c==='-'?'⁻':S[+c]).join('');return`${sign}${ms}×10${es} Pa`;}
 const SVGNS = 'http://www.w3.org/2000/svg';
 const W=780,H=500,ML=76,MR=24,MT=28,MB=62,PW=W-ML-MR,PH=H-MT-MB;
 const MW=18.015, KB=0.512, KF=1.86, R=8.314;
@@ -562,13 +566,13 @@ function attachHover(svgId,tipId,getState){
 
 function drawBoiling(){
   const st=solutionState('b'),Pext=+$('b-pressure').value;
-  $('b-water-val').textContent=st.water;$('b-solute-val').textContent=st.solute;$('b-molar-val').textContent=st.molar;$('b-pressure-val').textContent=fmt(Pext,1);
+  $('b-water-val').textContent=st.water;$('b-solute-val').textContent=st.solute;$('b-molar-val').textContent=st.molar;$('b-pressure-val').textContent=paSci(Pext);
   const tbPure=inversePsat(Pext),tbSol=inversePsat(Pext/Math.max(st.xWaterEff,.85)),delta=tbSol-tbPure,p100Pure=101.5,p100Sol=101.5*st.xWaterEff;
   const xMin=70,xMax=125,yMin=0,yMax=160;
-  const {sx,sy,svg}=frame({xMin,xMax,yMin,yMax,xTicks:[70,80,90,100,110,120].map(v=>({v,label:v})),yTicks:[0,40,80,120,160].map(v=>({v,label:v})),xLabel:'温度 t [℃]',yLabel:'蒸気圧 P [kPa]'});
+  const {sx,sy,svg}=frame({xMin,xMax,yMin,yMax,xTicks:[70,80,90,100,110,120].map(v=>({v,label:v})),yTicks:[0,40,80,120,160].map(v=>({v,label:v/100})),xLabel:'温度 t [℃]',yLabel:'蒸気圧 P [×10⁵ Pa]'});
   let g=svg,pure=sampleUntilTop(waterPsat,xMin,xMax,yMax),sol=sampleUntilTop(t=>st.xWaterEff*waterPsat(t),xMin,xMax,yMax);
   g+=`<line x1="${sx(xMin)}" y1="${sy(Pext)}" x2="${sx(xMax)}" y2="${sy(Pext)}" stroke="var(--axis)" stroke-width="2" stroke-dasharray="7 5"/>`;
-  g+=`<text x="${sx(xMax)-8}" y="${sy(Pext)-8}" text-anchor="end" font-size="12" font-weight="bold" fill="var(--ink)" stroke="#fff" stroke-width="4" paint-order="stroke fill">外圧 ${fmt(Pext,1)} kPa</text>`;
+  g+=`<text x="${sx(xMax)-8}" y="${sy(Pext)-8}" text-anchor="end" font-size="12" font-weight="bold" fill="var(--ink)" stroke="#fff" stroke-width="4" paint-order="stroke fill">外圧 ${paSci(Pext)}</text>`;
   g+=path(pure,sx,sy,COLORS.pure,3);
   if(showBoilingSolution)g+=path(sol,sx,sy,COLORS.solution,3);
   g+=`<text x="${sx(101.5)}" y="${sy(waterPsat(105))-18}" font-size="13" font-weight="bold" fill="var(--curve)" stroke="#fff" stroke-width="4" paint-order="stroke fill">純水</text>`;
@@ -579,8 +583,8 @@ function drawBoiling(){
   }
   if(showVaporPressureAt100){
     g+=`<line x1="${sx(100)}" y1="${sy(0)}" x2="${sx(100)}" y2="${sy(p100Pure)}" stroke="var(--axis)" stroke-width="1.2" stroke-dasharray="4 4"/>`;
-    g+=`<line x1="${sx(xMin)}" y1="${sy(p100Pure)}" x2="${sx(100)}" y2="${sy(p100Pure)}" stroke="var(--curve)" stroke-width="1.5" stroke-dasharray="5 4"/><circle cx="${sx(100)}" cy="${sy(p100Pure)}" r="6" fill="var(--curve)" stroke="#fff" stroke-width="2"/><text x="${sx(xMin)+8}" y="${sy(p100Pure)-9}" font-size="12" font-weight="bold" fill="var(--curve)" stroke="#fff" stroke-width="4" paint-order="stroke fill">${fmt(p100Pure,1)} kPa</text>`;
-    if(showBoilingSolution&&Math.abs(p100Pure-p100Sol)>.05)g+=`<line x1="${sx(xMin)}" y1="${sy(p100Sol)}" x2="${sx(100)}" y2="${sy(p100Sol)}" stroke="var(--solution)" stroke-width="1.5" stroke-dasharray="5 4"/><circle cx="${sx(100)}" cy="${sy(p100Sol)}" r="6" fill="var(--solution)" stroke="#fff" stroke-width="2"/><text x="${sx(xMin)+8}" y="${sy(p100Sol)+17}" font-size="12" font-weight="bold" fill="var(--solution)" stroke="#fff" stroke-width="4" paint-order="stroke fill">${fmt(p100Sol,1)} kPa</text>`;
+    g+=`<line x1="${sx(xMin)}" y1="${sy(p100Pure)}" x2="${sx(100)}" y2="${sy(p100Pure)}" stroke="var(--curve)" stroke-width="1.5" stroke-dasharray="5 4"/><circle cx="${sx(100)}" cy="${sy(p100Pure)}" r="6" fill="var(--curve)" stroke="#fff" stroke-width="2"/><text x="${sx(xMin)+8}" y="${sy(p100Pure)-9}" font-size="12" font-weight="bold" fill="var(--curve)" stroke="#fff" stroke-width="4" paint-order="stroke fill">${paSci(p100Pure)}</text>`;
+    if(showBoilingSolution&&Math.abs(p100Pure-p100Sol)>.05)g+=`<line x1="${sx(xMin)}" y1="${sy(p100Sol)}" x2="${sx(100)}" y2="${sy(p100Sol)}" stroke="var(--solution)" stroke-width="1.5" stroke-dasharray="5 4"/><circle cx="${sx(100)}" cy="${sy(p100Sol)}" r="6" fill="var(--solution)" stroke="#fff" stroke-width="2"/><text x="${sx(xMin)+8}" y="${sy(p100Sol)+17}" font-size="12" font-weight="bold" fill="var(--solution)" stroke="#fff" stroke-width="4" paint-order="stroke fill">${paSci(p100Sol)}</text>`;
   }
   $('chart-boiling').innerHTML=g;
   $('badges-boiling').innerHTML=`<span class="badge">水の沸点 <strong>${fmt(tbPure,1)} ℃</strong></span><span class="badge solution">溶液の沸点 <strong>${fmt(tbSol,1)} ℃</strong></span><span class="badge solution">沸点上昇 <strong>+${fmt(delta,2)} K</strong></span><span class="badge">ファントホッフ係数 <strong>i = ${st.i}</strong></span><span class="badge">実効モル分率 <strong>${fmt(st.xWaterEff,4)}</strong></span>`;
@@ -593,14 +597,15 @@ function drawBoilingZoom(st){
   const boilEndT=inversePsat(basePsat/Math.max(st.xWaterEff,.85)),vaporEndP=originP*st.xWaterEff;
   const deltaT=boilEndT-originT,deltaP=originP-vaporEndP;
   const xMin=97,xMax=103;
-  const yPad=Math.max(5,deltaP*2.4),yMin=originP-yPad,yMax=originP+yPad;
+  const yMin=85,yMax=120;   // 縦軸（蒸気圧）を 8.50×10⁴〜1.20×10⁵ Pa に固定
   const sx=x=>ZL+(x-xMin)/(xMax-xMin)*zpw,sy=y=>ZT+zph-(y-yMin)/(yMax-yMin)*zph;
   const pure=[],sol=[];for(let i=0;i<=160;i++){const t=xMin+(xMax-xMin)*i/160;pure.push([t,zoomPureP(t)]);sol.push([t,zoomSolutionP(t)]);}
   const riseColor='#f97316',dropColor='#0f766e',tickTemps=[97,100,103];
   let g=`<defs><clipPath id="boiling-zoom-clip"><rect x="${ZL}" y="${ZT}" width="${zpw}" height="${zph}"/></clipPath><marker id="boiling-rise-arrow" viewBox="0 0 9 9" refX="8" refY="4.5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 9 4.5 L 0 9 Z" fill="${riseColor}"/></marker><marker id="vapor-drop-arrow" viewBox="0 0 9 9" refX="8" refY="4.5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 9 4.5 L 0 9 Z" fill="${dropColor}"/></marker></defs>`;
   g+=`<text x="${ZW/2}" y="20" text-anchor="middle" font-size="15" font-weight="bold" fill="var(--ink)">沸点付近の拡大</text>`;
   for(const t of tickTemps)g+=`<line x1="${sx(t)}" y1="${ZT}" x2="${sx(t)}" y2="${ZT+zph}" stroke="var(--grid)"/><text x="${sx(t)}" y="${ZT+zph+22}" text-anchor="middle" font-size="12" fill="var(--ink2)">${fmt(t,1)}</text>`;
-  for(const p of [yMin,originP,yMax])g+=`<line x1="${ZL}" y1="${sy(p)}" x2="${ZL+zpw}" y2="${sy(p)}" stroke="${Math.abs(p-originP)<.001?'var(--axis)':'var(--grid)'}" ${Math.abs(p-originP)<.001?'stroke-width="1.7" stroke-dasharray="7 5"':''}/><text x="${ZL-9}" y="${sy(p)+4}" text-anchor="end" font-size="12" fill="var(--ink2)">${fmt(p,1)}</text>`;
+  for(const p of [85,90,100,110,120])g+=`<line x1="${ZL}" y1="${sy(p)}" x2="${ZL+zpw}" y2="${sy(p)}" stroke="var(--grid)"/><text x="${ZL-9}" y="${sy(p)+4}" text-anchor="end" font-size="12" fill="var(--ink2)">${fmt(p/100,2)}</text>`;
+  g+=`<line x1="${ZL}" y1="${sy(originP)}" x2="${ZL+zpw}" y2="${sy(originP)}" stroke="var(--axis)" stroke-width="1.7" stroke-dasharray="7 5"/>`;
   g+=`<line x1="${ZL}" y1="${ZT+zph}" x2="${ZL+zpw}" y2="${ZT+zph}" stroke="var(--axis)" stroke-width="1.5"/><line x1="${ZL}" y1="${ZT}" x2="${ZL}" y2="${ZT+zph}" stroke="var(--axis)" stroke-width="1.5"/>`;
   g+=`<g clip-path="url(#boiling-zoom-clip)">${path(pure,sx,sy,COLORS.pure,3)}${showBoilingSolution?path(sol,sx,sy,COLORS.solution,3):''}</g>`;
   if(showBoilingPointGuides){
@@ -608,8 +613,8 @@ function drawBoilingZoom(st){
     if(showBoilingSolution)g+=`<line x1="${sx(boilEndT)}" y1="${sy(originP)}" x2="${sx(boilEndT)}" y2="${ZT+zph}" stroke="var(--solution)" stroke-width="1.3" stroke-dasharray="4 4"/><circle cx="${sx(boilEndT)}" cy="${sy(originP)}" r="5" fill="var(--solution)" stroke="#fff" stroke-width="2"/><text x="${sx(boilEndT)+7}" y="${ZT+zph-10}" text-anchor="start" font-size="11" font-weight="bold" fill="var(--solution)" stroke="#fff" stroke-width="4" paint-order="stroke fill">${fmt(boilEndT,1)} ℃</text>`;
   }
   if(showVaporPressureAt100){
-    g+=`<line x1="${sx(originT)}" y1="${ZT+zph}" x2="${sx(originT)}" y2="${sy(originP)}" stroke="var(--axis)" stroke-width="1.2" stroke-dasharray="4 4"/><line x1="${ZL}" y1="${sy(originP)}" x2="${sx(originT)}" y2="${sy(originP)}" stroke="var(--curve)" stroke-width="1.5" stroke-dasharray="5 4"/><circle cx="${sx(originT)}" cy="${sy(originP)}" r="5" fill="var(--curve)" stroke="#fff" stroke-width="2"/><text x="${ZL+8}" y="${sy(originP)-9}" font-size="11" font-weight="bold" fill="var(--curve)" stroke="#fff" stroke-width="4" paint-order="stroke fill">${fmt(originP,1)} kPa</text>`;
-    if(showBoilingSolution&&Math.abs(originP-vaporEndP)>.05)g+=`<line x1="${ZL}" y1="${sy(vaporEndP)}" x2="${sx(originT)}" y2="${sy(vaporEndP)}" stroke="var(--solution)" stroke-width="1.5" stroke-dasharray="5 4"/><circle cx="${sx(originT)}" cy="${sy(vaporEndP)}" r="5" fill="var(--solution)" stroke="#fff" stroke-width="2"/><text x="${ZL+8}" y="${sy(vaporEndP)+16}" font-size="11" font-weight="bold" fill="var(--solution)" stroke="#fff" stroke-width="4" paint-order="stroke fill">${fmt(vaporEndP,1)} kPa</text>`;
+    g+=`<line x1="${sx(originT)}" y1="${ZT+zph}" x2="${sx(originT)}" y2="${sy(originP)}" stroke="var(--axis)" stroke-width="1.2" stroke-dasharray="4 4"/><line x1="${ZL}" y1="${sy(originP)}" x2="${sx(originT)}" y2="${sy(originP)}" stroke="var(--curve)" stroke-width="1.5" stroke-dasharray="5 4"/><circle cx="${sx(originT)}" cy="${sy(originP)}" r="5" fill="var(--curve)" stroke="#fff" stroke-width="2"/><text x="${ZL+8}" y="${sy(originP)-9}" font-size="11" font-weight="bold" fill="var(--curve)" stroke="#fff" stroke-width="4" paint-order="stroke fill">${paSci(originP)}</text>`;
+    if(showBoilingSolution&&Math.abs(originP-vaporEndP)>.05)g+=`<line x1="${ZL}" y1="${sy(vaporEndP)}" x2="${sx(originT)}" y2="${sy(vaporEndP)}" stroke="var(--solution)" stroke-width="1.5" stroke-dasharray="5 4"/><circle cx="${sx(originT)}" cy="${sy(vaporEndP)}" r="5" fill="var(--solution)" stroke="#fff" stroke-width="2"/><text x="${ZL+8}" y="${sy(vaporEndP)+16}" font-size="11" font-weight="bold" fill="var(--solution)" stroke="#fff" stroke-width="4" paint-order="stroke fill">${paSci(vaporEndP)}</text>`;
   }
   if(deltaT>.005){
     if(showVaporPressureArrow)g+=`<line x1="${sx(originT)}" y1="${sy(originP)}" x2="${sx(originT)}" y2="${sy(vaporEndP)}" stroke="${dropColor}" stroke-width="3" marker-end="url(#vapor-drop-arrow)"/><text x="${sx(originT)-13}" y="${(sy(originP)+sy(vaporEndP))/2+4}" text-anchor="end" font-size="12" font-weight="bold" fill="${dropColor}" stroke="#fff" stroke-width="4" paint-order="stroke fill">蒸気圧降下</text>`;
@@ -617,7 +622,7 @@ function drawBoilingZoom(st){
   }
   g+=`<circle cx="${sx(originT)}" cy="${sy(originP)}" r="4" fill="var(--ink)" stroke="#fff" stroke-width="1.5"/>`;
   g+=`<g font-size="11" font-weight="bold"><line x1="${ZL+10}" y1="31" x2="${ZL+36}" y2="31" stroke="var(--curve)" stroke-width="3"/><text x="${ZL+42}" y="35" fill="var(--ink)">純水</text>${showBoilingSolution?`<line x1="${ZL+92}" y1="31" x2="${ZL+118}" y2="31" stroke="var(--solution)" stroke-width="3"/><text x="${ZL+124}" y="35" fill="var(--ink)">希薄溶液</text>`:''}</g>`;
-  g+=`<text x="${ZL+zpw/2}" y="${ZH-10}" text-anchor="middle" font-size="13" fill="var(--ink)">温度 t [℃]</text><text x="17" y="${ZT+zph/2}" text-anchor="middle" font-size="13" fill="var(--ink)" transform="rotate(-90 17 ${ZT+zph/2})">蒸気圧 P [kPa]</text>`;
+  g+=`<text x="${ZL+zpw/2}" y="${ZH-10}" text-anchor="middle" font-size="13" fill="var(--ink)">温度 t [℃]</text><text x="17" y="${ZT+zph/2}" text-anchor="middle" font-size="13" fill="var(--ink)" transform="rotate(-90 17 ${ZT+zph/2})">蒸気圧 P [×10⁵ Pa]</text>`;
   $('chart-boiling-zoom').innerHTML=g;
 }
 
@@ -707,8 +712,8 @@ function drawOsmosis(){
   // π = i·cRT は i>1 で 3200 kPa を超えるため、縦軸を内容に合わせて自動スケール
   const nStep=v=>{const p=Math.pow(10,Math.floor(Math.log10(v))),f=v/p;return(f<=1?1:f<=2?2:f<=5?5:10)*p;};
   const rawMax=Math.max(st.pressure,st.i*xMax*R*st.tempK)*1.06||3200,yStep=nStep(rawMax/4),yMax=Math.max(yStep,Math.ceil(rawMax/yStep)*yStep);
-  const yTicks=[];for(let v=0;v<=yMax+1;v+=yStep)yTicks.push({v,label:Math.round(v)});
-  const {sx,sy,svg}=frame({xMin,xMax,yMin,yMax,xTicks:[0,.2,.4,.6,.8,1].map(v=>({v,label:fmt(v,1)})),yTicks,xLabel:'モル濃度 c [mol/L]',yLabel:'浸透圧 π [kPa]'});
+  const yTicks=[];for(let v=0;v<=yMax+1;v+=yStep)yTicks.push({v,label:+(v/100).toFixed(2)});
+  const {sx,sy,svg}=frame({xMin,xMax,yMin,yMax,xTicks:[0,.2,.4,.6,.8,1].map(v=>({v,label:fmt(v,1)})),yTicks,xLabel:'モル濃度 c [mol/L]',yLabel:'浸透圧 π [×10⁵ Pa]'});
   const line=[];for(let k=0;k<=120;k++){const c=k/120;line.push([c,st.i*c*R*st.tempK]);}
   let g=svg;
   g+=`<text x="${sx(.06)}" y="${sy(0)-11}" font-size="13" font-weight="bold" fill="var(--curve)" stroke="#fff" stroke-width="4" paint-order="stroke fill">純水 π = 0</text>`;
@@ -718,7 +723,7 @@ function drawOsmosis(){
     g+=`<line x1="${sx(st.concentration)}" y1="${sy(st.pressure)}" x2="${sx(st.concentration)}" y2="${sy(0)}" stroke="var(--solution)" stroke-width="1.5" stroke-dasharray="5 4"/><line x1="${sx(0)}" y1="${sy(st.pressure)}" x2="${sx(st.concentration)}" y2="${sy(st.pressure)}" stroke="var(--solution)" stroke-width="1.5" stroke-dasharray="5 4"/><circle cx="${sx(st.concentration)}" cy="${sy(st.pressure)}" r="7" fill="var(--solution)" stroke="#fff" stroke-width="2"/>`;
   }
   $('chart-osmosis').innerHTML=g;
-  $('badges-osmosis').innerHTML=`<span class="badge solution">浸透圧 <strong>${fmt(st.pressure,1)} kPa</strong></span><span class="badge solution">モル濃度 <strong>${fmt(st.concentration,3)} mol/L</strong></span><span class="badge">ファントホッフ係数 <strong>i = ${st.i}</strong></span><span class="badge">絶対温度 <strong>${fmt(st.tempK,1)} K</strong></span>`;
+  $('badges-osmosis').innerHTML=`<span class="badge solution">浸透圧 <strong>${paSci(st.pressure)}</strong></span><span class="badge solution">モル濃度 <strong>${fmt(st.concentration,3)} mol/L</strong></span><span class="badge">ファントホッフ係数 <strong>i = ${st.i}</strong></span><span class="badge">絶対温度 <strong>${fmt(st.tempK,1)} K</strong></span>`;
   drawOsmosisModel(st);
 }
 function drawOsmosisModel(st){
@@ -727,7 +732,7 @@ function drawOsmosisModel(st){
   const top=large?84:72,bottom=large?345:270,baseLevel=large?165:138,connectorTop=bottom-(large?58:46),center=leftX+colW+gap/2;
   const levelShift=Math.min(large?66:48,st.pressure/500*(large?34:25)),leftLevel=baseLevel+levelShift/2,rightLevel=baseLevel-levelShift/2;
   let s=`<defs><marker id="osmosis-water-arrow" viewBox="0 0 9 9" refX="8" refY="4.5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 9 4.5 L 0 9 Z" fill="var(--curve)"/></marker></defs>`;
-  s+=`<text x="${w/2}" y="20" text-anchor="middle" font-size="13" fill="var(--ink)"><tspan font-weight="bold">浸透圧 π</tspan><tspan dx="6">${fmt(st.pressure,1)} kPa</tspan></text>`;
+  s+=`<text x="${w/2}" y="20" text-anchor="middle" font-size="13" fill="var(--ink)"><tspan font-weight="bold">浸透圧 π</tspan><tspan dx="6">${paSci(st.pressure)}</tspan></text>`;
   s+=`<text x="${w/2}" y="42" text-anchor="middle" font-size="12" fill="var(--solution)" font-weight="bold">モル濃度 c = ${fmt(st.concentration,3)} mol/L</text>`;
   s+=`<text x="${w/2}" y="61" text-anchor="middle" font-size="11" fill="var(--ink2)">${fmt(st.tempK,1)} K</text>`;
   s+=`<rect x="${leftX+3}" y="${leftLevel}" width="${colW-6}" height="${bottom-leftLevel-3}" fill="#bfdbfe" opacity=".88"/><rect x="${rightX+3}" y="${rightLevel}" width="${colW-6}" height="${bottom-rightLevel-3}" fill="#ddd6fe" opacity=".9"/><rect x="${leftX+colW}" y="${connectorTop}" width="${gap}" height="${bottom-connectorTop-3}" fill="#c7d2fe" opacity=".9"/>`;
@@ -930,9 +935,9 @@ $('toggle-dlvo').addEventListener('click',ev=>{
   $('panel-colloid').classList.toggle('dlvo-hidden',!showDLVO);$('expand-dlvo').disabled=!showDLVO;drawColloid();
 });
 $('expand-dlvo').addEventListener('click',()=>setDLVOExpanded(!$('panel-colloid').classList.contains('dlvo-expanded')));
-attachHover('chart-boiling','tip-boiling',()=>{const st=solutionState('b');return{xMin:70,xMax:125,lines:t=>[`温度 ${fmt(t,1)} ℃`,`純水 ${fmt(waterPsat(t),1)} kPa`,...(showBoilingSolution?[`希薄溶液 ${fmt(st.xWaterEff*waterPsat(t),1)} kPa`]:[])]};});
+attachHover('chart-boiling','tip-boiling',()=>{const st=solutionState('b');return{xMin:70,xMax:125,lines:t=>[`温度 ${fmt(t,1)} ℃`,`純水 ${paSci(waterPsat(t))}`,...(showBoilingSolution?[`希薄溶液 ${paSci(st.xWaterEff*waterPsat(t))}`]:[])]};});
 attachHover('chart-freezing','tip-freezing',()=>{const st=solutionState('f'),tf=-st.i*KF*st.molality;return{xMin:0,xMax:60,lines:t=>[`冷却時間 ${fmt(t,1)} min`,`純水 ${fmt(pureCooling(t),1)} ℃`,...(showFreezingSolution?[`希薄溶液 ${fmt(solutionCooling(t,tf),1)} ℃`]:[])]};});
-attachHover('chart-osmosis','tip-osmosis',()=>{const st=osmosisState();return{xMin:0,xMax:1,lines:c=>[`モル濃度 ${fmt(c,3)} mol/L`,`純水 0.0 kPa`,...(showOsmosisSolution?[`希薄溶液 ${fmt(st.i*c*R*st.tempK,1)} kPa`]:[])]};});
+attachHover('chart-osmosis','tip-osmosis',()=>{const st=osmosisState();return{xMin:0,xMax:1,lines:c=>[`モル濃度 ${fmt(c,3)} mol/L`,`純水 0 Pa`,...(showOsmosisSolution?[`希薄溶液 ${paSci(st.i*c*R*st.tempK)}`]:[])]};});
 
 document.querySelectorAll('.tabs button').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-selected',b===btn));document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id==='panel-'+btn.dataset.tab));}));
 $('fullscreen').addEventListener('click',async()=>{try{document.fullscreenElement?await document.exitFullscreen():await document.documentElement.requestFullscreen();}catch(_){}});

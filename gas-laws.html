@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>気体の法則シミュレーター｜Interactive Lab</title>
+<title>気体の法則｜Interactive Lab</title>
 <meta name="description" content="ボイル・シャルル・ゲイリュサック・理想気体・蒸気圧・圧縮係数を粒子モデルと連動して学ぶ授業用シミュレーター。">
 <meta name="theme-color" content="#2563eb">
 <link rel="icon" href="icons/icon-192.png">
@@ -771,7 +771,7 @@
   body.is-fullscreen .diagram-stage > svg[id^="cont-"] { width: 250px; }
   body.is-fullscreen .panel.has-diagram .layout,
   body.is-fullscreen .panel.has-diagram .layout.view-swapped {
-    grid-template-columns: minmax(0, 1fr) minmax(350px, 430px);
+    grid-template-columns: 3fr 2fr;   /* グラフ : 模式図 ≈ 3 : 2 */
     grid-template-rows: minmax(0, 1fr) auto;
     align-items: stretch;
   }
@@ -806,8 +806,10 @@
     padding: 3px 8px;
   }
   body.is-fullscreen .panel.has-diagram .diagram-stage > svg[id^="cont-"] {
-    width: 290px;
-    max-height: calc(100vh - 125px);
+    width: min(100%, 400px);   /* 模式図を 2fr 枠に収まる限り大きく */
+    height: auto;
+    max-height: calc(100vh - 190px);
+    margin: 0 auto;
   }
   /* スマホ調整：見出し圧縮・タブ小型化・模式図が縦に長くなりすぎないよう高さ制限 */
   @media (max-width: 560px) {
@@ -815,14 +817,16 @@
     .tabs button { padding: 9px 12px; font-size: 13px; }
     .diagram-block svg { width: auto; max-width: 100%; max-height: 46vh; margin: 0 auto; }
   }
+  /* グラフ内の文字が線と重なっても読めるよう、明示的な stroke 指定がない text に白い縁取り */
+  svg text:not([stroke]) { paint-order: stroke; stroke: #fff; stroke-width: 2.4px; stroke-linejoin: round; }
 </style>
 </head>
 <body>
 <header>
   <div class="header-row">
     <div class="title-block">
-      <a href="index.html" style="display:inline-flex;align-items:center;gap:5px;margin-bottom:6px;color:#526078;text-decoration:none;font-size:12px;font-weight:700">← 化学シミュレーター一覧</a>
-      <h1>気体の法則シミュレーター</h1>
+      <a href="index.html" style="display:inline-flex;align-items:center;gap:6px;margin-bottom:8px;padding:7px 14px;border:1px solid #cdd9ea;border-radius:10px;background:#fff;color:#3a4d6b;text-decoration:none;font-size:13.5px;font-weight:800;box-shadow:0 2px 8px rgba(31,55,89,.06)">← 一覧に戻る</a>
+      <h1>気体の法則</h1>
     </div>
     <button class="classroom-btn" id="classroom-mode" type="button" title="全画面で表示">全画面表示</button>
   </div>
@@ -1138,8 +1142,8 @@
             <input type="range" id="z-T" min="200" max="1000" step="1" value="273">
           </div>
           <div class="ctrl dep">
-            <label>圧力 P（測定点） <span class="val"><span id="z-P-val">200</span> atm</span></label>
-            <input type="range" id="z-P" min="10" max="1000" step="10" value="200">
+            <label>圧力 P（測定点） <span class="val" id="z-P-val">2.0×10⁷ Pa</span></label>
+            <input type="range" id="z-P" min="2000000" max="100000000" step="2000000" value="20000000">
           </div>
           <button class="reset-btn" data-reset="z">初期値</button>
         </div>
@@ -1208,7 +1212,8 @@ const SVGNS = 'http://www.w3.org/2000/svg';
 // ---------- 共通ユーティリティ ----------
 const $ = id => document.getElementById(id);
 const fmt = (x, d) => x.toFixed(d);
-const fmtP = pa => fmt(pa / 1e5, 2) + '×10⁵ Pa';   // 圧力の表示は ×10⁵ Pa
+// 圧力を Pa の科学表記（有効数字3桁・指数は上付き）で。例: 227000 → "2.27×10⁵ Pa"
+const fmtP = pa => { if(!isFinite(pa)) return '– Pa'; if(pa===0) return '0 Pa'; const s=pa<0?'-':''; pa=Math.abs(pa); let e=Math.floor(Math.log10(pa)), ms=(pa/Math.pow(10,e)).toPrecision(3); if(+ms>=10){ms=(+ms/10).toPrecision(3);e++;} const S='⁰¹²³⁴⁵⁶⁷⁸⁹', es=(''+e).split('').map(c=>c==='-'?'⁻':S[+c]).join(''); return `${s}${ms}×10${es} Pa`; };
 const kToC = k => k - 273;
 
 // 軸つきチャート枠を描く。戻り値: {sx, sy, svgOpen, gridAxes, close}
@@ -1365,6 +1370,7 @@ function drawContainer(svgId, o) {
   if (vertical) {
     const fullscreen = document.body.classList.contains('is-fullscreen');
     const viewH = fullscreen ? 400 : 280;
+    const lblFont = fullscreen ? 15 : 11.5;   // 全画面では模式図中の数値を大きく
     const cylinderH = fullscreen ? 330 : 214;
     const tempY = fullscreen ? 387 : 267;
     svg.setAttribute('viewBox', `0 0 190 ${viewH}`);
@@ -1376,7 +1382,7 @@ function drawContainer(svgId, o) {
     const gasTop = innerBottom - gasH;
     const liqH = liqFrac * gasH, vaporH = gasH - liqH;
     let s = '';
-    s += `<text x="${centerX}" y="15" text-anchor="middle" font-size="11.5" fill="#172033"><tspan font-weight="bold">P</tspan><tspan dx="5">= ${fmtP(o.P)}</tspan></text>`;
+    s += `<text x="${centerX}" y="15" text-anchor="middle" font-size="${lblFont}" fill="#172033"><tspan font-weight="bold">P</tspan><tspan dx="5">= ${fmtP(o.P)}</tspan></text>`;
     s += `<rect x="${cx}" y="${cy}" width="${cw}" height="${ch}" rx="7" fill="#f8fafc" stroke="var(--axis)" stroke-width="2"/>`;
     s += `<rect x="${innerL}" y="${fmt(gasTop,1)}" width="${innerW}" height="${fmt(gasH,1)}" rx="3" fill="${gasColor}"/>`;
     if (liqFrac > 0.002) {
@@ -1394,7 +1400,7 @@ function drawContainer(svgId, o) {
     const rodX = innerL + innerW / 2 - 3;
     s += `<rect x="${fmt(rodX,1)}" y="${innerT}" width="6" height="${fmt(Math.max(0, pistonY - innerT),1)}" rx="2" fill="#94a3b8"/>`;
     s += `<rect x="${innerL - 1}" y="${fmt(pistonY,1)}" width="${innerW + 2}" height="8" rx="2" fill="#94a3b8" stroke="var(--axis)" stroke-width="1.5"/>`;
-    s += `<text x="${centerX}" y="${tempY}" text-anchor="middle" font-size="11.5" fill="#172033"><tspan font-weight="bold">T</tspan><tspan dx="5">= ${fmt(o.T, 0)} K（${fmt(kToC(o.T), 0)} ℃）</tspan></text>`;
+    s += `<text x="${centerX}" y="${tempY}" text-anchor="middle" font-size="${lblFont}" fill="#172033"><tspan font-weight="bold">T</tspan><tspan dx="5">= ${fmt(o.T, 0)} K（${fmt(kToC(o.T), 0)} ℃）</tspan></text>`;
     svg.innerHTML = s;
     return;
   }
@@ -1681,7 +1687,7 @@ const drawCharles = makeLinearTempTab({
     return { P, n, T };
   },
   f: (vals, T) => vals.n * R * T / vals.P,      // V(T)
-  lineLabel: vals => 'P = ' + fmt(vals.P / 1e5, 2) + '×10⁵ Pa',
+  lineLabel: vals => 'P = ' + fmtP(vals.P),
   hoverY: y => 'V = ' + fmt(y, 1) + ' L',
   updateSide(vals, V) {
     drawContainer('cont-charles', { V: V, P: vals.P, T: vals.T, n: vals.n });
@@ -1800,7 +1806,7 @@ function niceTicks(max, n) {
   for (let v = 0; v <= max * 1.0001; v += step) ticks.push(v);
   return { step, ticks };
 }
-function ticksKPa(max) { const { ticks, step } = niceTicks(max, 4); return ticks.map(v => ({ v, label: fmt(v / 1000, step < 1000 ? 1 : 0) })); }
+function ticksKPa(max) { const { ticks, step } = niceTicks(max, 4); return ticks.map(v => ({ v, label: fmt(v / 1e5, 1) })); }
 function ticksL(max) { const { ticks, step } = niceTicks(max, 5); return ticks.map(v => ({ v, label: fmt(v, step < 1 ? 1 : 0) })); }
 
 // ---------- ⑤ ボイル＋蒸気圧 ----------
@@ -1812,12 +1818,12 @@ function drawBoyleVap() {
     xMax, yMax,
     xTicks: [0, 10, 20, 30, 40, 50].map(v => ({ v, label: String(v) })),
     yTicks: ticksKPa(yMax),
-    xLabel: '体積 V [L]', yLabel: '圧力 P [kPa]',
+    xLabel: '体積 V [L]', yLabel: '圧力 P [×10⁵ Pa]',
   });
   let g = axesSvg;
   // 飽和蒸気圧ライン
   g += `<line x1="${sx(0)}" y1="${sy(Psat)}" x2="${sx(xMax)}" y2="${sy(Psat)}" stroke="var(--extrap)" stroke-width="1.5" stroke-dasharray="6 5"/>`;
-  g += `<text x="${sx(xMax) - 6}" y="${sy(Psat) - 6}" text-anchor="end" font-size="13" fill="var(--ink3)">飽和蒸気圧 P_sat = ${fmt(Psat / 1000, 1)} kPa</text>`;
+  g += `<text x="${sx(xMax) - 6}" y="${sy(Psat) - 6}" text-anchor="end" font-size="13" fill="var(--ink3)">飽和蒸気圧 P_sat = ${fmtP(Psat)}</text>`;
   // 凝縮開始の境界
   if (Vsat > 0 && Vsat <= xMax) {
     g += `<line x1="${sx(Vsat)}" y1="${MT}" x2="${sx(Vsat)}" y2="${MT + PH}" stroke="var(--extrap)" stroke-width="1" stroke-dasharray="2 4"/>`;
@@ -1849,12 +1855,12 @@ function drawBoyleVap() {
   // 模式図（凝縮した分は液体プールに）
   const nGas = Math.min(n, Psat * V / (R * Tk));
   drawContainer('cont-bvap', { V, P, T: Tk, n, liqFrac: 1 - nGas / n, pMax: yMax, liquidLabel: '液体' });
-  $('bvap-psat').textContent = fmt(Psat / 1000, 1) + ' kPa';
+  $('bvap-psat').textContent = fmtP(Psat);
   setReadout($('bvap-readout'), [
     ['温度 T', Tc + ' ℃（' + fmt(Tk, 0) + ' K）'],
     ['体積 V', fmt(V, 1) + ' L'],
-    ['圧力 P', fmt(P / 1000, 1) + ' kPa', true],
-    ['飽和蒸気圧', fmt(Psat / 1000, 1) + ' kPa'],
+    ['圧力 P', fmtP(P), true],
+    ['飽和蒸気圧', fmtP(Psat)],
     ['凝縮開始 V', Vsat <= xMax ? fmt(Vsat, 1) + ' L' : '> 50 L'],
     ['状態', phase],
   ]);
@@ -1865,7 +1871,7 @@ attachHover('chart-boylevap', 'chartwrap-boylevap', 'tip-boylevap', () => {
   return {
     xMax: 50, yMax: Psat / 0.72, domain: [2, 50],
     f: v => Math.min(n * R * Tk / v, Psat),
-    fmtLines: (v, p) => ['V = ' + fmt(v, 1) + ' L', 'P = ' + fmt(p / 1000, 1) + ' kPa'],
+    fmtLines: (v, p) => ['V = ' + fmt(v, 1) + ' L', 'P = ' + fmtP(p)],
   };
 });
 
@@ -1925,7 +1931,7 @@ attachHover('chart-charlesvap', 'chartwrap-charlesvap', 'tip-charlesvap', () => 
 // ---------- ⑦ 圧縮係数 Z–P（van der Waals） ----------
 // a[L²·atm/mol²], b[L/mol]。SIへ: a×0.101325 [Pa·m⁶/mol²], b×1e-3 [m³/mol]
 const GASES = { '理想気体': { a: 0, b: 0 }, 'H₂': { a: 0.2476, b: 0.02661 }, 'N₂': { a: 1.370, b: 0.0387 }, 'CO₂': { a: 3.640, b: 0.04267 }, 'CH₄': { a: 2.283, b: 0.04278 } };
-const RSI = 8.314, ZP_PMAX_ATM = 1000;
+const RSI = 8.314, ZP_PMAX = 1.0e8;   // 圧縮係数プロットの圧力上限（Pa）
 let zGas = 'N₂';
 function vdwSI(g) { return { a: g.a * 0.101325, b: g.b * 1e-3 }; }
 // Vm を大→小に振り、気体枝（P 単調増加）だけを返す。[Patm, Z] の配列
@@ -1938,9 +1944,8 @@ function zCurve(name, Tk) {
     if (P <= 0) { prevP = P; continue; }
     if (P < prevP) { spinodal = true; break; } // vdW ループ入口＝この温度は臨界温度以下（液化域）
     prevP = P;
-    const Patm = P / 101325;
-    if (Patm > ZP_PMAX_ATM * 1.03) break; // 軸上限に到達（液化とは別の打ち切り）
-    pts.push([Patm, P * Vm / (RSI * Tk)]);
+    if (P > ZP_PMAX * 1.03) break; // 軸上限に到達（液化とは別の打ち切り）
+    pts.push([P, P * Vm / (RSI * Tk)]);
   }
   return { pts, spinodal };
 }
@@ -1963,20 +1968,20 @@ function buildGasRow() {
 }
 function drawZ() {
   const T = +$('z-T').value, Pmark = +$('z-P').value, zMax = 2.0;
-  $('z-T-val').textContent = T; $('z-P-val').textContent = Pmark;
+  $('z-T-val').textContent = T; $('z-P-val').textContent = fmtP(Pmark);
   const { sx, sy, axesSvg } = frame({
-    xMax: ZP_PMAX_ATM, yMax: zMax,
-    xTicks: [0, 200, 400, 600, 800, 1000].map(v => ({ v, label: String(v) })),
+    xMax: ZP_PMAX, yMax: zMax,
+    xTicks: [0, 2e7, 4e7, 6e7, 8e7, 1e8].map(v => ({ v, label: fmt(v / 1e7, 0) })),
     yTicks: [0, 0.5, 1, 1.5, 2].map(v => ({ v, label: fmt(v, 1) })),
-    xLabel: '圧力 P [atm]', yLabel: '圧縮係数 Z',
+    xLabel: '圧力 P [×10⁷ Pa]', yLabel: '圧縮係数 Z',
   });
   let g = axesSvg;
   // 理想気体 Z=1
-  g += `<line x1="${sx(0)}" y1="${sy(1)}" x2="${sx(ZP_PMAX_ATM)}" y2="${sy(1)}" stroke="var(--extrap)" stroke-width="2" stroke-dasharray="7 6"/>`;
-  g += `<text x="${sx(ZP_PMAX_ATM) - 6}" y="${sy(1) - 8}" text-anchor="end" font-size="13" fill="var(--ink3)">理想気体 Z = 1</text>`;
+  g += `<line x1="${sx(0)}" y1="${sy(1)}" x2="${sx(ZP_PMAX)}" y2="${sy(1)}" stroke="var(--extrap)" stroke-width="2" stroke-dasharray="7 6"/>`;
+  g += `<text x="${sx(ZP_PMAX) - 6}" y="${sy(1) - 8}" text-anchor="end" font-size="13" fill="var(--ink3)">理想気体 Z = 1</text>`;
   // 選択気体（太）※選んだ気体だけ。Z>zMax は水平化せず軸境界で切り、上端を突き抜けさせる
   const { pts, spinodal } = zCurve(zGas, T);
-  const drawn = clipZcurve(pts, ZP_PMAX_ATM, zMax);
+  const drawn = clipZcurve(pts, ZP_PMAX, zMax);
   if (drawn.length >= 2) {
     g += polyline(drawn, sx, sy, 'var(--curve)', 3);
     const l = drawn[drawn.length - 1];
@@ -1984,7 +1989,7 @@ function drawZ() {
   }
   // 測定点マーカー。打ち切り理由で文言を分ける（液化域 vs 軸上限）
   const Zc = zAt(pts, Pmark), curveMaxP = pts.length ? pts[pts.length - 1][0] : 0, beyond = Pmark > curveMaxP;
-  const beyondMsg = spinodal ? '▲ 高圧側は液化域（vdW近似の気体解の限界）' : '▲ 軸範囲外（1000 atm 超）';
+  const beyondMsg = spinodal ? '▲ 高圧側は液化域（vdW近似の気体解の限界）' : '▲ 軸範囲外（1.0×10⁸ Pa 超）';
   if (Zc != null) g += currentPoint(Math.min(Pmark, curveMaxP), Math.min(Zc, zMax), sx, sy, beyond ? beyondMsg : '');
   $('chart-z').innerHTML = g;
   const { a, b } = vdwSI(GASES[zGas]), TB = a / (RSI * b);
@@ -1995,7 +2000,7 @@ function drawZ() {
     ['気体', zGas],
     ['温度 T', T + ' K'],
     ['ボイル温度 T_B', tbStr],
-    ['測定圧 P', beyond ? fmt(curveMaxP, 0) + ' atm（上限）' : Pmark + ' atm'],
+    ['測定圧 P', beyond ? fmtP(curveMaxP) + '（上限）' : fmtP(Pmark)],
     ['圧縮係数 Z', Zc != null ? fmt(Zc, 3) : '—', true],
     ['解釈', interp],
   ]);
@@ -2012,7 +2017,7 @@ function drawGaylussacVap() {
     xMax: Tmax, yMax,
     xTicks: [0, 100, 200, 300, 400, 500].map(v => ({ v, label: String(v) })),
     yTicks: ticksKPa(yMax),
-    xLabel: '絶対温度 T [K]', yLabel: '圧力 P [kPa]',
+    xLabel: '絶対温度 T [K]', yLabel: '圧力 P [×10⁵ Pa]',
   });
   let g = axesSvg;
   // 凝縮しない場合の理論ゲイリュサック（原点を通る直線）破線
@@ -2041,12 +2046,12 @@ function drawGaylussacVap() {
   g += currentPoint(T, Math.min(P, yMax), sx, sy, '');
   $('chart-gvap').innerHTML = g;
   drawContainer('cont-gvap', { V, P, T, n, locked: true, liqFrac, pMax: yMax, liquidLabel: '液体' });
-  $('gvap-psat').textContent = fmt(pSatWater(T) / 1000, 1) + ' kPa';
+  $('gvap-psat').textContent = fmtP(pSatWater(T));
   setReadout($('gvap-readout'), [
     ['体積 V', fmt(V, 1) + ' L'],
     ['温度 T', T + ' K（' + fmt(T - 273.15, 0) + ' ℃）'],
-    ['圧力 P', fmt(P / 1000, 1) + ' kPa', true],
-    ['飽和蒸気圧', fmt(pSatWater(T) / 1000, 1) + ' kPa'],
+    ['圧力 P', fmtP(P), true],
+    ['飽和蒸気圧', fmtP(pSatWater(T))],
     ['全て気体になる T', Tstar ? fmt(Tstar, 0) + ' K' : '—'],
     ['状態', phase],
   ]);
@@ -2057,7 +2062,7 @@ attachHover('chart-gvap', 'chartwrap-gvap', 'tip-gvap', () => {
   return {
     xMax: Tmax, yMax: (n * R * Tmax / V) * 1.1, domain: [273, Tmax],
     f: t => Math.min(pSatWater(t), n * R * t / V),
-    fmtLines: (t, p) => ['T = ' + fmt(t, 0) + ' K', 'P = ' + fmt(p / 1000, 1) + ' kPa'],
+    fmtLines: (t, p) => ['T = ' + fmt(t, 0) + ' K', 'P = ' + fmtP(p)],
   };
 });
 
@@ -2070,7 +2075,7 @@ const INIT = {
   ideal:     { 'ideal-n': 1.0, 'ideal-T': 273, 'ideal-V': 10 },
   boylevap:  { 'bvap-T': 100, 'bvap-n': 1.0, 'bvap-V': 40 },
   charlesvap:{ 'cvap-P': 1.01, 'cvap-n': 1.0, 'cvap-T': 373 },
-  z:         { 'z-T': 273, 'z-P': 200 },
+  z:         { 'z-T': 273, 'z-P': 20000000 },
   gvap:      { 'gvap-V': 10, 'gvap-n': 1.0, 'gvap-T': 373 },
 };
 document.querySelectorAll('.reset-btn').forEach(btn => {

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>化学シミュレーター｜Interactive Lab</title>
+<title>化学インタラクティブ教材｜Interactive Lab</title>
 <meta name="description" content="気体の法則・希薄溶液・コロイド・結晶格子をスライダーで動かして学ぶ、授業投影用インタラクティブ教材。">
 <meta name="theme-color" content="#2563eb">
 <link rel="icon" href="icons/icon-192.png">
@@ -49,6 +49,7 @@
   .sim:focus-visible { outline: 3px solid rgba(37,99,235,.32); outline-offset: 3px; }
   .sim .ico { font-size: 40px; line-height: 1; flex: 0 0 auto; }
   .sim h2 { margin: 0; font-size: 20px; font-weight: 800; color: var(--blue-deep); }
+  .credit { max-width: 1080px; margin: 0 auto; padding: 8px clamp(18px, 5vw, 60px) 40px; color: #b9c2cf; font-size: 11px; font-weight: 600; letter-spacing: .02em; }
   @media (max-width: 560px) {
     header { padding-top: 28px; } main { padding-top: 24px; }
     .grid { gap: 14px; }
@@ -61,8 +62,7 @@
 <body>
 <header>
   <div class="wrap">
-    <span class="badge">CHEMISTRY LAB</span>
-    <h1>化学シミュレーター</h1>
+    <h1>化学インタラクティブ教材</h1>
     <p class="subtitle">スライダーを動かすと、グラフ・数値・粒子モデルが同時に変化。授業でそのまま投影して使えるインタラクティブ教材です。</p>
   </div>
 </header>
@@ -70,17 +70,18 @@
   <div class="grid">
     <a class="sim" href="crystals.html">
       <div class="ico">💎</div>
-      <h2>結晶格子シミュレーター</h2>
+      <h2>結晶格子</h2>
     </a>
     <a class="sim" href="gas-laws.html">
       <div class="ico">🎈</div>
-      <h2>気体の法則シミュレーター</h2>
+      <h2>気体の法則</h2>
     </a>
     <a class="sim" href="solutions.html">
       <div class="ico">🧪</div>
-      <h2>希薄溶液・コロイド シミュレーター</h2>
+      <h2>希薄溶液・コロイド</h2>
     </a>
   </div>
 </main>
+<footer class="credit">大阪女学院中学校・高等学校　Yuto Yamaguchi</footer>
 </body>
 </html>
