@@ -197,6 +197,14 @@
   body.is-fullscreen .badge { padding: 3px 6px; }
   body.is-fullscreen .chart-stage { flex: 1 1 auto; min-height: 0; display: grid; place-items: center; }
   body.is-fullscreen .chart-stage > svg { width: 100%; height: 100%; max-height: 100%; }
+  /* 全画面：浸透圧・凝固点のモデル（正方形）が非全画面用の 540px 制限で小さくならないよう、表示エリアいっぱいに */
+  body.is-fullscreen #panel-osmosis.osmosis-model-visible .chart-stage > #model-osmosis,
+  body.is-fullscreen #panel-freezing.freezing-model-visible .chart-stage > #model-freezing { width: 100%; max-width: 100%; height: 100%; max-height: 100%; aspect-ratio: auto; margin: 0; }
+  /* landscapeモデル（コロイド/塩析/保護/電気泳動）の非全画面用 max-height 制限を全画面では解除して縦いっぱいに */
+  body.is-fullscreen #panel-colloid .chart-stage > svg,
+  body.is-fullscreen #panel-salt .chart-stage > svg,
+  body.is-fullscreen #panel-protect .chart-stage > svg,
+  body.is-fullscreen #panel-electro .chart-stage > svg { height: 100%; max-height: 100%; }
   body.is-fullscreen .side { grid-column: 2; grid-row: 1; display: flex; flex-direction: column; gap: 7px; min-height: 0; min-width: 0; }
   body.is-fullscreen .side > .card:not(.controls) { flex: 1 1 auto; min-height: 0; display: grid; place-items: center; padding: 3px 6px; overflow: hidden; }
   body.is-fullscreen .model-stage { width: 100%; height: 100%; min-height: 0; display: grid; place-items: center; }
