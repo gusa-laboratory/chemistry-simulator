@@ -715,18 +715,19 @@ function drawOsmosis(){
   drawOsmosisModel(st);
 }
 function drawOsmosisModel(st){
+  const FS=document.body.classList.contains('is-fullscreen')?1.5:1;   // 全画面では文字を拡大
   const svg=$('model-osmosis'),large=!!svg.closest('.chart-stage');svg.setAttribute('viewBox',large?'0 0 420 420':'0 0 320 330');
   const w=large?420:320,h=large?420:330,leftX=large?55:40,colW=large?120:92,gap=large?70:56,rightX=leftX+colW+gap;
   const top=large?84:72,bottom=large?345:270,baseLevel=large?165:138,connectorTop=bottom-(large?58:46),center=leftX+colW+gap/2;
   const levelShift=Math.min(large?66:48,st.pressure/500*(large?34:25)),leftLevel=baseLevel+levelShift/2,rightLevel=baseLevel-levelShift/2;
   let s=`<defs><marker id="osmosis-water-arrow" viewBox="0 0 9 9" refX="8" refY="4.5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 9 4.5 L 0 9 Z" fill="var(--curve)"/></marker></defs>`;
-  s+=`<text x="${w/2}" y="20" text-anchor="middle" font-size="13" fill="var(--ink)"><tspan font-weight="bold">浸透圧 π</tspan><tspan dx="6">${paSci(st.pressure)}</tspan></text>`;
-  s+=`<text x="${w/2}" y="42" text-anchor="middle" font-size="12" fill="var(--solution)" font-weight="bold">モル濃度 c = ${fmt(st.concentration,3)} mol/L</text>`;
-  s+=`<text x="${w/2}" y="61" text-anchor="middle" font-size="11" fill="var(--ink2)">${fmt(st.tempK,1)} K</text>`;
+  s+=`<text x="${w/2}" y="20" text-anchor="middle" font-size="${13*FS}" fill="var(--ink)"><tspan font-weight="bold">浸透圧 π</tspan><tspan dx="6">${paSci(st.pressure)}</tspan></text>`;
+  s+=`<text x="${w/2}" y="42" text-anchor="middle" font-size="${12*FS}" fill="var(--solution)" font-weight="bold">モル濃度 c = ${fmt(st.concentration,3)} mol/L</text>`;
+  s+=`<text x="${w/2}" y="61" text-anchor="middle" font-size="${11*FS}" fill="var(--ink2)">${fmt(st.tempK,1)} K</text>`;
   s+=`<rect x="${leftX+3}" y="${leftLevel}" width="${colW-6}" height="${bottom-leftLevel-3}" fill="#bfdbfe" opacity=".88"/><rect x="${rightX+3}" y="${rightLevel}" width="${colW-6}" height="${bottom-rightLevel-3}" fill="#ddd6fe" opacity=".9"/><rect x="${leftX+colW}" y="${connectorTop}" width="${gap}" height="${bottom-connectorTop-3}" fill="#c7d2fe" opacity=".9"/>`;
   s+=`<path d="M ${leftX} ${top} V ${bottom} H ${rightX+colW} V ${top}" fill="none" stroke="var(--axis)" stroke-width="3"/><line x1="${leftX+colW}" y1="${top}" x2="${leftX+colW}" y2="${connectorTop}" stroke="var(--axis)" stroke-width="3"/><line x1="${rightX}" y1="${top}" x2="${rightX}" y2="${connectorTop}" stroke="var(--axis)" stroke-width="3"/>`;
   s+=`<line x1="${center}" y1="${connectorTop-2}" x2="${center}" y2="${bottom-2}" stroke="var(--ink2)" stroke-width="5" stroke-dasharray="5 4"/>`;
-  s+=`<text x="${leftX+colW/2}" y="${top-10}" text-anchor="middle" font-size="12" font-weight="bold" fill="var(--curve)">純水</text><text x="${rightX+colW/2}" y="${top-10}" text-anchor="middle" font-size="12" font-weight="bold" fill="var(--solution)">希薄溶液</text>`;
+  s+=`<text x="${leftX+colW/2}" y="${top-10}" text-anchor="middle" font-size="${12*FS}" font-weight="bold" fill="var(--curve)">純水</text><text x="${rightX+colW/2}" y="${top-10}" text-anchor="middle" font-size="${12*FS}" font-weight="bold" fill="var(--solution)">希薄溶液</text>`;
   const waterN=large?22:16;
   for(let i=0;i<waterN;i++){const d=DOTS[i],lx=leftX+10+d[0]*(colW-20),ly=leftLevel+8+d[1]*Math.max(10,connectorTop-leftLevel-12);s+=`<circle cx="${fmt(lx,1)}" cy="${fmt(ly,1)}" r="${large?4:3.4}" fill="#2563eb" opacity=".9"/>`;}
   for(let i=0;i<waterN;i++){const d=DOTS[24+i],rx=rightX+10+d[0]*(colW-20),ry=rightLevel+8+d[1]*Math.max(10,connectorTop-rightLevel-12);s+=`<circle cx="${fmt(rx,1)}" cy="${fmt(ry,1)}" r="${large?4:3.4}" fill="#2563eb" opacity=".9"/>`;}
@@ -763,12 +764,13 @@ function drawColloid(){
   if(showDLVO)drawDLVO(st);
 }
 function drawColloidModel(st,statusColor){
+  const FS=document.body.classList.contains('is-fullscreen')?1.5:1;   // 全画面では文字を拡大（位置は保ちフォントのみ）
   const dispersed=[[105,145],[260,125],[420,155],[610,125],[690,245],[545,275],[365,260],[190,275],[100,390],[270,405],[465,390],[650,400]];
   const clustered=[[250,190],[305,170],[276,235],[335,224],[485,185],[540,205],[505,245],[555,260],[370,335],[425,315],[398,370],[455,365]];
   const a=st.aggregation,haloR=50-25*Math.min(1,Math.sqrt(st.ratio));
   let s=`<defs><filter id="colloid-shadow" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#172033" flood-opacity=".16"/></filter></defs>`;
   s+=`<rect x="32" y="72" width="716" height="390" rx="22" fill="#f8fbff" stroke="var(--border)" stroke-width="2"/>`;
-  s+=`<text x="390" y="42" text-anchor="middle" font-size="24" font-weight="900" fill="${statusColor}">${st.status}</text><text x="390" y="63" text-anchor="middle" font-size="12" font-weight="bold" fill="var(--ink2)">電気二重層が${st.ratio<.6?'粒子を離している':st.ratio<1?'圧縮され、障壁が低下':'圧縮され、引力が優勢'}</text>`;
+  s+=`<text x="390" y="42" text-anchor="middle" font-size="${24*FS}" font-weight="900" fill="${statusColor}">${st.status}</text><text x="390" y="63" text-anchor="middle" font-size="${12*FS}" font-weight="bold" fill="var(--ink2)">電気二重層が${st.ratio<.6?'粒子を離している':st.ratio<1?'圧縮され、障壁が低下':'圧縮され、引力が優勢'}</text>`;
   for(let i=0;i<dispersed.length;i++){
     const x=dispersed[i][0]*(1-a)+clustered[i][0]*a,y=dispersed[i][1]*(1-a)+clustered[i][1]*a;
     s+=`<circle cx="${fmt(x,1)}" cy="${fmt(y,1)}" r="${fmt(haloR,1)}" fill="#60a5fa" fill-opacity=".10" stroke="#60a5fa" stroke-opacity=".45" stroke-width="2" stroke-dasharray="5 4"/>`;
@@ -779,7 +781,7 @@ function drawColloidModel(st,statusColor){
       for(let j=0;j<count;j++){const ang=(i*71+j*360/count)*Math.PI/180,rr=haloR+13+(j%2)*8,qx=Math.max(46,Math.min(734,x+rr*Math.cos(ang))),qy=Math.max(86,Math.min(448,y+rr*Math.sin(ang)));s+=`<circle cx="${fmt(qx,1)}" cy="${fmt(qy,1)}" r="11" fill="#14b8a6" stroke="#fff" stroke-width="2.5"/><text x="${fmt(qx,1)}" y="${fmt(qy+3.5,1)}" text-anchor="middle" font-size="9.5" font-weight="900" fill="#fff">${st.z}+</text>`;}
     }
   }
-  s+=`<g font-size="12" font-weight="bold" fill="var(--ink2)"><circle cx="62" cy="481" r="9" fill="#5b6578"/><text x="78" y="485">負に帯電した疎水コロイド</text><circle cx="282" cy="481" r="7" fill="#14b8a6"/><text x="296" y="485">対イオン ${st.ionName}</text><circle cx="430" cy="481" r="13" fill="#60a5fa" fill-opacity=".12" stroke="#60a5fa" stroke-dasharray="4 3"/><text x="451" y="485">電気二重層</text></g>`;
+  s+=`<g font-size="${12*FS}" font-weight="bold" fill="var(--ink2)"><circle cx="62" cy="481" r="9" fill="#5b6578"/><text x="78" y="486">負に帯電した疎水コロイド</text><circle cx="282" cy="481" r="7" fill="#14b8a6"/><text x="296" y="486">対イオン ${st.ionName}</text><circle cx="430" cy="481" r="13" fill="#60a5fa" fill-opacity=".12" stroke="#60a5fa" stroke-dasharray="4 3"/><text x="451" y="486">電気二重層</text></g>`;
   $('model-colloid').innerHTML=s;
 }
 function drawDLVO(st){
@@ -966,6 +968,7 @@ function saltState(){
   return{hydro,conc,cSalt,onset,agg,shell,status};
 }
 function drawSaltModel(st){
+  const FS=document.body.classList.contains('is-fullscreen')?1.5:1;   // 全画面では文字を拡大
   const box={x:32,y:74,w:716,h:388};
   const dispersed=[[140,150],[300,135],[470,150],[640,140],[210,270],[390,255],[560,270],[690,275],[150,385],[330,390],[510,385],[660,390]];
   const clustered=[[300,255],[352,238],[322,300],[382,288],[432,250],[472,298],[420,340],[360,350],[300,348],[500,258],[520,318],[460,358]];
@@ -974,8 +977,8 @@ function drawSaltModel(st){
   const a=st.agg,frac=st.conc/st.cSalt;
   let s=`<rect x="${box.x}" y="${box.y}" width="${box.w}" height="${box.h}" rx="22" fill="#f8fbff" stroke="var(--border)" stroke-width="2"/>`;
   const sc=st.agg<0.05?'#2563eb':st.agg<0.85?'#f97316':'#dc2626';
-  s+=`<text x="390" y="44" text-anchor="middle" font-size="24" font-weight="900" fill="${sc}">${st.status}</text>`;
-  s+=`<text x="390" y="66" text-anchor="middle" font-size="12" font-weight="bold" fill="var(--ink2)">${st.agg<0.05?'水和水の殻がコロイドを分散させている':st.agg<0.85?'多量の電解質が水和水を引き寄せ、奪っていく':'水和水を失って凝集・沈殿した'}</text>`;
+  s+=`<text x="390" y="44" text-anchor="middle" font-size="${24*FS}" font-weight="900" fill="${sc}">${st.status}</text>`;
+  s+=`<text x="390" y="66" text-anchor="middle" font-size="${12*FS}" font-weight="bold" fill="var(--ink2)">${st.agg<0.05?'水和水の殻がコロイドを分散させている':st.agg<0.85?'多量の電解質が水和水を引き寄せ、奪っていく':'水和水を失って凝集・沈殿した'}</text>`;
   // コロイド本体（水和殻の水は下の水和水で描画。移動した分だけ殻から減る）
   const parts=[];
   for(let i=0;i<dispersed.length;i++){const x=dispersed[i][0]*(1-a)+clustered[i][0]*a,y=dispersed[i][1]*(1-a)+clustered[i][1]*a;parts.push([x,y]);
@@ -995,7 +998,7 @@ function drawSaltModel(st){
       s+=`<circle cx="${fmt(sx0+(tx-sx0)*p,1)}" cy="${fmt(sy0+(ty-sy0)*p,1)}" r="4.5" fill="#3b82f6"/>`;
     }
   }
-  s+=`<g font-size="12" font-weight="bold" fill="var(--ink2)"><circle cx="62" cy="481" r="9" fill="#6b7f9e"/><text x="78" y="485">親水コロイド</text><circle cx="232" cy="481" r="5" fill="#3b82f6"/><text x="244" y="485">水和水</text><circle cx="342" cy="481" r="7" fill="#14b8a6"/><text x="356" y="485">電解質イオン</text></g>`;
+  s+=`<g font-size="${12*FS}" font-weight="bold" fill="var(--ink2)"><circle cx="62" cy="481" r="9" fill="#6b7f9e"/><text x="78" y="485">親水コロイド</text><circle cx="232" cy="481" r="5" fill="#3b82f6"/><text x="244" y="485">水和水</text><circle cx="342" cy="481" r="7" fill="#14b8a6"/><text x="356" y="485">電解質イオン</text></g>`;
   $('model-salt').innerHTML=s;
 }
 function drawSaltGraph(st){
@@ -1034,20 +1037,21 @@ function protectState(){
   return{protect,conc,cov,baseCCC,effCCC,ratio,agg,status};
 }
 function drawProtectModel(st){
+  const FS=document.body.classList.contains('is-fullscreen')?1.5:1;   // 全画面では文字を拡大
   const box={x:32,y:74,w:716,h:388};
   const dispersed=[[150,150],[320,135],[500,150],[650,150],[210,275],[400,260],[580,275],[690,285],[160,390],[350,395],[540,390],[670,395]];
   const clustered=[[330,250],[380,235],[350,295],[300,270],[430,250],[470,290],[420,335],[360,345],[500,260],[520,320],[300,340],[560,300]];
   const a=st.agg,cov=st.cov;let s='';
   s+=`<rect x="${box.x}" y="${box.y}" width="${box.w}" height="${box.h}" rx="22" fill="#f8fbff" stroke="var(--border)" stroke-width="2"/>`;
   const sc=st.status==='分散（保護されている）'?'#2563eb':st.status==='凝析しやすい'?'#f97316':'#dc2626';
-  s+=`<text x="390" y="44" text-anchor="middle" font-size="24" font-weight="900" fill="${sc}">${st.status}</text>`;
-  s+=`<text x="390" y="66" text-anchor="middle" font-size="12" font-weight="bold" fill="var(--ink2)">${cov<0.05?'保護コロイドなし：少量の電解質で凝析する':st.status==='凝析'?'保護しきれず凝析した':'親水性の保護層が疎水コロイドを凝析から守る'}</text>`;
+  s+=`<text x="390" y="44" text-anchor="middle" font-size="${24*FS}" font-weight="900" fill="${sc}">${st.status}</text>`;
+  s+=`<text x="390" y="66" text-anchor="middle" font-size="${12*FS}" font-weight="bold" fill="var(--ink2)">${cov<0.05?'保護コロイドなし：少量の電解質で凝析する':st.status==='凝析'?'保護しきれず凝析した':'親水性の保護層が疎水コロイドを凝析から守る'}</text>`;
   for(let i=0;i<dispersed.length;i++){
     const x=dispersed[i][0]*(1-a)+clustered[i][0]*a,y=dispersed[i][1]*(1-a)+clustered[i][1]*a;
     if(showProtectShell&&cov>0.02)s+=`<circle cx="${fmt(x,1)}" cy="${fmt(y,1)}" r="${fmt(26+18*cov,1)}" fill="#34d399" fill-opacity="${fmt(0.16*cov+0.05,3)}" stroke="#10b981" stroke-opacity=".55" stroke-width="2"/>`;
     s+=`<circle cx="${fmt(x,1)}" cy="${fmt(y,1)}" r="22" fill="#5b6578" stroke="#283244" stroke-width="3"/>`;
   }
-  s+=`<g font-size="12" font-weight="bold" fill="var(--ink2)"><circle cx="62" cy="481" r="9" fill="#5b6578"/><text x="78" y="485">疎水コロイド</text><circle cx="248" cy="481" r="10" fill="#34d399" fill-opacity=".3" stroke="#10b981"/><text x="264" y="485">保護コロイド（親水）</text></g>`;
+  s+=`<g font-size="${12*FS}" font-weight="bold" fill="var(--ink2)"><circle cx="62" cy="481" r="9" fill="#5b6578"/><text x="78" y="485">疎水コロイド</text><circle cx="248" cy="481" r="10" fill="#34d399" fill-opacity=".3" stroke="#10b981"/><text x="264" y="485">保護コロイド（親水）</text></g>`;
   $('model-protect').innerHTML=s;
 }
 function drawProtectGraph(st){
@@ -1096,6 +1100,7 @@ function ePlate(cx,color,sign,label){
   return `<rect x="${cx-13}" y="118" width="26" height="150" rx="3" fill="#b6bcc6" stroke="#4b5563" stroke-width="2"/><rect x="${cx-9}" y="123" width="6" height="141" rx="2" fill="#d8dce3"/><circle cx="${cx}" cy="101" r="14" fill="${color}"/><text x="${cx}" y="106" text-anchor="middle" font-size="17" font-weight="900" fill="#fff">${sign}</text><text x="${cx}" y="81" text-anchor="middle" font-size="13" font-weight="bold" fill="${color}">${label}</text>`;
 }
 function drawElectroModel(st){
+  const FS=document.body.classList.contains('is-fullscreen')?1.5:1;   // 全画面では文字を拡大
   const c=st.c,col=c.color,sign=c.sign,ch=sign<0?'−':'＋',disp=st.disp;
   const lx0=200,lx1=330,rx0=450,rx1=580,topY=150,chTop=395,botY=452,baseline=290,travel=96;
   const d=disp*travel;let lB,rB;
@@ -1103,8 +1108,8 @@ function drawElectroModel(st){
   const clamp=v=>Math.max(topY+14,Math.min(chTop-14,v));lB=clamp(lB);rB=clamp(rB);
   const Lx=(lx0+lx1)/2,Rx=(rx0+rx1)/2,chY=(chTop+botY)/2;
   let s=`<defs><marker id="electro-arrow" viewBox="0 0 9 9" refX="8" refY="4.5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 9 4.5 L 0 9 Z" fill="${col}"/></marker></defs>`;
-  s+=`<text x="390" y="34" text-anchor="middle" font-size="22" font-weight="900" fill="${col}">${c.name}（${c.charge}コロイド）</text>`;
-  s+=`<text x="390" y="58" text-anchor="middle" font-size="13" font-weight="bold" fill="var(--ink2)">${st.volt<=0?'電圧 0：移動しない':(sign>0?'正コロイドは陰極(−)へ移動':'負コロイドは陽極(＋)へ移動')}</text>`;
+  s+=`<text x="390" y="34" text-anchor="middle" font-size="${22*FS}" font-weight="900" fill="${col}">${c.name}（${c.charge}コロイド）</text>`;
+  s+=`<text x="390" y="58" text-anchor="middle" font-size="${13*FS}" font-weight="bold" fill="var(--ink2)">${st.volt<=0?'電圧 0：移動しない':(sign>0?'正コロイドは陰極(−)へ移動':'負コロイドは陽極(＋)へ移動')}</text>`;
   // 溶媒（無色）と色付きコロイド溶液（境界が移動）
   s+=`<rect x="${lx0}" y="${topY}" width="${lx1-lx0}" height="${botY-topY}" fill="#f4f8fd"/><rect x="${rx0}" y="${topY}" width="${rx1-rx0}" height="${botY-topY}" fill="#f4f8fd"/>`;
   s+=`<rect x="${lx0}" y="${chTop}" width="${rx1-lx0}" height="${botY-chTop}" fill="${col}" opacity="0.24"/>`;
@@ -1128,7 +1133,7 @@ function drawElectroModel(st){
   s+=ePlate(Lx,leftColor,anodeRight?'−':'＋',anodeRight?'陰極':'陽極')+ePlate(Rx,rightColor,anodeRight?'＋':'−',anodeRight?'陽極':'陰極');
   // 移動方向の矢印（腕の間の空きスペースに表示）
   if(st.volt>0&&disp>0.01){const dir=st.goesRight?1:-1;s+=`<line x1="${390-dir*40}" y1="250" x2="${390+dir*40}" y2="250" stroke="${col}" stroke-width="4" marker-end="url(#electro-arrow)"/><text x="390" y="236" text-anchor="middle" font-size="12" font-weight="bold" fill="${col}">コロイドが移動</text>`;}
-  s+=`<text x="390" y="${botY+30}" text-anchor="middle" font-size="13" font-weight="bold" fill="var(--ink2)">${c.name}（表面電荷 ${c.charge}）を含む溶液の色が ${st.volt<=0?'—':(st.goesRight?'右':'左')}の電極側へ移動する</text>`;
+  s+=`<text x="390" y="${botY+30}" text-anchor="middle" font-size="${13*FS}" font-weight="bold" fill="var(--ink2)">${c.name}（表面電荷 ${c.charge}）を含む溶液の色が ${st.volt<=0?'—':(st.goesRight?'右':'左')}の電極側へ移動する</text>`;
   $('model-electro').innerHTML=s;
 }
 function buildEColloidRow(){
