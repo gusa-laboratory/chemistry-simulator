@@ -34,11 +34,11 @@
   h1 { margin: 0; font-size: clamp(26px, 4vw, 40px); font-weight: 800; letter-spacing: -.03em; color: var(--blue-deep); }
   .subtitle { margin: 12px 0 0; color: var(--ink2); font-size: clamp(14px, 1.8vw, 17px); line-height: 1.7; font-weight: 600; }
   main { padding: 34px clamp(18px, 5vw, 60px) 60px; }
-  .grid { display: grid; grid-template-columns: 1fr; gap: 14px; max-width: 640px; }
+  .grid { display: grid; grid-template-columns: 1fr; gap: 11px; max-width: 900px; }
   .sim {
-    display: flex; flex-direction: row; align-items: center; gap: 18px; text-decoration: none; color: inherit;
+    display: flex; flex-direction: row; align-items: center; gap: 16px; text-decoration: none; color: inherit;
     background: var(--card); border: 1px solid var(--border); border-radius: 22px;
-    padding: 22px 26px; box-shadow: var(--shadow); position: relative; overflow: hidden;
+    padding: 14px 22px; box-shadow: var(--shadow); position: relative; overflow: hidden;
     transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
   }
   .sim::after {
@@ -47,15 +47,21 @@
   }
   .sim:hover { transform: translateY(-4px); border-color: #b7cdf0; box-shadow: 0 26px 60px rgba(31,55,89,.16); }
   .sim:focus-visible { outline: 3px solid rgba(37,99,235,.32); outline-offset: 3px; }
-  .sim .ico { font-size: 40px; line-height: 1; flex: 0 0 auto; }
-  .sim h2 { margin: 0; font-size: 20px; font-weight: 800; color: var(--blue-deep); }
+  .sim .ico { width: 48px; display: grid; place-items: center; font-size: 35px; line-height: 1; flex: 0 0 auto; }
+  .sim .ico svg { display: block; width: 46px; height: 46px; }
+  .sim-body { position: relative; z-index: 1; flex: 1; min-width: 0; display: grid; grid-template-columns: minmax(190px, .7fr) minmax(280px, 1.3fr); align-items: center; gap: 18px; }
+  .sim h2 { margin: 0; font-size: 19px; font-weight: 800; color: var(--blue-deep); }
+  .sim-desc { margin: 0; color: var(--ink2); font-size: 13px; line-height: 1.55; font-weight: 600; }
   .credit { max-width: 1080px; margin: 0 auto; padding: 8px clamp(18px, 5vw, 60px) 40px; text-align: center; color: #dbe0e8; font-size: 10.5px; font-weight: 500; letter-spacing: .05em; }
   @media (max-width: 560px) {
     header { padding-top: 28px; } main { padding-top: 24px; }
-    .grid { gap: 14px; }
-    .sim { padding: 18px 20px; gap: 14px; }
-    .sim .ico { font-size: 34px; }
+    .grid { gap: 11px; }
+    .sim { padding: 14px 17px; gap: 13px; }
+    .sim .ico { width: 40px; font-size: 31px; }
+    .sim .ico svg { width: 40px; height: 40px; }
+    .sim-body { grid-template-columns: 1fr; gap: 3px; }
     .sim h2 { font-size: 17px; }
+    .sim-desc { font-size: 11.5px; line-height: 1.45; }
   }
 </style>
 </head>
@@ -69,20 +75,40 @@
 <main class="wrap">
   <div class="grid">
     <a class="sim" href="molecular-shapes.html">
-      <div class="ico">🧬</div>
-      <h2>分子の形</h2>
+      <div class="ico" aria-hidden="true">
+        <svg viewBox="0 0 56 56">
+          <path d="M28 27 12 42M28 27l18 14" fill="none" stroke="#8da3bd" stroke-width="7" stroke-linecap="round"/>
+          <circle cx="28" cy="25" r="11" fill="#ef4444"/>
+          <circle cx="11" cy="43" r="8" fill="#f8fafc" stroke="#9fb0c5" stroke-width="2"/>
+          <circle cx="46" cy="42" r="8" fill="#f8fafc" stroke="#9fb0c5" stroke-width="2"/>
+          <circle cx="24" cy="21" r="3" fill="#fff" opacity=".72"/>
+        </svg>
+      </div>
+      <div class="sim-body">
+        <h2>分子の形</h2>
+        <p class="sim-desc">構造式と3Dモデルを見比べ、電子対の反発と結合角を確認。</p>
+      </div>
     </a>
     <a class="sim" href="crystals.html">
       <div class="ico">💎</div>
-      <h2>結晶格子</h2>
+      <div class="sim-body">
+        <h2>結晶格子</h2>
+        <p class="sim-desc">単位格子を回転し、配位数・充填率・断面を立体的に理解。</p>
+      </div>
     </a>
     <a class="sim" href="gas-laws.html">
       <div class="ico">🎈</div>
-      <h2>気体の法則</h2>
+      <div class="sim-body">
+        <h2>気体の法則</h2>
+        <p class="sim-desc">状態量を動かし、グラフと粒子モデルの変化を同時に観察。</p>
+      </div>
     </a>
     <a class="sim" href="solutions.html">
       <div class="ico">🧪</div>
-      <h2>希薄溶液・コロイド</h2>
+      <div class="sim-body">
+        <h2>希薄溶液・コロイド</h2>
+        <p class="sim-desc">束一的性質とコロイドの挙動をグラフ・模式図で確認。</p>
+      </div>
     </a>
   </div>
 </main>
