@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>分子の形｜VSEPRモデル</title>
+<meta name="description" content="電子式とVSEPRモデルを対応させて、電子対の反発と分子の形を確認できる授業用教材。">
+<meta name="theme-color" content="#2563eb">
+<link rel="icon" href="icons/icon-192.png">
+<style>
+  :root{--blue:#2563eb;--blue-deep:#173b75;--ink:#162033;--ink2:#526079;--ink3:#8290a5;--bg:#eef3f9;--card:#fff;--line:#d8e1ed;--purple:#7c3aed;--cyan:#0891b2;--orange:#ea580c;--shadow:0 18px 45px rgba(31,55,89,.1);--shadow-sm:0 7px 22px rgba(31,55,89,.075)}
+  *{box-sizing:border-box}
+  html{min-width:320px;background:var(--bg)}
+  body{margin:0;min-height:100vh;color:var(--ink);font-family:Inter,'Yu Gothic UI','Yu Gothic',Meiryo,sans-serif;-webkit-font-smoothing:antialiased;background:radial-gradient(circle at 5% -4%,rgba(37,99,235,.13),transparent 27rem),radial-gradient(circle at 97% 2%,rgba(14,165,233,.09),transparent 25rem),linear-gradient(180deg,#f6f9fd 0,var(--bg) 30rem)}
+  button{font:inherit}
+  button:focus-visible,[tabindex]:focus-visible{outline:3px solid rgba(37,99,235,.34);outline-offset:3px}
+  header{padding:20px clamp(16px,4vw,54px) 0;background:rgba(250,252,255,.94);border-bottom:1px solid rgba(203,215,230,.92);box-shadow:0 4px 18px rgba(31,55,89,.05);position:sticky;top:0;z-index:20}
+  .head-row{display:flex;max-width:1480px;margin:0 auto 14px;gap:22px;align-items:center;justify-content:space-between}
+  .title-block{display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+  .back-link{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border:1px solid #cdd9ea;border-radius:10px;background:#fff;color:#3a4d6b;text-decoration:none;font-size:13.5px;font-weight:800;box-shadow:0 2px 8px rgba(31,55,89,.06)}
+  .back-link:hover{color:var(--blue);border-color:#8fb0df}
+  h1{margin:0;color:var(--blue-deep);font-size:clamp(22px,2.5vw,32px);line-height:1.25;font-weight:850;letter-spacing:-.035em}
+  .outline-btn{display:inline-flex;align-items:center;gap:7px;padding:9px 13px;border:1px solid #bfd0e7;border-radius:12px;background:#fff;color:var(--blue-deep);box-shadow:var(--shadow-sm);font-size:13px;font-weight:800;cursor:pointer;transition:transform .16s ease,border-color .16s ease,color .16s ease}
+  .outline-btn:hover{color:var(--blue);border-color:#8fb0df;transform:translateY(-1px)}
+  .tabs{display:flex;gap:6px;max-width:1480px;margin:0 auto;overflow-x:auto;scrollbar-width:thin}
+  .tabs button{appearance:none;flex:0 0 auto;border:1px solid transparent;border-bottom:0;border-radius:11px 11px 0 0;background:transparent;cursor:pointer;padding:10px 14px 12px;font-size:13px;font-weight:760;color:#59677c;transition:background .16s ease,color .16s ease}
+  .tabs button:hover{color:var(--blue);background:rgba(237,244,255,.82)}
+  .tabs button[aria-selected="true"]{border-color:#cfd9e6;background:var(--bg);color:var(--blue);box-shadow:inset 0 3px 0 var(--blue)}
+  main{max-width:1560px;margin:0 auto;padding:22px clamp(16px,4vw,54px) 50px}
+  .toolbar{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:18px;flex-wrap:wrap}
+  .comparison-tab{border-left:1px solid #cbd5e1!important;color:var(--blue-deep)!important}
+  .view-switch{display:inline-grid;grid-auto-flow:column;padding:4px;border:1px solid #cfdae8;border-radius:14px;background:#e4ebf4;box-shadow:inset 0 1px 2px rgba(31,55,89,.06)}
+  .view-switch button{border:0;border-radius:10px;background:transparent;color:var(--ink2);padding:8px 14px;cursor:pointer;font-size:12.5px;font-weight:800;transition:background .16s ease,color .16s ease,box-shadow .16s ease}
+  .view-switch button[aria-pressed="true"]{background:#fff;color:var(--blue-deep);box-shadow:0 2px 8px rgba(31,55,89,.14)}
+  .electron-toggle,.repulsion-toggle,.angle-toggle{min-width:126px;justify-content:center;box-shadow:none;background:rgba(255,255,255,.82)}
+  .electron-toggle[aria-pressed="true"]{border-color:#b9a0ee;background:#f5f0ff;color:#6026bc}
+  .repulsion-toggle[aria-pressed="true"]{border-color:#fdba74;background:#fff7ed;color:#c2410c}
+  .angle-toggle[aria-pressed="true"]{border-color:#f9a8d4;background:#fdf2f8;color:#be185d}
+  .repulsion-toggle:disabled,.angle-toggle:disabled{cursor:not-allowed;border-color:#d8e1ed;background:#edf2f7;color:#8290a5;opacity:.72}
+  .lesson-head{text-align:center;margin-bottom:12px}
+  .lesson-head h2{margin:0 0 9px;color:var(--blue-deep);font-size:clamp(21px,2.4vw,29px);letter-spacing:-.025em}
+  .facts{display:flex;justify-content:center;align-items:center;gap:7px;flex-wrap:wrap}
+  .fact{padding:5px 9px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.82);color:var(--ink2);font-size:11px;font-weight:800}
+  .molecule-card{border:1px solid rgba(210,221,236,.95);border-top:4px solid var(--cyan);border-radius:20px;background:linear-gradient(145deg,#fff 0%,#fbfdff 100%);box-shadow:var(--shadow);padding:14px}
+  .molecule-display{display:grid;grid-template-columns:1fr 1fr;gap:10px;min-height:0}
+  .view-block{min-width:0;position:relative;border:1px solid #e0e7f0;border-radius:14px;background:radial-gradient(circle at 50% 40%,#fff,#edf3fa);overflow:hidden}
+  .view-label{position:absolute;z-index:3;top:8px;left:9px;padding:3px 7px;border-radius:6px;background:rgba(255,255,255,.9);color:var(--ink3);font:850 9px/1.2 Inter,Arial,sans-serif;letter-spacing:.09em;pointer-events:none}
+  .two-d{min-height:clamp(430px,58vh,680px);display:grid;place-items:center;padding:34px 10px 10px;background:#fff}
+  .formula-host{width:100%;height:100%;display:grid;place-items:center}
+  .formula-host svg{width:100%;height:clamp(390px,53vh,620px);display:block}
+  .three-d{min-height:clamp(430px,58vh,680px)}
+  .mol-canvas{display:block;width:100%;height:clamp(430px,58vh,680px);cursor:grab;touch-action:none}
+  .mol-canvas:active{cursor:grabbing}
+  .canvas-help{position:absolute;z-index:3;bottom:7px;left:50%;transform:translateX(-50%);color:#74859d;background:rgba(255,255,255,.86);border-radius:7px;padding:3px 7px;font-size:9.5px;font-weight:700;white-space:nowrap;pointer-events:none}
+  .electron-key{position:absolute;z-index:3;right:9px;bottom:9px;display:flex;gap:8px;align-items:center;padding:5px 8px;border:1px solid rgba(216,225,237,.9);border-radius:8px;background:rgba(255,255,255,.88);color:#5f6f85;font-size:9px;font-weight:800;pointer-events:none}
+  .electron-key[hidden]{display:none}
+  .electron-key [hidden]{display:none}
+  .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:3px;vertical-align:-1px}.dot.bond{background:rgba(8,145,178,.7)}.dot.lone{background:rgba(124,58,237,.75)}.dot.repulsion{border:2px dashed #f97316;background:transparent}
+  .reset-view{position:absolute;z-index:4;right:7px;top:7px;width:30px;height:30px;border:1px solid #d8e1ed;border-radius:9px;background:rgba(255,255,255,.9);color:var(--blue-deep);cursor:pointer;font-size:15px;font-weight:900}
+  .reset-view:hover{color:var(--blue);border-color:#9db9df}
+  .comparison-panel[hidden]{display:none}
+  .comparison-panel{min-height:0}
+  .comparison-title{margin:0 0 10px;text-align:center;color:var(--blue-deep);font-size:clamp(19px,2vw,25px);letter-spacing:-.02em}
+  .compare-grid{display:flex;align-items:stretch;gap:10px;min-height:0}
+  .compare-card{min-width:0;flex:1 1 0;border:1px solid #d8e1ed;border-top:4px solid var(--cyan);border-radius:17px;background:#fff;box-shadow:var(--shadow-sm);padding:10px;display:flex;flex-direction:column}
+  .compare-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
+  .compare-head h3{margin:0;color:var(--blue-deep);font-size:clamp(16px,1.7vw,22px)}
+  .compare-facts{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:6px}
+  .compare-facts span{padding:3px 6px;border-radius:999px;background:#f5f8fc;color:var(--ink2);font-size:9px;font-weight:800}
+  .compare-canvas-wrap{position:relative;flex:1;min-height:390px;border:1px solid #e0e7f0;border-radius:12px;overflow:hidden;background:radial-gradient(circle at 50% 40%,#fff,#edf3fa)}
+  .compare-canvas{display:block;width:100%;height:clamp(390px,52vh,600px);cursor:grab;touch-action:none}
+  .compare-canvas:active{cursor:grabbing}
+  body.comparison-mode .lesson-head,body.comparison-mode .molecule-card,body.comparison-mode .mode-switch,body.comparison-mode .formula-switch{display:none}
+  body[data-view="2d"] .three-d{display:none}body[data-view="2d"] .molecule-display{grid-template-columns:1fr}
+  body[data-view="3d"] .two-d{display:none}body[data-view="3d"] .molecule-display{grid-template-columns:1fr}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  footer{padding:0 20px 25px;text-align:center;color:#a3adbc;font-size:10px;font-weight:600;letter-spacing:.04em}
+  body.is-fullscreen{height:100vh;overflow:hidden;display:flex;flex-direction:column}
+  body.is-fullscreen header{position:static;padding:9px clamp(14px,2.5vw,34px) 0;flex:0 0 auto}
+  body.is-fullscreen .head-row{margin-bottom:7px}body.is-fullscreen h1{font-size:clamp(20px,2vw,27px)}
+  body.is-fullscreen .back-link{display:none}
+  body.is-fullscreen .tabs button{padding-top:7px;padding-bottom:9px}
+  body.is-fullscreen main{padding:8px clamp(12px,2vw,30px) 10px;max-width:none;width:100%;flex:1;min-height:0;display:flex;flex-direction:column}
+  body.is-fullscreen footer{display:none}body.is-fullscreen .toolbar{flex:0 0 auto;margin-bottom:8px}body.is-fullscreen .lesson-head{flex:0 0 auto;margin-bottom:7px}
+  body.is-fullscreen .molecule-card{flex:1;min-height:0;display:flex;padding:10px}body.is-fullscreen .molecule-display{flex:1;width:100%;min-height:0}
+  body.is-fullscreen .view-block,body.is-fullscreen .formula-host,body.is-fullscreen .formula-host svg,body.is-fullscreen .three-d,body.is-fullscreen .mol-canvas{height:100%;min-height:0}
+  body.is-fullscreen.comparison-mode .lesson-head,body.is-fullscreen.comparison-mode .molecule-card{display:none}body.is-fullscreen.comparison-mode .comparison-panel{display:flex;flex:1;min-height:0;flex-direction:column}body.is-fullscreen.comparison-mode .compare-grid{flex:1;height:auto}body.is-fullscreen.comparison-mode .compare-card{min-height:0}body.is-fullscreen.comparison-mode .compare-canvas-wrap,body.is-fullscreen.comparison-mode .compare-canvas{height:100%;min-height:0}
+  @media(max-width:900px){.compare-grid{flex-direction:column}.compare-card{flex:1}.compare-canvas-wrap,.compare-canvas{min-height:360px;height:360px}}
+  @media(max-width:760px){header{position:static}.molecule-display{grid-template-columns:1fr!important}.two-d,.three-d,.mol-canvas{min-height:400px;height:400px}.formula-host svg{height:370px}body.is-fullscreen{height:auto;overflow:auto;display:block}body.is-fullscreen .molecule-card{display:block}body.is-fullscreen .view-block,body.is-fullscreen .three-d,body.is-fullscreen .mol-canvas{height:400px}}
+  @media(max-width:520px){header{padding-top:14px}.btn-text{display:none}.outline-btn{padding:9px 11px}.tabs button{padding:9px 11px 11px;font-size:12px}main{padding-top:16px}.toolbar{align-items:stretch}.view-switch{width:100%;grid-auto-columns:1fr}.view-switch button{padding:8px 5px}.electron-toggle,.repulsion-toggle{flex:1}.two-d,.three-d,.mol-canvas{min-height:350px;height:350px}.formula-host svg{height:320px}.electron-key{left:9px;right:auto}}
+  @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+  @media(prefers-contrast:more){:root{--ink2:#344055;--line:#aebaca}.molecule-card,.view-block{border-color:#aebaca}}
+</style>
+</head>
+<body data-view="both">
+<header>
+  <div class="head-row">
+    <div class="title-block">
+      <a class="back-link" href="index.html">← 一覧に戻る</a>
+      <h1>分子の形</h1>
+    </div>
+    <button class="outline-btn" id="fullscreenBtn" type="button" aria-label="全画面表示"><span aria-hidden="true">⛶</span><span class="btn-text">全画面表示</span></button>
+  </div>
+  <nav class="tabs" id="moleculeTabs" role="tablist" aria-label="表示する分子と比較セット">
+    <span id="compareSwitch" style="display:contents">
+      <button class="comparison-tab" id="tab-compare-co2-h2o" type="button" role="tab" aria-controls="comparisonPanel" aria-selected="false" tabindex="-1" data-compare="co2-h2o">比較 CO₂／H₂O</button>
+      <button class="comparison-tab" id="tab-compare-ch4-nh3-h2o" type="button" role="tab" aria-controls="comparisonPanel" aria-selected="false" tabindex="-1" data-compare="ch4-nh3-h2o">比較 CH₄／NH₃／H₂O</button>
+    </span>
+  </nav>
+</header>
+<main>
+  <div class="toolbar">
+    <div class="view-switch mode-switch" role="group" aria-label="表示方法">
+      <button type="button" data-view="2d" aria-pressed="false">2Dのみ</button>
+      <button type="button" data-view="both" aria-pressed="true">2D＋3D</button>
+      <button type="button" data-view="3d" aria-pressed="false">3Dのみ</button>
+    </div>
+    <div class="view-switch formula-switch" role="group" aria-label="2D構造式の種類">
+      <button type="button" data-formula="structure" aria-pressed="true">構造式</button>
+      <button type="button" data-formula="lewis" aria-pressed="false">電子式</button>
+    </div>
+    <button class="outline-btn electron-toggle" id="electronToggle" type="button" aria-pressed="true">電子対表示 ON</button>
+    <button class="outline-btn repulsion-toggle" id="repulsionToggle" type="button" aria-pressed="true">反発矢印 ON</button>
+    <button class="outline-btn angle-toggle" id="angleToggle" type="button" aria-pressed="false">結合角 OFF</button>
+  </div>
+  <div class="lesson-head">
+    <h2 id="moleculeTitle">H₂</h2>
+    <div class="facts" id="facts"></div>
+  </div>
+  <article class="molecule-card" id="moleculePanel" role="tabpanel" aria-labelledby="tab-h2">
+    <div class="molecule-display">
+      <section class="view-block two-d"><span class="view-label" id="formulaLabel">2D 構造式</span><div class="formula-host" id="formulaHost"></div></section>
+      <section class="view-block three-d">
+        <span class="view-label">3D VSEPRモデル</span>
+        <canvas class="mol-canvas" id="molCanvas" tabindex="0" aria-label="分子の3D VSEPRモデル。ドラッグまたは矢印キーで回転"></canvas>
+        <button class="reset-view" id="resetView" type="button" aria-label="視点をリセット">↺</button>
+        <div class="electron-key" id="electronKey"><span id="sharedLegend"><i class="dot bond"></i>共有電子対</span><span id="loneLegend"><i class="dot lone"></i>非共有電子対</span><span id="repulsionLegend"><i class="dot repulsion"></i>反発</span></div>
+        <span class="canvas-help">ドラッグ：回転　ホイール：拡大</span>
+      </section>
+    </div>
+  </article>
+  <section class="comparison-panel" id="comparisonPanel" hidden aria-labelledby="comparisonTitle">
+    <h2 class="comparison-title" id="comparisonTitle"></h2>
+    <div class="compare-grid" id="compareGrid"></div>
+  </section>
+  <div class="sr-only" id="live" aria-live="polite"></div>
+</main>
+<footer>大阪女学院中学校・高等学校　Yuto Yamaguchi</footer>
+<script>
+const A=(e,x,y,z)=>({e,x,y,z});
+const B=(a,b,o=1)=>({a,b,o});
+const LP=(atom,x,y,z)=>({atom,dir:[x,y,z]});
+const molecules={
+ h2:{label:'H₂',name:'水素',shape:'直線形',electronShape:'—',domainCount:'—',angle:'—（二原子分子）',domains:'各H：共有1',initialYaw:-.2,initialPitch:.18,atoms:[A('H',-.82,0,0),A('H',.82,0,0)],bonds:[B(0,1)],lonePairs:[],vsepr:[]},
+ o2:{label:'O₂',name:'酸素',shape:'直線形',electronShape:'各O：平面三角形',domainCount:'各O：3',angle:'—（二原子分子）',domains:'各O：共有2＋非共有2',initialYaw:-.35,initialPitch:.2,atoms:[A('O',-.72,0,0),A('O',.72,0,0)],bonds:[B(0,1,2)],lonePairs:[LP(0,-.5,.866,0),LP(0,-.5,-.866,0),LP(1,.5,.866,0),LP(1,.5,-.866,0)],vsepr:[{center:0,bonds:[1],lone:[0,1]},{center:1,bonds:[0],lone:[2,3]}]},
+ n2:{label:'N₂',name:'窒素',shape:'直線形',electronShape:'各N：直線形',domainCount:'各N：2',angle:'—（二原子分子）',domains:'各N：共有3＋非共有1',initialYaw:-.3,initialPitch:.18,atoms:[A('N',-.72,0,0),A('N',.72,0,0)],bonds:[B(0,1,3)],lonePairs:[LP(0,-1,0,0),LP(1,1,0,0)],vsepr:[{center:0,bonds:[1],lone:[0],arcDir:[0,1,0]},{center:1,bonds:[0],lone:[1],arcDir:[0,-1,0]}]},
+ hcl:{label:'HCl',name:'塩化水素',shape:'直線形',electronShape:'Cl：正四面体',domainCount:'Cl：4',angle:'—（二原子分子）',domains:'Cl：共有1＋非共有3',initialYaw:-.55,initialPitch:.32,atoms:[A('H',-.92,0,0),A('Cl',.72,0,0)],bonds:[B(0,1)],lonePairs:[LP(1,.333,.943,0),LP(1,.333,-.471,.816),LP(1,.333,-.471,-.816)],vsepr:[{center:1,bonds:[0],lone:[0,1,2]}]},
+ ch4:{label:'CH₄',name:'メタン',shape:'正四面体形',electronShape:'正四面体',domainCount:'4',angle:'109.5°',domains:'C：共有4＋非共有0',angleGuides:[{center:0,a:1,b:2,label:'109.5°',radius:.68}],initialYaw:-.65,initialPitch:.35,atoms:[A('C',0,0,0),A('H',.72,.72,.72),A('H',.72,-.72,-.72),A('H',-.72,.72,-.72),A('H',-.72,-.72,.72)],bonds:[B(0,1),B(0,2),B(0,3),B(0,4)],lonePairs:[],vsepr:[{center:0,bonds:[1,2,3,4],lone:[]}]},
+ h2o:{label:'H₂O',name:'水',shape:'折れ線形',electronShape:'正四面体',domainCount:'4',angle:'104.5°',domains:'O：共有2＋非共有2',angleGuides:[{center:0,a:1,b:2,label:'104.5°',radius:.68}],initialYaw:-.55,initialPitch:.26,atoms:[A('O',0,.28,0),A('H',-.95,-.456,0),A('H',.95,-.456,0)],bonds:[B(0,1),B(0,2)],lonePairs:[LP(0,0,.544,.839),LP(0,0,.544,-.839)],vsepr:[{center:0,bonds:[1,2],lone:[0,1]}]},
+ co2:{label:'CO₂',name:'二酸化炭素',shape:'直線形',electronShape:'直線形',domainCount:'2',angle:'180°',domains:'C：共有4（電子領域2）',angleGuides:[{center:1,a:0,b:2,label:'180°',radius:.72,arcDir:[0,1,0]}],initialYaw:-.35,initialPitch:.2,atoms:[A('O',-1.25,0,0),A('C',0,0,0),A('O',1.25,0,0)],bonds:[B(0,1,2),B(1,2,2)],lonePairs:[LP(0,-.5,.866,0),LP(0,-.5,-.866,0),LP(2,.5,.866,0),LP(2,.5,-.866,0)],vsepr:[{center:0,bonds:[1],lone:[0,1]},{center:1,bonds:[0,2],lone:[],arcDir:[0,1,0]},{center:2,bonds:[1],lone:[2,3]}]},
+ nh3:{label:'NH₃',name:'アンモニア',shape:'三角錐形',electronShape:'正四面体',domainCount:'4',angle:'約107°',domains:'N：共有3＋非共有1',angleGuides:[{center:0,a:1,b:2,label:'約107°',radius:.7}],initialYaw:-.72,initialPitch:.3,atoms:[A('N',0,.22,0),A('H',1.05,-.2,0),A('H',-.53,-.2,.91),A('H',-.53,-.2,-.91)],bonds:[B(0,1),B(0,2),B(0,3)],lonePairs:[LP(0,0,1,0)],vsepr:[{center:0,bonds:[1,2,3],lone:[0]}]},
+ becl2:{label:'BeCl₂',name:'塩化ベリリウム',shape:'直線形',electronShape:'直線形',domainCount:'2',angle:'180°',domains:'Be：共有2＋非共有0',angleGuides:[{center:0,a:1,b:2,label:'180°',radius:.76,arcDir:[0,1,0]}],initialYaw:-.38,initialPitch:.22,atoms:[A('Be',0,0,0),A('Cl',-1.35,0,0),A('Cl',1.35,0,0)],bonds:[B(0,1),B(0,2)],lonePairs:[],vsepr:[{center:0,bonds:[1,2],lone:[],arcDir:[0,1,0]}]},
+ bf3:{label:'BF₃',name:'三フッ化ホウ素',shape:'平面三角形',electronShape:'平面三角形',domainCount:'3',angle:'120°',domains:'B：共有3＋非共有0',angleGuides:[{center:0,a:1,b:2,label:'120°',radius:.7}],initialYaw:-.52,initialPitch:.38,atoms:[A('B',0,0,0),A('F',1.18,0,0),A('F',-.59,1.022,0),A('F',-.59,-1.022,0)],bonds:[B(0,1),B(0,2),B(0,3)],lonePairs:[],vsepr:[{center:0,bonds:[1,2,3],lone:[]}]},
+ pcl5:{label:'PCl₅',name:'五塩化リン',shape:'三方両錐形',electronShape:'三方両錐',domainCount:'5',angle:'90°・120°・180°',domains:'P：共有5＋非共有0',angleGuides:[{center:0,a:1,b:4,label:'90°',radius:.7,labelRadius:1},{center:0,a:4,b:5,label:'120°',radius:.8,labelRadius:1.05}],initialYaw:-.72,initialPitch:.32,atoms:[A('P',0,0,0),A('Cl',0,1.4,0),A('Cl',0,-1.4,0),A('Cl',1.22,0,0),A('Cl',-.61,0,1.056),A('Cl',-.61,0,-1.056)],bonds:[B(0,1),B(0,2),B(0,3),B(0,4),B(0,5)],lonePairs:[],vsepr:[{center:0,bonds:[1,2,3,4,5],lone:[],pairs:[[0,2],[1,3],[0,4],[2,3],[3,4],[4,2]]}]},
+ sf6:{label:'SF₆',name:'六フッ化硫黄',shape:'正八面体形',electronShape:'正八面体',domainCount:'6',angle:'90°・180°',domains:'S：共有6＋非共有0',angleGuides:[{center:0,a:1,b:4,label:'90°',radius:.72,labelRadius:1}],initialYaw:-.62,initialPitch:.4,atoms:[A('S',0,0,0),A('F',1.22,0,0),A('F',-1.22,0,0),A('F',0,1.22,0),A('F',0,-1.22,0),A('F',0,0,1.22),A('F',0,0,-1.22)],bonds:[B(0,1),B(0,2),B(0,3),B(0,4),B(0,5),B(0,6)],lonePairs:[],vsepr:[{center:0,bonds:[1,2,3,4,5,6],lone:[],pairs:[[0,2],[2,4],[4,1],[1,3],[3,5],[5,0]]}]}
+};
+
+const E3=(cx,cy,dx,dy)=>{
+ const n=Math.hypot(dx,dy)||1,a=Math.atan2(dy/n,dx/n);
+ return [-Math.PI/2,0,Math.PI/2].map(offset=>{const t=a+offset,px=cx+Math.cos(t)*43,py=cy+Math.sin(t)*43,tx=-Math.sin(t)*8,ty=Math.cos(t)*8;return [px-tx,py-ty,px+tx,py+ty]});
+};
+const formulaData={
+ h2:{atoms:[['H',130,150],['H',290,150]],bonds:[[170,150,250,150,1]],pairs:[]},
+ o2:{atoms:[['O',130,150],['O',290,150]],bonds:[[170,142,250,142,1],[170,158,250,158,1]],pairs:[[120,88,140,88],[120,212,140,212],[280,88,300,88],[280,212,300,212]]},
+ n2:{atoms:[['N',130,150],['N',290,150]],bonds:[[170,134,250,134,1],[170,150,250,150,1],[170,166,250,166,1]],pairs:[[68,142,68,158],[352,142,352,158]]},
+ hcl:{atoms:[['H',120,150],['Cl',290,150]],bonds:[[160,150,238,150,1]],pairs:[[280,82,300,82],[280,218,300,218],[363,142,363,158]]},
+ h2o:{atoms:[['H',105,150],['O',210,150],['H',315,150]],bonds:[[145,150,174,150,1],[246,150,275,150,1]],pairs:[[200,82,220,82],[200,218,220,218]]},
+ co2:{atoms:[['O',90,150],['C',210,150],['O',330,150]],bonds:[[132,142,168,142,1],[132,158,168,158,1],[252,142,288,142,1],[252,158,288,158,1]],pairs:[[80,88,100,88],[80,212,100,212],[320,88,340,88],[320,212,340,212]]},
+ nh3:{atoms:[['N',210,150],['H',95,150],['H',325,150],['H',210,255]],bonds:[[135,150,174,150,1],[246,150,285,150,1],[210,186,210,215,1]],pairs:[[200,82,220,82]]},
+ becl2:{atoms:[['Cl',65,150],['Be',210,150],['Cl',355,150]],bonds:[[112,150,168,150,1],[252,150,308,150,1]],pairs:[...E3(65,150,-1,0),...E3(355,150,1,0)]},
+ bf3:{atoms:[['B',210,150],['F',95,150],['F',325,150],['F',210,245]],bonds:[[135,150,174,150,1],[246,150,285,150,1],[210,186,210,207,1]],pairs:[...E3(95,150,-1,0),...E3(325,150,1,0),...E3(210,245,0,1)]},
+ ch4:{atoms:[['C',210,150],['H',210,45],['H',105,150],['H',315,150],['H',210,255]],bonds:[[210,112,210,82,1],[168,150,145,150,1],[252,150,275,150,1],[210,188,210,218,1]],pairs:[]},
+ pcl5:{atoms:[['P',210,150],['Cl',210,52],['Cl',210,248],['Cl',66,150],['Cl',326,82],['Cl',326,218]],bonds:[[210,112,210,90,1],[210,188,210,210,1],[168,150,113,150,1],[245,128,285,105,1],[245,172,285,195,1]],pairs:[...E3(210,52,0,-1),...E3(210,248,0,1),...E3(66,150,-1,0),...E3(326,82,.85,-.53),...E3(326,218,.85,.53)]},
+ sf6:{atoms:[['S',210,150],['F',210,50],['F',297,100],['F',297,200],['F',210,250],['F',123,200],['F',123,100]],bonds:[[210,112,210,88,1],[244,130,263,119,1],[244,170,263,181,1],[210,188,210,212,1],[176,170,157,181,1],[176,130,157,119,1]],pairs:[...E3(210,50,0,-1),...E3(297,100,.866,-.5),...E3(297,200,.866,.5),...E3(210,250,0,1),...E3(123,200,-.866,.5),...E3(123,100,-.866,-.5)]}
+};
+
+const state={molecule:'h2',formula:'structure',electrons:true,repulsion:true,angles:false,compare:'none',compareFocus:null};
+const compareSets={
+ 'co2-h2o':{title:'CO₂ と H₂O',keys:['co2','h2o']},
+ 'ch4-nh3-h2o':{title:'CH₄・NH₃・H₂O',keys:['ch4','nh3','h2o']}
+};
+const colors={H:'#f8fafc',O:'#ef4444',N:'#2563eb',Cl:'#22c55e',C:'#374151',Be:'#94a3b8',B:'#f59e0b',F:'#14b8a6',P:'#f97316',S:'#eab308'};
+const outlines={H:'#94a3b8',O:'#b91c1c',N:'#1d4ed8',Cl:'#15803d',C:'#111827',Be:'#64748b',B:'#b45309',F:'#0f766e',P:'#c2410c',S:'#a16207'};
+const radii={H:13,O:18,N:18,Cl:21,C:18,Be:18,B:18,F:17,P:21,S:21};
+
+function formulaSVG(key,lewis){
+ const d=formulaData[key],bondGroups=[],compact=.85,px=x=>lewis?210+(x-210)*compact:x,py=y=>lewis?150+(y-150)*compact:y;
+ d.bonds.forEach(b=>{const mx=(b[0]+b[2])/2,my=(b[1]+b[3])/2,dx=b[2]-b[0],dy=b[3]-b[1],n=Math.hypot(dx,dy)||1;let ux=dx/n,uy=dy/n;if(ux<-.001||(Math.abs(ux)<.001&&uy<0)){ux=-ux;uy=-uy}let g=bondGroups.find(x=>Math.abs(x.ux*ux+x.uy*uy)>.98&&Math.hypot(x.mx-mx,x.my-my)<31);if(g){g.lines.push(b);g.mx=(g.mx*(g.lines.length-1)+mx)/g.lines.length;g.my=(g.my*(g.lines.length-1)+my)/g.lines.length}else bondGroups.push({mx,my,ux,uy,lines:[b]})});
+ const bonds=lewis?bondGroups.map(g=>{const nx=-g.uy,ny=g.ux,count=g.lines.length;return g.lines.map((_,i)=>{const along=(i-(count-1)/2)*18,cx=px(g.mx+g.ux*along),cy=py(g.my+g.uy*along);return `<circle class="shared-electron" cx="${cx-nx*7}" cy="${cy-ny*7}" r="5"/><circle class="shared-electron" cx="${cx+nx*7}" cy="${cy+ny*7}" r="5"/>`}).join('')}).join(''):d.bonds.map(b=>`<line class="bond" x1="${b[0]}" y1="${b[1]}" x2="${b[2]}" y2="${b[3]}"/>`).join(''),atoms=d.atoms.map(a=>`<text class="atom ${a[0]}" x="${px(a[1])}" y="${py(a[2])}">${a[0]}</text>`).join(''),pairs=lewis?d.pairs.map(p=>{const cx=px((p[0]+p[2])/2),cy=py((p[1]+p[3])/2),hx=(p[2]-p[0])/2,hy=(p[3]-p[1])/2;return `<circle class="nonshared-electron" cx="${cx-hx}" cy="${cy-hy}" r="5"/><circle class="nonshared-electron" cx="${cx+hx}" cy="${cy+hy}" r="5"/>`}).join(''):'';
+ return `<svg viewBox="0 0 420 300" role="img" aria-label="${molecules[key].label}の${lewis?'電子式':'構造式'}"><style>.bond{stroke:#111827;stroke-width:7;stroke-linecap:square}.atom{font:400 62px Arial,'Yu Gothic',sans-serif;fill:#111827;text-anchor:middle;dominant-baseline:middle}.shared-electron{fill:#0891b2}.nonshared-electron{fill:#7c3aed}</style>${bonds}${pairs}${atoms}</svg>`
+}
+
+class VSEPRView{
+ constructor(canvas){this.c=canvas;this.ctx=canvas.getContext('2d');this.drag=null;this.model=molecules[state.molecule];this.reset(false);this.bind();this.resize()}
+ bind(){
+  this.c.addEventListener('pointerdown',e=>{this.c.setPointerCapture(e.pointerId);this.drag={x:e.clientX,y:e.clientY}});
+  this.c.addEventListener('pointermove',e=>{if(!this.drag)return;this.yaw+=(e.clientX-this.drag.x)*.012;this.pitch=Math.max(-1.45,Math.min(1.45,this.pitch+(e.clientY-this.drag.y)*.012));this.drag={x:e.clientX,y:e.clientY};this.draw()});
+  ['pointerup','pointercancel','lostpointercapture'].forEach(t=>this.c.addEventListener(t,()=>this.drag=null));
+  this.c.addEventListener('wheel',e=>{e.preventDefault();this.zoom=Math.max(.62,Math.min(1.8,this.zoom*(e.deltaY>0?.92:1.08)));this.draw()},{passive:false});
+  this.c.addEventListener('keydown',e=>{let used=true;if(e.key==='ArrowLeft')this.yaw-=.14;else if(e.key==='ArrowRight')this.yaw+=.14;else if(e.key==='ArrowUp')this.pitch-=.14;else if(e.key==='ArrowDown')this.pitch+=.14;else if(e.key==='+'||e.key==='=')this.zoom=Math.min(1.8,this.zoom*1.1);else if(e.key==='-')this.zoom=Math.max(.62,this.zoom/1.1);else if(e.key.toLowerCase()==='r')this.reset();else used=false;if(used){e.preventDefault();this.draw()}})
+ }
+ setModel(model){this.model=model;this.reset()}
+ reset(draw=true){this.yaw=this.model.initialYaw??-.5;this.pitch=this.model.initialPitch??.28;this.zoom=1;if(draw)this.draw()}
+ resize(){const r=this.c.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);if(r.width<2||r.height<2)return;this.c.width=Math.round(r.width*d);this.c.height=Math.round(r.height*d);this.ctx.setTransform(d,0,0,d,0,0);this.w=r.width;this.h=r.height;this.draw()}
+ project(a,yaw,pitch){const cy=Math.cos(yaw),sy=Math.sin(yaw),cx=Math.cos(pitch),sx=Math.sin(pitch),x=a.x*cy+a.z*sy,z=-a.x*sy+a.z*cy,y=a.y*cx-z*sx,zz=a.y*sx+z*cx,scale=Math.min(this.w,this.h)*.25*this.zoom;return{x:this.w/2+x*scale,y:this.h/2-y*scale,z:zz,scale:Math.max(.7,Math.min(1.35,1+zz*.09))}}
+ point(a){return this.project(a,this.yaw,this.pitch)}
+ coord(atom,dir,mul){const a=this.model.atoms[atom];return A('',a.x+dir[0]*mul,a.y+dir[1]*mul,a.z+dir[2]*mul)}
+ ellipseBetween(a,b,width,fill,stroke){const dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy),s=this.zoom;this.ctx.save();this.ctx.translate((a.x+b.x)/2,(a.y+b.y)/2);this.ctx.rotate(Math.atan2(dy,dx));this.ctx.beginPath();this.ctx.ellipse(0,0,Math.max(12*s,len/2),width,0,0,Math.PI*2);this.ctx.fillStyle=fill;this.ctx.fill();this.ctx.strokeStyle=stroke;this.ctx.lineWidth=1.8*s;this.ctx.stroke();this.ctx.restore()}
+ domainCoords(group){const center=this.model.atoms[group.center],pts=[];group.bonds.forEach(i=>{const t=this.model.atoms[i];pts.push(A('',(center.x+t.x)/2,(center.y+t.y)/2,(center.z+t.z)/2))});group.lone.forEach(i=>pts.push(this.coord(this.model.lonePairs[i].atom,this.model.lonePairs[i].dir,1.12)));return pts}
+ drawArrowHead(x,y,ux,uy){const s=this.zoom,nx=-uy,ny=ux,triangle=(size,wing,fill)=>{this.ctx.beginPath();this.ctx.moveTo(x,y);this.ctx.lineTo(x-ux*size+nx*wing,y-uy*size+ny*wing);this.ctx.lineTo(x-ux*size-nx*wing,y-uy*size-ny*wing);this.ctx.closePath();this.ctx.fillStyle=fill;this.ctx.fill()};triangle(18*s,10.5*s,'rgba(255,255,255,.96)');triangle(14*s,7.5*s,'rgba(234,88,12,.98)')}
+ drawProjectedDoubleArrow(a,b,c){const dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy),s=this.zoom;if(len<12*s)return;const ax=a.x-c.x,ay=a.y-c.y,bx=b.x-c.x,by=b.y-c.y,an=Math.hypot(ax,ay)||1,bn=Math.hypot(bx,by)||1,auX=ax/an,auY=ay/an,buX=bx/bn,buY=by/bn,pad=Math.min(20*s,len*.15),x1=a.x-auX*pad,y1=a.y-auY*pad,x2=b.x-buX*pad,y2=b.y-buY*pad,stroke=(color,width)=>{this.ctx.beginPath();this.ctx.moveTo(x1,y1);this.ctx.quadraticCurveTo(c.x,c.y,x2,y2);this.ctx.strokeStyle=color;this.ctx.lineWidth=width;this.ctx.lineCap='round';this.ctx.stroke()};stroke('rgba(255,255,255,.95)',8*s);stroke('rgba(234,88,12,.96)',4.2*s);this.drawArrowHead(x1,y1,auX,auY);this.drawArrowHead(x2,y2,buX,buY)}
+ repulsionControl(a,b,center,group){const va=[a.x-center.x,a.y-center.y,a.z-center.z],vb=[b.x-center.x,b.y-center.y,b.z-center.z],na=Math.hypot(...va)||1,nb=Math.hypot(...vb)||1,opposite=(va[0]*vb[0]+va[1]*vb[1]+va[2]*vb[2])/(na*nb)<-.86,m=A('',(a.x+b.x)/2,(a.y+b.y)/2,(a.z+b.z)/2);let dir,bend;if(opposite){dir=group.arcDir||[0,1,0];bend=1.15}else{dir=[m.x-center.x,m.y-center.y,m.z-center.z];const n=Math.hypot(...dir)||1;dir=dir.map(v=>v/n);bend=Math.min(.55,Math.max(.28,Math.hypot(a.x-b.x,a.y-b.y,a.z-b.z)*.34))}return A('',m.x+dir[0]*bend,m.y+dir[1]*bend,m.z+dir[2]*bend)}
+ drawRepulsion(){this.model.vsepr.forEach(group=>{const pts=this.domainCoords(group),center=this.model.atoms[group.center];if(pts.length<2)return;const pairs=group.pairs||pts.flatMap((_,i)=>pts.slice(i+1).map((__,j)=>[i,i+j+1]));pairs.forEach(([i,j])=>this.drawProjectedDoubleArrow(this.point(pts[i]),this.point(pts[j]),this.point(this.repulsionControl(pts[i],pts[j],center,group))))})}
+ angleGeometry(guide){const center=this.model.atoms[guide.center],a=this.model.atoms[guide.a],b=this.model.atoms[guide.b],va=[a.x-center.x,a.y-center.y,a.z-center.z],vb=[b.x-center.x,b.y-center.y,b.z-center.z],na=Math.hypot(...va)||1,nb=Math.hypot(...vb)||1,u=va.map(x=>x/na),q=vb.map(x=>x/nb),dot=Math.max(-1,Math.min(1,u[0]*q[0]+u[1]*q[1]+u[2]*q[2])),angle=Math.acos(dot);let v;if(Math.PI-angle<.002){const ref=guide.arcDir||[0,1,0],d=ref[0]*u[0]+ref[1]*u[1]+ref[2]*u[2];v=[ref[0]-u[0]*d,ref[1]-u[1]*d,ref[2]-u[2]*d];let n=Math.hypot(...v);if(n<.001){const fallback=Math.abs(u[0])<.8?[1,0,0]:[0,0,1],fd=fallback[0]*u[0]+fallback[1]*u[1]+fallback[2]*u[2];v=[fallback[0]-u[0]*fd,fallback[1]-u[1]*fd,fallback[2]-u[2]*fd];n=Math.hypot(...v)||1}v=v.map(x=>x/n)}else{const sin=Math.sin(angle)||1;v=[(q[0]-u[0]*dot)/sin,(q[1]-u[1]*dot)/sin,(q[2]-u[2]*dot)/sin]}const radius=guide.radius??.68,at=(t,r=radius)=>A('',center.x+r*(u[0]*Math.cos(t)+v[0]*Math.sin(t)),center.y+r*(u[1]*Math.cos(t)+v[1]*Math.sin(t)),center.z+r*(u[2]*Math.cos(t)+v[2]*Math.sin(t))),steps=Math.max(18,Math.ceil(angle*20)),points=Array.from({length:steps+1},(_,i)=>at(angle*i/steps));return{points,label:at(angle/2,guide.labelRadius??radius+.13)}}
+ drawAngleGuides(labelsOnly=false){(this.model.angleGuides||[]).forEach(guide=>{const geometry=this.angleGeometry(guide),s=this.zoom;if(labelsOnly){const p=this.point(geometry.label),fontSize=Math.max(12,15*s);this.ctx.save();this.ctx.font=`850 ${fontSize}px Inter,Arial`;this.ctx.textAlign='center';this.ctx.textBaseline='middle';const width=this.ctx.measureText(guide.label).width+14*s,height=fontSize+10*s;this.ctx.beginPath();this.ctx.roundRect(p.x-width/2,p.y-height/2,width,height,7*s);this.ctx.fillStyle='rgba(255,255,255,.96)';this.ctx.fill();this.ctx.strokeStyle='#f472b6';this.ctx.lineWidth=1.5*s;this.ctx.stroke();this.ctx.fillStyle='#9d174d';this.ctx.fillText(guide.label,p.x,p.y+.3*s);this.ctx.restore();return}const pts=geometry.points.map(p=>this.point(p)),stroke=(color,width)=>{this.ctx.beginPath();pts.forEach((p,i)=>i?this.ctx.lineTo(p.x,p.y):this.ctx.moveTo(p.x,p.y));this.ctx.strokeStyle=color;this.ctx.lineWidth=width;this.ctx.lineCap='round';this.ctx.lineJoin='round';this.ctx.stroke()};stroke('rgba(255,255,255,.96)',8*s);stroke('#db2777',4*s);[pts[0],pts[pts.length-1]].forEach(p=>{this.ctx.beginPath();this.ctx.arc(p.x,p.y,4.5*s,0,Math.PI*2);this.ctx.fillStyle='#db2777';this.ctx.fill();this.ctx.strokeStyle='#fff';this.ctx.lineWidth=1.5*s;this.ctx.stroke()})})}
+ drawElectronClouds(p){
+  const s=this.zoom;
+  this.model.bonds.forEach(b=>{const a=p[b.a],z=p[b.b];this.ellipseBetween(a,z,(13+b.o*2)*s,'rgba(8,145,178,.16)','rgba(8,145,178,.5)')});
+  this.model.lonePairs.forEach(lp=>{const near=this.point(this.coord(lp.atom,lp.dir,.34)),far=this.point(this.coord(lp.atom,lp.dir,1.12));this.ellipseBetween(near,far,30*s,'rgba(124,58,237,.22)','rgba(124,58,237,.72)');const dx=far.x-near.x,dy=far.y-near.y,n=Math.hypot(dx,dy)||1,nx=-dy/n,ny=dx/n;[-1,1].forEach(side=>{this.ctx.beginPath();this.ctx.arc(far.x+nx*8*s*side,far.y+ny*8*s*side,5.5*s,0,Math.PI*2);this.ctx.fillStyle='#7c3aed';this.ctx.fill()})})
+ }
+ drawSharedElectronDots(p){const s=this.zoom;this.model.bonds.forEach(b=>{const a=p[b.a],z=p[b.b],dx=z.x-a.x,dy=z.y-a.y,len=Math.hypot(dx,dy)||1,ux=dx/len,uy=dy/len,nx=-uy,ny=ux,mx=(a.x+z.x)/2,my=(a.y+z.y)/2;for(let k=0;k<b.o;k++){const along=(k-(b.o-1)/2)*18*s,cx=mx+ux*along,cy=my+uy*along;[-1,1].forEach(side=>{const x=cx+nx*7*s*side,y=cy+ny*7*s*side;this.ctx.beginPath();this.ctx.arc(x,y,7*s,0,Math.PI*2);this.ctx.fillStyle='rgba(255,255,255,.95)';this.ctx.fill();this.ctx.beginPath();this.ctx.arc(x,y,5*s,0,Math.PI*2);this.ctx.fillStyle='#0891b2';this.ctx.fill()})}})}
+ draw(){
+  if(!this.w)return;const g=this.ctx.createRadialGradient(this.w*.5,this.h*.38,5,this.w*.5,this.h*.45,Math.max(this.w,this.h)*.65);g.addColorStop(0,'#fff');g.addColorStop(1,'#eaf1f8');this.ctx.fillStyle=g;this.ctx.fillRect(0,0,this.w,this.h);const p=this.model.atoms.map(a=>this.point(a));
+  if(state.electrons)this.drawElectronClouds(p);
+  const s=this.zoom;
+  [...this.model.bonds].sort((u,v)=>(p[u.a].z+p[u.b].z)-(p[v.a].z+p[v.b].z)).forEach(b=>{const a=p[b.a],z=p[b.b],dx=z.x-a.x,dy=z.y-a.y,len=Math.hypot(dx,dy)||1,nx=-dy/len,ny=dx/len;for(let k=0;k<b.o;k++){const off=(k-(b.o-1)/2)*10*s;this.ctx.beginPath();this.ctx.moveTo(a.x+nx*off,a.y+ny*off);this.ctx.lineTo(z.x+nx*off,z.y+ny*off);this.ctx.strokeStyle='#64748b';this.ctx.lineWidth=(b.o===1?9:6)*s;this.ctx.lineCap='round';this.ctx.stroke()}});
+  if(state.repulsion)this.drawRepulsion();
+  if(state.angles)this.drawAngleGuides(false);
+  if(state.electrons)this.drawSharedElectronDots(p);
+  this.model.atoms.map((a,i)=>i).sort((i,j)=>p[i].z-p[j].z).forEach(i=>{const a=this.model.atoms[i],q=p[i],r=radii[a.e]*2.8*q.scale*s,gr=this.ctx.createRadialGradient(q.x-r*.34,q.y-r*.38,r*.12,q.x,q.y,r);gr.addColorStop(0,'#fff');gr.addColorStop(.24,colors[a.e]);gr.addColorStop(1,outlines[a.e]);this.ctx.beginPath();this.ctx.arc(q.x,q.y,r,0,Math.PI*2);this.ctx.fillStyle=gr;this.ctx.fill();this.ctx.strokeStyle=outlines[a.e];this.ctx.lineWidth=1.4*s;this.ctx.stroke();this.ctx.fillStyle=a.e==='H'?'#475569':'#fff';this.ctx.font=`800 ${(a.e.length>1?23:26)*s}px Inter,Arial`;this.ctx.textAlign='center';this.ctx.textBaseline='middle';this.ctx.fillText(a.e,q.x,q.y+.5*s)});if(state.angles)this.drawAngleGuides(true)
+ }
+}
+
+const tabs=document.getElementById('moleculeTabs'),compareSwitch=document.getElementById('compareSwitch');
+Object.entries(molecules).forEach(([key,m],i)=>{const b=document.createElement('button');b.type='button';b.id=`tab-${key}`;b.dataset.molecule=key;b.setAttribute('role','tab');b.setAttribute('aria-controls','moleculePanel');b.setAttribute('aria-selected',i===0);b.tabIndex=i===0?0:-1;b.textContent=m.label;tabs.insertBefore(b,compareSwitch)});
+const formulaHost=document.getElementById('formulaHost'),facts=document.getElementById('facts'),title=document.getElementById('moleculeTitle'),formulaLabel=document.getElementById('formulaLabel'),live=document.getElementById('live'),electronToggle=document.getElementById('electronToggle'),repulsionToggle=document.getElementById('repulsionToggle'),angleToggle=document.getElementById('angleToggle'),electronKey=document.getElementById('electronKey'),sharedLegend=document.getElementById('sharedLegend'),loneLegend=document.getElementById('loneLegend'),repulsionLegend=document.getElementById('repulsionLegend'),moleculePanel=document.getElementById('moleculePanel'),comparisonPanel=document.getElementById('comparisonPanel'),comparisonTitle=document.getElementById('comparisonTitle'),compareGrid=document.getElementById('compareGrid');
+const view=new VSEPRView(document.getElementById('molCanvas'));
+let compareViews=[];
+function activeModels(){return state.compare==='none'?[molecules[state.molecule]]:compareSets[state.compare].keys.map(key=>molecules[key])}
+function repulsionAvailable(){return activeModels().some(model=>model.vsepr.some(group=>group.bonds.length+group.lone.length>=2))}
+function angleAvailable(){return activeModels().some(model=>model.angleGuides?.length)}
+function updateLegend(){const available=repulsionAvailable(),angle=angleAvailable();sharedLegend.hidden=!state.electrons;loneLegend.hidden=!state.electrons;repulsionLegend.hidden=!state.repulsion||!available;electronKey.hidden=!state.electrons&&(!state.repulsion||!available);repulsionToggle.disabled=!available;repulsionToggle.setAttribute('aria-pressed',available&&state.repulsion);repulsionToggle.textContent=available?`反発矢印 ${state.repulsion?'ON':'OFF'}`:'反発対象なし';angleToggle.disabled=!angle;angleToggle.setAttribute('aria-pressed',angle&&state.angles);angleToggle.textContent=angle?`結合角 ${state.angles?'ON':'OFF'}`:'結合角対象なし'}
+function drawViews(){view.draw();compareViews.forEach(item=>item.view.draw())}
+function resizeViews(){view.resize();compareViews.forEach(item=>item.view.resize())}
+function renderComparison(){const set=compareSets[state.compare];comparisonTitle.textContent=set.title;compareGrid.replaceChildren();compareViews=[];set.keys.forEach(key=>{const m=molecules[key],card=document.createElement('article');card.className='compare-card';card.innerHTML=`<div class="compare-head"><h3>${m.label}　${m.name}</h3></div><div class="compare-facts"><span>電子領域：${m.domainCount}</span><span>${m.electronShape}</span><span>${m.shape}</span><span>${m.angle}</span></div><div class="compare-canvas-wrap"><canvas class="compare-canvas" tabindex="0" aria-label="${m.label}の3D VSEPRモデル。ドラッグまたは矢印キーで回転"></canvas><span class="canvas-help">ドラッグ：回転　ホイール：拡大</span></div>`;compareGrid.appendChild(card);const compareView=new VSEPRView(card.querySelector('canvas'));compareView.setModel(m);compareViews.push({key,card,view:compareView})});requestAnimationFrame(resizeViews)}
+function setCompare(mode){state.compare=mode;const active=mode!=='none';tabs.querySelectorAll('[role="tab"]').forEach(button=>{const selected=active&&button.dataset.compare===mode;button.setAttribute('aria-selected',selected);button.tabIndex=selected?0:-1});document.body.classList.toggle('comparison-mode',active);comparisonPanel.hidden=!active;if(active){comparisonPanel.setAttribute('aria-labelledby',`tab-compare-${mode}`);renderComparison()}else{compareViews=[];compareGrid.replaceChildren();requestAnimationFrame(()=>view.resize())}updateLegend();live.textContent=active?`${compareSets[mode].title}の比較表示に切り替えました`:'個別表示に戻しました'}
+function render(){const m=molecules[state.molecule];title.textContent=`${m.label}　${m.name}`;facts.innerHTML=`<span class="fact">電子領域数：${m.domainCount}</span><span class="fact">電子領域の形：${m.electronShape}</span><span class="fact">分子の形：${m.shape}</span><span class="fact">結合角：${m.angle}</span><span class="fact">電子対：${m.domains}</span>`;formulaHost.innerHTML=formulaSVG(state.molecule,state.formula==='lewis');formulaLabel.textContent=state.formula==='lewis'?'2D 電子式':'2D 構造式';updateLegend();view.setModel(m);requestAnimationFrame(()=>view.resize())}
+function selectMolecule(btn,focus=false){if(state.compare!=='none')setCompare('none');state.molecule=btn.dataset.molecule;tabs.querySelectorAll('[role="tab"]').forEach(b=>{const active=b===btn;b.setAttribute('aria-selected',active);b.tabIndex=active?0:-1});moleculePanel.setAttribute('aria-labelledby',btn.id);render();if(focus)btn.focus();live.textContent=`${btn.textContent}を表示しました`}
+function activateTab(btn,focus=false){if(btn.dataset.compare)setCompare(btn.dataset.compare);else selectMolecule(btn);if(focus)btn.focus()}
+tabs.querySelectorAll('[role="tab"]').forEach(btn=>btn.addEventListener('click',()=>activateTab(btn)));
+tabs.addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;const buttons=[...tabs.querySelectorAll('[role="tab"]')],current=buttons.indexOf(document.activeElement);if(current<0)return;e.preventDefault();let next=e.key==='Home'?0:e.key==='End'?buttons.length-1:(current+(e.key==='ArrowRight'?1:-1)+buttons.length)%buttons.length;activateTab(buttons[next],true)});
+document.querySelectorAll('.view-switch button[data-view]').forEach(btn=>btn.addEventListener('click',()=>{document.body.dataset.view=btn.dataset.view;document.querySelectorAll('.view-switch button[data-view]').forEach(b=>b.setAttribute('aria-pressed',b===btn));live.textContent=`表示を${btn.textContent}に切り替えました`;requestAnimationFrame(()=>view.resize())}));
+document.querySelectorAll('[data-formula]').forEach(btn=>btn.addEventListener('click',()=>{state.formula=btn.dataset.formula;document.querySelectorAll('[data-formula]').forEach(b=>b.setAttribute('aria-pressed',b===btn));formulaHost.innerHTML=formulaSVG(state.molecule,state.formula==='lewis');formulaLabel.textContent=state.formula==='lewis'?'2D 電子式':'2D 構造式';live.textContent=`${btn.textContent}を表示しました`}));
+electronToggle.addEventListener('click',()=>{state.electrons=!state.electrons;electronToggle.setAttribute('aria-pressed',state.electrons);electronToggle.textContent=`電子対表示 ${state.electrons?'ON':'OFF'}`;updateLegend();drawViews();live.textContent=`電子対を${state.electrons?'表示':'非表示'}にしました`});
+repulsionToggle.addEventListener('click',()=>{state.repulsion=!state.repulsion;repulsionToggle.setAttribute('aria-pressed',state.repulsion);repulsionToggle.textContent=`反発矢印 ${state.repulsion?'ON':'OFF'}`;updateLegend();drawViews();live.textContent=`反発矢印を${state.repulsion?'表示':'非表示'}にしました`});
+angleToggle.addEventListener('click',()=>{state.angles=!state.angles;updateLegend();drawViews();live.textContent=`結合角を${state.angles?'表示':'非表示'}にしました`});
+document.getElementById('resetView').addEventListener('click',()=>view.reset());
+const ro=new ResizeObserver(resizeViews);ro.observe(document.body);
+const fs=document.getElementById('fullscreenBtn');fs.addEventListener('click',async()=>{try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen();else await document.exitFullscreen()}catch(e){live.textContent='このブラウザでは全画面表示を開始できませんでした'}});document.addEventListener('fullscreenchange',()=>{const active=!!document.fullscreenElement;document.body.classList.toggle('is-fullscreen',active);if(active)window.scrollTo(0,0);fs.querySelector('.btn-text').textContent=active?'全画面を終了':'全画面表示';fs.setAttribute('aria-label',active?'全画面を終了':'全画面表示');requestAnimationFrame(resizeViews)});
+render();
+</script>
+</body>
+</html>
