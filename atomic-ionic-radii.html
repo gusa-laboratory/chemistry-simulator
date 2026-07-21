@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>原子半径・イオン半径｜比較モデル</title>
+<meta name="description" content="電子配置と核電荷を見ながら、原子半径・イオン半径の周期性や等電子イオンの大小を比較する授業用教材。">
+<meta name="theme-color" content="#2563eb">
+<link rel="icon" href="icons/icon-192.png">
+<style>
+  :root{--blue:#2563eb;--deep:#173b75;--ink:#172033;--ink2:#526078;--ink3:#8190a6;--bg:#eef3f9;--line:#d8e1ed;--red:#d91636;--cyan:#38bdf8;--shadow:0 18px 45px rgba(31,55,89,.1);--shadow-sm:0 7px 22px rgba(31,55,89,.075)}
+  *{box-sizing:border-box}
+  html{min-width:320px;background:var(--bg)}
+  body{margin:0;min-height:100vh;color:var(--ink);font-family:Inter,'Yu Gothic UI','Yu Gothic',Meiryo,sans-serif;-webkit-font-smoothing:antialiased;background:radial-gradient(circle at 5% -4%,rgba(37,99,235,.13),transparent 27rem),radial-gradient(circle at 97% 2%,rgba(14,165,233,.09),transparent 25rem),linear-gradient(180deg,#f6f9fd 0,var(--bg) 30rem)}
+  button{font:inherit}
+  button:focus-visible{outline:3px solid rgba(37,99,235,.32);outline-offset:2px}
+  header{padding:20px clamp(16px,4vw,54px) 0;background:rgba(250,252,255,.94);border-bottom:1px solid rgba(203,215,230,.92);box-shadow:0 4px 18px rgba(31,55,89,.05);position:sticky;top:0;z-index:20}
+  .head-row{display:flex;max-width:1500px;margin:0 auto 14px;gap:20px;align-items:flex-start;justify-content:space-between}
+  .title-block{display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+  .back-link{height:35px;display:inline-flex;align-items:center;padding:0 14px;border:1px solid #cdd9ea;border-radius:11px;background:#fff;color:#3a4d6b;text-decoration:none;font-size:13.5px;font-weight:800;box-shadow:0 2px 8px rgba(31,55,89,.06)}
+  .back-link:hover{color:var(--blue);border-color:#8fb0df}
+  h1{margin:0;color:var(--deep);font-size:clamp(23px,2.6vw,33px);line-height:1.25;font-weight:850;letter-spacing:-.035em}
+  .outline-btn{height:35px;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:0 13px;border:1px solid #bfd0e7;border-radius:11px;background:#fff;color:var(--deep);box-shadow:var(--shadow-sm);font-size:13px;font-weight:800;cursor:pointer}
+  .outline-btn:hover{color:var(--blue);border-color:#8fb0df}
+  .tabs{display:flex;gap:6px;max-width:1500px;margin:0 auto;overflow-x:auto;scrollbar-width:thin}
+  .tabs button{appearance:none;flex:0 0 auto;border:1px solid transparent;border-bottom:0;border-radius:11px 11px 0 0;background:transparent;cursor:pointer;padding:10px 16px 12px;font-size:13px;font-weight:800;color:#59677c}
+  .tabs button:hover{color:var(--blue);background:rgba(237,244,255,.82)}
+  .tabs button[aria-selected="true"]{border-color:#cfd9e6;background:var(--bg);color:var(--blue);box-shadow:inset 0 3px 0 var(--blue)}
+  main{max-width:1600px;margin:0 auto;padding:20px clamp(14px,3vw,46px) 42px}
+  .toolbar{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+  .toggle{height:35px;padding:0 13px;border:1px solid #c7d5e7;border-radius:11px;background:rgba(255,255,255,.86);color:var(--ink2);font-size:12px;font-weight:800;cursor:pointer}
+  .toggle[aria-pressed="true"]{border-color:#8fb0df;background:#edf4ff;color:var(--blue)}
+  .pair-picker{display:none;align-items:center;justify-content:center;gap:6px;margin:-2px 0 12px;flex-wrap:wrap}
+  .pair-picker.is-visible{display:flex}
+  .pair-picker span{margin-right:2px;color:var(--ink2);font-size:11px;font-weight:800}
+  .pair-picker button{padding:6px 11px;border:1px solid #cdd9e8;border-radius:999px;background:#fff;color:var(--ink2);font-size:11px;font-weight:800;cursor:pointer}
+  .pair-picker button[aria-pressed="true"]{border-color:#8fb0df;background:#edf4ff;color:var(--blue)}
+  .period-picker{display:none;align-items:center;justify-content:center;gap:6px;margin:-2px 0 12px;flex-wrap:wrap}
+  .period-picker.is-visible{display:flex}
+  .period-picker span{color:var(--ink2);font-size:11px;font-weight:800}
+  .period-picker strong{color:var(--blue)}
+  .period-option{min-width:42px;padding:6px 9px;border:1px solid #cdd9e8;border-radius:9px;background:#fff;color:var(--ink2);font-size:11px;font-weight:850;cursor:pointer}
+  .period-option[aria-pressed="true"]{border-color:#2563eb;background:#2563eb;color:#fff}
+  .period-message{min-height:17px;color:#c2410c}
+  .free-picker{display:none;margin:-2px auto 12px;max-width:1180px;text-align:center}
+  .free-picker.is-visible{display:block}
+  .free-status{display:flex;align-items:center;justify-content:center;gap:9px;margin-bottom:7px;color:var(--ink2);font-size:11px;font-weight:800;flex-wrap:wrap}
+  .free-status strong{color:var(--blue);font-size:12px}
+  .sort-btn{padding:5px 10px;border:1px solid #cdd9e8;border-radius:999px;background:#fff;color:var(--ink2);font-size:10.5px;font-weight:800;cursor:pointer}
+  .sort-btn[aria-pressed="true"]{border-color:#8fb0df;background:#edf4ff;color:var(--blue)}
+  .free-message{min-height:17px;color:#c2410c}
+  .option-groups{display:flex;align-items:flex-start;justify-content:center;gap:8px;flex-wrap:wrap}
+  .option-group{display:flex;align-items:center;gap:5px;flex-wrap:wrap;justify-content:center}
+  .option-label{color:var(--ink3);font-size:10px;font-weight:850}
+  .species-option{min-width:42px;padding:6px 9px;border:1px solid #cdd9e8;border-radius:9px;background:#fff;color:var(--ink2);font-size:11px;font-weight:850;cursor:pointer}
+  .species-option[aria-pressed="true"]{border-color:#2563eb;background:#2563eb;color:#fff;box-shadow:0 2px 7px rgba(37,99,235,.2)}
+  .stage{border:1px solid #d6e0ed;border-top:4px solid #0891b2;border-radius:20px;background:rgba(255,255,255,.94);box-shadow:var(--shadow);padding:14px;overflow:hidden}
+  .scale-note{min-width:0;display:flex;align-items:center;justify-content:space-between;gap:6px 12px;margin:0 4px 8px;color:var(--ink3);font-size:10.5px;font-weight:750;flex-wrap:wrap}
+  .scale-note span:first-child{min-width:0;overflow-wrap:anywhere}
+  .scale-note span:last-child{flex:0 0 auto}
+  .species-grid{width:100%;min-width:0;display:grid;grid-template-columns:repeat(var(--count),minmax(0,1fr));gap:8px;align-items:stretch}
+  .species{min-width:0;display:flex;flex-direction:column;align-items:center;border:1px solid #e0e7f0;border-radius:14px;background:radial-gradient(circle at 50% 42%,#fff,#f1f6fb);overflow:hidden;padding:9px 5px 8px}
+  .species-name{display:flex;align-items:baseline;gap:6px;min-height:27px;color:var(--deep)}
+  .species-head{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;position:relative}
+  .order-controls{position:absolute;right:3px;top:0;display:flex;gap:3px}
+  .order-controls button{width:25px;height:25px;padding:0;border:1px solid #cbd7e6;border-radius:7px;background:#fff;color:var(--blue);font-size:13px;font-weight:900;cursor:pointer}
+  .order-controls button:disabled{opacity:.3;cursor:default}
+  .species-symbol{font-size:clamp(19px,1.8vw,26px);font-weight:850}
+  .species-jp{font-size:10.5px;font-weight:750;color:var(--ink2)}
+  .atom-svg{width:100%;height:clamp(300px,47vh,540px);display:block;overflow:visible}
+  .radius-value{min-height:26px;display:flex;align-items:center;padding:4px 9px;border-radius:999px;background:#eaf2ff;color:var(--deep);font-size:11px;font-weight:850;font-variant-numeric:tabular-nums}
+  .radius-value sup{font-size:.76em;line-height:0}
+  .radius-value[hidden]{visibility:hidden}
+  .config{margin-top:5px;color:var(--ink2);font-size:10px;font-weight:750}
+  .takeaway{margin:11px 0 0;padding:10px 13px;border-left:4px solid #2563eb;border-radius:9px;background:#eef4ff;color:#31445f;font-size:12.5px;font-weight:700;line-height:1.65}
+  .empty-state{grid-column:1/-1;min-height:390px;display:grid;place-items:center;border:1px dashed #cbd7e6;border-radius:14px;color:var(--ink3);font-size:14px;font-weight:800;background:#f8fbff}
+  .attraction-legend{display:inline-flex;align-items:center;gap:5px;color:#c2410c}
+  .attraction-legend[hidden]{display:none}
+  .arrow-sample{display:inline-block;width:25px;height:0;border-top:4px solid #ea580c;position:relative}
+  .arrow-sample::after{content:'';position:absolute;right:-1px;top:-6px;border-left:8px solid #ea580c;border-top:4px solid transparent;border-bottom:4px solid transparent}
+  footer{padding:0 20px 24px;text-align:center;color:#aab4c3;font-size:10px;font-weight:600}
+  body.is-fullscreen{height:100vh;overflow:hidden;display:flex;flex-direction:column}
+  body.is-fullscreen header{position:static;padding:8px 24px 0;flex:0 0 auto}
+  body.is-fullscreen .head-row{margin-bottom:5px}
+  body.is-fullscreen .back-link{display:none}
+  body.is-fullscreen h1{font-size:23px}
+  body.is-fullscreen .tabs button{padding-top:7px;padding-bottom:9px}
+  body.is-fullscreen main{padding:7px 22px 8px;max-width:none;width:100%;flex:1;min-height:0;display:flex;flex-direction:column}
+  body.is-fullscreen .toolbar{margin-bottom:5px}
+  body.is-fullscreen .pair-picker{margin-bottom:5px}
+  body.is-fullscreen .period-picker{margin-bottom:5px}
+  body.is-fullscreen .free-picker{margin-bottom:5px}
+  body.is-fullscreen .free-status{margin-bottom:3px}
+  body.is-fullscreen .species-option{padding-top:4px;padding-bottom:4px}
+  body.is-fullscreen .stage{flex:1;min-height:0;display:flex;flex-direction:column;padding:9px}
+  body.is-fullscreen .species-grid{flex:1;min-height:0}
+  body.is-fullscreen .atom-svg{height:100%;min-height:0}
+  body.is-fullscreen .takeaway{margin-top:6px;padding-top:6px;padding-bottom:6px}
+  body.is-fullscreen footer{display:none}
+  @media(max-width:900px){.species-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.species-grid.free-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.atom-svg{height:330px}}
+  @media(max-width:620px){body{overflow-x:hidden}header{position:static;padding:14px 12px 0}.head-row{gap:10px}.subtitle{font-size:11px}.btn-text{display:none}.outline-btn{width:38px;padding:0}.tabs{max-width:100%}.tabs button{padding:8px 11px 10px;font-size:12px}main{width:100%;min-width:0;padding:14px 10px 30px;overflow:hidden}.toolbar{gap:6px}.toggle{min-width:0;padding:0 9px;font-size:11.5px}.stage{width:100%;min-width:0}.species-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.atom-svg{height:285px}.species-jp{display:none}.takeaway{font-size:11.5px}}
+  @media(max-width:480px){.species-grid{grid-template-columns:1fr}.atom-svg{height:300px}}
+  @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="head-row">
+    <div class="title-block">
+      <a class="back-link" href="index.html">← 一覧に戻る</a>
+      <h1>原子半径・イオン半径</h1>
+    </div>
+    <button class="outline-btn" id="fullscreenBtn" type="button" aria-label="全画面表示"><span aria-hidden="true">⛶</span><span class="btn-text">全画面表示</span></button>
+  </div>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="比較テーマ">
+    <button type="button" role="tab" aria-selected="false" data-mode="period2">周期2の原子</button>
+    <button type="button" role="tab" aria-selected="true" data-mode="period3">周期3の原子</button>
+    <button type="button" role="tab" aria-selected="false" data-mode="iso10">等電子イオン（10e⁻）</button>
+    <button type="button" role="tab" aria-selected="false" data-mode="atomIon">原子とイオン</button>
+    <button type="button" role="tab" aria-selected="false" data-mode="free">自由比較</button>
+  </nav>
+</header>
+<main>
+  <div class="toolbar" role="group" aria-label="表示設定">
+    <button class="toggle" type="button" id="electronToggle" aria-pressed="true">電子表示 ON</button>
+    <button class="toggle" type="button" id="nucleusToggle" aria-pressed="true">核電荷表示 ON</button>
+    <button class="toggle" type="button" id="attractionToggle" aria-pressed="true">引力矢印 ON</button>
+    <button class="toggle" type="button" id="valueToggle" aria-pressed="true">半径数値 ON</button>
+  </div>
+  <div class="period-picker" id="periodPicker" role="group" aria-label="表示する原子">
+    <span>表示：<strong id="periodCount">8 / 8</strong></span>
+    <span id="periodOptions"></span>
+    <button class="sort-btn" id="clearPeriodButton" type="button">全選択解除</button>
+    <span class="period-message" id="periodMessage" aria-live="polite"></span>
+  </div>
+  <div class="pair-picker" id="pairPicker" role="group" aria-label="比較する元素">
+    <span>元素：</span>
+    <button type="button" data-pair="Na" aria-pressed="true">Na</button>
+    <button type="button" data-pair="Mg" aria-pressed="false">Mg</button>
+    <button type="button" data-pair="Al" aria-pressed="false">Al</button>
+    <button type="button" data-pair="Cl" aria-pressed="false">Cl</button>
+  </div>
+  <div class="free-picker" id="freePicker">
+    <div class="free-status">
+      <span>比較する粒子：<strong id="selectedCount">4 / 4</strong></span>
+      <button class="sort-btn" id="sortButton" type="button" aria-pressed="false">選択順</button>
+      <button class="sort-btn" id="clearSelectionButton" type="button">全選択解除</button>
+      <span class="free-message" id="freeMessage" aria-live="polite"></span>
+    </div>
+    <div class="option-groups" role="group" aria-label="比較する原子とイオンを選択">
+      <div class="option-group"><span class="option-label">原子</span><button class="species-option" type="button" data-species="Na">Na</button><button class="species-option" type="button" data-species="Mg">Mg</button><button class="species-option" type="button" data-species="Al">Al</button><button class="species-option" type="button" data-species="Si">Si</button><button class="species-option" type="button" data-species="P">P</button><button class="species-option" type="button" data-species="S">S</button><button class="species-option" type="button" data-species="Cl">Cl</button></div>
+      <div class="option-group"><span class="option-label">陽イオン</span><button class="species-option" type="button" data-species="Lip">Li⁺</button><button class="species-option" type="button" data-species="Nap">Na⁺</button><button class="species-option" type="button" data-species="Mg2p">Mg²⁺</button><button class="species-option" type="button" data-species="Al3p">Al³⁺</button><button class="species-option" type="button" data-species="Kp">K⁺</button></div>
+      <div class="option-group"><span class="option-label">陰イオン</span><button class="species-option" type="button" data-species="O2m">O²⁻</button><button class="species-option" type="button" data-species="Fm">F⁻</button><button class="species-option" type="button" data-species="S2m">S²⁻</button><button class="species-option" type="button" data-species="Clm">Cl⁻</button><button class="species-option" type="button" data-species="Brm">Br⁻</button></div>
+    </div>
+  </div>
+  <section class="stage" aria-label="原子とイオンの半径比較図">
+    <div class="scale-note"><span class="attraction-legend" id="attractionLegend"><i class="arrow-sample" aria-hidden="true"></i>太いほど引力が強い</span><span>単位：m</span></div>
+    <div class="species-grid" id="speciesGrid"></div>
+    <p class="takeaway" id="takeaway"></p>
+  </section>
+</main>
+<footer>大阪女学院中学校・高等学校　Yuto Yamaguchi</footer>
+<script>
+const species={
+  Li:{symbol:'Li',name:'リチウム原子',z:3,shells:[2,1],radius:152,kind:'原子'},
+  Be:{symbol:'Be',name:'ベリリウム原子',z:4,shells:[2,2],radius:112,kind:'原子'},
+  B:{symbol:'B',name:'ホウ素原子',z:5,shells:[2,3],radius:85,kind:'原子'},
+  C:{symbol:'C',name:'炭素原子',z:6,shells:[2,4],radius:77,kind:'原子'},
+  N:{symbol:'N',name:'窒素原子',z:7,shells:[2,5],radius:75,kind:'原子'},
+  O:{symbol:'O',name:'酸素原子',z:8,shells:[2,6],radius:73,kind:'原子'},
+  F:{symbol:'F',name:'フッ素原子',z:9,shells:[2,7],radius:72,kind:'原子'},
+  Ne:{symbol:'Ne',name:'ネオン原子',z:10,shells:[2,8],radius:71,kind:'原子'},
+  Lip:{symbol:'Li⁺',name:'リチウムイオン',z:3,shells:[2],radius:76,kind:'イオン'},
+  Na:{symbol:'Na',name:'ナトリウム原子',z:11,shells:[2,8,1],radius:186,kind:'原子'},
+  Mg:{symbol:'Mg',name:'マグネシウム原子',z:12,shells:[2,8,2],radius:160,kind:'原子'},
+  Al:{symbol:'Al',name:'アルミニウム原子',z:13,shells:[2,8,3],radius:143,kind:'原子'},
+  Si:{symbol:'Si',name:'ケイ素原子',z:14,shells:[2,8,4],radius:118,kind:'原子'},
+  P:{symbol:'P',name:'リン原子',z:15,shells:[2,8,5],radius:110,kind:'原子'},
+  S:{symbol:'S',name:'硫黄原子',z:16,shells:[2,8,6],radius:103,kind:'原子'},
+  Cl:{symbol:'Cl',name:'塩素原子',z:17,shells:[2,8,7],radius:99,kind:'原子'},
+  Ar:{symbol:'Ar',name:'アルゴン原子',z:18,shells:[2,8,8],radius:98,kind:'原子'},
+  O2m:{symbol:'O²⁻',name:'酸化物イオン',z:8,shells:[2,8],radius:140,kind:'イオン'},
+  Fm:{symbol:'F⁻',name:'フッ化物イオン',z:9,shells:[2,8],radius:133,kind:'イオン'},
+  Nap:{symbol:'Na⁺',name:'ナトリウムイオン',z:11,shells:[2,8],radius:102,kind:'イオン'},
+  Mg2p:{symbol:'Mg²⁺',name:'マグネシウムイオン',z:12,shells:[2,8],radius:72,kind:'イオン'},
+  Al3p:{symbol:'Al³⁺',name:'アルミニウムイオン',z:13,shells:[2,8],radius:53.5,kind:'イオン'},
+  Kp:{symbol:'K⁺',name:'カリウムイオン',z:19,shells:[2,8,8],radius:138,kind:'イオン'},
+  S2m:{symbol:'S²⁻',name:'硫化物イオン',z:16,shells:[2,8,8],radius:184,kind:'イオン'},
+  Clm:{symbol:'Cl⁻',name:'塩化物イオン',z:17,shells:[2,8,8],radius:181,kind:'イオン'},
+  Brm:{symbol:'Br⁻',name:'臭化物イオン',z:35,shells:[2,8,18,8],radius:196,kind:'イオン'}
+};
+const modes={
+  period2:{available:['Li','Be','B','C','N','O','F','Ne'],takeaway:'第2周期では電子殻の数が同じまま核電荷が増えるため、右へ行くほど原子半径が小さくなる。'},
+  period3:{available:['Na','Mg','Al','Si','P','S','Cl','Ar'],takeaway:'第3周期では電子殻の数が同じまま核電荷が増えるため、右へ行くほど原子半径が小さくなる。'},
+  iso10:{title:'電子数が同じなら、核電荷が大きいほどイオン半径が小さい',lead:'5種類はすべて電子配置 2, 8（10個の電子）。違うのは陽子数です。',keys:['O2m','Fm','Nap','Mg2p','Al3p'],takeaway:'等電子配置では、陽子数 8 → 13 と増えるにつれて、同じ10個の電子がより強く核へ引かれる。'},
+  atomIon:{title:'電子を失うと小さく、受け取ると大きくなる',lead:'元素を切り替えて、中性原子とその代表的なイオンを比較します。',keys:['Na','Nap'],takeaway:'陽イオンは最外殻を失って電子殻が減るため大きく収縮する。陰イオンは電子間反発が増えるため膨張する。'},
+  free:{title:'比較したい原子・イオンを自由に選ぶ',lead:'上の選択肢から0〜4個を選び、同一縮尺で大きさと電子配置を比較します。',keys:[],takeaway:'半径だけでなく、電子殻の数・電子数・核電荷の違いを一緒に見ると、大小の理由を説明できる。'}
+};
+const pairs={Na:['Na','Nap'],Mg:['Mg','Mg2p'],Al:['Al','Al3p'],Cl:['Cl','Clm']};
+const state={mode:'period3',pair:'Na',period2Selected:['Li','Be','B','C','N','O','F','Ne'],period3Selected:['Na','Mg','Al','Si','P','S','Cl','Ar'],selected:['O2m','Nap','Mg2p','Al3p'],sortRadius:false,electrons:true,nucleus:true,attraction:true,values:true};
+const grid=document.getElementById('speciesGrid'),takeaway=document.getElementById('takeaway'),pairPicker=document.getElementById('pairPicker'),periodPicker=document.getElementById('periodPicker'),periodOptions=document.getElementById('periodOptions'),periodCount=document.getElementById('periodCount'),periodMessage=document.getElementById('periodMessage'),clearPeriodButton=document.getElementById('clearPeriodButton'),freePicker=document.getElementById('freePicker'),selectedCount=document.getElementById('selectedCount'),freeMessage=document.getElementById('freeMessage'),sortButton=document.getElementById('sortButton'),clearSelectionButton=document.getElementById('clearSelectionButton'),attractionLegend=document.getElementById('attractionLegend');
+function currentKeys(){let keys=state.mode==='period2'?modes.period2.available.filter(key=>state.period2Selected.includes(key)):state.mode==='period3'?modes.period3.available.filter(key=>state.period3Selected.includes(key)):state.mode==='atomIon'?pairs[state.pair]:state.mode==='free'?state.selected:modes[state.mode].keys;return state.mode==='free'&&state.sortRadius?[...keys].sort((a,b)=>species[b].radius-species[a].radius):keys}
+function electronDots(cx,cy,r,count,shellIndex){let dots='';const offset=shellIndex%2?-.18:0;for(let i=0;i<count;i++){const a=-Math.PI/2+offset+i*Math.PI*2/count,x=cx+Math.cos(a)*r,y=cy+Math.sin(a)*r;dots+=`<circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="3.15" fill="#38bdf8" stroke="#153047" stroke-width="1.25"/>`}return dots}
+function effectiveAttraction(item){const n=item.shells.length,same=Math.max(0,item.shells[n-1]-1);let shielding=same*(n===1?.30:.35);if(n>1)shielding+=item.shells[n-2]*.85;if(n>2)shielding+=item.shells.slice(0,n-2).reduce((sum,count)=>sum+count,0);return Math.max(.2,item.z-shielding)}
+function attractionArrows(cx,cy,outer,norm){if(!state.attraction)return'';const width=2.2+norm*3.8,opacity=.58+norm*.36,startR=Math.max(50,outer-4),endR=27;return[-Math.PI/2,Math.PI/6,Math.PI*5/6].map(angle=>{const ux=-Math.cos(angle),uy=-Math.sin(angle),px=-uy,py=ux,x1=cx+Math.cos(angle)*startR,y1=cy+Math.sin(angle)*startR,x2=cx+Math.cos(angle)*endR,y2=cy+Math.sin(angle)*endR,bx=x2-ux*8,by=y2-uy*8;return `<g opacity="${opacity.toFixed(2)}"><line x1="${x1.toFixed(2)}" y1="${y1.toFixed(2)}" x2="${bx.toFixed(2)}" y2="${by.toFixed(2)}" stroke="#ea580c" stroke-width="${width.toFixed(2)}" stroke-linecap="round"/><polygon points="${x2.toFixed(2)},${y2.toFixed(2)} ${(bx+px*4.5).toFixed(2)},${(by+py*4.5).toFixed(2)} ${(bx-px*4.5).toFixed(2)},${(by-py*4.5).toFixed(2)}" fill="#ea580c"/></g>`}).join('')}
+function radiusNotation(pm){const meters=pm*1e-12,exponent=Math.floor(Math.log10(meters)),coefficient=meters/10**exponent,expText=exponent<0?`−${Math.abs(exponent)}`:`${exponent}`;return{html:`${coefficient.toPrecision(3)} × 10<sup>${expText}</sup> m`,aria:`${coefficient.toPrecision(3)}かける10の${exponent<0?'マイナス':''}${Math.abs(exponent)}乗メートル`}}
+function atomSVG(item,maxRadius,minStrength,maxStrength){const cx=130,cy=145,nucleusR=20,outer=Math.max(43,item.radius/maxRadius*112),span=Math.max(10,outer-nucleusR-11),strength=effectiveAttraction(item),norm=maxStrength===minStrength?.5:(strength-minStrength)/(maxStrength-minStrength);let rings='',dots='';item.shells.forEach((count,i)=>{const r=nucleusR+11+span*(i+1)/item.shells.length;rings+=`<circle cx="${cx}" cy="${cy}" r="${r.toFixed(2)}" fill="none" stroke="#1f2937" stroke-width="1.5"/>`;if(state.electrons)dots+=electronDots(cx,cy,r,count,i)});const nuclearText=state.nucleus?`<text x="${cx}" y="${cy+1}" text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="18" font-weight="850">${item.z}+</text>`:'',notation=radiusNotation(item.radius);return `<svg class="atom-svg" viewBox="0 0 260 290" role="img" aria-label="${item.symbol}、半径${notation.aria}、電子配置${item.shells.join('、')}"><circle cx="${cx}" cy="${cy}" r="${outer.toFixed(2)}" fill="rgba(56,189,248,.035)"/>${rings}${attractionArrows(cx,cy,outer,norm)}<circle cx="${cx}" cy="${cy}" r="${nucleusR}" fill="#d91636" stroke="#7f1023" stroke-width="2"/>${nuclearText}${dots}</svg>`}
+function activePeriodSelection(){return state.mode==='period2'?state.period2Selected:state.period3Selected}
+function renderPeriodPicker(){const active=state.mode==='period2'||state.mode==='period3';periodPicker.classList.toggle('is-visible',active);if(!active)return;const selected=activePeriodSelection(),available=modes[state.mode].available;periodCount.textContent=`${selected.length} / 8`;clearPeriodButton.disabled=selected.length===0;periodOptions.replaceChildren();available.forEach(key=>{const button=document.createElement('button');button.type='button';button.className='period-option';button.dataset.periodSpecies=key;button.setAttribute('aria-pressed',selected.includes(key));button.textContent=species[key].symbol;periodOptions.appendChild(button)})}
+function moveFreeItem(key,delta){const ordered=currentKeys();state.selected=[...ordered];state.sortRadius=false;const index=state.selected.indexOf(key),next=index+delta;if(next<0||next>=state.selected.length)return;[state.selected[index],state.selected[next]]=[state.selected[next],state.selected[index]];render()}
+function render(){const mode=modes[state.mode],keys=currentKeys(),items=keys.map(key=>species[key]);takeaway.textContent=mode.takeaway;pairPicker.classList.toggle('is-visible',state.mode==='atomIon');freePicker.classList.toggle('is-visible',state.mode==='free');renderPeriodPicker();selectedCount.textContent=`${state.selected.length} / 4`;clearSelectionButton.disabled=state.selected.length===0;freePicker.querySelectorAll('[data-species]').forEach(button=>button.setAttribute('aria-pressed',state.selected.includes(button.dataset.species)));sortButton.setAttribute('aria-pressed',state.sortRadius);sortButton.textContent=state.sortRadius?'半径順':'選択順';grid.classList.toggle('free-grid',state.mode==='free');grid.replaceChildren();if(items.length===0){attractionLegend.hidden=true;grid.style.setProperty('--count',1);grid.innerHTML='<div class="empty-state">上のボタンから表示する粒子を選んでください</div>';return}attractionLegend.hidden=!state.attraction;const maxRadius=Math.max(...items.map(item=>item.radius)),strengths=items.map(effectiveAttraction),minStrength=Math.min(...strengths),maxStrength=Math.max(...strengths);grid.style.setProperty('--count',items.length);keys.forEach((key,index)=>{const item=species[key],card=document.createElement('article'),notation=radiusNotation(item.radius),orderControls=state.mode==='free'?`<div class="order-controls"><button type="button" data-move="-1" data-key="${key}" aria-label="${item.symbol}を左へ移動" ${index===0?'disabled':''}>←</button><button type="button" data-move="1" data-key="${key}" aria-label="${item.symbol}を右へ移動" ${index===keys.length-1?'disabled':''}>→</button></div>`:'';card.className='species';card.innerHTML=`<div class="species-head"><div class="species-name"><span class="species-symbol">${item.symbol}</span><span class="species-jp">${item.name}</span></div>${orderControls}</div>${atomSVG(item,maxRadius,minStrength,maxStrength)}<div class="radius-value" aria-label="${notation.aria}" ${state.values?'':'hidden'}>${notation.html}</div><div class="config">電子配置：${item.shells.join(', ')}</div>`;grid.appendChild(card)})}
+document.getElementById('tabs').querySelectorAll('[data-mode]').forEach(button=>button.addEventListener('click',()=>{state.mode=button.dataset.mode;periodMessage.textContent='';freeMessage.textContent='';document.querySelectorAll('[data-mode]').forEach(tab=>tab.setAttribute('aria-selected',tab===button));render()}));
+periodOptions.addEventListener('click',event=>{const button=event.target.closest('[data-period-species]');if(!button)return;const selected=activePeriodSelection(),key=button.dataset.periodSpecies,index=selected.indexOf(key);periodMessage.textContent='';if(index>=0)selected.splice(index,1);else if(selected.length>=8){periodMessage.textContent='表示できるのは最大8個です';return}else selected.push(key);render()});
+clearPeriodButton.addEventListener('click',()=>{activePeriodSelection().length=0;periodMessage.textContent='';render()});
+pairPicker.querySelectorAll('[data-pair]').forEach(button=>button.addEventListener('click',()=>{state.pair=button.dataset.pair;pairPicker.querySelectorAll('[data-pair]').forEach(item=>item.setAttribute('aria-pressed',item===button));render()}));
+freePicker.querySelectorAll('[data-species]').forEach(button=>button.addEventListener('click',()=>{const key=button.dataset.species,index=state.selected.indexOf(key);freeMessage.textContent='';if(index>=0)state.selected.splice(index,1);else{if(state.selected.length>=4){freeMessage.textContent='選べるのは最大4個です';return}state.selected.push(key)}render()}));
+grid.addEventListener('click',event=>{const button=event.target.closest('[data-move]');if(button)moveFreeItem(button.dataset.key,Number(button.dataset.move))});
+sortButton.addEventListener('click',()=>{state.sortRadius=!state.sortRadius;freeMessage.textContent='';render()});
+clearSelectionButton.addEventListener('click',()=>{state.selected.length=0;freeMessage.textContent='';render()});
+function bindToggle(id,key,label){document.getElementById(id).addEventListener('click',event=>{state[key]=!state[key];event.currentTarget.setAttribute('aria-pressed',state[key]);event.currentTarget.textContent=`${label} ${state[key]?'ON':'OFF'}`;render()})}
+bindToggle('electronToggle','electrons','電子表示');bindToggle('nucleusToggle','nucleus','核電荷表示');bindToggle('attractionToggle','attraction','引力矢印');bindToggle('valueToggle','values','半径数値');
+const fs=document.getElementById('fullscreenBtn');fs.addEventListener('click',async()=>{try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen();else await document.exitFullscreen()}catch(error){}});document.addEventListener('fullscreenchange',()=>{const active=!!document.fullscreenElement;document.body.classList.toggle('is-fullscreen',active);fs.querySelector('.btn-text').textContent=active?'全画面を終了':'全画面表示';fs.setAttribute('aria-label',active?'全画面を終了':'全画面表示')});
+render();
+</script>
+</body>
+</html>
