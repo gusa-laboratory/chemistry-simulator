@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>有機化合物の立体構造｜Interactive Lab</title>
+<meta name="description" content="有機分子の2D構造式と3D立体構造を並べて比較できる、授業用インタラクティブ教材。">
+<meta name="theme-color" content="#2563eb">
+<link rel="icon" href="icons/icon-192.png">
+<style>
+  :root{
+    --blue:#2563eb;--blue-deep:#173b75;--blue-soft:#eaf2ff;--teal:#0f766e;--orange:#ea580c;
+    --ink:#162033;--ink2:#526079;--ink3:#8290a5;--bg:#eef3f9;--card:#fff;--line:#d8e1ed;
+    --shadow:0 18px 45px rgba(31,55,89,.10);--shadow-sm:0 7px 22px rgba(31,55,89,.075);
+  }
+  *{box-sizing:border-box}
+  html{min-width:320px;background:var(--bg)}
+  body{margin:0;min-height:100vh;color:var(--ink);font-family:Inter,'Yu Gothic UI','Yu Gothic',Meiryo,sans-serif;-webkit-font-smoothing:antialiased;background:radial-gradient(circle at 5% -4%,rgba(37,99,235,.13),transparent 27rem),radial-gradient(circle at 97% 2%,rgba(14,165,233,.09),transparent 25rem),linear-gradient(180deg,#f6f9fd 0,var(--bg) 30rem)}
+  button{font:inherit}
+  button:focus-visible,[tabindex]:focus-visible{outline:3px solid rgba(37,99,235,.34);outline-offset:3px}
+  header{padding:20px clamp(16px,4vw,54px) 0;background:rgba(250,252,255,.94);border-bottom:1px solid rgba(203,215,230,.92);box-shadow:0 4px 18px rgba(31,55,89,.05);position:sticky;top:0;z-index:20}
+  .head-row{display:flex;max-width:1480px;margin:0 auto 14px;gap:22px;align-items:flex-start;justify-content:space-between}
+  .title-block{display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+  .back-link{display:inline-flex;align-items:center;height:34px;padding:0 14px;border:1px solid #cdd9ea;border-radius:10px;background:#fff;color:#3a4d6b;text-decoration:none;font-size:13.5px;font-weight:800;box-shadow:0 2px 8px rgba(31,55,89,.06)}
+  .back-link:hover{color:var(--blue);border-color:#8fb0df}
+  h1{margin:0;color:var(--blue-deep);font-size:clamp(22px,2.5vw,32px);line-height:1.25;font-weight:850;letter-spacing:-.035em}
+  .head-actions{display:flex;gap:8px;flex:0 0 auto}
+  #fullscreenBtn{height:34px;padding-top:0;padding-bottom:0}
+  .outline-btn{display:inline-flex;align-items:center;gap:7px;padding:9px 13px;border:1px solid #bfd0e7;border-radius:12px;background:#fff;color:var(--blue-deep);box-shadow:var(--shadow-sm);font-size:13px;font-weight:800;cursor:pointer;transition:transform .16s ease,border-color .16s ease,color .16s ease}
+  .outline-btn:hover{color:var(--blue);border-color:#8fb0df;transform:translateY(-1px)}
+  .tabs{display:flex;gap:6px;max-width:1480px;margin:0 auto;overflow-x:auto;scrollbar-width:thin}
+  .tabs button{appearance:none;flex:0 0 auto;border:1px solid transparent;border-bottom:0;border-radius:11px 11px 0 0;background:transparent;cursor:pointer;padding:10px 14px 12px;font-size:13px;font-weight:760;color:#59677c;transition:background .16s ease,color .16s ease}
+  .tabs button:hover{color:var(--blue);background:rgba(237,244,255,.82)}
+  .tabs button[aria-selected="true"]{border-color:#cfd9e6;background:var(--bg);color:var(--blue);box-shadow:inset 0 3px 0 var(--blue)}
+  main{max-width:1560px;margin:0 auto;padding:22px clamp(16px,4vw,54px) 50px}
+  .toolbar{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:18px;flex-wrap:wrap}
+  .view-switch{display:inline-grid;grid-template-columns:repeat(3,auto);padding:4px;border:1px solid #cfdae8;border-radius:14px;background:#e4ebf4;box-shadow:inset 0 1px 2px rgba(31,55,89,.06)}
+  .view-switch button{border:0;border-radius:10px;background:transparent;color:var(--ink2);padding:8px 14px;cursor:pointer;font-size:12.5px;font-weight:800;transition:background .16s ease,color .16s ease,box-shadow .16s ease}
+  .view-switch button[aria-pressed="true"]{background:#fff;color:var(--blue-deep);box-shadow:0 2px 8px rgba(31,55,89,.14)}
+  .guide-toggle,.electron-toggle,.repulsion-toggle{min-width:118px;justify-content:center;box-shadow:none;background:rgba(255,255,255,.82)}
+  .guide-toggle[aria-pressed="true"]{border-color:#ef9a9a;background:#fff1f2;color:#b91c1c}
+  .electron-toggle[aria-pressed="true"]{border-color:#67e8f9;background:#ecfeff;color:#0e7490}
+  .repulsion-toggle[aria-pressed="true"]{border-color:#fdba74;background:#fff7ed;color:#c2410c}
+  .guide-toggle[hidden],.electron-toggle[hidden],.repulsion-toggle[hidden]{display:none}
+  .panel{display:none}.panel.active{display:block}
+  .lesson-head{margin-bottom:12px;text-align:center}
+  .lesson-head h2{margin:0;color:var(--blue-deep);font-size:clamp(21px,2.4vw,29px);letter-spacing:-.025em}
+  .compare-tools{display:flex;align-items:center;justify-content:center;gap:7px;margin:0 0 14px;flex-wrap:wrap}.compare-label{margin-right:3px;color:var(--ink2);font-size:12px;font-weight:800}
+  .compare-tools button{border:1px solid var(--line);border-radius:999px;background:#fff;color:var(--ink2);padding:7px 11px;font-size:11.5px;font-weight:800;cursor:pointer;box-shadow:var(--shadow-sm);transition:.16s ease}
+  .compare-tools button[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff}.compare-tools button:hover{border-color:#9db9df;color:var(--blue)}.compare-tools button[aria-pressed="true"]:hover{color:#fff}
+  .molecules{display:grid;grid-template-columns:repeat(var(--cols,1),minmax(0,1fr));gap:15px;align-items:stretch}
+  .panel.single-display .molecules{grid-template-columns:minmax(0,1fr)!important}
+  .panel.single-display .molecule-card:not([hidden]){grid-column:1/-1}
+  .panel.single-display .two-d,.panel.single-display .three-d,.panel.single-display .mol-canvas{min-height:clamp(420px,56vh,640px);height:clamp(420px,56vh,640px)}
+  .panel.single-display .two-d svg{height:clamp(380px,52vh,600px)}
+  .molecule-card{min-width:0;border:1px solid rgba(210,221,236,.95);border-top:4px solid var(--accent,var(--teal));border-radius:20px;background:linear-gradient(145deg,#fff 0%,#fbfdff 100%);box-shadow:var(--shadow);padding:14px;transition:opacity .18s ease,transform .18s ease,filter .18s ease}
+  .molecule-card[hidden]{display:none!important}
+  .molecule-card[data-group="dichloro11"]{grid-column:1/-1}
+  .comparison-panel .molecule-card.compare-active{order:0}
+  .comparison-panel .molecule-card.compare-inactive{order:1;align-self:end;opacity:.58;filter:saturate(.58);transform:scale(.985);padding:10px 14px}
+  .comparison-panel .molecule-card.compare-inactive .molecule-title{margin:0}
+  .comparison-panel .molecule-card.compare-inactive .molecule-display{display:none}
+  .molecule-title{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin:0 2px 10px}.molecule-title h3{margin:0;color:var(--blue-deep);font-size:15px}.config{color:var(--orange);font:850 11px/1.4 Inter,Arial,sans-serif;white-space:nowrap}
+  .vsepr-facts{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin:-2px 2px 10px}.vsepr-fact{padding:4px 8px;border:1px solid #cfe0ee;border-radius:999px;background:#f7fbff;color:#526079;font-size:10px;font-weight:800;white-space:nowrap}.vsepr-fact.emphasis{border-color:#9bdce8;background:#ecfeff;color:#0e7490}
+  .molecule-display{display:grid;grid-template-columns:1fr 1fr;gap:10px;min-height:0}
+  .view-block{min-width:0;position:relative;border:1px solid #e0e7f0;border-radius:14px;background:radial-gradient(circle at 50% 40%,#fff,#edf3fa);overflow:hidden}
+  .view-label{position:absolute;z-index:2;top:8px;left:9px;padding:3px 7px;border-radius:6px;background:rgba(255,255,255,.88);color:var(--ink3);font:850 9px/1.2 Inter,Arial,sans-serif;letter-spacing:.09em;pointer-events:none}
+  .two-d{min-height:clamp(330px,42vh,480px);display:grid;place-items:center;padding:30px 8px 8px}.two-d svg{width:100%;height:clamp(295px,38vh,440px);display:block}
+  .three-d{min-height:clamp(330px,42vh,480px)}.mol-canvas{display:block;width:100%;height:clamp(330px,42vh,480px);cursor:grab;touch-action:none}.mol-canvas:active{cursor:grabbing}
+  .canvas-help{position:absolute;bottom:7px;left:50%;transform:translateX(-50%);color:#74859d;background:rgba(255,255,255,.82);border-radius:7px;padding:3px 7px;font-size:9.5px;font-weight:700;white-space:nowrap;pointer-events:none}
+  .position-legend{position:absolute;z-index:2;left:50%;bottom:31px;transform:translateX(-50%);display:flex;align-items:center;justify-content:center;gap:14px;padding:6px 11px;border:1px solid rgba(203,213,225,.9);border-radius:9px;background:rgba(255,255,255,.9);box-shadow:0 3px 10px rgba(31,55,89,.08);font-size:11px;font-weight:850;white-space:nowrap;pointer-events:none}
+  .position-key{display:inline-flex;align-items:center;gap:5px}.position-swatch{width:12px;height:12px;border:2px solid rgba(15,23,42,.18);border-radius:50%}.position-swatch.axial{background:#dc2626}.position-swatch.equatorial{background:#2563eb}
+  .reset-view{position:absolute;z-index:3;right:7px;top:7px;width:30px;height:30px;border:1px solid #d8e1ed;border-radius:9px;background:rgba(255,255,255,.9);color:var(--blue-deep);cursor:pointer;font-size:15px;font-weight:900}.reset-view:hover{color:var(--blue);border-color:#9db9df}
+  body[data-view="2d"] .three-d{display:none}body[data-view="2d"] .molecule-display{grid-template-columns:1fr}
+  body[data-view="3d"] .two-d{display:none}body[data-view="3d"] .molecule-display{grid-template-columns:1fr}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  footer{padding:0 20px 28px;text-align:center;color:#a3adbc;font-size:10px;font-weight:600;letter-spacing:.04em}
+  body.is-fullscreen:not([data-tab="relations"]):not([data-tab="meso"]){height:100vh;overflow:hidden;display:flex;flex-direction:column}
+  body.is-fullscreen header{position:static;padding:9px clamp(14px,2.5vw,34px) 0;flex:0 0 auto}
+  body.is-fullscreen .head-row{margin-bottom:7px}
+  body.is-fullscreen .back-link{display:none}
+  body.is-fullscreen h1{font-size:clamp(20px,2vw,27px)}
+  body.is-fullscreen .tabs button{padding-top:7px;padding-bottom:9px}
+  body.is-fullscreen main{padding:8px clamp(12px,2vw,30px) 10px;max-width:none;width:100%;flex:1;min-height:0;display:flex;flex-direction:column}
+  body.is-fullscreen footer{display:none}
+  body.is-fullscreen .toolbar{flex:0 0 auto;margin-bottom:8px}
+  body.is-fullscreen:not([data-tab="relations"]):not([data-tab="meso"]) #panels{display:flex;flex:1;min-height:0;flex-direction:column}
+  body.is-fullscreen:not([data-tab="relations"]):not([data-tab="meso"]) .panel.active{flex:1;min-height:0}
+  body.is-fullscreen:not([data-tab="relations"]):not([data-tab="meso"]) .panel.active{display:flex;flex-direction:column}
+  body.is-fullscreen:not([data-tab="relations"]):not([data-tab="meso"]) .lesson-head{flex:0 0 auto;margin-bottom:7px}
+  body.is-fullscreen:not([data-tab="relations"]):not([data-tab="meso"]) .lesson-head h2{font-size:clamp(19px,1.8vw,25px)}
+  body.is-fullscreen:not([data-tab="relations"]):not([data-tab="meso"]) :is(.molecule-select,.substance-select){flex:0 0 auto;margin-bottom:7px}
+  body.is-fullscreen:not([data-tab="relations"]):not([data-tab="meso"]) .molecules{flex:1;min-height:0}
+  body.is-fullscreen:not([data-tab="relations"]):not([data-tab="meso"]) .molecule-card{height:100%;min-height:0;display:flex;flex-direction:column;padding:10px}
+  body.is-fullscreen:not([data-tab="relations"]):not([data-tab="meso"]) .molecule-title{flex:0 0 auto;margin-bottom:7px}
+  body.is-fullscreen:not([data-tab="relations"]):not([data-tab="meso"]) .vsepr-facts{flex:0 0 auto;margin-bottom:7px}
+  body.is-fullscreen:not([data-tab="relations"]):not([data-tab="meso"]) .molecule-display{flex:1;min-height:0}
+  body.is-fullscreen:not([data-tab="relations"]):not([data-tab="meso"]) .view-block{min-height:0;height:100%}
+  body.is-fullscreen:not([data-tab="relations"]):not([data-tab="meso"]) .three-d,body.is-fullscreen:not([data-tab="relations"]):not([data-tab="meso"]) .mol-canvas{height:100%;min-height:0}
+  body.is-fullscreen:not([data-tab="relations"]):not([data-tab="meso"]) .two-d{height:100%;min-height:0;padding-top:26px}
+  body.is-fullscreen:not([data-tab="relations"]):not([data-tab="meso"]) .two-d svg{height:100%;min-height:0}
+  body.is-fullscreen:is([data-tab="relations"],[data-tab="meso"]){overflow:auto}
+  @media(max-width:1050px){.molecules[style*="--cols:2"] .molecule-display{grid-template-columns:1fr}.molecules[style*="--cols:2"] .two-d,.molecules[style*="--cols:2"] .three-d{min-height:clamp(320px,40vh,440px)}.molecules[style*="--cols:2"] .mol-canvas{height:clamp(320px,40vh,440px)}}
+  @media(max-width:760px){header{position:static}.molecules{grid-template-columns:1fr!important}.molecule-display{grid-template-columns:1fr 1fr!important}body.is-fullscreen{height:auto!important;overflow:auto!important;display:block!important}body.is-fullscreen .panel.active{display:block!important}body.is-fullscreen .molecule-card{height:auto!important}body.is-fullscreen .view-block,body.is-fullscreen .three-d,body.is-fullscreen .mol-canvas{height:clamp(340px,46vh,480px)!important}}
+  @media(max-width:520px){header{padding-top:14px}.head-actions .btn-text{display:none}.outline-btn{padding:9px 11px}.tabs button{padding:9px 11px 11px;font-size:12px}main{padding-top:16px}.view-switch{width:100%;grid-template-columns:repeat(3,1fr)}.view-switch button{padding:8px 5px}.molecule-display{grid-template-columns:1fr!important}.two-d{min-height:330px}.two-d svg{height:300px}.three-d,.mol-canvas{height:340px}.lesson-head h2{font-size:22px}}
+  .panel.foundation .two-d,.panel.foundation .three-d{min-height:clamp(380px,52vh,600px)}
+  .panel.foundation .two-d{background:#fff}
+  .panel.foundation .mol-canvas{height:clamp(380px,52vh,600px)}
+  .panel.foundation .two-d svg{height:clamp(350px,48vh,560px);max-width:100%}
+  .comparison-panel .two-d,.comparison-panel .three-d{min-height:clamp(380px,48vh,600px)}
+  .comparison-panel .mol-canvas{height:clamp(380px,48vh,600px)}
+  .comparison-panel .two-d svg{height:clamp(350px,44vh,560px);max-width:100%}
+  @media(min-width:761px){
+    body.is-fullscreen:is([data-tab="relations"],[data-tab="meso"]){height:100vh;overflow:hidden;display:flex;flex-direction:column}
+    body.is-fullscreen:is([data-tab="relations"],[data-tab="meso"]) #panels{display:flex;flex:1;min-height:0;flex-direction:column}
+    body.is-fullscreen:is([data-tab="relations"],[data-tab="meso"]) .panel.active{display:flex;flex:1;min-height:0;flex-direction:column}
+    body.is-fullscreen:is([data-tab="relations"],[data-tab="meso"]) .lesson-head{flex:0 0 auto;margin-bottom:6px}
+    body.is-fullscreen:is([data-tab="relations"],[data-tab="meso"]) .lesson-head h2{font-size:clamp(19px,1.8vw,25px)}
+    body.is-fullscreen:is([data-tab="relations"],[data-tab="meso"]) .compare-tools{flex:0 0 auto;margin-bottom:7px}
+    body.is-fullscreen:is([data-tab="relations"],[data-tab="meso"]) .molecules{flex:1;min-height:0;grid-template-rows:repeat(2,minmax(0,1fr));gap:10px}
+    body.is-fullscreen:is([data-tab="relations"],[data-tab="meso"]) .molecule-card{height:100%;min-height:0;display:flex;flex-direction:column;padding:10px}
+    body.is-fullscreen:is([data-tab="relations"],[data-tab="meso"]) .molecule-title{flex:0 0 auto;margin-bottom:7px}
+    body.is-fullscreen:is([data-tab="relations"],[data-tab="meso"]) .comparison-panel.active .molecule-display{flex:1;min-height:0}
+    body.is-fullscreen:is([data-tab="relations"],[data-tab="meso"]) .comparison-panel.active .view-block{height:100%;min-height:0}
+    body.is-fullscreen:is([data-tab="relations"],[data-tab="meso"]) .comparison-panel.active .three-d,body.is-fullscreen:is([data-tab="relations"],[data-tab="meso"]) .comparison-panel.active .mol-canvas{height:100%;min-height:0}
+    body.is-fullscreen:is([data-tab="relations"],[data-tab="meso"]) .comparison-panel.active .two-d{height:100%;min-height:0;padding-top:26px}
+    body.is-fullscreen:is([data-tab="relations"],[data-tab="meso"]) .comparison-panel.active .two-d svg{height:100%;min-height:0}
+    body.is-fullscreen:is([data-tab="relations"],[data-tab="meso"]) .comparison-panel.active.compare-focus .molecules{grid-template-rows:minmax(0,1fr) auto}
+    body.is-fullscreen:is([data-tab="relations"],[data-tab="meso"]) .comparison-panel.active .molecule-card.compare-inactive{height:auto;min-height:0;align-self:end}
+  }
+  @media(max-width:760px){.panel.foundation .two-d,.panel.foundation .three-d,.panel.foundation .mol-canvas{min-height:clamp(340px,46vh,480px);height:clamp(340px,46vh,480px)}.panel.foundation .two-d svg{height:clamp(315px,43vh,450px)}}
+  @media(max-width:760px){.comparison-panel .two-d,.comparison-panel .three-d,.comparison-panel .mol-canvas{min-height:clamp(340px,46vh,480px);height:clamp(340px,46vh,480px)}.comparison-panel .two-d svg{height:clamp(315px,43vh,450px)}}
+  @media(max-width:520px){.panel.foundation .two-d,.panel.foundation .three-d,.panel.foundation .mol-canvas{min-height:380px;height:380px}.panel.foundation .two-d svg{height:350px}}
+  @media(max-width:520px){.comparison-panel .two-d,.comparison-panel .three-d,.comparison-panel .mol-canvas{min-height:380px;height:380px}.comparison-panel .two-d svg{height:350px}}
+  @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition-duration:.01ms!important}}
+  @media(prefers-contrast:more){:root{--ink2:#344055;--line:#aebaca}.molecule-card,.view-block{border-color:#aebaca}}
+</style>
+</head>
+<body data-view="both" data-tab="alkane">
+<header>
+  <div class="head-row">
+    <div class="title-block">
+      <a class="back-link" href="index.html">← 一覧に戻る</a>
+      <h1>有機化合物の立体構造</h1>
+    </div>
+    <div class="head-actions"><button class="outline-btn" id="fullscreenBtn" type="button" aria-label="全画面表示"><span aria-hidden="true">⛶</span><span class="btn-text">全画面表示</span></button></div>
+  </div>
+  <nav class="tabs" role="tablist" aria-label="有機化学の単元">
+    <button role="tab" id="tab-alkane" aria-controls="panel-alkane" aria-selected="true" tabindex="0" data-tab="alkane">① アルカン</button>
+    <button role="tab" id="tab-alkene" aria-controls="panel-alkene" aria-selected="false" tabindex="-1" data-tab="alkene">② アルケン</button>
+    <button role="tab" id="tab-alkyne" aria-controls="panel-alkyne" aria-selected="false" tabindex="-1" data-tab="alkyne">③ アルキン</button>
+    <button role="tab" id="tab-cistrans" aria-controls="panel-cistrans" aria-selected="false" tabindex="-1" data-tab="cistrans">④ シス・トランス</button>
+    <button role="tab" id="tab-optical" aria-controls="panel-optical" aria-selected="false" tabindex="-1" data-tab="optical">⑤ 光学異性体</button>
+    <button role="tab" id="tab-relations" aria-controls="panel-relations" aria-selected="false" tabindex="-1" data-tab="relations">⑥ エナンチオマー／ジアステレオマー</button>
+    <button role="tab" id="tab-meso" aria-controls="panel-meso" aria-selected="false" tabindex="-1" data-tab="meso">⑦ メソ体</button>
+    <button role="tab" id="tab-cyclohexane" aria-controls="panel-cyclohexane" aria-selected="false" tabindex="-1" data-tab="cyclohexane">⑧ シクロヘキサン</button>
+    <button role="tab" id="tab-dimethylcyclohexane" aria-controls="panel-dimethylcyclohexane" aria-selected="false" tabindex="-1" data-tab="dimethylcyclohexane">⑨ 1,4-ジメチルシクロヘキサン</button>
+  </nav>
+</header>
+<main>
+  <div class="toolbar">
+    <div class="view-switch" role="group" aria-label="表示方法">
+      <button type="button" data-view="2d" aria-pressed="false">2Dのみ</button>
+      <button type="button" data-view="both" aria-pressed="true">2D＋3D</button>
+      <button type="button" data-view="3d" aria-pressed="false">3Dのみ</button>
+    </div>
+    <button class="outline-btn guide-toggle" id="guideToggle" type="button" aria-pressed="true">補助図形 ON</button>
+    <button class="outline-btn electron-toggle" id="electronToggle" type="button" aria-pressed="true">共有電子対 ON</button>
+    <button class="outline-btn repulsion-toggle" id="repulsionToggle" type="button" aria-pressed="true">反発矢印 ON</button>
+  </div>
+  <div id="panels"></div>
+  <div class="sr-only" id="live" aria-live="polite"></div>
+</main>
+<footer>大阪女学院中学校・高等学校　Yuto Yamaguchi</footer>
+<script>
+const A=(e,x,y,z)=>({e,x,y,z});
+const B=(a,b,o=1)=>({a,b,o});
+const tetra=[[1,1,1],[-1,-1,1],[-1,1,-1],[1,-1,-1]].map(v=>v.map(n=>n*.88));
+
+function methane(){return{large:true,electrons:true,guide:'tetrahedron',atoms:[A('C',0,0,0),...tetra.map(v=>A('H',...v))],bonds:[B(0,1),B(0,2),B(0,3),B(0,4)]}}
+function dichloromethane(){return{large:true,guide:'tetrahedron',atoms:[A('C',0,0,0),A('H',...tetra[0]),A('H',...tetra[1]),A('Cl',...tetra[2]),A('Cl',...tetra[3])],bonds:[B(0,1),B(0,2),B(0,3),B(0,4)]}}
+function ethane(){return{large:true,guide:'multi-tetrahedron',guideTetrahedra:[[1,2,3,4],[0,5,6,7]],atoms:[A('C',-.58,0,0),A('C',.58,0,0),A('H',-1,.94,0),A('H',-1,-.47,.82),A('H',-1,-.47,-.82),A('H',1,.47,.82),A('H',1,-.94,0),A('H',1,.47,-.82)],bonds:[B(0,1),B(0,2),B(0,3),B(0,4),B(1,5),B(1,6),B(1,7)]}}
+function ethene(){return{large:true,electrons:true,guide:'plane',atoms:[A('C',-.65,0,0),A('C',.65,0,0),A('H',-1.25,.92,0),A('H',-1.25,-.92,0),A('H',1.25,.92,0),A('H',1.25,-.92,0)],bonds:[B(0,1,2),B(0,2),B(0,3),B(1,4),B(1,5)]}}
+function propene(){return{large:true,guide:'plane',atoms:[A('C',-.55,0,0),A('C',.55,0,0),A('C',1.15,-.92,0),A('H',-1.18,.82,0),A('H',-1.18,-.82,0),A('H',1.12,.82,0),A('H',1.95,-1.1,0),A('H',1.25,-1.62,.72),A('H',1.25,-1.62,-.72)],bonds:[B(0,1,2),B(1,2),B(0,3),B(0,4),B(1,5),B(2,6),B(2,7),B(2,8)]}}
+function ethyne(){return{large:true,electrons:true,guide:'line',atoms:[A('H',-1.65,0,0),A('C',-.58,0,0),A('C',.58,0,0),A('H',1.65,0,0)],bonds:[B(0,1),B(1,2,3),B(2,3)]}}
+function propyne(){return{large:true,guide:'line',atoms:[A('H',-1.65,0,0),A('C',-.72,0,0),A('C',.3,0,0),A('C',1.25,0,0),A('H',1.62,.94,0),A('H',1.62,-.47,.82),A('H',1.62,-.47,-.82)],bonds:[B(0,1),B(1,2,3),B(2,3),B(3,4),B(3,5),B(3,6)]}}
+function dichloro(cis=true){return{large:true,atoms:[A('C',-.62,0,0),A('C',.62,0,0),A('Cl',-1.2,.88,0),A('H',-1.2,-.88,0),A('Cl',1.2,cis?.88:-.88,0),A('H',1.2,cis?-.88:.88,0)],bonds:[B(0,1,2),B(0,2),B(0,3),B(1,4),B(1,5)]}}
+function dichloro11(){return{large:true,atoms:[A('C',-.62,0,0),A('C',.62,0,0),A('Cl',-1.2,.88,0),A('Cl',-1.2,-.88,0),A('H',1.2,.88,0),A('H',1.2,-.88,0)],bonds:[B(0,1,2),B(0,2),B(0,3),B(1,4),B(1,5)]}}
+function lactic(s=1){return{initialYaw:-.6,initialPitch:.35,initialZoom:1.08,depthEmphasis:.22,atomScale:1.7,atomScaleMax:2.4,syncGroup:'lactic',stereoBranches:[9,11],stereos:[0],atoms:[A('C',0,0,0),A('C',-.98,-.69,0),A('H',-1.62,-.75,0),A('H',-1.15,-1.25,.43),A('H',-1.15,-1.25,-.43),A('C',.98,-.69,0),A('O',1.1,-1.54,0),A('O',1.7,-.32,0),A('H',2.18,-.48,0),A('O',0,.69,.98*s),A('H',-.12,1.27,1.35*s),A('H',0,.69,-.98*s)],bonds:[B(0,1),B(1,2),B(1,3),B(1,4),B(0,5),B(5,6,2),B(5,7),B(7,8),B(0,9),B(9,10),B(0,11)]}}
+function tetrahalomethane(s=1){const q=Math.sqrt(1/3),t=Math.sqrt(2/3);return{initialYaw:-.28,initialPitch:.12,initialZoom:1.08,depthEmphasis:.25,atomScale:1.85,atomScaleMax:2.55,stereoBranches:[3,4],stereos:[0],stereoLabels:['C*'],atoms:[A('C',0,0,0),A('I',-t,-q,0),A('Br',t,-q,0),A('Cl',0,q,t*s),A('F',0,q,-t*s)],bonds:[B(0,1),B(0,2),B(0,3),B(0,4)]}}
+function cyclohexaneChair({flip=false,methyl={},syncGroup=null,sideView=false}={}){
+ const ring=[[-1.3,0,.75],[-.65,-1.05,0],[.65,-1.05,0],[1.3,0,-.75],[.65,1.05,0],[-.65,1.05,0]].map(([x,y,z])=>[x,y,flip?-z:z]);
+ const atoms=ring.map(v=>A('C',...v)),bonds=[B(0,1),B(1,2),B(2,3),B(3,4),B(4,5),B(5,0)],guideBonds=[],methylGuides=[];
+ ring.forEach(([x,y,z],i)=>{
+  const radial=Math.hypot(x,y)||1,sign=(i%2===0?1:-1)*(flip?-1:1);
+  const dirs={axial:[0,0,1.08*sign],equatorial:[x/radial*.94,y/radial*.94,-.5*sign]};
+  for(const type of ['axial','equatorial']){
+   const [dx,dy,dz]=dirs[type],isMethyl=methyl[i]===type,index=atoms.length;
+   const branchAtom=A(isMethyl?'C':'H',x+dx,y+dy,z+dz);if(!isMethyl)branchAtom.ringPosition=type;atoms.push(branchAtom);bonds.push(B(i,index));
+   if(isMethyl){const n=Math.hypot(dx,dy,dz)||1,u=[dx/n,dy/n,dz/n],ref=Math.abs(u[2])<.8?[0,0,1]:[0,1,0],cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]],v0=cross(u,ref),vn=Math.hypot(...v0)||1,v=v0.map(q=>q/vn),w=cross(u,v),mc=atoms[index],vertices=[i];[0,2*Math.PI/3,4*Math.PI/3].forEach(t=>{const hi=atoms.length;atoms.push(A('H',mc.x+u[0]*.38+(v[0]*Math.cos(t)+w[0]*Math.sin(t))*.7,mc.y+u[1]*.38+(v[1]*Math.cos(t)+w[1]*Math.sin(t))*.7,mc.z+u[2]*.38+(v[2]*Math.cos(t)+w[2]*Math.sin(t))*.7));bonds.push(B(index,hi));vertices.push(hi)});methylGuides.push({type,vertices})}
+   if(isMethyl||(!Object.keys(methyl).length&&i===0))guideBonds.push({a:i,b:index,type,side:dz>0?'↑':'↓'});
+  }
+ });
+ return{initialYaw:sideView?0:(flip ? .78 : 2.36),initialPitch:sideView?1.5:1.18,initialRoll:sideView?0:(flip ? -2.615 : -.528),initialZoom:1.02,atomScale:1.16,atomScaleMax:1.48,atomScaleByWidth:true,freeRotation:true,trackball:true,syncGroup,syncRelative:!!syncGroup,guide:'cyclohexane-chair',positionLegend:true,guideBonds,methylGuides,atoms,bonds}
+}
+function cyclohexaneBoat({syncGroup=null}={}){
+ const ring=[[-1.3,0,.75],[-.65,-1.05,0],[.65,-1.05,0],[1.3,0,.75],[.65,1.05,0],[-.65,1.05,0]],atoms=ring.map(v=>A('C',...v)),bonds=[B(0,1),B(1,2),B(2,3),B(3,4),B(4,5),B(5,0)],flagpole=[];
+ ring.forEach(([x,y,z],i)=>{
+  let dirs;
+  if(i===0)dirs=[[.82,0,.74],[-.78,0,-.64]];
+  else if(i===3)dirs=[[-.82,0,.74],[.78,0,-.64]];
+  else{const radial=Math.hypot(x,y)||1,sign=i%2===0?1:-1;dirs=[[0,0,.94*sign],[x/radial*.9,y/radial*.9,-.48*sign]]}
+  dirs.forEach(([dx,dy,dz],n)=>{const index=atoms.length;atoms.push(A('H',x+dx,y+dy,z+dz));bonds.push(B(i,index));if((i===0||i===3)&&n===0)flagpole.push(index)});
+ });
+ return{initialYaw:0,initialPitch:-1.5,initialRoll:0,initialZoom:1.02,atomScale:1.16,atomScaleMax:1.48,atomScaleByWidth:true,freeRotation:true,trackball:true,syncGroup,syncRelative:!!syncGroup,guide:'cyclohexane-boat',positionLegend:true,flagpole,atoms,bonds}
+}
+function erythro(s2=1,s3=1){
+ const c2=[0,.57,0],c3=[.35,-.57,-.15];
+ const site2a=[.98,.66,.94],site2b=[-.92,.43,-.9],site3a=[1.25,-.5,-.95],site3b=[-.58,-.7,.94];
+ const [o2,h2]=s2>0?[site2a,site2b]:[site2b,site2a], [o3,h3]=s3>0?[site3a,site3b]:[site3b,site3a];
+ const hydroxylH=(center,o)=>o.map((n,i)=>n+(n-center[i])*.5);
+ const oh2=hydroxylH(c2,o2),oh3=hydroxylH(c3,o3);
+ return{initialYaw:-.72,initialPitch:.2,initialZoom:1.03,depthEmphasis:.24,atomScale:1.7,atomScaleMax:2.4,atomScaleByWidth:true,syncGroup:'relations',stereos:[1,2],stereoBonds:[[1,7],[1,9],[2,10],[2,12]],atoms:[A('C',-.42,1.72,-.3),A('C',...c2),A('C',...c3),A('C',-.1,-1.72,.25),A('O',-1.08,2.34,-.38),A('O',.25,2.32,-.16),A('H',.76,2.58,-.05),A('O',...o2),A('H',...oh2),A('H',...h2),A('O',...o3),A('H',...oh3),A('H',...h3),A('O',.62,-2.38,.34),A('H',1.14,-2.58,.38),A('H',-.78,-2.08,.9),A('H',-.68,-2.06,-.5)],bonds:[B(0,1),B(1,2),B(2,3),B(0,4,2),B(0,5),B(5,6),B(1,7),B(7,8),B(1,9),B(2,10),B(10,11),B(2,12),B(3,13),B(13,14),B(3,15),B(3,16)]}
+}
+function tartaricStereo(topLeft=true,bottomLeft=true,meso=false){
+ const c2=[0,.57,0],c3=[0,-.57,0],leftTop=[-.95,.6,.85],rightTop=[.95,.52,-.85],leftBottom=[-.95,-.6,.85],rightBottom=[.95,-.52,-.85];
+ const [o2,h2]=topLeft?[leftTop,rightTop]:[rightTop,leftTop], [o3,h3]=bottomLeft?[leftBottom,rightBottom]:[rightBottom,leftBottom];
+ const hydroxylH=(center,o)=>o.map((n,i)=>n+(n-center[i])*.5),oh2=hydroxylH(c2,o2),oh3=hydroxylH(c3,o3);
+ return{initialYaw:-.72,initialPitch:.2,initialZoom:1.03,depthEmphasis:.24,atomScale:1.7,atomScaleMax:2.4,atomScaleByWidth:true,syncGroup:'tartaric',stereos:[1,2],stereoBonds:[[1,7],[1,9],[2,10],[2,12]],plane:meso?'xz':null,atoms:[A('C',0,1.72,-.45),A('C',...c2),A('C',...c3),A('C',0,-1.72,-.45),A('O',-.68,2.38,-.55),A('O',.68,2.34,-.42),A('H',1.18,2.58,-.38),A('O',...o2),A('H',...oh2),A('H',...h2),A('O',...o3),A('H',...oh3),A('H',...h3),A('O',-.68,-2.38,-.55),A('O',.68,-2.34,-.42),A('H',1.18,-2.58,-.38)],bonds:[B(0,1),B(1,2),B(2,3),B(0,4,2),B(0,5),B(5,6),B(1,7),B(7,8),B(1,9),B(2,10),B(10,11),B(2,12),B(3,13,2),B(3,14),B(14,15)]}
+}
+
+const bondLine=(x1,y1,x2,y2,cls='')=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="bond ${cls}"/>`;
+const svg=(body,extra='')=>`<svg viewBox="0 0 300 220" role="img" aria-label="2D構造式"><style>.bond{stroke:#334155;stroke-width:3;stroke-linecap:round}.thin{stroke-width:2}.dash{stroke-dasharray:5 5}.atom{font:700 18px Inter,Arial,sans-serif;fill:#172033;text-anchor:middle;dominant-baseline:middle}.small{font-size:13px}.oxy{fill:#dc2626}.chlor{fill:#15803d}.hint{font:700 11px Inter,Arial,sans-serif;fill:#64748b}.stereo{fill:#fff7ed;stroke:#f97316;stroke-width:2}</style>${body}${extra}</svg>`;
+const foundationSvg=body=>`<svg class="foundation-formula" viewBox="0 0 300 300" role="img" aria-label="2D構造式"><style>.foundation-formula .bond{stroke:#000;stroke-width:8;stroke-linecap:square}.foundation-formula .double{stroke-width:6}.foundation-formula .atom{font:400 54px Arial,'Yu Gothic',sans-serif;fill:#000;text-anchor:middle;dominant-baseline:middle}.foundation-formula .chlor{fill:#000}</style>${body}</svg>`;
+const foundationWideSvg=body=>`<svg class="foundation-formula" viewBox="0 0 420 300" role="img" aria-label="2D構造式"><style>.foundation-formula .bond{stroke:#000;stroke-width:8;stroke-linecap:square}.foundation-formula .double{stroke-width:6}.foundation-formula .atom{font:400 54px Arial,'Yu Gothic',sans-serif;fill:#000;text-anchor:middle;dominant-baseline:middle}.foundation-formula .chlor{fill:#000}</style>${body}</svg>`;
+function simple2D(type){
+ if(type==='methane')return foundationSvg(`${bondLine(150,74,150,118)}${bondLine(150,182,150,226)}${bondLine(74,150,118,150)}${bondLine(182,150,226,150)}<text class="atom" x="150" y="150">C</text><text class="atom" x="150" y="42">H</text><text class="atom" x="150" y="258">H</text><text class="atom" x="42" y="150">H</text><text class="atom" x="258" y="150">H</text>`);
+ if(type==='dichloromethane')return foundationSvg(`${bondLine(150,74,150,118)}${bondLine(150,182,150,226)}${bondLine(81,150,118,150)}${bondLine(182,150,219,150)}<text class="atom" x="150" y="150">C</text><text class="atom" x="150" y="42">H</text><text class="atom" x="150" y="258">H</text><text class="atom chlor" x="42" y="150">Cl</text><text class="atom chlor" x="258" y="150">Cl</text>`);
+ if(type==='ethane')return foundationWideSvg(`${bondLine(192,150,228,150)}${bondLine(160,74,160,118)}${bondLine(160,182,160,226)}${bondLine(260,74,260,118)}${bondLine(260,182,260,226)}${bondLine(74,150,128,150)}${bondLine(292,150,346,150)}<text class="atom" x="160" y="150">C</text><text class="atom" x="260" y="150">C</text><text class="atom" x="42" y="150">H</text><text class="atom" x="160" y="42">H</text><text class="atom" x="160" y="258">H</text><text class="atom" x="260" y="42">H</text><text class="atom" x="260" y="258">H</text><text class="atom" x="378" y="150">H</text>`);
+ if(type==='ethene')return foundationSvg(`${bondLine(132,142,168,142,'double')}${bondLine(132,158,168,158,'double')}${bondLine(100,74,100,118)}${bondLine(100,182,100,226)}${bondLine(200,74,200,118)}${bondLine(200,182,200,226)}<text class="atom" x="100" y="150">C</text><text class="atom" x="200" y="150">C</text><text class="atom" x="100" y="42">H</text><text class="atom" x="100" y="258">H</text><text class="atom" x="200" y="42">H</text><text class="atom" x="200" y="258">H</text>`);
+ if(type==='propene')return foundationWideSvg(`${bondLine(132,142,168,142,'double')}${bondLine(132,158,168,158,'double')}${bondLine(232,150,268,150)}${bondLine(100,74,100,118)}${bondLine(100,182,100,226)}${bondLine(200,74,200,118)}${bondLine(300,74,300,118)}${bondLine(300,182,300,226)}${bondLine(332,150,363,150)}<text class="atom" x="100" y="150">C</text><text class="atom" x="200" y="150">C</text><text class="atom" x="300" y="150">C</text><text class="atom" x="100" y="42">H</text><text class="atom" x="100" y="258">H</text><text class="atom" x="200" y="42">H</text><text class="atom" x="300" y="42">H</text><text class="atom" x="300" y="258">H</text><text class="atom" x="395" y="150">H</text>`);
+ if(type==='ethyne')return foundationSvg(`${bondLine(137,132,163,132,'double')}${bondLine(137,150,163,150,'double')}${bondLine(137,168,163,168,'double')}${bondLine(60,150,73,150)}${bondLine(227,150,240,150)}<text class="atom" x="28" y="150">H</text><text class="atom" x="105" y="150">C</text><text class="atom" x="195" y="150">C</text><text class="atom" x="272" y="150">H</text>`);
+ if(type==='propyne')return foundationWideSvg(`${bondLine(137,132,173,132,'double')}${bondLine(137,150,173,150,'double')}${bondLine(137,168,173,168,'double')}${bondLine(60,150,73,150)}${bondLine(237,150,273,150)}${bondLine(305,74,305,118)}${bondLine(305,182,305,226)}${bondLine(337,150,363,150)}<text class="atom" x="28" y="150">H</text><text class="atom" x="105" y="150">C</text><text class="atom" x="205" y="150">C</text><text class="atom" x="305" y="150">C</text><text class="atom" x="305" y="42">H</text><text class="atom" x="305" y="258">H</text><text class="atom" x="395" y="150">H</text>`);
+}
+function dichloro2D(cis){const topRight=cis?'Cl':'H',bottomRight=cis?'H':'Cl';return foundationSvg(`${bondLine(139,141,161,141,'double')}${bondLine(139,159,161,159,'double')}${bondLine(96,127,67,88)}${bondLine(96,173,67,212)}${bondLine(204,127,233,88)}${bondLine(204,173,233,212)}<text class="atom carbon" x="116" y="151">C</text><text class="atom carbon" x="184" y="151">C</text><text class="atom chlor" x="48" y="65">Cl</text><text class="atom" x="50" y="235">H</text><text class="atom ${topRight==='Cl'?'chlor':''}" x="250" y="65">${topRight}</text><text class="atom ${bottomRight==='Cl'?'chlor':''}" x="250" y="235">${bottomRight}</text>`)}
+function dichloro112D(){return foundationSvg(`${bondLine(139,141,161,141,'double')}${bondLine(139,159,161,159,'double')}${bondLine(96,127,67,88)}${bondLine(96,173,67,212)}${bondLine(204,127,233,88)}${bondLine(204,173,233,212)}<text class="atom carbon" x="116" y="151">C</text><text class="atom carbon" x="184" y="151">C</text><text class="atom chlor" x="48" y="65">Cl</text><text class="atom chlor" x="48" y="235">Cl</text><text class="atom" x="250" y="65">H</text><text class="atom" x="250" y="235">H</text>`)}
+function lactic2D(side='D'){
+ const d=side==='D';
+ const front=d?'HO':'H',back=d?'H':'OH';
+ return `<svg class="lactic-formula" viewBox="-10 0 320 250" role="img" aria-label="${side}-乳酸の省略立体構造式"><style>.lactic-formula .bond{stroke:#000;stroke-width:6;stroke-linecap:square}.lactic-formula .atom{font:400 39px Arial,'Yu Gothic',sans-serif;fill:#000;text-anchor:middle;dominant-baseline:middle}.lactic-formula .group{font-size:34px}.lactic-formula .left-sub,.lactic-formula .left-main{text-anchor:end}.lactic-formula .right-sub,.lactic-formula .right-main{text-anchor:start}.lactic-formula .wedge{fill:#000}.lactic-formula .hashed{stroke:#000;stroke-width:4;stroke-linecap:round}</style>${bondLine(127,155,87,190)}${bondLine(173,155,213,190)}<polygon class="wedge" points="140,130 109,72 88,90"/><g class="hashed"><line x1="161" y1="128" x2="164" y2="131"/><line x1="168" y1="118" x2="172" y2="121"/><line x1="175" y1="107" x2="181" y2="112"/><line x1="182" y1="96" x2="190" y2="102"/><line x1="189" y1="85" x2="200" y2="93"/><line x1="195" y1="74" x2="209" y2="84"/></g><text class="atom" x="150" y="145">C</text><text class="atom group left-main" x="92" y="219">H₃C</text><text class="atom group right-main" x="208" y="219">COOH</text><text class="atom group left-sub" x="94" y="58">${front}</text><text class="atom group right-sub" x="206" y="58">${back}</text></svg>`
+}
+function tetrahalo2D(configuration='R'){
+ const front=configuration==='R'?'F':'Cl',back=configuration==='R'?'Cl':'F';
+ return `<svg class="tetrahalo-formula" viewBox="0 0 300 250" role="img" aria-label="${configuration}配置のブロモクロロフルオロヨードメタンの立体構造式"><style>.tetrahalo-formula .bond{stroke:#000;stroke-width:6;stroke-linecap:square}.tetrahalo-formula .atom{font:400 39px Arial,'Yu Gothic',sans-serif;fill:#000;text-anchor:middle;dominant-baseline:middle}.tetrahalo-formula .wedge{fill:#000}.tetrahalo-formula .hashed{stroke:#000;stroke-width:4;stroke-linecap:round}</style>${bondLine(127,155,87,190)}${bondLine(173,155,213,190)}<polygon class="wedge" points="140,130 109,72 88,90"/><g class="hashed"><line x1="161" y1="128" x2="164" y2="131"/><line x1="168" y1="118" x2="172" y2="121"/><line x1="175" y1="107" x2="181" y2="112"/><line x1="182" y1="96" x2="190" y2="102"/><line x1="189" y1="85" x2="200" y2="93"/><line x1="195" y1="74" x2="209" y2="84"/></g><text class="atom" x="150" y="145">C</text><text class="atom" x="78" y="219">I</text><text class="atom" x="222" y="219">Br</text><text class="atom" x="91" y="58">${front}</text><text class="atom" x="209" y="58">${back}</text></svg>`
+}
+function chain2D(cfg){
+ const stereoBond=(y,configuration)=>{
+  const solidLeft=configuration==='R',solidStart=solidLeft?134:166,solidEnd=solidLeft?92:208,dashStart=solidLeft?166:134,dashEnd=solidLeft?208:92;
+  const solidPoints=`${solidStart},${y-2} ${solidStart},${y+2} ${solidEnd},${y+11} ${solidEnd},${y-11}`;
+  const hashes=[.04,.24,.43,.62,.81,1].map((t,i)=>{const x=dashStart+(dashEnd-dashStart)*t,h=1.4+i*1.75;return `<line x1="${x}" y1="${y-h}" x2="${x}" y2="${y+h}"/>`}).join('');
+  const leftLabel=solidLeft?'HO':'H',rightLabel=solidLeft?'H':'OH';
+  const leftX=leftLabel==='H'?84:92,rightX=rightLabel==='H'?216:208;
+  return `<polygon class="wedge" points="${solidPoints}"/><g class="hashed">${hashes}</g><text class="atom group left-sub" x="${leftX}" y="${y+1}">${leftLabel}</text><text class="atom group right-sub" x="${rightX}" y="${y+1}">${rightLabel}</text>`
+ };
+ const [c2,c3]=cfg.split('');
+ return `<svg class="chain-formula" viewBox="0 0 300 270" role="img" aria-label="${cfg}配置の省略立体構造式"><style>.chain-formula .bond{stroke:#000;stroke-width:6;stroke-linecap:square}.chain-formula .atom{font:400 34px Arial,'Yu Gothic',sans-serif;fill:#000;text-anchor:middle;dominant-baseline:middle}.chain-formula .carbon{font-size:42px}.chain-formula .group{font-size:30px}.chain-formula .end-group{font-size:29px}.chain-formula .left-sub{text-anchor:end}.chain-formula .right-sub,.chain-formula .top-group,.chain-formula .bottom-group{text-anchor:start}.chain-formula .wedge{fill:#000}.chain-formula .hashed{stroke:#000;stroke-width:3.5;stroke-linecap:round}</style>${bondLine(150,38,150,60)}${bondLine(150,104,150,138)}${bondLine(150,182,150,227)}${stereoBond(82,c2)}${stereoBond(160,c3)}<text class="atom end-group top-group" x="145" y="20">COOH</text><text class="atom carbon" x="150" y="83">C</text><text class="atom carbon" x="150" y="161">C</text><text class="atom end-group bottom-group" x="141" y="254">CH₂OH</text></svg>`
+}
+function tartaric2D(cfg,showPlane=false){
+ const stereoBond=(y,solidLeft)=>{const solidStart=solidLeft?134:166,solidEnd=solidLeft?92:208,dashStart=solidLeft?166:134,dashEnd=solidLeft?208:92,solidPoints=`${solidStart},${y-2} ${solidStart},${y+2} ${solidEnd},${y+11} ${solidEnd},${y-11}`,hashes=[.04,.24,.43,.62,.81,1].map((t,i)=>{const x=dashStart+(dashEnd-dashStart)*t,h=1.4+i*1.75;return `<line x1="${x}" y1="${y-h}" x2="${x}" y2="${y+h}"/>`}).join(''),leftLabel=solidLeft?'HO':'H',rightLabel=solidLeft?'H':'OH',leftX=leftLabel==='H'?84:92,rightX=rightLabel==='H'?216:208;return `<polygon class="wedge" points="${solidPoints}"/><g class="hashed">${hashes}</g><text class="atom group left-sub" x="${leftX}" y="${y+1}">${leftLabel}</text><text class="atom group right-sub" x="${rightX}" y="${y+1}">${rightLabel}</text>`};
+ const topLeft=cfg==='RR'||cfg==='RS',bottomLeft=cfg==='SS'||cfg==='RS';
+ return `<svg class="chain-formula tartaric-formula" viewBox="0 0 300 270" role="img" aria-label="${cfg}配置の酒石酸の省略立体構造式"><style>.chain-formula .bond{stroke:#000;stroke-width:6;stroke-linecap:square}.chain-formula .atom{font:400 34px Arial,'Yu Gothic',sans-serif;fill:#000;text-anchor:middle;dominant-baseline:middle}.chain-formula .carbon{font-size:42px}.chain-formula .group{font-size:30px}.chain-formula .end-group{font-size:29px}.chain-formula .left-sub{text-anchor:end}.chain-formula .right-sub,.chain-formula .top-group,.chain-formula .bottom-group{text-anchor:start}.chain-formula .wedge{fill:#000}.chain-formula .hashed{stroke:#000;stroke-width:3.5;stroke-linecap:round}.tartaric-formula .symmetry{stroke:#0ea5e9;stroke-width:2;stroke-dasharray:7 6}.tartaric-formula .symmetry-label{font:700 11px Inter,Arial,sans-serif;fill:#0284c7}</style>${bondLine(150,38,150,60)}${bondLine(150,104,150,138)}${bondLine(150,182,150,227)}${stereoBond(82,topLeft)}${stereoBond(160,bottomLeft)}<text class="atom end-group top-group" x="145" y="20">COOH</text><text class="atom carbon" x="150" y="83">C</text><text class="atom carbon" x="150" y="161">C</text><text class="atom end-group bottom-group" x="141" y="254">COOH</text>${showPlane?'<line class="symmetry" x1="30" y1="121" x2="270" y2="121"/><text class="symmetry-label" x="34" y="113">分子内対称面</text>':''}</svg>`
+}
+function cyclohexane2D(shape='chair',placements={},flip=false){
+ const lineToLabel=(from,to,label,position='')=>{const [x,y]=from,[tx,ty]=to,vx=tx-x,vy=ty-y,len=Math.hypot(vx,vy)||1,gap=label==='H'?18:38,bx=tx-vx/len*gap,by=ty-vy/len*gap,cls=label==='H'?'hydrogen':'methyl',positionClass=position?` ${position}`:'';return `<line class="sub-bond${positionClass}" x1="${x}" y1="${y}" x2="${bx}" y2="${by}"/><text class="${cls}${positionClass}" x="${tx}" y="${ty}">${label}</text>`};
+ const ringSegment=(a,b,depth)=>`<line class="ring ${depth}" x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}"/>`;
+ const styles=`<style>.cyclohexane-formula .ring,.cyclohexane-formula .sub-bond{fill:none;stroke:#000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round}.cyclohexane-formula .ring.back{stroke-width:3.2}.cyclohexane-formula .ring.front{stroke-width:11;stroke-linecap:round}.cyclohexane-formula .sub-bond{stroke-width:3.4}.cyclohexane-formula .sub-bond.axial{stroke:#dc2626}.cyclohexane-formula .sub-bond.equatorial{stroke:#2563eb}.cyclohexane-formula .hydrogen,.cyclohexane-formula .methyl{font:400 28px Arial,'Yu Gothic',sans-serif;fill:#000;text-anchor:middle;dominant-baseline:middle}.cyclohexane-formula .hydrogen.axial,.cyclohexane-formula .methyl.axial{fill:#dc2626}.cyclohexane-formula .hydrogen.equatorial,.cyclohexane-formula .methyl.equatorial{fill:#2563eb}.cyclohexane-formula .methyl{font-size:30px}</style>`;
+ if(shape==='boat'){
+  const pts=[[58,72],[108,190],[205,190],[302,72],[230,120],[132,120]],ring=[ringSegment(pts[3],pts[4],'back'),ringSegment(pts[4],pts[5],'back'),ringSegment(pts[5],pts[0],'back'),ringSegment(pts[0],pts[1],'front'),ringSegment(pts[1],pts[2],'front'),ringSegment(pts[2],pts[3],'front')].join(''),targets=[[[145,26],[12,38]],[[108,258],[45,225]],[[205,258],[268,225]],[[215,26],[348,38]],[[230,55],[305,142]],[[132,55],[55,142]]];
+  const branches=pts.map((p,i)=>targets[i].map(t=>lineToLabel(p,t,'H')).join('')).join('');
+  return `<svg class="cyclohexane-formula" viewBox="-8 0 376 275" role="img" aria-label="舟形シクロヘキサンの構造式"><desc>舟形環の全水素を示す。</desc>${styles}${ring}${branches}</svg>`
+ }
+ const mirror=([x,y])=>flip?[x,260-y]:[x,y],sites=[
+  {c:0,p:[278,80],axial:[278,17],equatorial:[330,105]},
+  {c:1,p:[225,150],axial:[225,248],equatorial:[305,158]},
+  {c:2,p:[140,128],axial:[140,53],equatorial:[115,226]},
+  {c:3,p:[68,150],axial:[68,248],equatorial:[30,158]},
+  {c:4,p:[120,75],axial:[120,17],equatorial:[50,102]},
+  {c:5,p:[190,103],axial:[190,190],equatorial:[232,39]}
+ ].map(s=>({...s,p:mirror(s.p),axial:mirror(s.axial),equatorial:mirror(s.equatorial)}));
+ const byCarbon=new Map(sites.map(s=>[s.c,s])),ringOrder=[3,4,5,0,1,2].map(i=>byCarbon.get(i).p),ring=[ringSegment(ringOrder[0],ringOrder[1],'back'),ringSegment(ringOrder[1],ringOrder[2],'back'),ringSegment(ringOrder[2],ringOrder[3],'back'),ringSegment(ringOrder[3],ringOrder[4],'front'),ringSegment(ringOrder[4],ringOrder[5],'front'),ringSegment(ringOrder[5],ringOrder[0],'front')].join('');
+ const branches=sites.map(s=>['axial','equatorial'].map(type=>{const label=placements[s.c]?.type===type?'CH₃':'H';return lineToLabel(s.p,s[type],label,type)}).join('')).join('');
+ return `<svg class="cyclohexane-formula" viewBox="-10 -5 380 275" role="img" aria-label="いす形シクロヘキサンの構造式"><desc>いす形環の全水素${Object.keys(placements).length?'と1位・4位のメチル基':''}を示す。赤はアキシャル水素、青はエクアトリアル水素。</desc>${styles}${ring}${branches}</svg>`
+}
+
+const lessons=[
+ {id:'alkane',eyebrow:'ALKANE · sp³',title:'アルカンの立体構造',select:true,mols:[{id:'methane',name:'メタン',config:'CH₄・正四面体形',vsepr:['中心C：電子領域4','電子領域の形：正四面体形','結合角：約109.5°'],svg:simple2D('methane'),model:methane()},{id:'dichloromethane',name:'ジクロロメタン',config:'CH₂Cl₂・正四面体形',vsepr:['中心C：電子領域4','電子領域の形：正四面体形','結合角：約109.5°'],svg:simple2D('dichloromethane'),model:dichloromethane()},{id:'ethane',name:'エタン',config:'C₂H₆・ねじれ形',vsepr:['各C：電子領域4','電子領域の形：正四面体形','結合角：約109.5°'],svg:simple2D('ethane'),model:ethane()}]},
+ {id:'alkene',eyebrow:'ALKENE · sp²',title:'アルケンの立体構造',select:true,mols:[{id:'ethene',name:'エチレン',config:'C₂H₄・平面形',vsepr:['C=Cの各C：電子領域3','電子領域の形：平面三角形','結合角：約120°','二重結合も1領域'],svg:simple2D('ethene'),model:ethene()},{id:'propene',name:'プロピレン（プロペン）',config:'C₃H₆',vsepr:['C=Cの各C：3・平面三角形','CH₃のC：4・正四面体形','結合角：約120°／109.5°','二重結合も1領域'],svg:simple2D('propene'),model:propene()}]},
+ {id:'alkyne',eyebrow:'ALKYNE · sp',title:'アルキンの立体構造',select:true,mols:[{id:'ethyne',name:'アセチレン',config:'C₂H₂・直線形',vsepr:['C≡Cの各C：電子領域2','電子領域の形：直線形','結合角：180°','三重結合も1領域'],svg:simple2D('ethyne'),model:ethyne()},{id:'propyne',name:'プロピン',config:'C₃H₄',vsepr:['C≡Cの各C：2・直線形','CH₃のC：4・正四面体形','結合角：180°／約109.5°','三重結合も1領域'],svg:simple2D('propyne'),model:propyne()}]},
+ {id:'cistrans',eyebrow:'GEOMETRIC ISOMERISM',title:'シス・トランス異性体',substanceLabel:'比較する化合物',substances:[['dichloro12','1,2-ジクロロエチレン'],['dichloro11','1,1-ジクロロエチレン']],cols:2,mols:[{id:'cis',group:'dichloro12',name:'cis-1,2-ジクロロエチレン',config:'(Z)体',svg:dichloro2D(true),model:dichloro(true),note:'2個の塩素原子が二重結合の同じ側にある。'},{id:'trans',group:'dichloro12',name:'trans-1,2-ジクロロエチレン',config:'(E)体',svg:dichloro2D(false),model:dichloro(false),note:'2個の塩素原子が二重結合の反対側にある。'},{id:'dichloro11',group:'dichloro11',name:'1,1-ジクロロエチレン',config:'シス・トランス異性なし',svg:dichloro112D(),model:dichloro11(),note:'同じ二重結合炭素に2個のClが結合している。'}]},
+ {id:'optical',eyebrow:'OPTICAL ISOMERISM',title:'光学異性体',substanceLabel:'光学異性体の例',substances:[['lactic','乳酸'],['tetrahalo','CBrClFI']],cols:2,mols:[{id:'d-lactic',group:'lactic',name:'D-乳酸',config:'(R)-乳酸',svg:lactic2D('D'),model:lactic(1),note:'OHが手前、Hが奥を向く立体構造式。'},{id:'l-lactic',group:'lactic',name:'L-乳酸',config:'(S)-乳酸',svg:lactic2D('L'),model:lactic(-1),note:'OHが奥、Hが手前を向くD-乳酸の鏡像。'},{id:'r-tetrahalo',group:'tetrahalo',name:'(R)-ブロモクロロフルオロヨードメタン',config:'(R)体・CBrClFI',svg:tetrahalo2D('R'),model:tetrahalomethane(-1),note:'CIP順位は I ＞ Br ＞ Cl ＞ F。'},{id:'s-tetrahalo',group:'tetrahalo',name:'(S)-ブロモクロロフルオロヨードメタン',config:'(S)体・CBrClFI',svg:tetrahalo2D('S'),model:tetrahalomethane(1),note:'(R)体と重ね合わせられない鏡像。'}]},
+ {id:'relations',eyebrow:'STEREOISOMER RELATIONSHIPS',title:'エナンチオマーとジアステレオマー',cols:2,compare:true,compareOptions:[['d-ery,l-ery','エナンチオマー（エリトロン酸）'],['d-thr,l-thr','エナンチオマー（トレオン酸）'],['d-ery,d-thr','ジアステレオマー（D体）'],['l-ery,l-thr','ジアステレオマー（L体）'],['all','4種類すべて']],mols:[{id:'d-ery',name:'D-エリトロン酸',config:'(2R,3R)',svg:chain2D('RR'),model:erythro(1,1)},{id:'l-ery',name:'L-エリトロン酸',config:'(2S,3S)',svg:chain2D('SS'),model:erythro(-1,-1)},{id:'d-thr',name:'D-トレオン酸',config:'(2S,3R)',svg:chain2D('SR'),model:erythro(-1,1)},{id:'l-thr',name:'L-トレオン酸',config:'(2R,3S)',svg:chain2D('RS'),model:erythro(1,-1)}]},
+ {id:'meso',eyebrow:'MESO COMPOUND',title:'メソ体と光学異性体（酒石酸）',cols:2,compare:true,compareOptions:[['d-tartaric,l-tartaric','D体／L体（エナンチオマー）'],['d-tartaric,meso-tartaric','D体／メソ体（ジアステレオマー）'],['l-tartaric,meso-tartaric','L体／メソ体（ジアステレオマー）'],['all','3種類すべて']],mols:[{id:'d-tartaric',name:'D-酒石酸',config:'(2R,3R)',svg:tartaric2D('RR'),model:tartaricStereo(true,false,false)},{id:'l-tartaric',name:'L-酒石酸',config:'(2S,3S)',svg:tartaric2D('SS'),model:tartaricStereo(false,true,false)},{id:'meso-tartaric',name:'メソ酒石酸',config:'(2R,3S)',svg:tartaric2D('RS',true),model:tartaricStereo(true,true,true)}]},
+ {id:'cyclohexane',eyebrow:'CYCLOHEXANE CONFORMATIONS',title:'シクロヘキサンの立体配座',cols:2,displayOptions:[['cyclo-chair','いす型のみ'],['cyclo-boat','舟型のみ'],['all','両方表示']],mols:[
+  {id:'cyclo-chair',name:'いす形',config:'最安定配座',svg:cyclohexane2D('chair'),model:cyclohexaneChair({syncGroup:'cyclohexane-comparison',sideView:true})},
+  {id:'cyclo-boat',name:'舟形',config:'立体反発・不安定',svg:cyclohexane2D('boat'),model:cyclohexaneBoat({syncGroup:'cyclohexane-comparison'})}
+ ]},
+ {id:'dimethylcyclohexane',eyebrow:'1,4-DIMETHYLCYCLOHEXANE',title:'1,4-ジメチルシクロヘキサンの立体配座',cols:2,displayOptions:[['cis14-ae','cis型のみ'],['trans14-ee','trans型のみ'],['all','両方表示']],mols:[
+  {id:'cis14-ae',name:'cis-1,4-ジメチル',config:'a/e・CH₃：同じ側（↑↑）',svg:cyclohexane2D('chair',{0:{type:'axial',side:'↑'},3:{type:'equatorial',side:'↑'}}),model:cyclohexaneChair({methyl:{0:'axial',3:'equatorial'},syncGroup:'dimethylcyclohexane-comparison'})},
+  {id:'trans14-ee',name:'trans-1,4-ジメチル',config:'e/e・CH₃：反対側（↓↑）・安定',svg:cyclohexane2D('chair',{0:{type:'equatorial',side:'↓'},3:{type:'equatorial',side:'↑'}}),model:cyclohexaneChair({methyl:{0:'equatorial',3:'equatorial'},syncGroup:'dimethylcyclohexane-comparison'})}
+ ]}
+];
+
+const panels=document.getElementById('panels');
+function cardHTML(m){const guideText=m.model.guide?'。補助図形を切り替え可能':'',electronText=m.model.electrons?'。共有電子対と反発矢印を切り替え可能':'',freeText=m.model.trackball?'。ドラッグ方向に追従して自由回転':m.model.freeRotation?'。Shift＋ドラッグで傾き方向にも回転':'',help=m.model.trackball?'ドラッグ：自由回転　ホイール：拡大':m.model.freeRotation?'回転　⇧ドラッグ：傾き　ホイール：拡大':'ドラッグ：回転　ホイール：拡大',vsepr=m.vsepr?`<div class="vsepr-facts" aria-label="VSEPR則による分子形の情報">${m.vsepr.map(f=>`<span class="vsepr-fact${f.includes('1領域')?' emphasis':''}">${f}</span>`).join('')}</div>`:'',positionLegend=m.model.positionLegend?'<div class="position-legend" aria-label="置換基の位置の凡例"><span class="position-key"><i class="position-swatch axial" aria-hidden="true"></i>赤：Axial位</span><span class="position-key"><i class="position-swatch equatorial" aria-hidden="true"></i>青：Equatorial位</span></div>':'';return `<article class="molecule-card" data-mol="${m.id}" data-group="${m.group||''}"><div class="molecule-title"><h3>${m.name}</h3><span class="config">${m.config}</span></div>${vsepr}<div class="molecule-display"><section class="view-block two-d"><span class="view-label">2D 構造式</span>${m.svg}</section><section class="view-block three-d"><span class="view-label">3D 球棒モデル</span><canvas class="mol-canvas" data-model="${m.id}" tabindex="0" aria-label="${m.name}の3Dモデル${guideText}${electronText}${freeText}。ドラッグまたは矢印キーで回転"></canvas><button class="reset-view" type="button" aria-label="${m.name}の視点をリセット" data-reset="${m.id}">↺</button>${positionLegend}<span class="canvas-help">${help}</span></section></div></article>`}
+function compareHTML(l){return `<div class="compare-tools" role="group" aria-label="比較する立体異性体"><span class="compare-label">比較：</span>${l.compareOptions.map(([pair,label],i)=>`<button type="button" aria-pressed="${i===0}" data-pair="${pair}">${label}</button>`).join('')}</div>`}
+function selectHTML(l){return `<div class="compare-tools molecule-select" role="group" aria-label="表示する分子">${l.mols.map((m,i)=>`<button type="button" aria-pressed="${i===0}" data-molecule="${m.id}">${m.name}</button>`).join('')}</div>`}
+function substanceHTML(l){return `<div class="compare-tools substance-select" role="group" aria-label="${l.substanceLabel||'表示する例'}を選択">${l.substances.map(([id,label],i)=>`<button type="button" aria-pressed="${i===0}" data-substance="${id}">${label}</button>`).join('')}</div>`}
+function displayHTML(l){return `<div class="compare-tools display-select" role="group" aria-label="表示する配座">${l.displayOptions.map(([id,label],i)=>`<button type="button" aria-pressed="${i===l.displayOptions.length-1}" data-display-molecule="${id}">${label}</button>`).join('')}</div>`}
+lessons.forEach((l,i)=>{const el=document.createElement('section');el.className='panel'+(i<4?' foundation':'')+(l.compare?' comparison-panel':'')+(i===0?' active':'');el.id=`panel-${l.id}`;el.setAttribute('role','tabpanel');el.setAttribute('aria-labelledby',`tab-${l.id}`);el.hidden=i!==0;el.innerHTML=`<div class="lesson-head"><h2>${l.title}</h2></div>${l.select?selectHTML(l):l.substances?substanceHTML(l):l.compare?compareHTML(l):l.displayOptions?displayHTML(l):''}<div class="molecules" style="--cols:${l.cols||1}">${l.mols.map(cardHTML).join('')}</div>`;if(l.select)el.querySelectorAll('.molecule-card').forEach((card,n)=>card.hidden=n!==0);if(l.substances){const first=l.substances[0][0];el.querySelectorAll('.molecule-card').forEach(card=>card.hidden=card.dataset.group!==first)}panels.appendChild(el)});
+
+const modelMap=new Map();lessons.flatMap(l=>l.mols).forEach(m=>modelMap.set(m.id,m.model));
+const colors={C:'#374151',H:'#f8fafc',O:'#ef4444',F:'#a3e635',Cl:'#22c55e',Br:'#a16207',I:'#7c3aed'};const outlines={C:'#111827',H:'#94a3b8',O:'#b91c1c',F:'#4d7c0f',Cl:'#15803d',Br:'#713f12',I:'#4c1d95'};const radii={C:12,H:8,O:11,F:11,Cl:15,Br:17,I:18};const atomLabels={},ringHydrogenColors={axial:{highlight:'#fee2e2',base:'#ef4444',outline:'#991b1b'},equatorial:{highlight:'#dbeafe',base:'#3b82f6',outline:'#1d4ed8'}},stericHydrogenColor={highlight:'#ffedd5',base:'#f97316',outline:'#9a3412'};
+const atomScale=3;
+let guidesVisible=true,electronPairsVisible=true,repulsionVisible=true;
+class MoleculeView{
+ constructor(canvas,model){this.c=canvas;this.ctx=canvas.getContext('2d');this.model=model;this.yaw=model.initialYaw??-.55;this.pitch=model.initialPitch??.35;this.roll=model.initialRoll??0;this.zoom=model.initialZoom??1;this.drag=null;this.bind();this.resize()}
+ bind(){this.c.addEventListener('pointerdown',e=>{this.c.setPointerCapture(e.pointerId);this.drag={x:e.clientX,y:e.clientY};});this.c.addEventListener('pointermove',e=>{if(!this.drag)return;const dx=e.clientX-this.drag.x,dy=e.clientY-this.drag.y;if(this.model.trackball&&!e.shiftKey){const r=this.c.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,previousAngle=Math.atan2(this.drag.y-cy,this.drag.x-cx),nextAngle=Math.atan2(e.clientY-cy,e.clientX-cx),radius=Math.hypot(this.drag.x-cx,this.drag.y-cy),edge=Math.max(0,Math.min(1,(radius/(Math.min(r.width,r.height)*.5)-.18)/.82));let angleDelta=nextAngle-previousAngle;if(angleDelta>Math.PI)angleDelta-=Math.PI*2;if(angleDelta< -Math.PI)angleDelta+=Math.PI*2;this.yaw+=dx*.011;this.pitch+=dy*.011;this.roll+=angleDelta*.7*edge}else if(this.model.freeRotation&&e.shiftKey){this.roll+=dx*.012;this.pitch+=dy*.006}else{this.yaw+=dx*.012;const nextPitch=this.pitch+dy*.012;this.pitch=this.model.freeRotation?nextPitch:Math.max(-1.45,Math.min(1.45,nextPitch))}this.drag={x:e.clientX,y:e.clientY};this.renderChange()});['pointerup','pointercancel','lostpointercapture'].forEach(t=>this.c.addEventListener(t,()=>this.drag=null));this.c.addEventListener('wheel',e=>{e.preventDefault();this.zoom=Math.max(.62,Math.min(1.8,this.zoom*(e.deltaY>0?.92:1.08)));this.renderChange()},{passive:false});this.c.addEventListener('keydown',e=>{let used=true;if(this.model.freeRotation&&e.shiftKey&&e.key==='ArrowLeft')this.roll-=.14;else if(this.model.freeRotation&&e.shiftKey&&e.key==='ArrowRight')this.roll+=.14;else if(e.key==='ArrowLeft')this.yaw-=.14;else if(e.key==='ArrowRight')this.yaw+=.14;else if(e.key==='ArrowUp')this.pitch-=.14;else if(e.key==='ArrowDown')this.pitch+=.14;else if(e.key==='+'||e.key==='=')this.zoom=Math.min(1.8,this.zoom*1.1);else if(e.key==='-')this.zoom=Math.max(.62,this.zoom/1.1);else if(e.key.toLowerCase()==='r')this.reset();else used=false;if(used){e.preventDefault();this.renderChange()}})}
+ renderChange(){this.draw();if(this.model.syncGroup)views.forEach(v=>{if(v!==this&&v.model.syncGroup===this.model.syncGroup){if(this.model.syncRelative){const sourceYaw=this.model.initialYaw??-.55,sourcePitch=this.model.initialPitch??.35,sourceRoll=this.model.initialRoll??0,sourceZoom=this.model.initialZoom??1,targetYaw=v.model.initialYaw??-.55,targetPitch=v.model.initialPitch??.35,targetRoll=v.model.initialRoll??0,targetZoom=v.model.initialZoom??1;v.yaw=targetYaw+(this.yaw-sourceYaw);v.pitch=targetPitch+(this.pitch-sourcePitch);v.roll=targetRoll+(this.roll-sourceRoll);v.zoom=targetZoom*(this.zoom/sourceZoom)}else{v.yaw=this.yaw;v.pitch=this.pitch;v.roll=this.roll;v.zoom=this.zoom}v.draw()}})}
+ reset(){this.yaw=this.model.initialYaw??-.55;this.pitch=this.model.initialPitch??.35;this.roll=this.model.initialRoll??0;this.zoom=this.model.initialZoom??1;this.renderChange()}
+ resize(){const r=this.c.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);if(r.width<2||r.height<2)return;this.c.width=Math.round(r.width*d);this.c.height=Math.round(r.height*d);this.ctx.setTransform(d,0,0,d,0,0);this.w=r.width;this.h=r.height;this.draw()}
+ point(a){const cy=Math.cos(this.yaw),sy=Math.sin(this.yaw),cx=Math.cos(this.pitch),sx=Math.sin(this.pitch),cr=Math.cos(this.roll),sr=Math.sin(this.roll);const x=a.x*cy+a.z*sy,z=-a.x*sy+a.z*cy,y=a.y*cx-z*sx,zz=a.y*sx+z*cx,screenY=-y,rx=x*cr-screenY*sr,ry=x*sr+screenY*cr;const scale=Math.min(this.w,this.h)*(this.model.large ? .27 : .21)*this.zoom/(1+Math.max(0,this.model.atoms.length-7)*.022),depth=this.model.depthEmphasis??.055;return{x:this.w/2+rx*scale,y:this.h/2+ry*scale,z:zz,scale:Math.max(.62,Math.min(1.4,1+zz*depth))}}
+ drawGuide(p){
+  if(!guidesVisible)return;
+  const drawTetra=(vertices,fill='rgba(239,68,68,.07)',stroke='rgba(220,38,38,.56)')=>{const faces=[[0,1,2],[0,1,3],[0,2,3],[1,2,3]].map(face=>face.map(i=>vertices[i])).sort((a,b)=>a.reduce((s,i)=>s+p[i].z,0)-b.reduce((s,i)=>s+p[i].z,0));faces.forEach(face=>{this.ctx.beginPath();face.forEach((i,n)=>n?this.ctx.lineTo(p[i].x,p[i].y):this.ctx.moveTo(p[i].x,p[i].y));this.ctx.closePath();this.ctx.fillStyle=fill;this.ctx.fill();this.ctx.strokeStyle=stroke;this.ctx.lineWidth=2.2;this.ctx.stroke()})};
+  (this.model.methylGuides||[]).forEach(g=>drawTetra(g.vertices,g.type==='axial'?'rgba(239,68,68,.16)':'rgba(37,99,235,.16)',g.type==='axial'?'rgba(220,38,38,.82)':'rgba(37,99,235,.82)'));
+  if(this.model.guide==='tetrahedron'){
+   drawTetra([1,2,3,4]);
+  }else if(this.model.guide==='multi-tetrahedron'){
+   this.model.guideTetrahedra.forEach(drawTetra);
+  }else if(this.model.guide==='plane'){
+   const pts=[A('',-1.55,1.18,0),A('',1.55,1.18,0),A('',1.55,-1.18,0),A('',-1.55,-1.18,0)].map(a=>this.point(a));
+   this.ctx.beginPath();pts.forEach((q,i)=>i?this.ctx.lineTo(q.x,q.y):this.ctx.moveTo(q.x,q.y));this.ctx.closePath();this.ctx.fillStyle='rgba(239,68,68,.13)';this.ctx.fill();this.ctx.strokeStyle='rgba(220,38,38,.68)';this.ctx.lineWidth=2.5;this.ctx.stroke();
+  }else if(this.model.guide==='line'){
+   const a=this.point(A('',-1.95,0,0)),b=this.point(A('',1.95,0,0));this.ctx.beginPath();this.ctx.moveTo(a.x,a.y);this.ctx.lineTo(b.x,b.y);this.ctx.strokeStyle='rgba(220,38,38,.48)';this.ctx.lineWidth=14;this.ctx.lineCap='round';this.ctx.stroke();
+  }else if(this.model.guide==='cyclohexane-chair'){
+   (this.model.guideBonds||[]).forEach(g=>{const a=p[g.a],b=p[g.b],color=g.type==='axial'?'rgba(220,38,38,.94)':'rgba(37,99,235,.94)';this.ctx.beginPath();this.ctx.moveTo(a.x,a.y);this.ctx.lineTo(b.x,b.y);this.ctx.strokeStyle='rgba(255,255,255,.96)';this.ctx.lineWidth=13;this.ctx.lineCap='round';this.ctx.stroke();this.ctx.beginPath();this.ctx.moveTo(a.x,a.y);this.ctx.lineTo(b.x,b.y);this.ctx.strokeStyle=color;this.ctx.lineWidth=8;this.ctx.stroke()});
+  }else if(this.model.guide==='cyclohexane-boat'&&this.model.flagpole?.length===2){
+   const a=p[this.model.flagpole[0]],b=p[this.model.flagpole[1]],dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy)||1,nx=-dy/len,ny=dx/len,mx=(a.x+b.x)/2,my=(a.y+b.y)/2,c={x:mx-nx*32*this.zoom,y:my-ny*32*this.zoom};this.drawProjectedDoubleArrow(a,b,c);this.ctx.fillStyle='#c2410c';this.ctx.font='800 12px Inter,Arial';this.ctx.textAlign='center';this.ctx.textBaseline='middle';this.ctx.shadowColor='rgba(255,255,255,.98)';this.ctx.shadowBlur=5;this.ctx.fillText('立体反発',c.x-nx*12*this.zoom,c.y-ny*12*this.zoom);this.ctx.shadowBlur=0;
+  }
+ }
+ repulsionDomains(centerIndex){const center=this.model.atoms[centerIndex],domains=[];this.model.bonds.forEach(b=>{if(b.a!==centerIndex&&b.b!==centerIndex)return;const other=this.model.atoms[b.a===centerIndex?b.b:b.a];domains.push(A('',(center.x+other.x)/2,(center.y+other.y)/2,(center.z+other.z)/2))});return domains}
+ drawArrowHead(x,y,ux,uy){const s=this.zoom,nx=-uy,ny=ux,triangle=(size,wing,fill)=>{this.ctx.beginPath();this.ctx.moveTo(x,y);this.ctx.lineTo(x-ux*size+nx*wing,y-uy*size+ny*wing);this.ctx.lineTo(x-ux*size-nx*wing,y-uy*size-ny*wing);this.ctx.closePath();this.ctx.fillStyle=fill;this.ctx.fill()};triangle(16*s,9.5*s,'rgba(255,255,255,.96)');triangle(12.5*s,6.7*s,'rgba(234,88,12,.98)')}
+ drawProjectedDoubleArrow(a,b,c){const dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy),s=this.zoom;if(len<10*s)return;const ax=a.x-c.x,ay=a.y-c.y,bx=b.x-c.x,by=b.y-c.y,an=Math.hypot(ax,ay)||1,bn=Math.hypot(bx,by)||1,auX=ax/an,auY=ay/an,buX=bx/bn,buY=by/bn,pad=Math.min(17*s,len*.18),x1=a.x-auX*pad,y1=a.y-auY*pad,x2=b.x-buX*pad,y2=b.y-buY*pad,stroke=(color,width)=>{this.ctx.beginPath();this.ctx.moveTo(x1,y1);this.ctx.quadraticCurveTo(c.x,c.y,x2,y2);this.ctx.strokeStyle=color;this.ctx.lineWidth=width;this.ctx.lineCap='round';this.ctx.stroke()};stroke('rgba(255,255,255,.95)',7*s);stroke('rgba(234,88,12,.96)',3.8*s);this.drawArrowHead(x1,y1,auX,auY);this.drawArrowHead(x2,y2,buX,buY)}
+ repulsionControl(a,b,center){const va=[a.x-center.x,a.y-center.y,a.z-center.z],vb=[b.x-center.x,b.y-center.y,b.z-center.z],na=Math.hypot(...va)||1,nb=Math.hypot(...vb)||1,opposite=(va[0]*vb[0]+va[1]*vb[1]+va[2]*vb[2])/(na*nb)<-.86,m=A('',(a.x+b.x)/2,(a.y+b.y)/2,(a.z+b.z)/2);let dir,bend;if(opposite){dir=[0,center.x<=0?1:-1,0];bend=1.08}else{dir=[m.x-center.x,m.y-center.y,m.z-center.z];const n=Math.hypot(...dir)||1;dir=dir.map(v=>v/n);bend=Math.min(.5,Math.max(.3,Math.hypot(a.x-b.x,a.y-b.y,a.z-b.z)*.32))}return A('',m.x+dir[0]*bend,m.y+dir[1]*bend,m.z+dir[2]*bend)}
+ drawRepulsion(){this.model.atoms.forEach((atom,centerIndex)=>{if(atom.e!=='C')return;const domains=this.repulsionDomains(centerIndex),center=this.model.atoms[centerIndex];for(let i=0;i<domains.length;i++)for(let j=i+1;j<domains.length;j++)this.drawProjectedDoubleArrow(this.point(domains[i]),this.point(domains[j]),this.point(this.repulsionControl(domains[i],domains[j],center)))})}
+ drawSharedElectronDots(p){const s=this.zoom;this.model.bonds.forEach(b=>{const a=p[b.a],z=p[b.b],dx=z.x-a.x,dy=z.y-a.y,len=Math.hypot(dx,dy)||1,ux=dx/len,uy=dy/len,nx=-uy,ny=ux,mx=(a.x+z.x)/2,my=(a.y+z.y)/2;for(let k=0;k<b.o;k++){const along=(k-(b.o-1)/2)*18*s,cx=mx+ux*along,cy=my+uy*along;[-1,1].forEach(side=>{const x=cx+nx*7*s*side,y=cy+ny*7*s*side;this.ctx.beginPath();this.ctx.arc(x,y,7.5*s,0,Math.PI*2);this.ctx.fillStyle='rgba(255,255,255,.96)';this.ctx.fill();this.ctx.beginPath();this.ctx.arc(x,y,5.2*s,0,Math.PI*2);this.ctx.fillStyle='#0891b2';this.ctx.fill()})}})}
+ draw(){if(!this.w)return;const g=this.ctx.createRadialGradient(this.w*.5,this.h*.38,5,this.w*.5,this.h*.45,Math.max(this.w,this.h)*.65);g.addColorStop(0,'#ffffff');g.addColorStop(1,'#eaf1f8');this.ctx.fillStyle=g;this.ctx.fillRect(0,0,this.w,this.h);const p=this.model.atoms.map(a=>this.point(a));this.drawGuide(p);if(this.model.plane){const raw=this.model.plane==='xz'?[A('',-1.45,0,-1.25),A('',1.45,0,-1.25),A('',1.45,0,1.25),A('',-1.45,0,1.25)]:[A('',0,2.65,-1.15),A('',0,2.65,1.15),A('',0,-2.65,1.15),A('',0,-2.65,-1.15)],pts=raw.map(a=>this.point(a));this.ctx.beginPath();pts.forEach((q,i)=>i?this.ctx.lineTo(q.x,q.y):this.ctx.moveTo(q.x,q.y));this.ctx.closePath();this.ctx.fillStyle='rgba(14,165,233,.12)';this.ctx.fill();this.ctx.strokeStyle='rgba(14,165,233,.62)';this.ctx.setLineDash([5,4]);this.ctx.stroke();this.ctx.setLineDash([]);this.ctx.fillStyle='#0284c7';this.ctx.font='700 10px Inter,Arial';this.ctx.fillText('対称面',pts[0].x+5,pts[0].y+12)}
+ const bonds=[...this.model.bonds].sort((u,v)=>(p[u.a].z+p[u.b].z)-(p[v.a].z+p[v.b].z));bonds.forEach(b=>{const a=p[b.a],z=p[b.b],dx=z.x-a.x,dy=z.y-a.y,len=Math.hypot(dx,dy)||1,nx=-dy/len,ny=dx/len,big=this.model.large,depth=(a.z+z.z)/2,other=b.a===0?b.b:b.b===0?b.a:-1,pair=this.model.stereoBonds?.find(([u,v])=>(u===b.a&&v===b.b)||(u===b.b&&v===b.a)),stereo=!!pair||this.model.stereoBranches?.includes(other),center=pair?(this.model.stereos?.includes(b.a)?b.a:b.b):-1,branch=center===b.a?b.b:b.a,front=pair?p[branch].z>p[center].z:depth>0;for(let k=0;k<b.o;k++){const off=(k-(b.o-1)/2)*(big?7:5),base=b.o===1?(big?7:5):(big?4:3),width=this.model.depthEmphasis?base*(stereo?(front?1.85:.56):Math.max(.72,Math.min(1.18,.9+depth*.1))):base,alpha=this.model.depthEmphasis?(stereo?(front?.98:.35):Math.max(.55,Math.min(.9,.72+depth*.1))):1;this.ctx.beginPath();this.ctx.moveTo(a.x+nx*off,a.y+ny*off);this.ctx.lineTo(z.x+nx*off,z.y+ny*off);this.ctx.strokeStyle=this.model.depthEmphasis?`rgba(78,98,124,${alpha})`:'#708197';this.ctx.lineWidth=width;this.ctx.lineCap='round';this.ctx.setLineDash(stereo&&!front?[5,5]:[]);this.ctx.stroke();this.ctx.setLineDash([])}});
+ if(this.model.electrons&&repulsionVisible)this.drawRepulsion();
+ if(this.model.electrons&&electronPairsVisible)this.drawSharedElectronDots(p);
+ const order=this.model.atoms.map((a,i)=>i).sort((i,j)=>p[i].z-p[j].z),responsiveSize=this.model.atomScaleByWidth?this.w:Math.min(this.w,this.h),sizeScale=this.model.large?atomScale:this.model.atomScale?Math.min(this.model.atomScaleMax??this.model.atomScale,this.model.atomScale*Math.sqrt(Math.max(.7,responsiveSize/250))):1,fullscreenAtomBoost=document.body.classList.contains('is-fullscreen')&&/^(alkane|alkene|alkyne|cistrans|optical|cyclohexane|dimethylcyclohexane)$/.test(document.body.dataset.tab||'')?1.15:1,displaySizeScale=sizeScale*fullscreenAtomBoost,zoomScale=this.zoom/(this.model.initialZoom??1);
+ order.forEach(i=>{
+   const a=this.model.atoms[i],q=p[i],r=radii[a.e]*q.scale*displaySizeScale*zoomScale,isStericHydrogen=this.model.flagpole?.includes(i),positionColor=isStericHydrogen?stericHydrogenColor:ringHydrogenColors[a.ringPosition];
+   const gr=this.ctx.createRadialGradient(q.x-r*.34,q.y-r*.38,r*.12,q.x,q.y,r);
+   gr.addColorStop(0,positionColor?.highlight??(a.e==='H'?'#fff':'#ffffff'));gr.addColorStop(.24,positionColor?.base??colors[a.e]);gr.addColorStop(1,positionColor?.outline??outlines[a.e]);
+   this.ctx.beginPath();this.ctx.arc(q.x,q.y,r,0,Math.PI*2);this.ctx.fillStyle=gr;this.ctx.fill();this.ctx.strokeStyle=positionColor?.outline??outlines[a.e];this.ctx.lineWidth=Math.max(1,zoomScale);this.ctx.stroke();
+   if(isStericHydrogen){this.ctx.beginPath();this.ctx.arc(q.x,q.y,r+5*zoomScale,0,Math.PI*2);this.ctx.strokeStyle='rgba(249,115,22,.96)';this.ctx.lineWidth=3*zoomScale;this.ctx.stroke()}
+   const label=atomLabels[a.e]||a.e,baseLabel=label.length>1?10:9,labelSize=(displaySizeScale===1?baseLabel:Math.round(baseLabel*Math.min(displaySizeScale/1.15,2)))*zoomScale;
+   this.ctx.fillStyle=positionColor?'#fff':a.e==='H'||a.e==='F'?'#475569':'#fff';this.ctx.font=`800 ${labelSize}px Inter,Arial`;this.ctx.textAlign='center';this.ctx.textBaseline='middle';this.ctx.fillText(label,q.x,q.y+.5);
+   if(this.model.stereos?.includes(i)){
+     this.ctx.beginPath();this.ctx.arc(q.x,q.y,r+5*zoomScale,0,Math.PI*2);this.ctx.strokeStyle='#f97316';this.ctx.lineWidth=2.5*zoomScale;this.ctx.stroke();
+     this.ctx.fillStyle='#c2410c';this.ctx.font=`800 ${9*zoomScale}px Inter,Arial`;this.ctx.fillText(this.model.stereoLabels?.[this.model.stereos.indexOf(i)]??`C${this.model.stereos.indexOf(i)+2}`,q.x,q.y-r-10*zoomScale);
+   }
+ });
+ }
+}
+const views=new Map();
+function initVisible(){document.querySelectorAll('.panel.active .molecule-card:not([hidden]) .mol-canvas').forEach(c=>{const id=c.dataset.model;if(!views.has(id))views.set(id,new MoleculeView(c,modelMap.get(id)));else views.get(id).resize()})}
+const ro=new ResizeObserver(()=>views.forEach(v=>v.resize()));ro.observe(document.body);
+
+const guideToggle=document.getElementById('guideToggle'),electronToggle=document.getElementById('electronToggle'),repulsionToggle=document.getElementById('repulsionToggle');
+function activeModel(tabId){const card=document.querySelector(`#panel-${tabId} .molecule-card:not([hidden])`);return card?modelMap.get(card.dataset.mol):null}
+function syncGuideToggle(tabId){const lesson=lessons.find(l=>l.id===tabId),model=activeModel(tabId);guideToggle.hidden=!lesson?.mols.some(m=>m.model.guide);electronToggle.hidden=!model?.electrons;repulsionToggle.hidden=!model?.electrons}
+guideToggle.addEventListener('click',()=>{guidesVisible=!guidesVisible;guideToggle.setAttribute('aria-pressed',guidesVisible);guideToggle.textContent=`補助図形 ${guidesVisible?'ON':'OFF'}`;document.getElementById('live').textContent=`補助図形を${guidesVisible?'表示':'非表示'}にしました`;views.forEach(v=>v.draw())});
+electronToggle.addEventListener('click',()=>{electronPairsVisible=!electronPairsVisible;electronToggle.setAttribute('aria-pressed',electronPairsVisible);electronToggle.textContent=`共有電子対 ${electronPairsVisible?'ON':'OFF'}`;document.getElementById('live').textContent=`共有電子対を${electronPairsVisible?'表示':'非表示'}にしました`;views.forEach(v=>v.draw())});
+repulsionToggle.addEventListener('click',()=>{repulsionVisible=!repulsionVisible;repulsionToggle.setAttribute('aria-pressed',repulsionVisible);repulsionToggle.textContent=`反発矢印 ${repulsionVisible?'ON':'OFF'}`;document.getElementById('live').textContent=`反発矢印を${repulsionVisible?'表示':'非表示'}にしました`;views.forEach(v=>v.draw())});
+function activateTab(btn){document.body.dataset.tab=btn.dataset.tab;document.querySelectorAll('[role="tab"]').forEach(b=>{const on=b===btn;b.setAttribute('aria-selected',on);b.tabIndex=on?0:-1});document.querySelectorAll('.panel').forEach(p=>{const on=p.id===`panel-${btn.dataset.tab}`;p.classList.toggle('active',on);p.hidden=!on});syncGuideToggle(btn.dataset.tab);btn.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth',block:'nearest',inline:'center'});document.getElementById('live').textContent=`${btn.textContent.trim()}を表示しました`;requestAnimationFrame(initVisible)}
+document.querySelectorAll('[role="tab"]').forEach((btn,i,arr)=>{btn.addEventListener('click',()=>activateTab(btn));btn.addEventListener('keydown',e=>{let n;if(e.key==='ArrowRight')n=(i+1)%arr.length;else if(e.key==='ArrowLeft')n=(i-1+arr.length)%arr.length;else if(e.key==='Home')n=0;else if(e.key==='End')n=arr.length-1;if(n!==undefined){e.preventDefault();arr[n].focus();activateTab(arr[n])}})});
+document.querySelectorAll('.view-switch [data-view]').forEach(btn=>btn.addEventListener('click',()=>{document.body.dataset.view=btn.dataset.view;document.querySelectorAll('.view-switch button').forEach(b=>b.setAttribute('aria-pressed',b===btn));document.getElementById('live').textContent=`表示を${btn.textContent.trim()}に切り替えました`;requestAnimationFrame(()=>views.forEach(v=>v.resize()))}));
+document.querySelectorAll('[data-reset]').forEach(btn=>btn.addEventListener('click',()=>views.get(btn.dataset.reset)?.reset()));
+document.querySelectorAll('.molecule-select button').forEach(btn=>btn.addEventListener('click',()=>{const tools=btn.closest('.molecule-select'),panel=btn.closest('.panel');tools.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b===btn));panel.querySelectorAll('.molecule-card').forEach(card=>card.hidden=card.dataset.mol!==btn.dataset.molecule);syncGuideToggle(document.body.dataset.tab);document.getElementById('live').textContent=`${btn.textContent.trim()}を表示しました`;requestAnimationFrame(initVisible)}));
+document.querySelectorAll('.substance-select button').forEach(btn=>btn.addEventListener('click',()=>{const tools=btn.closest('.substance-select'),panel=btn.closest('.panel');tools.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b===btn));panel.querySelectorAll('.molecule-card').forEach(card=>card.hidden=card.dataset.group!==btn.dataset.substance);syncGuideToggle(document.body.dataset.tab);document.getElementById('live').textContent=`${btn.textContent.trim()}を表示しました`;requestAnimationFrame(initVisible)}));
+document.querySelectorAll('.display-select button').forEach(btn=>btn.addEventListener('click',()=>{const tools=btn.closest('.display-select'),panel=btn.closest('.panel'),id=btn.dataset.displayMolecule,single=id!=='all';tools.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b===btn));panel.classList.toggle('single-display',single);panel.querySelectorAll('.molecule-card').forEach(card=>card.hidden=single&&card.dataset.mol!==id);syncGuideToggle(document.body.dataset.tab);document.getElementById('live').textContent=`${btn.textContent.trim()}に切り替えました`;requestAnimationFrame(initVisible)}));
+function applyComparison(btn,announce=true){
+ const panel=btn.closest('.comparison-panel'),tools=btn.closest('.compare-tools');
+ tools.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b===btn));
+ const ids=btn.dataset.pair==='all'?null:btn.dataset.pair.split(',');
+ panel.classList.toggle('compare-focus',!!ids);
+ panel.querySelectorAll('.molecule-card').forEach(c=>{const selected=ids?.includes(c.dataset.mol);c.classList.toggle('compare-active',!!ids&&selected);c.classList.toggle('compare-inactive',!!ids&&!selected)});
+ if(announce)document.getElementById('live').textContent=`${btn.textContent.trim()}を比較します`;
+ requestAnimationFrame(initVisible);
+}
+document.querySelectorAll('.comparison-panel .compare-tools button').forEach(btn=>btn.addEventListener('click',()=>applyComparison(btn)));
+document.querySelectorAll('.comparison-panel .compare-tools button[aria-pressed="true"]').forEach(btn=>applyComparison(btn,false));
+const fs=document.getElementById('fullscreenBtn');fs.addEventListener('click',async()=>{try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen();else await document.exitFullscreen()}catch(e){document.getElementById('live').textContent='このブラウザでは全画面表示を開始できませんでした'}});document.addEventListener('fullscreenchange',()=>{const active=!!document.fullscreenElement;document.body.classList.toggle('is-fullscreen',active);fs.querySelector('.btn-text').textContent=active?'全画面を終了':'全画面表示';fs.setAttribute('aria-label',active?'全画面を終了':'全画面表示');requestAnimationFrame(()=>views.forEach(v=>v.resize()))});
+requestAnimationFrame(initVisible);
+</script>
+</body>
+</html>
