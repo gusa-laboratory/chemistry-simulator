@@ -15,9 +15,10 @@
   button{font:inherit}
   button:focus-visible,[tabindex]:focus-visible{outline:3px solid rgba(37,99,235,.34);outline-offset:3px}
   header{padding:20px clamp(16px,4vw,54px) 0;background:rgba(250,252,255,.94);border-bottom:1px solid rgba(203,215,230,.92);box-shadow:0 4px 18px rgba(31,55,89,.05);position:sticky;top:0;z-index:20}
-  .head-row{display:flex;max-width:1480px;margin:0 auto 14px;gap:22px;align-items:center;justify-content:space-between}
+  .head-row{display:flex;max-width:1480px;margin:0 auto 14px;gap:22px;align-items:flex-start;justify-content:space-between}
   .title-block{display:flex;flex-direction:column;align-items:flex-start;gap:8px}
-  .back-link{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border:1px solid #cdd9ea;border-radius:10px;background:#fff;color:#3a4d6b;text-decoration:none;font-size:13.5px;font-weight:800;box-shadow:0 2px 8px rgba(31,55,89,.06)}
+  .back-link{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 14px;border:1px solid #cdd9ea;border-radius:10px;background:#fff;color:#3a4d6b;text-decoration:none;font-size:13.5px;font-weight:800;box-shadow:0 2px 8px rgba(31,55,89,.06)}
+  #fullscreenBtn{height:34px;padding-top:0;padding-bottom:0}
   .back-link:hover{color:var(--blue);border-color:#8fb0df}
   h1{margin:0;color:var(--blue-deep);font-size:clamp(22px,2.5vw,32px);line-height:1.25;font-weight:850;letter-spacing:-.035em}
   .outline-btn{display:inline-flex;align-items:center;gap:7px;padding:9px 13px;border:1px solid #bfd0e7;border-radius:12px;background:#fff;color:var(--blue-deep);box-shadow:var(--shadow-sm);font-size:13px;font-weight:800;cursor:pointer;transition:transform .16s ease,border-color .16s ease,color .16s ease}

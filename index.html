@@ -37,7 +37,7 @@
   .sim {
     display: flex; flex-direction: row; align-items: center; gap: 16px; text-decoration: none; color: inherit;
     background: var(--card); border: 1px solid var(--border); border-radius: 22px;
-    padding: 14px 22px; box-shadow: var(--shadow); position: relative; overflow: hidden;
+    height: 76px; padding: 14px 22px; box-shadow: var(--shadow); position: relative; overflow: hidden;
     transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
   }
   .sim::after {
@@ -55,7 +55,7 @@
   @media (max-width: 560px) {
     header { padding-top: 28px; } main { padding-top: 24px; }
     .grid { gap: 11px; }
-    .sim { padding: 14px 17px; gap: 13px; }
+    .sim { height: 86px; padding: 11px 17px; gap: 13px; }
     .sim .ico { width: 40px; font-size: 31px; }
     .sim .ico svg { width: 40px; height: 40px; }
     .sim-body { grid-template-columns: 1fr; gap: 3px; }
