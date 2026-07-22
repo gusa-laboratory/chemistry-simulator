@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>錯イオン・錯塩の立体構造｜Interactive Lab</title>
+<meta name="description" content="錯イオン・錯塩の2D構造式と3D立体構造を並べて比較できる、授業用インタラクティブ教材。">
+<meta name="theme-color" content="#2563eb">
+<style>html,body{margin:0;min-width:320px;background:#eef3f9}</style>
+</head>
+<body data-view="both" data-tab="cn2">
+  <header>
+    <div class="head-row">
+      <h1>錯イオン・錯塩の立体構造</h1>
+      <div class="head-actions"><button class="outline-btn" id="coord-fullscreen" type="button" aria-label="全画面表示"><span aria-hidden="true">⛶</span><span class="btn-text">全画面表示</span></button></div>
+    </div>
+    <nav class="tabs" id="coord-tabs" role="tablist" aria-label="錯体の単元"></nav>
+  </header>
+  <main>
+    <div class="toolbar">
+      <div class="view-switch" role="group" aria-label="表示方法">
+        <button type="button" data-view-choice="2d" aria-pressed="false">2Dのみ</button>
+        <button type="button" data-view-choice="both" aria-pressed="true">2D＋3D</button>
+        <button type="button" data-view-choice="3d" aria-pressed="false">3Dのみ</button>
+      </div>
+      <button class="outline-btn guide-toggle" id="coord-guide" type="button" aria-pressed="true">補助図形 ON</button>
+    </div>
+    <div id="coord-panels"></div>
+    <div class="sr-only" id="coord-live" aria-live="polite"></div>
+  </main>
+  <footer>大阪女学院中学校・高等学校　Yuto Yamaguchi</footer>
+<style>
+body{
+  --blue:#2563eb;--blue-deep:#173b75;--blue-soft:#eaf2ff;--teal:#0f766e;--orange:#ea580c;
+  --ink:#162033;--ink2:#526079;--ink3:#8290a5;--bg:#eef3f9;--card:#fff;--line:#d8e1ed;
+  --shadow:0 18px 45px rgba(31,55,89,.10);--shadow-sm:0 7px 22px rgba(31,55,89,.075);
+  --metal:#60a5fa;--nh3:#f5b84b;--cl:#4ade80;--cn:#22d3ee;--oxygen:#ef4444;--water:#818cf8;
+  min-width:320px;min-height:100vh;color:var(--ink);font-family:Inter,'Yu Gothic UI','Yu Gothic',Meiryo,sans-serif;-webkit-font-smoothing:antialiased;background:radial-gradient(circle at 5% -4%,rgba(37,99,235,.13),transparent 27rem),radial-gradient(circle at 97% 2%,rgba(14,165,233,.09),transparent 25rem),linear-gradient(180deg,#f6f9fd 0,var(--bg) 30rem)
+}
+*{box-sizing:border-box}
+button{font:inherit}
+button:focus-visible,[tabindex]:focus-visible{outline:3px solid rgba(37,99,235,.34);outline-offset:3px}
+header{padding:20px clamp(16px,4vw,54px) 0;background:rgba(250,252,255,.94);border-bottom:1px solid rgba(203,215,230,.92);box-shadow:0 4px 18px rgba(31,55,89,.05);position:sticky;top:0;z-index:20}
+.head-row{display:flex;max-width:1480px;margin:0 auto 14px;gap:22px;align-items:center;justify-content:space-between}
+h1{margin:0;color:var(--blue-deep);font-size:clamp(22px,2.5vw,32px);line-height:1.25;font-weight:850;letter-spacing:-.035em}
+.head-actions{display:flex;gap:8px;flex:0 0 auto}
+.outline-btn{display:inline-flex;align-items:center;gap:7px;padding:9px 13px;border:1px solid #bfd0e7;border-radius:12px;background:#fff;color:var(--blue-deep);box-shadow:var(--shadow-sm);font-size:13px;font-weight:800;cursor:pointer;transition:transform .16s ease,border-color .16s ease,color .16s ease}
+.outline-btn:hover{color:var(--blue);border-color:#8fb0df;transform:translateY(-1px)}
+.tabs{display:flex;gap:6px;max-width:1480px;margin:0 auto;overflow-x:auto;scrollbar-width:thin}.tabs button{appearance:none;flex:0 0 auto;border:1px solid transparent;border-bottom:0;border-radius:11px 11px 0 0;background:transparent;cursor:pointer;padding:10px 14px 12px;font-size:13px;font-weight:760;color:#59677c;transition:background .16s ease,color .16s ease}.tabs button:hover{color:var(--blue);background:rgba(237,244,255,.82)}.tabs button[aria-selected="true"]{border-color:#cfd9e6;background:var(--bg);color:var(--blue);box-shadow:inset 0 3px 0 var(--blue)}
+main{max-width:1560px;margin:0 auto;padding:22px clamp(16px,4vw,54px) 50px}.toolbar{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:18px;flex-wrap:wrap}.view-switch{display:inline-grid;grid-template-columns:repeat(3,auto);padding:4px;border:1px solid #cfdae8;border-radius:14px;background:#e4ebf4;box-shadow:inset 0 1px 2px rgba(31,55,89,.06)}.view-switch button{border:0;border-radius:10px;background:transparent;color:var(--ink2);padding:8px 14px;cursor:pointer;font-size:12.5px;font-weight:800;transition:background .16s ease,color .16s ease,box-shadow .16s ease}.view-switch button[aria-pressed="true"]{background:#fff;color:var(--blue-deep);box-shadow:0 2px 8px rgba(31,55,89,.14)}.guide-toggle{min-width:118px;justify-content:center;box-shadow:none;background:rgba(255,255,255,.82)}.guide-toggle[aria-pressed="true"]{border-color:#ef9a9a;background:#fff1f2;color:#b91c1c}
+.panel{display:none}.panel.active{display:block}.lesson-head{margin-bottom:12px;text-align:center}.lesson-head h2{margin:0;color:var(--blue-deep);font-size:clamp(21px,2.4vw,29px);letter-spacing:-.025em}
+.compare-tools{display:flex;align-items:center;justify-content:center;gap:7px;margin:0 0 14px;flex-wrap:wrap}.compare-tools button{border:1px solid var(--line);border-radius:999px;background:#fff;color:var(--ink2);padding:7px 11px;font-size:11.5px;font-weight:800;cursor:pointer;box-shadow:var(--shadow-sm);transition:.16s ease}.compare-tools button[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff}.compare-tools button:hover{border-color:#9db9df;color:var(--blue)}.compare-tools button[aria-pressed="true"]:hover{color:#fff}
+.molecules{display:grid;grid-template-columns:repeat(var(--cols,1),minmax(0,1fr));gap:15px;align-items:stretch}.molecule-card{min-width:0;border:1px solid rgba(210,221,236,.95);border-top:4px solid var(--teal);border-radius:20px;background:linear-gradient(145deg,#fff 0%,#fbfdff 100%);box-shadow:var(--shadow);padding:12px}.molecule-title{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin:0 2px 7px}.molecule-title h3{min-width:0;margin:0;color:var(--blue-deep);font-size:15px;line-height:1.35;overflow-wrap:anywhere}.config{flex:0 0 auto;color:var(--orange);font:850 11px/1.4 Inter,Arial,sans-serif;white-space:nowrap}.vsepr-facts{display:flex;justify-content:center;gap:5px;flex-wrap:wrap;margin:-1px 2px 7px}.vsepr-fact{max-width:100%;padding:3px 7px;border:1px solid #cfe0ee;border-radius:999px;background:#f7fbff;color:#526079;font-size:10px;line-height:1.35;font-weight:800;white-space:normal;text-align:center;overflow-wrap:anywhere}.molecule-display{display:grid;grid-template-columns:1fr 1fr;gap:10px;min-height:0}.view-block{min-width:0;position:relative;border:1px solid #e0e7f0;border-radius:14px;background:radial-gradient(circle at 50% 40%,#fff,#edf3fa);overflow:hidden}.view-label{position:absolute;z-index:2;top:8px;left:9px;padding:3px 7px;border-radius:6px;background:rgba(255,255,255,.88);color:var(--ink3);font:850 9px/1.2 Inter,Arial,sans-serif;letter-spacing:.09em;pointer-events:none}.two-d{height:clamp(350px,calc(100vh - 340px),620px);min-height:350px;display:grid;place-items:center;padding:28px 5px 5px;background:#fff}.two-d svg{width:100%;height:100%;display:block}.three-d{height:clamp(350px,calc(100vh - 340px),620px);min-height:350px}.mol-canvas{display:block;width:100%;height:100%;min-height:350px;cursor:grab;touch-action:none}.mol-canvas:active{cursor:grabbing}.canvas-help{position:absolute;bottom:7px;left:50%;max-width:calc(100% - 18px);transform:translateX(-50%);color:#526079;background:rgba(255,255,255,.9);border-radius:7px;padding:3px 7px;font-size:10px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}.reset-view{position:absolute;z-index:3;right:7px;top:7px;width:30px;height:30px;border:1px solid #d8e1ed;border-radius:9px;background:rgba(255,255,255,.9);color:var(--blue-deep);cursor:pointer;font-size:15px;font-weight:900}.reset-view:hover{color:var(--blue);border-color:#9db9df}
+body[data-view="2d"] .three-d{display:none}body[data-view="2d"] .molecule-display{grid-template-columns:1fr}body[data-view="3d"] .two-d{display:none}body[data-view="3d"] .molecule-display{grid-template-columns:1fr}.only-3d-display{grid-template-columns:minmax(0,1fr)!important}body[data-tab="bidentate"] .view-switch{display:none}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}footer{padding:0 20px 28px;text-align:center;color:#a3adbc;font-size:10px;font-weight:600;letter-spacing:.04em}
+body.is-fullscreen{height:100vh;overflow:hidden;display:flex;flex-direction:column}body.is-fullscreen header{position:static;padding:9px clamp(14px,2.5vw,34px) 0;flex:0 0 auto}body.is-fullscreen .head-row{margin-bottom:7px}body.is-fullscreen h1{font-size:clamp(20px,2vw,27px)}body.is-fullscreen .tabs button{padding-top:7px;padding-bottom:9px}body.is-fullscreen main{padding:8px clamp(12px,2vw,30px) 10px;max-width:none;width:100%;flex:1;min-height:0;display:flex;flex-direction:column}body.is-fullscreen footer{display:none}body.is-fullscreen .toolbar{flex:0 0 auto;margin-bottom:8px}body.is-fullscreen #coord-panels{display:flex;flex:1;min-height:0;flex-direction:column}body.is-fullscreen .panel.active{display:flex;flex:1;min-height:0;flex-direction:column;overflow:hidden}body.is-fullscreen .lesson-head{flex:0 0 auto;margin-bottom:7px}body.is-fullscreen .lesson-head h2{font-size:clamp(19px,1.8vw,25px)}body.is-fullscreen .compare-tools{flex:0 0 auto;margin-bottom:7px}body.is-fullscreen .model-set:not([hidden]){display:flex;flex:1;min-height:0}body.is-fullscreen .molecules{flex:1;min-height:0;height:100%;grid-auto-rows:minmax(0,1fr)}body.is-fullscreen .molecule-card{height:100%;min-height:0;display:flex;flex-direction:column;padding:10px;overflow:hidden}body.is-fullscreen .molecule-title,body.is-fullscreen .vsepr-facts{flex:0 0 auto;margin-bottom:7px}body.is-fullscreen .molecule-display{flex:1;height:100%;min-height:0;overflow:hidden;grid-auto-rows:minmax(0,1fr)}body.is-fullscreen[data-view="both"] .molecule-display{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}body.is-fullscreen[data-view="2d"] .molecule-display,body.is-fullscreen[data-view="3d"] .molecule-display{grid-template-columns:minmax(0,1fr)}body.is-fullscreen .view-block{height:100%;min-height:0}body.is-fullscreen .three-d,body.is-fullscreen .mol-canvas{height:100%;min-height:0}body.is-fullscreen .two-d{height:100%;min-height:0;padding-top:26px}body.is-fullscreen .two-d svg{height:100%;min-height:0}
+@media(max-width:1400px){.molecules[style*="--cols:4"]{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:1050px){.molecules[style*="--cols:2"] .molecule-display,.molecules[style*="--cols:3"] .molecule-display,.molecules[style*="--cols:4"] .molecule-display{grid-template-columns:1fr}.molecules[style*="--cols:2"] .two-d,.molecules[style*="--cols:2"] .three-d,.molecules[style*="--cols:3"] .two-d,.molecules[style*="--cols:3"] .three-d,.molecules[style*="--cols:4"] .two-d,.molecules[style*="--cols:4"] .three-d{height:clamp(360px,48vh,520px);min-height:360px}}@media(max-width:760px){header{position:static}.molecules{grid-template-columns:1fr!important}.molecule-display{grid-template-columns:1fr 1fr!important}body.is-fullscreen{height:auto!important;overflow:auto!important;display:block!important}body.is-fullscreen .panel.active{display:block!important}body.is-fullscreen .molecule-card{height:auto!important}body.is-fullscreen .view-block,body.is-fullscreen .three-d,body.is-fullscreen .mol-canvas{height:clamp(360px,52vh,540px)!important}}@media(max-width:520px){header{padding-top:14px}.head-actions .btn-text{display:none}.outline-btn{padding:9px 11px}.tabs button{padding:9px 11px 11px;font-size:12px}main{padding-top:16px}.view-switch{width:100%;grid-template-columns:repeat(3,1fr)}.view-switch button{padding:8px 5px}.molecule-display{grid-template-columns:1fr!important}.two-d,.three-d,.mol-canvas{height:clamp(360px,54vh,500px);min-height:360px}.lesson-head h2{font-size:22px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition-duration:.01ms!important}}@media(prefers-contrast:more){:root{--ink2:#344055;--line:#aebaca}.molecule-card,.view-block{border-color:#aebaca}}
+</style>
+
+<script>
+(()=>{
+const root=document.body;
+const pos={
+  linear:[[-1.35,0,0],[1.35,0,0]],
+  square:[[1.18,0,0],[-1.18,0,0],[0,1.18,0],[0,-1.18,0]],
+  tetra:[[.88,.88,.88],[-.88,-.88,.88],[-.88,.88,-.88],[.88,-.88,-.88]],
+  oct:[[1.15,0,0],[-1.15,0,0],[0,1.15,0],[0,-1.15,0],[0,0,1.15],[0,0,-1.15]]
+};
+const ligandLabel={NH3:'NH₃',H2O:'H₂O',OH:'OH⁻',CN:'CN⁻',Cl:'Cl⁻',enN:'N',edtaN:'N',edtaO:'O',oxo:'O²⁻',A:'A',B:'B'};
+const metalLabel={Ag:'Ag⁺',Cu:'Cu²⁺',Zn:'Zn²⁺',Al:'Al³⁺',Fe:'Fe³⁺',Co:'Co³⁺',Pt:'Pt²⁺',V:'V⁵⁺',M:'M'};
+const metalOxidation={Ag:1,Cu:2,Zn:2,Al:3,Fe:3,Co:3,Pt:2,V:5};
+const ligandCharge={NH3:0,H2O:0,OH:-1,CN:-1,Cl:-1,enN:0,edtaN:0,edtaO:0,oxo:-2};
+const sub=s=>ligandLabel[s]||s;
+const centerLabel=m=>m.centerLabel||metalLabel[m.metal]||m.metal;
+const complex=(id,name,formula,metal,geometry,ligands,extra={})=>({id,name,formula,metal,geometry,ligands,...extra});
+const all=(type,n)=>Array(n).fill(type);
+const lessons=[
+ {id:'cn2',tab:'① 配位数2',title:'配位数2：直線形',sets:[{id:'ag',label:'ジアンミン銀(I)',cards:[complex('ag-linear','ジアンミン銀(I)イオン','[Ag(NH₃)₂]⁺','Ag','linear',all('NH3',2),{angle:'180°',note:'2個のNH₃はN原子からAg⁺へ配位する。'})]}]},
+ {id:'cn4',tab:'② 配位数4',title:'配位数4：正方形平面型と正四面体型',sets:[
+  {id:'cu-simple',label:'Cu・高校表示',cards:[complex('cu-square','テトラアンミン銅(II)イオン','[Cu(NH₃)₄]²⁺','Cu','square',all('NH3',4),{angle:'90°',note:'高校では軸方向の配位水を省略し、正方形平面型の[Cu(NH₃)₄]²⁺として表す。'})]},
+  {id:'cu-aqua',label:'Cu・配位水表示',cards:[complex('cu-aqua','テトラアンミンジアクア銅(II)イオン','[Cu(NH₃)₄(H₂O)₂]²⁺','Cu','oct',['NH3','NH3','NH3','NH3','H2O','H2O'],{angle:'90°／180°',axialLong:true,note:'省略しない表示。4個のNH₃が赤道面、2個のH₂Oが弱く長い軸方向に配位し、配位数は6。'})]},
+  {id:'zn',label:'Zn・正四面体',cards:[complex('zn-tetra','テトラアンミン亜鉛(II)イオン','[Zn(NH₃)₄]²⁺','Zn','tetra',all('NH3',4),{angle:'約109.5°',note:'4個のNH₃が正四面体の頂点を占める。'})]},
+  {id:'al',label:'Al・正四面体',cards:[complex('al-tetra','テトラヒドロキソアルミン酸イオン','[Al(OH)₄]⁻','Al','tetra',all('OH',4),{angle:'約109.5°',note:'Alの第一配位圏は4個のOで、正四面体型として扱う。'})]}
+ ]},
+ {id:'cn6',tab:'③ 配位数6',title:'配位数6：正八面体型',sets:[{id:'fe',label:'ヘキサシアニド鉄(III)',cards:[complex('fe-oct','ヘキサシアニド鉄(III)酸イオン','[Fe(CN)₆]³⁻','Fe','oct',all('CN',6),{angle:'90°／180°',note:'CN⁻はC原子側からFe³⁺へ配位する。'})]}]},
+ {id:'iso4',tab:'④ 4配位異性体',title:'4配位：正方形平面型のcis/transと正四面体型',sets:[
+  {id:'pt-cis-only',label:'cis体',cards:[
+    complex('pt-cis','cis-ジアンミンジクロリド白金(II)','cis-[Pt(NH₃)₂Cl₂]','Pt','square',['Cl','NH3','Cl','NH3'],{note:'同種配位子が隣り合うためcis型。'})
+  ]},
+  {id:'pt-trans-only',label:'trans体',cards:[
+    complex('pt-trans','trans-ジアンミンジクロリド白金(II)','trans-[Pt(NH₃)₂Cl₂]','Pt','square',['Cl','Cl','NH3','NH3'],{note:'同種配位子が向かい合うためtrans型。'})
+  ]},
+  {id:'pt-both',label:'両方並べて表示',cards:[
+    complex('pt-cis-compare','cis-ジアンミンジクロリド白金(II)','cis-[Pt(NH₃)₂Cl₂]','Pt','square',['Cl','NH3','Cl','NH3'],{sync:'pt-ct',note:'同種配位子が隣り合うためcis型。'}),
+    complex('pt-trans-compare','trans-ジアンミンジクロリド白金(II)','trans-[Pt(NH₃)₂Cl₂]','Pt','square',['Cl','Cl','NH3','NH3'],{sync:'pt-ct',note:'同種配位子が向かい合うためtrans型。'})
+  ]},
+  {id:'tetra-same',label:'正四面体型（参考）',cards:[
+    complex('tetra-a','正四面体型 MA₂B₂・配置A','[MA₂B₂]','M','tetra',['A','A','B','B'],{sync:'tetra-ref',note:'正四面体では全頂点が等価。'}),
+    complex('tetra-b','正四面体型 MA₂B₂・配置B','[MA₂B₂]','M','tetra',['A','B','A','B'],{sync:'tetra-ref',note:'回転により配置Aと重ね合わせられ、cis/transを区別できない。'})
+  ]}
+ ]},
+ {id:'iso6',tab:'⑤ 6配位cis/trans',title:'正八面体型 MA₄B₂：cis/trans',sets:[
+  {id:'oct-cis-only',label:'cis体',cards:[complex('oct-cis','cis-[Co(NH₃)₄Cl₂]⁺','cis-[Co(NH₃)₄Cl₂]⁺','Co','oct',['Cl','NH3','Cl','NH3','NH3','NH3'],{note:'Cl–Co–Clは90°。'})]},
+  {id:'oct-trans-only',label:'trans体',cards:[complex('oct-trans','trans-[Co(NH₃)₄Cl₂]⁺','trans-[Co(NH₃)₄Cl₂]⁺','Co','oct',['Cl','Cl','NH3','NH3','NH3','NH3'],{note:'Cl–Co–Clは180°。'})]},
+  {id:'oct-both',label:'両方並べて表示',cards:[
+   complex('oct-cis-compare','cis-[Co(NH₃)₄Cl₂]⁺','cis-[Co(NH₃)₄Cl₂]⁺','Co','oct',['Cl','NH3','Cl','NH3','NH3','NH3'],{sync:'oct-ct',note:'Cl–Co–Clは90°。'}),
+   complex('oct-trans-compare','trans-[Co(NH₃)₄Cl₂]⁺','trans-[Co(NH₃)₄Cl₂]⁺','Co','oct',['Cl','Cl','NH3','NH3','NH3','NH3'],{sync:'oct-ct',note:'Cl–Co–Clは180°。'})
+  ]}
+ ]},
+ {id:'facmer',tab:'⑥ 6配位fac/mer',title:'正八面体型 MA₃B₃：fac/mer',sets:[
+  {id:'fac-only',label:'fac体',cards:[complex('oct-fac','fac-[Co(NH₃)₃Cl₃]','fac-[Co(NH₃)₃Cl₃]','Co','oct',['Cl','NH3','Cl','NH3','Cl','NH3'],{specialGuide:'fac',guideIndices:[0,2,4],note:'3個のClが八面体の同じ三角形面を占める。'})]},
+  {id:'mer-only',label:'mer体',cards:[complex('oct-mer','mer-[Co(NH₃)₃Cl₃]','mer-[Co(NH₃)₃Cl₃]','Co','oct',['Cl','Cl','Cl','NH3','NH3','NH3'],{specialGuide:'mer',guideIndices:[0,1,2],note:'3個のClとCoが子午面に並び、2個のClがtransになる。'})]},
+  {id:'facmer-both',label:'両方並べて表示',cards:[
+   complex('oct-fac-compare','fac-[Co(NH₃)₃Cl₃]','fac-[Co(NH₃)₃Cl₃]','Co','oct',['Cl','NH3','Cl','NH3','Cl','NH3'],{sync:'facmer',specialGuide:'fac',guideIndices:[0,2,4],note:'3個のClが八面体の同じ三角形面を占める。'}),
+   complex('oct-mer-compare','mer-[Co(NH₃)₃Cl₃]','mer-[Co(NH₃)₃Cl₃]','Co','oct',['Cl','Cl','Cl','NH3','NH3','NH3'],{sync:'facmer',specialGuide:'mer',guideIndices:[0,1,2],note:'3個のClとCoが子午面に並び、2個のClがtransになる。'})
+  ]}
+ ]},
+ {id:'bidentate',tab:'⑦ 二座配位子',title:'エタン-1,2-ジアミン：二座配位とΔ/Λ',sets:[
+  {id:'en-delta',label:'Δ体',cards:[complex('co-en-delta','Δ-[Co(en)₃]³⁺','Δ-[Co(en)₃]³⁺','Co','oct',all('enN',6),{only3d:true,chelates:[[0,2],[1,4],[3,5]],enStructure:true,noGuide:true,ligandCount:3,ligandChargeSum:0,denticityText:'エタン-1,2-ジアミン 3分子・各分子がN原子2個で二座配位',note:'en＝H₂N–CH₂–CH₂–NH₂。3個のキレート環が右巻きのΔ配置をつくる。'})]},
+  {id:'en-lambda',label:'Λ体',cards:[complex('co-en-lambda','Λ-[Co(en)₃]³⁺','Λ-[Co(en)₃]³⁺','Co','oct',all('enN',6),{only3d:true,chelates:[[0,2],[1,5],[3,4]],enStructure:true,noGuide:true,ligandCount:3,ligandChargeSum:0,denticityText:'エタン-1,2-ジアミン 3分子・各分子がN原子2個で二座配位',note:'Δ体と重ね合わせられない鏡像関係にある左巻きのΛ配置。'})]},
+  {id:'en-both',label:'両方並べて表示',cards:[
+   complex('co-en-delta-compare','Δ-[Co(en)₃]³⁺','Δ-[Co(en)₃]³⁺','Co','oct',all('enN',6),{only3d:true,sync:'enantiomer',chelates:[[0,2],[1,4],[3,5]],enStructure:true,noGuide:true,ligandCount:3,ligandChargeSum:0,denticityText:'エタン-1,2-ジアミン 3分子・各分子がN原子2個で二座配位',note:'右巻きのΔ配置。'}),
+   complex('co-en-lambda-compare','Λ-[Co(en)₃]³⁺','Λ-[Co(en)₃]³⁺','Co','oct',all('enN',6),{only3d:true,sync:'enantiomer',chelates:[[0,2],[1,5],[3,4]],enStructure:true,noGuide:true,ligandCount:3,ligandChargeSum:0,denticityText:'エタン-1,2-ジアミン 3分子・各分子がN原子2個で二座配位',note:'左巻きのΛ配置。'})
+  ]}
+ ]},
+ {id:'werner',tab:'⑧ Werner錯塩',title:'CoCl₃・nNH₃：配位圏と外圏Cl⁻',sets:[
+  {id:'co6',label:'CoCl₃・6NH₃',cards:[complex('co6','ヘキサアンミンコバルト(III)塩化物','[Co(NH₃)₆]Cl₃','Co','oct',all('NH3',6),{outerCount:3,solutionIons:4,agCl:3,note:'錯イオンは[Co(NH₃)₆]³⁺。'})]},
+  {id:'co5',label:'CoCl₃・5NH₃',cards:[complex('co5','ペンタアンミンクロリドコバルト(III)塩化物','[Co(NH₃)₅Cl]Cl₂','Co','oct',['Cl','NH3','NH3','NH3','NH3','NH3'],{outerCount:2,solutionIons:3,agCl:2,note:'Cl⁻が1個、配位圏内に入る。'})]},
+  {id:'co4',label:'CoCl₃・4NH₃',cards:[
+    complex('co4-cis','cis-テトラアンミンジクロリドコバルト(III)塩化物','cis-[Co(NH₃)₄Cl₂]Cl','Co','oct',['Cl','NH3','Cl','NH3','NH3','NH3'],{outerCount:1,solutionIons:2,agCl:1,sync:'co4',note:'2個の配位Clが隣接するcis型。'}),
+    complex('co4-trans','trans-テトラアンミンジクロリドコバルト(III)塩化物','trans-[Co(NH₃)₄Cl₂]Cl','Co','oct',['Cl','Cl','NH3','NH3','NH3','NH3'],{outerCount:1,solutionIons:2,agCl:1,sync:'co4',note:'2個の配位Clが向かい合うtrans型。'})
+  ]},
+  {id:'co3',label:'CoCl₃・3NH₃',cards:[
+    complex('co3-fac','fac-[Co(NH₃)₃Cl₃]','fac-[Co(NH₃)₃Cl₃]','Co','oct',['Cl','NH3','Cl','NH3','Cl','NH3'],{outerCount:0,solutionIons:1,agCl:0,sync:'co3',specialGuide:'fac',guideIndices:[0,2,4],note:'外圏Cl⁻を持たない中性錯体。3個のClが同じ面を占めるfac型。'}),
+    complex('co3-mer','mer-[Co(NH₃)₃Cl₃]','mer-[Co(NH₃)₃Cl₃]','Co','oct',['Cl','Cl','Cl','NH3','NH3','NH3'],{outerCount:0,solutionIons:1,agCl:0,sync:'co3',specialGuide:'mer',guideIndices:[0,1,2],note:'同じ組成で、3個のClが子午面に並ぶmer型。'})
+  ]},
+  {id:'co-all',label:'4つ並べて表示',cards:[
+    complex('co6-compare','CoCl₃・6NH₃','[Co(NH₃)₆]Cl₃','Co','oct',all('NH3',6),{outerCount:3,solutionIons:4,agCl:3,note:'配位Cl⁻：0個'}),
+    complex('co5-compare','CoCl₃・5NH₃','[Co(NH₃)₅Cl]Cl₂','Co','oct',['Cl','NH3','NH3','NH3','NH3','NH3'],{outerCount:2,solutionIons:3,agCl:2,note:'配位Cl⁻：1個'}),
+    complex('co4-compare','CoCl₃・4NH₃','trans-[Co(NH₃)₄Cl₂]Cl','Co','oct',['Cl','Cl','NH3','NH3','NH3','NH3'],{outerCount:1,solutionIons:2,agCl:1,note:'配位Cl⁻：2個'}),
+    complex('co3-compare','CoCl₃・3NH₃','[Co(NH₃)₃Cl₃]','Co','oct',['Cl','NH3','Cl','NH3','Cl','NH3'],{outerCount:0,solutionIons:1,agCl:0,note:'配位Cl⁻：3個（fac/merあり）'})
+  ]}
+ ]}
+];
+
+const labelColor=type=>({NH3:'var(--nh3)',Cl:'var(--cl)',CN:'var(--cn)',OH:'var(--oxygen)',H2O:'var(--water)',enN:'#c084fc',edtaN:'#c084fc',edtaO:'#fb7185',oxo:'#ef4444',A:'var(--cl)',B:'var(--water)'}[type]||'var(--metal)');
+const formulaPoints={linear:[[65,150],[295,150]],square:[[300,150],[60,150],[180,35],[180,265]],tetra:[[270,65],[90,235],[90,65],[270,235]],oct:[[305,150],[55,150],[180,30],[180,270],[100,75],[260,225]]};
+const quadPoint=(p,c,q,t)=>{const u=1-t;return[p[0]*u*u+2*c[0]*u*t+q[0]*t*t,p[1]*u*u+2*c[1]*u*t+q[1]*t*t]};
+function formulaSVG(m){
+ const pts=formulaPoints[m.geometry],cx=180,cy=150;
+ const chelates=(m.chelates||[]).map(([a,b])=>{const p=pts[a],q=pts[b],mx=(p[0]+q[0])/2,my=(p[1]+q[1])/2,k=1.35,tx=cx+(mx-cx)*k,ty=cy+(my-cy)*k,c=[tx,ty],carbons=m.enStructure?[.38,.62].map(t=>quadPoint(p,c,q,t)).map(v=>`<circle cx="${v[0]}" cy="${v[1]}" r="15" fill="#64748b"/><text x="${v[0]}" y="${v[1]+1}" text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="9" font-weight="900">CH₂</text>`).join(''):'';return `<path d="M ${p[0]} ${p[1]} Q ${tx} ${ty} ${q[0]} ${q[1]}" fill="none" stroke="#0f766e" stroke-width="8" stroke-linecap="round" opacity=".76"/>${carbons}${m.enStructure?'':`<text x="${tx}" y="${ty-5}" text-anchor="middle" fill="#0f5132" font-size="12" font-weight="900" paint-order="stroke" stroke="#fff" stroke-width="3">en</text>`}`}).join('');
+ const edta=m.edta6?`<g fill="none" stroke="#0f766e" stroke-width="8" stroke-linecap="round" opacity=".76"><path d="M ${pts[4][0]} ${pts[4][1]} Q 315 60 ${pts[5][0]} ${pts[5][1]}"/><path d="M ${pts[4][0]} ${pts[4][1]} Q 230 35 ${pts[0][0]} ${pts[0][1]}"/><path d="M ${pts[4][0]} ${pts[4][1]} Q 92 18 ${pts[2][0]} ${pts[2][1]}"/><path d="M ${pts[5][0]} ${pts[5][1]} Q 130 265 ${pts[1][0]} ${pts[1][1]}"/><path d="M ${pts[5][0]} ${pts[5][1]} Q 270 292 ${pts[3][0]} ${pts[3][1]}"/></g>`:'';
+ const bonds=pts.map((p,i)=>{const dash=(m.geometry==='tetra'&&i===2)||(m.geometry==='oct'&&i===5),wedge=(m.geometry==='tetra'&&i===0)||(m.geometry==='oct'&&i===4);if(wedge)return `<polygon points="${cx},${cy} ${p[0]-10},${p[1]+8} ${p[0]+10},${p[1]-8}" fill="currentColor" opacity=".82"/>`;return `<line x1="${cx}" y1="${cy}" x2="${p[0]}" y2="${p[1]}" stroke="currentColor" stroke-width="${m.axialLong&&i>3?2.5:4}" stroke-linecap="round" ${dash?'stroke-dasharray="7 7"':''}/>`}).join('');
+ const lig=pts.map((p,i)=>`<circle cx="${p[0]}" cy="${p[1]}" r="27" fill="${labelColor(m.ligands[i])}"/><text x="${p[0]}" y="${p[1]+1}" text-anchor="middle" dominant-baseline="middle" fill="#111827" stroke="#fff" stroke-width="3" paint-order="stroke" font-weight="900">${sub(m.ligands[i])}</text>`).join('');
+ const hasOuter=m.outerCount!==undefined,viewH=hasOuter?380:340;
+ const outer=hasOuter?`<text x="180" y="356" text-anchor="middle" fill="#64748b" font-weight="700">外圏 Cl⁻ × ${m.outerCount}</text>`:'';
+ return `<svg viewBox="0 0 360 ${viewH}" role="img" aria-label="${m.name}の2D構造式">${chelates}${edta}<g opacity=".9">${bonds}</g>${lig}<circle cx="${cx}" cy="${cy}" r="31" fill="var(--metal)"/><text x="${cx}" y="${cy+1}" text-anchor="middle" dominant-baseline="middle" fill="#111827" stroke="#fff" stroke-width="3" paint-order="stroke" font-weight="900">${centerLabel(m)}</text><text x="180" y="${hasOuter?330:325}" text-anchor="middle" fill="#172033" font-weight="800">${m.formula}</text>${outer}</svg>`
+}
+const geometryName=m=>m.geometry==='linear'?'直線形':m.geometry==='square'?'正方形平面型':m.geometry==='tetra'?'正四面体型':'正八面体型';
+const signed=n=>n>0?`＋${n}`:n<0?`−${Math.abs(n)}`:'0';
+function chargeSummary(m){const ox=metalOxidation[m.metal];if(ox===undefined)return null;const ligandSum=m.ligandChargeSum??m.ligands.reduce((sum,l)=>sum+(ligandCharge[l]??0),0);return `電荷：中心 ${signed(ox)} ＋ 配位子 ${signed(ligandSum)} ＝ 錯体 ${signed(ox+ligandSum)}`}
+function cardHTML(m){const hasOuter=m.outerCount!==undefined,experiment=m.solutionIons!==undefined?`水中の粒子 ${m.solutionIons}個相当・AgCl ${m.agCl} mol相当`:null,denticity=m.denticityText||(m.ligandCount!==undefined?`配位子数 ${m.ligandCount}・配位数 ${m.ligands.length}`:null),facts=[m.note,denticity,chargeSummary(m),hasOuter?`外圏 Cl⁻ × ${m.outerCount}（非配位）`:null,experiment].filter(Boolean),twoD=m.only3d?'':`<section class="view-block two-d"><span class="view-label">2D 構造式</span>${formulaSVG(m)}</section>`;return `<article class="molecule-card${m.only3d?' only-3d-card':''}" data-mol="${m.id}"><div class="molecule-title"><h3>${m.name}</h3><span class="config">配位数 ${m.ligands.length}<br>${geometryName(m)}${m.angle?'・'+m.angle:''}</span></div><div class="vsepr-facts">${facts.map(f=>`<span class="vsepr-fact">${f}</span>`).join('')}</div><div class="molecule-display${m.only3d?' only-3d-display':''}">${twoD}<section class="view-block three-d"><span class="view-label">3D 球棒モデル</span><canvas class="mol-canvas" data-model="${m.id}" aria-label="${m.name}の3Dモデル。ドラッグまたは矢印キーで回転" tabindex="0"></canvas><button class="reset-view" type="button" data-reset="${m.id}" aria-label="${m.name}の視点をリセット">↺</button><span class="canvas-help">ドラッグ：自由回転　ホイール：拡大</span></section></div></article>`}
+
+const tabs=document.getElementById('coord-tabs'),panels=document.getElementById('coord-panels'),modelMap=new Map();
+lessons.forEach((lesson,li)=>{
+ const tab=document.createElement('button');tab.type='button';tab.id=`coord-tab-${lesson.id}`;tab.setAttribute('role','tab');tab.setAttribute('aria-controls',`coord-panel-${lesson.id}`);tab.setAttribute('aria-selected',li===0);tab.tabIndex=li===0?0:-1;tab.textContent=lesson.tab;tabs.appendChild(tab);
+ const panel=document.createElement('section');panel.className='panel'+(li===0?' active':'');panel.id=`coord-panel-${lesson.id}`;panel.setAttribute('role','tabpanel');panel.setAttribute('aria-labelledby',tab.id);panel.hidden=li!==0;
+ const switcher=lesson.sets.length>1?`<div class="compare-tools" role="group" aria-label="表示する錯体">${lesson.sets.map((set,i)=>`<button type="button" data-set="${set.id}" aria-pressed="${i===0}">${set.label}</button>`).join('')}</div>`:'';
+ panel.innerHTML=`<div class="lesson-head"><h2>${lesson.title}</h2></div>${switcher}${lesson.sets.map((set,i)=>`<div class="model-set" data-set-panel="${set.id}" ${i?'hidden':''}><div class="molecules" style="--cols:${set.cards.length}">${set.cards.map(cardHTML).join('')}</div></div>`).join('')}`;panels.appendChild(panel);
+ lesson.sets.flatMap(s=>s.cards).forEach(m=>modelMap.set(m.id,m));
+});
+
+const sphereColors={metal:{highlight:'#ffffff',base:'#60a5fa',outline:'#1d4ed8'},NH3:{highlight:'#ffffff',base:'#f5b84b',outline:'#a16207'},Cl:{highlight:'#ffffff',base:'#4ade80',outline:'#15803d'},CN:{highlight:'#ffffff',base:'#22d3ee',outline:'#0e7490'},OH:{highlight:'#ffffff',base:'#ef4444',outline:'#b91c1c'},H2O:{highlight:'#ffffff',base:'#818cf8',outline:'#4338ca'},enN:{highlight:'#ffffff',base:'#c084fc',outline:'#7e22ce'},edtaN:{highlight:'#ffffff',base:'#c084fc',outline:'#7e22ce'},edtaO:{highlight:'#ffffff',base:'#fb7185',outline:'#be123c'},oxo:{highlight:'#ffffff',base:'#ef4444',outline:'#b91c1c'},carbon:{highlight:'#ffffff',base:'#64748b',outline:'#334155'},A:{highlight:'#ffffff',base:'#4ade80',outline:'#15803d'},B:{highlight:'#ffffff',base:'#818cf8',outline:'#4338ca'}};
+const outerIonScreen={1:[[.09,.5]],2:[[.09,.35],[.09,.65]],3:[[.09,.24],[.09,.5],[.09,.76]]};
+let guidesVisible=true;
+const views=new Map();
+class ModelView{
+ constructor(canvas,model){this.c=canvas;this.ctx=canvas.getContext('2d');this.m=model;this.yaw=-.62;this.pitch=this.m.geometry==='square'?.15:.42;this.roll=0;this.zoom=1;this.drag=null;this.bind();this.resize()}
+ bind(){
+  this.c.addEventListener('pointerdown',e=>{this.c.setPointerCapture(e.pointerId);this.drag={x:e.clientX,y:e.clientY}});
+  this.c.addEventListener('pointermove',e=>{if(!this.drag)return;const dx=e.clientX-this.drag.x,dy=e.clientY-this.drag.y,r=this.c.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,a0=Math.atan2(this.drag.y-cy,this.drag.x-cx),a1=Math.atan2(e.clientY-cy,e.clientX-cx),radius=Math.hypot(this.drag.x-cx,this.drag.y-cy),edge=Math.max(0,Math.min(1,(radius/(Math.min(r.width,r.height)*.5)-.2)/.8));let da=a1-a0;if(da>Math.PI)da-=Math.PI*2;if(da< -Math.PI)da+=Math.PI*2;if(e.shiftKey){this.roll+=dx*.012;this.pitch+=dy*.006}else{this.yaw+=dx*.011;this.pitch+=dy*.011;this.roll+=da*.65*edge}this.drag={x:e.clientX,y:e.clientY};this.changed()});
+  ['pointerup','pointercancel','lostpointercapture'].forEach(type=>this.c.addEventListener(type,()=>this.drag=null));
+  this.c.addEventListener('wheel',e=>{e.preventDefault();this.zoom=Math.max(.6,Math.min(1.9,this.zoom*(e.deltaY>0?.92:1.08)));this.changed()},{passive:false});
+  this.c.addEventListener('keydown',e=>{let used=true;if(e.shiftKey&&e.key==='ArrowLeft')this.roll-=.14;else if(e.shiftKey&&e.key==='ArrowRight')this.roll+=.14;else if(e.key==='ArrowLeft')this.yaw-=.14;else if(e.key==='ArrowRight')this.yaw+=.14;else if(e.key==='ArrowUp')this.pitch-=.14;else if(e.key==='ArrowDown')this.pitch+=.14;else if(e.key==='+'||e.key==='=')this.zoom=Math.min(1.9,this.zoom*1.1);else if(e.key==='-')this.zoom=Math.max(.6,this.zoom/1.1);else if(e.key.toLowerCase()==='r')this.reset();else used=false;if(used){e.preventDefault();this.changed()}})
+ }
+ changed(){this.draw();if(this.m.sync)views.forEach(v=>{if(v!==this&&v.m.sync===this.m.sync){v.yaw=this.yaw;v.pitch=this.pitch;v.roll=this.roll;v.zoom=this.zoom;v.draw()}})}
+ reset(){this.yaw=-.62;this.pitch=this.m.geometry==='square'?.15:.42;this.roll=0;this.zoom=1;this.changed()}
+ resize(){const r=this.c.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);if(r.width<2||r.height<2)return;this.c.width=Math.round(r.width*d);this.c.height=Math.round(r.height*d);this.ctx.setTransform(d,0,0,d,0,0);this.w=r.width;this.h=r.height;this.draw()}
+ point(v){const cy=Math.cos(this.yaw),sy=Math.sin(this.yaw),cx=Math.cos(this.pitch),sx=Math.sin(this.pitch),cr=Math.cos(this.roll),sr=Math.sin(this.roll),x=v[0]*cy+v[2]*sy,z=-v[0]*sy+v[2]*cy,y=v[1]*cx-z*sx,zz=v[1]*sx+z*cx,screenY=-y,rx=x*cr-screenY*sr,ry=x*sr+screenY*cr,spread=this.m.outerCount?.22:(this.m.chelates?.length?.34:(this.m.edta6?.32:.29)),scale=Math.min(this.w,this.h)*spread*this.zoom;return{x:this.w/2+rx*scale,y:this.h/2+ry*scale,z:zz,scale:Math.max(.72,Math.min(1.3,1+zz*.07))}}
+ guide(points){if(!guidesVisible||this.m.noGuide)return;const ctx=this.ctx;ctx.save();ctx.strokeStyle='rgba(220,38,38,.56)';ctx.fillStyle='rgba(239,68,68,.07)';ctx.lineWidth=2.2;
+  const polygon=indices=>{ctx.beginPath();indices.forEach((i,n)=>n?ctx.lineTo(points[i].x,points[i].y):ctx.moveTo(points[i].x,points[i].y));ctx.closePath();ctx.fill();ctx.stroke()};
+  if(this.m.specialGuide==='fac')polygon(this.m.guideIndices);
+  else if(this.m.specialGuide==='mer')polygon(this.m.guideIndices);
+  else if(this.m.geometry==='linear'){ctx.beginPath();ctx.moveTo(points[0].x,points[0].y);ctx.lineTo(points[1].x,points[1].y);ctx.lineWidth=14;ctx.globalAlpha=.48;ctx.stroke()}
+  else if(this.m.geometry==='square')polygon([0,2,1,3]);
+  else if(this.m.geometry==='tetra')[[0,1,2],[0,1,3],[0,2,3],[1,2,3]].forEach(polygon);
+  else [[0,2,4],[2,1,4],[1,3,4],[3,0,4],[0,2,5],[2,1,5],[1,3,5],[3,0,5]].forEach(polygon);ctx.restore()
+ }
+ draw(){if(!this.w)return;const ctx=this.ctx;ctx.clearRect(0,0,this.w,this.h);const grad=ctx.createRadialGradient(this.w*.5,this.h*.38,5,this.w*.5,this.h*.45,Math.max(this.w,this.h)*.65);grad.addColorStop(0,'#ffffff');grad.addColorStop(1,'#eaf1f8');ctx.fillStyle=grad;ctx.fillRect(0,0,this.w,this.h);
+  const raw=pos[this.m.geometry],p=raw.map(v=>this.point(v));this.guide(p);const center={x:this.w/2,y:this.h/2,z:0,scale:1},backboneAtoms=[];
+  const curve=(q,r,control,label)=>{ctx.beginPath();ctx.moveTo(q.x,q.y);ctx.quadraticCurveTo(control.x,control.y,r.x,r.y);ctx.strokeStyle='#0f766e';ctx.lineWidth=Math.max(7,9*this.zoom);ctx.lineCap='round';ctx.globalAlpha=.78;ctx.stroke();ctx.globalAlpha=1;if(label){ctx.font=`900 ${Math.max(12,14*this.zoom)}px Inter,Arial`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineJoin='round';ctx.strokeStyle='rgba(255,255,255,.96)';ctx.lineWidth=4;ctx.strokeText(label,control.x,control.y);ctx.fillStyle='#0f5132';ctx.fillText(label,control.x,control.y)}};
+  (this.m.chelates||[]).forEach(([a,b])=>{const q=p[a],r=p[b],mx=(q.x+r.x)/2,my=(q.y+r.y)/2,k=1.26,control={x:center.x+(mx-center.x)*k,y:center.y+(my-center.y)*k};curve(q,r,control,this.m.enStructure?'': 'en');if(this.m.enStructure)[.38,.62].forEach(t=>{const u=1-t;backboneAtoms.push({label:'CH₂',palette:sphereColors.carbon,small:true,q:{x:q.x*u*u+2*control.x*u*t+r.x*t*t,y:q.y*u*u+2*control.y*u*t+r.y*t*t,z:q.z*u+r.z*t,scale:.9}})})});
+  if(this.m.edta6){const edtaEdge=(a,b,opposite=false)=>{const q=p[a],r=p[b],mx=(q.x+r.x)/2,my=(q.y+r.y)/2;let control={x:center.x+(mx-center.x)*1.35,y:center.y+(my-center.y)*1.35};if(opposite){const dx=r.x-q.x,dy=r.y-q.y,len=Math.hypot(dx,dy)||1,offset=Math.min(this.w,this.h)*.28;control={x:center.x-dy/len*offset,y:center.y+dx/len*offset}}curve(q,r,control,'')};edtaEdge(4,0);edtaEdge(4,2);edtaEdge(4,5,true);edtaEdge(5,1);edtaEdge(5,3)}
+  p.map((q,i)=>({q,i})).sort((a,b)=>a.q.z-b.q.z).forEach(({q,i})=>{const dx=q.x-center.x,dy=q.y-center.y,len=Math.hypot(dx,dy)||1,pad=this.m.axialLong&&i>3?18:12,ex=q.x-dx/len*pad,ey=q.y-dy/len*pad;ctx.beginPath();ctx.moveTo(center.x,center.y);ctx.lineTo(ex,ey);ctx.strokeStyle='#708197';ctx.globalAlpha=this.m.axialLong&&i>3?.58:1;ctx.lineWidth=this.m.axialLong&&i>3?4:7;ctx.lineCap='round';ctx.stroke();ctx.globalAlpha=1});
+  const outer=(outerIonScreen[this.m.outerCount]||[]).map(([x,y],i)=>({label:'Cl⁻',palette:sphereColors.Cl,q:{x:this.w*x,y:this.h*y,z:-2+i*.01,scale:1},outer:true}));
+  const atoms=[{label:centerLabel(this.m),palette:sphereColors.metal,q:center,center:true},...p.map((q,i)=>({label:sub(this.m.ligands[i]),palette:sphereColors[this.m.ligands[i]]||sphereColors.metal,q})),...backboneAtoms,...outer].sort((a,b)=>a.q.z-b.q.z);
+  const zoomScale=this.zoom;
+  const canvasScale=Math.max(.72,Math.min(1.12,Math.min(this.w,this.h)/330));
+  atoms.forEach(a=>{const radius=(a.center?37:a.outer?29:a.small?18:33)*canvasScale*a.q.scale*zoomScale,gr=ctx.createRadialGradient(a.q.x-radius*.34,a.q.y-radius*.38,radius*.12,a.q.x,a.q.y,radius);gr.addColorStop(0,a.palette.highlight);gr.addColorStop(.24,a.palette.base);gr.addColorStop(1,a.palette.outline);ctx.beginPath();ctx.arc(a.q.x,a.q.y,radius,0,Math.PI*2);ctx.fillStyle=gr;ctx.fill();ctx.strokeStyle=a.palette.outline;ctx.lineWidth=Math.max(1.5,zoomScale*1.4);ctx.stroke();const fontSize=Math.max(a.small?8:11,Math.min(25,(a.label.length>2?(a.small?9:13):16)*canvasScale*zoomScale));ctx.font=`900 ${fontSize}px Inter,Arial`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineJoin='round';ctx.strokeStyle='rgba(255,255,255,.96)';ctx.lineWidth=Math.max(3,fontSize*.22);ctx.strokeText(a.label,a.q.x,a.q.y+.5);ctx.fillStyle='#111827';ctx.fillText(a.label,a.q.x,a.q.y+.5)});
+ }
+}
+function visibleCanvases(){document.querySelectorAll('.panel.active .model-set:not([hidden]) .mol-canvas').forEach(c=>{if(!views.has(c.dataset.model))views.set(c.dataset.model,new ModelView(c,modelMap.get(c.dataset.model)));else views.get(c.dataset.model).resize()})}
+function scheduleLayout(){requestAnimationFrame(()=>requestAnimationFrame(()=>{visibleCanvases();views.forEach(v=>{if(v.c.offsetParent!==null)v.resize()})}))}
+const resizeObserver=new ResizeObserver(scheduleLayout);resizeObserver.observe(root);
+let preferredView=root.dataset.view||'both';
+function applyView(view){root.dataset.view=view;document.querySelectorAll('[data-view-choice]').forEach(x=>x.setAttribute('aria-pressed',x.dataset.viewChoice===view));scheduleLayout()}
+function activateTab(index){const tabButtons=[...tabs.querySelectorAll('[role="tab"]')];tabButtons.forEach((b,i)=>{const on=i===index;b.setAttribute('aria-selected',on);b.tabIndex=on?0:-1;const panel=document.getElementById(b.getAttribute('aria-controls'));panel.hidden=!on;panel.classList.toggle('active',on)});root.dataset.tab=lessons[index].id;applyView(lessons[index].id==='bidentate'?'3d':preferredView);document.getElementById('coord-live').textContent=`${tabButtons[index].textContent}を表示しました`}
+[...tabs.querySelectorAll('[role="tab"]')].forEach((b,i,arr)=>{b.addEventListener('click',()=>activateTab(i));b.addEventListener('keydown',e=>{let n;if(e.key==='ArrowRight')n=(i+1)%arr.length;else if(e.key==='ArrowLeft')n=(i-1+arr.length)%arr.length;else if(e.key==='Home')n=0;else if(e.key==='End')n=arr.length-1;if(n!==undefined){e.preventDefault();arr[n].focus();activateTab(n)}})});
+document.querySelectorAll('.compare-tools [data-set]').forEach(b=>b.addEventListener('click',()=>{const panel=b.closest('.panel');panel.querySelectorAll('.compare-tools [data-set]').forEach(x=>x.setAttribute('aria-pressed',x===b));panel.querySelectorAll('.model-set').forEach(x=>x.hidden=x.dataset.setPanel!==b.dataset.set);document.getElementById('coord-live').textContent=`${b.textContent}を表示しました`;scheduleLayout()}));
+document.querySelectorAll('[data-view-choice]').forEach(b=>b.addEventListener('click',()=>{preferredView=b.dataset.viewChoice;applyView(preferredView)}));
+document.getElementById('coord-guide').addEventListener('click',e=>{guidesVisible=!guidesVisible;e.currentTarget.setAttribute('aria-pressed',guidesVisible);e.currentTarget.textContent=`補助図形 ${guidesVisible?'ON':'OFF'}`;views.forEach(v=>v.draw())});
+document.querySelectorAll('[data-reset]').forEach(b=>b.addEventListener('click',()=>views.get(b.dataset.reset)?.reset()));
+const fs=document.getElementById('coord-fullscreen');fs.addEventListener('click',async()=>{try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen();else await document.exitFullscreen()}catch(e){document.getElementById('coord-live').textContent='このブラウザでは全画面表示を開始できませんでした'}});document.addEventListener('fullscreenchange',()=>{const active=!!document.fullscreenElement;document.body.classList.toggle('is-fullscreen',active);fs.querySelector('.btn-text').textContent=active?'全画面を終了':'全画面表示';fs.setAttribute('aria-label',active?'全画面を終了':'全画面表示');scheduleLayout()});
+scheduleLayout();
+})();
+</script>
+</body>
+</html>
