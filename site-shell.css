@@ -1,0 +1,124 @@
+:root {
+  --site-blue: #2563eb;
+  --site-blue-deep: #173b75;
+  --site-border: #bfd0e7;
+  --site-focus: rgba(37, 99, 235, .34);
+}
+
+body header .head-row,
+body header .header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 22px;
+}
+
+body header .title-block {
+  min-width: 0;
+}
+
+body header .back-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 34px;
+  margin: 0 0 8px;
+  padding: 0 14px;
+  border: 1px solid #cdd9ea;
+  border-radius: 10px;
+  background: #fff;
+  color: #3a4d6b;
+  box-shadow: 0 2px 8px rgba(31, 55, 89, .06);
+  text-decoration: none;
+  font-size: 13.5px;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+body header .back-link:hover {
+  color: var(--site-blue);
+  border-color: #8fb0df;
+}
+
+body .site-fullscreen-btn {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: auto;
+  height: auto;
+  min-height: 40px;
+  padding: 9px 13px;
+  border: 1px solid var(--site-border);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--site-blue-deep);
+  box-shadow: 0 7px 22px rgba(31, 55, 89, .075);
+  font: 800 13px/1 Inter, 'Yu Gothic UI', 'Yu Gothic', Meiryo, sans-serif;
+  cursor: pointer;
+}
+
+body .site-fullscreen-btn::before {
+  content: none !important;
+  display: none !important;
+}
+
+body .site-fullscreen-btn:hover {
+  color: var(--site-blue);
+  border-color: #8fb0df;
+}
+
+body .site-fullscreen-btn .site-fullscreen-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+body header .tabs [role="tab"] {
+  min-height: 42px;
+  touch-action: manipulation;
+}
+
+body.is-fullscreen header .back-link {
+  display: none;
+}
+
+body button:focus-visible,
+body a:focus-visible {
+  outline: 3px solid var(--site-focus);
+  outline-offset: 3px;
+}
+
+@media (max-width: 520px) {
+  body header .head-row,
+  body header .header-row {
+    gap: 12px;
+  }
+
+  body header .back-link {
+    min-height: 32px;
+    margin-bottom: 6px;
+    padding-inline: 11px;
+    font-size: 12px;
+  }
+
+  body .site-fullscreen-btn {
+    width: 42px;
+    height: 42px;
+    min-height: 42px;
+    padding: 0;
+  }
+
+  body .site-fullscreen-btn .btn-text {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body * {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+  }
+}

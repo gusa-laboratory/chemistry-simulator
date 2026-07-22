@@ -100,15 +100,16 @@
   body.is-fullscreen .panel.section-on .card{padding:12px 16px;}
   body.is-fullscreen .panel.section-on .card h2{margin-bottom:8px;}
 </style>
+<link rel="stylesheet" href="site-shell.css">
 </head>
 <body>
 <header>
   <div class="header-row">
     <div class="title-block">
-      <a href="index.html" style="display:inline-flex;align-items:center;gap:6px;margin-bottom:8px;padding:7px 14px;border:1px solid #cdd9ea;border-radius:10px;background:#fff;color:#3a4d6b;text-decoration:none;font-size:13.5px;font-weight:800;box-shadow:0 2px 8px rgba(31,55,89,.06)">← 一覧に戻る</a>
+      <a class="back-link" href="index.html">← 一覧に戻る</a>
       <h1>結晶格子</h1>
     </div>
-    <button class="classroom-btn" id="classroom-mode" type="button">全画面表示</button>
+    <button class="classroom-btn site-fullscreen-btn" id="classroom-mode" type="button" aria-label="全画面表示"><span class="site-fullscreen-icon" aria-hidden="true">⛶</span><span class="btn-text">全画面表示</span></button>
   </div>
   <nav class="tabs" role="tablist">
     <button role="tab" aria-selected="true"  data-tab="bcc">① 体心立方格子</button>
@@ -1598,7 +1599,8 @@ document.querySelectorAll('.tabs button').forEach(btn=>btn.addEventListener('cli
 }));
 const cbtn=$('classroom-mode');
 cbtn.addEventListener('click',async()=>{try{document.fullscreenElement?await document.exitFullscreen():await document.documentElement.requestFullscreen();}catch(_){}});
-document.addEventListener('fullscreenchange',()=>{const a=!!document.fullscreenElement;document.body.classList.toggle('is-fullscreen',a);cbtn.textContent=a?'全画面を終了':'全画面表示';setTimeout(resize,60);});
+document.addEventListener('fullscreenchange',()=>{const a=!!document.fullscreenElement;document.body.classList.toggle('is-fullscreen',a);cbtn.querySelector('.btn-text').textContent=a?'全画面を終了':'全画面表示';cbtn.setAttribute('aria-label',a?'全画面を終了':'全画面表示');setTimeout(resize,60);});
 </script>
+<script src="site-shell.js"></script>
 </body>
 </html>

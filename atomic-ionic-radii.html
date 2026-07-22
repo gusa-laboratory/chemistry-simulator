@@ -102,6 +102,7 @@
   @media(max-width:480px){.species-grid{grid-template-columns:1fr}.atom-svg{height:300px}}
   @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
+<link rel="stylesheet" href="site-shell.css">
 </head>
 <body>
 <header>
@@ -110,7 +111,7 @@
       <a class="back-link" href="index.html">← 一覧に戻る</a>
       <h1>原子半径・イオン半径</h1>
     </div>
-    <button class="outline-btn" id="fullscreenBtn" type="button" aria-label="全画面表示"><span aria-hidden="true">⛶</span><span class="btn-text">全画面表示</span></button>
+    <button class="outline-btn site-fullscreen-btn" id="fullscreenBtn" type="button" aria-label="全画面表示"><span class="site-fullscreen-icon" aria-hidden="true">⛶</span><span class="btn-text">全画面表示</span></button>
   </div>
   <nav class="tabs" id="tabs" role="tablist" aria-label="比較テーマ">
     <button type="button" role="tab" aria-selected="false" data-mode="period2">周期2の原子</button>
@@ -222,5 +223,6 @@ bindToggle('electronToggle','electrons','電子表示');bindToggle('nucleusToggl
 const fs=document.getElementById('fullscreenBtn');fs.addEventListener('click',async()=>{try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen();else await document.exitFullscreen()}catch(error){}});document.addEventListener('fullscreenchange',()=>{const active=!!document.fullscreenElement;document.body.classList.toggle('is-fullscreen',active);fs.querySelector('.btn-text').textContent=active?'全画面を終了':'全画面表示';fs.setAttribute('aria-label',active?'全画面を終了':'全画面表示')});
 render();
 </script>
+<script src="site-shell.js"></script>
 </body>
 </html>

@@ -7,12 +7,16 @@
 <meta name="description" content="錯イオン・錯塩の2D構造式と3D立体構造を並べて比較できる、授業用インタラクティブ教材。">
 <meta name="theme-color" content="#2563eb">
 <style>html,body{margin:0;min-width:320px;background:#eef3f9}</style>
+<link rel="stylesheet" href="site-shell.css">
 </head>
 <body data-view="both" data-tab="cn2">
   <header>
     <div class="head-row">
-      <h1>錯イオン・錯塩の立体構造</h1>
-      <div class="head-actions"><button class="outline-btn" id="coord-fullscreen" type="button" aria-label="全画面表示"><span aria-hidden="true">⛶</span><span class="btn-text">全画面表示</span></button></div>
+      <div class="title-block">
+        <a class="back-link" href="index.html">← 一覧に戻る</a>
+        <h1>錯イオン・錯塩の立体構造</h1>
+      </div>
+      <div class="head-actions"><button class="outline-btn site-fullscreen-btn" id="coord-fullscreen" type="button" aria-label="全画面表示"><span class="site-fullscreen-icon" aria-hidden="true">⛶</span><span class="btn-text">全画面表示</span></button></div>
     </div>
     <nav class="tabs" id="coord-tabs" role="tablist" aria-label="錯体の単元"></nav>
   </header>
@@ -224,5 +228,6 @@ const fs=document.getElementById('coord-fullscreen');fs.addEventListener('click'
 scheduleLayout();
 })();
 </script>
+<script src="site-shell.js"></script>
 </body>
 </html>

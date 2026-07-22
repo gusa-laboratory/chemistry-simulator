@@ -247,15 +247,16 @@
   /* グラフ内の文字が線と重なっても読めるよう、明示的な stroke 指定がない text に白い縁取り */
   svg text:not([stroke]):not([fill="#fff"]) { paint-order: stroke; stroke: #fff; stroke-width: 2.2px; stroke-linejoin: round; }
 </style>
+<link rel="stylesheet" href="site-shell.css">
 </head>
 <body>
 <header>
   <div class="header-row">
-    <div>
-      <a href="index.html" style="display:inline-flex;align-items:center;gap:6px;margin-bottom:8px;padding:7px 14px;border:1px solid #cdd9ea;border-radius:10px;background:#fff;color:#3a4d6b;text-decoration:none;font-size:13.5px;font-weight:800;box-shadow:0 2px 8px rgba(31,55,89,.06)">← 一覧に戻る</a>
+    <div class="title-block">
+      <a class="back-link" href="index.html">← 一覧に戻る</a>
       <h1>希薄溶液</h1>
     </div>
-    <button class="fullscreen-btn" id="fullscreen" type="button">全画面表示</button>
+    <button class="fullscreen-btn site-fullscreen-btn" id="fullscreen" type="button" aria-label="全画面表示"><span class="site-fullscreen-icon" aria-hidden="true">⛶</span><span class="btn-text">全画面表示</span></button>
   </div>
   <nav class="tabs" role="tablist">
     <button role="tab" aria-selected="true" data-tab="boiling">① 蒸気圧降下・沸点上昇</button>
@@ -945,7 +946,7 @@ document.querySelectorAll('.panel .panel-tools').forEach(tools=>{
   b.addEventListener('click',async()=>{try{await document.exitFullscreen();}catch(_){}});
   tools.prepend(b);
 });
-document.addEventListener('fullscreenchange',()=>{document.body.classList.toggle('is-fullscreen',!!document.fullscreenElement);document.querySelector('.panel.active input[type=range]')?.dispatchEvent(new Event('input'));});
+document.addEventListener('fullscreenchange',()=>{const active=!!document.fullscreenElement;document.body.classList.toggle('is-fullscreen',active);const fsButton=$('fullscreen');fsButton.querySelector('.btn-text').textContent=active?'全画面を終了':'全画面表示';fsButton.setAttribute('aria-label',active?'全画面を終了':'全画面表示');document.querySelector('.panel.active input[type=range]')?.dispatchEvent(new Event('input'));});
 ['b-water','b-solute','b-molar','b-pressure'].forEach(id=>$(id).addEventListener('input',drawBoiling));
 ['f-water','f-solute','f-molar','f-time'].forEach(id=>$(id).addEventListener('input',drawFreezing));
 ['o-volume','o-solute','o-molar','o-temp'].forEach(id=>$(id).addEventListener('input',drawOsmosis));
@@ -1174,5 +1175,6 @@ document.querySelector('.reset-btn[data-reset="electro"]').addEventListener('cli
 drawBoiling();drawFreezing();drawOsmosis();drawColloid();
 buildEColloidRow();drawSalt();drawProtect();drawElectro();
 </script>
+<script src="site-shell.js"></script>
 </body>
 </html>

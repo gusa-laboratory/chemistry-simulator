@@ -135,6 +135,7 @@
   @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition-duration:.01ms!important}}
   @media(prefers-contrast:more){:root{--ink2:#344055;--line:#aebaca}.molecule-card,.view-block{border-color:#aebaca}}
 </style>
+<link rel="stylesheet" href="site-shell.css">
 </head>
 <body data-view="both" data-tab="alkane">
 <header>
@@ -143,7 +144,7 @@
       <a class="back-link" href="index.html">← 一覧に戻る</a>
       <h1>有機化合物の立体構造</h1>
     </div>
-    <div class="head-actions"><button class="outline-btn" id="fullscreenBtn" type="button" aria-label="全画面表示"><span aria-hidden="true">⛶</span><span class="btn-text">全画面表示</span></button></div>
+    <div class="head-actions"><button class="outline-btn site-fullscreen-btn" id="fullscreenBtn" type="button" aria-label="全画面表示"><span class="site-fullscreen-icon" aria-hidden="true">⛶</span><span class="btn-text">全画面表示</span></button></div>
   </div>
   <nav class="tabs" role="tablist" aria-label="有機化学の単元">
     <button role="tab" id="tab-alkane" aria-controls="panel-alkane" aria-selected="true" tabindex="0" data-tab="alkane">① アルカン</button>
@@ -405,5 +406,6 @@ document.querySelectorAll('.comparison-panel .compare-tools button[aria-pressed=
 const fs=document.getElementById('fullscreenBtn');fs.addEventListener('click',async()=>{try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen();else await document.exitFullscreen()}catch(e){document.getElementById('live').textContent='このブラウザでは全画面表示を開始できませんでした'}});document.addEventListener('fullscreenchange',()=>{const active=!!document.fullscreenElement;document.body.classList.toggle('is-fullscreen',active);fs.querySelector('.btn-text').textContent=active?'全画面を終了':'全画面表示';fs.setAttribute('aria-label',active?'全画面を終了':'全画面表示');requestAnimationFrame(()=>views.forEach(v=>v.resize()))});
 requestAnimationFrame(initVisible);
 </script>
+<script src="site-shell.js"></script>
 </body>
 </html>
