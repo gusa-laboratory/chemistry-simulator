@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>モル・化学量論トレーナー</title>
+<meta name="description" content="質量・物質量・粒子数・気体の体積の変換、組成式、濃度、反応式の量的関係、限定反応物と収率を、図と数値で確かめる授業用教材。演習問題の自動生成つき。">
+<meta name="theme-color" content="#2563eb">
+<link rel="icon" href="icons/icon-192.png">
+<style>
+  :root{
+    --blue:#2563eb; --deep:#173b75; --ink:#172033; --ink2:#526078; --ink3:#8290a5;
+    --bg:#eef3f9; --card:#fff; --line:#d8e1ed; --accent:#f97316;
+    --grid:#e8eef6; --axis:#9aa8bb;
+    --mass:#0891b2; --mol:#2563eb; --num:#7c3aed; --vol:#16a34a;
+    --react:#38bdf8; --prod:#ea580c; --limit:#dc2626;
+    --shadow:0 18px 45px rgba(31,55,89,.1); --shadow-sm:0 7px 22px rgba(31,55,89,.075);
+  }
+  *{box-sizing:border-box}
+  html{min-width:320px;background:var(--bg)}
+  body{margin:0;min-height:100vh;color:var(--ink);font-family:Inter,'Yu Gothic UI','Yu Gothic',Meiryo,sans-serif;-webkit-font-smoothing:antialiased;
+    background:radial-gradient(circle at 5% -4%,rgba(37,99,235,.13),transparent 27rem),radial-gradient(circle at 97% 2%,rgba(14,165,233,.09),transparent 25rem),linear-gradient(180deg,#f6f9fd 0,var(--bg) 30rem)}
+  button,input,select{font:inherit}
+  button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid rgba(37,99,235,.34);outline-offset:3px}
+
+  header{padding:20px clamp(16px,4vw,54px) 0;background:rgba(250,252,255,.94);border-bottom:1px solid rgba(203,215,230,.92);box-shadow:0 4px 18px rgba(31,55,89,.05);position:sticky;top:0;z-index:20}
+  .header-row{display:flex;max-width:1560px;margin:0 auto 14px;gap:22px;align-items:flex-start;justify-content:space-between}
+  .title-block{display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+  .back-link{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 14px;border:1px solid #cdd9ea;border-radius:10px;background:#fff;color:#3a4d6b;text-decoration:none;font-size:13.5px;font-weight:800;box-shadow:0 2px 8px rgba(31,55,89,.06)}
+  .back-link:hover{color:var(--blue);border-color:#8fb0df}
+  h1{margin:0;color:var(--deep);font-size:clamp(22px,2.5vw,32px);line-height:1.25;font-weight:850;letter-spacing:-.035em}
+  .outline-btn{display:inline-flex;align-items:center;gap:7px;padding:9px 13px;border:1px solid #bfd0e7;border-radius:12px;background:#fff;color:var(--deep);box-shadow:var(--shadow-sm);font-size:13px;font-weight:800;cursor:pointer}
+  .outline-btn:hover{color:var(--blue);border-color:#8fb0df}
+  .tabs{display:flex;gap:6px;max-width:1560px;margin:0 auto;overflow-x:auto;scrollbar-width:thin}
+  .tabs button{appearance:none;flex:0 0 auto;border:1px solid transparent;border-bottom:0;border-radius:11px 11px 0 0;background:transparent;cursor:pointer;padding:10px 15px 12px;font-size:13px;font-weight:800;color:#59677c}
+  .tabs button:hover{color:var(--blue);background:rgba(237,244,255,.82)}
+  .tabs button[aria-selected="true"]{border-color:#cfd9e6;background:var(--bg);color:var(--blue);box-shadow:inset 0 3px 0 var(--blue)}
+
+  main{max-width:1560px;margin:0 auto;padding:20px clamp(14px,3.5vw,50px) 46px}
+  .panel{display:none}
+  .panel.active{display:block}
+  .panel-tools{display:flex;align-items:center;justify-content:center;gap:9px;margin-bottom:13px;flex-wrap:wrap}
+  .switch{display:inline-grid;grid-auto-flow:column;padding:4px;border:1px solid #cfdae8;border-radius:14px;background:#e4ebf4;box-shadow:inset 0 1px 2px rgba(31,55,89,.06)}
+  .switch button{border:0;border-radius:10px;background:transparent;color:var(--ink2);padding:8px 14px;cursor:pointer;font-size:12.5px;font-weight:800}
+  .switch button[aria-pressed="true"]{background:#fff;color:var(--deep);box-shadow:0 2px 8px rgba(31,55,89,.14)}
+
+  .layout{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(292px,.92fr);gap:14px;align-items:start}
+  .chart-card,.card{border:1px solid var(--line);border-radius:18px;background:var(--card);box-shadow:var(--shadow-sm)}
+  .chart-card{position:relative;min-width:0;padding:10px 14px 14px;overflow:hidden;border-top:4px solid #0891b2}
+  .chart-card::before{content:attr(data-label);display:block;margin:0 0 2px 3px;color:var(--ink3);font:850 9.5px/1.4 Inter,Arial,sans-serif;letter-spacing:.11em}
+  .chart-card svg{display:block;width:100%;height:auto}
+  .side{display:flex;flex-direction:column;gap:11px;min-width:0}
+  .card{padding:12px 14px 13px}
+  .card h2{margin:0 0 9px;color:var(--deep);font-size:13px;font-weight:850}
+  .law{border-top:4px solid var(--blue)}
+  .law-copy{color:var(--ink2);font-size:12.5px;font-weight:700;line-height:1.7}
+  .law-copy b{color:var(--deep);font-size:14px}
+  .law-copy .eq{display:inline-block;margin-top:3px;color:var(--deep);font-weight:850}
+
+  .ctrl{margin-bottom:9px}
+  .ctrl:last-of-type{margin-bottom:0}
+  .ctrl label{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:3px;color:var(--ink2);font-size:11.5px;font-weight:800}
+  .ctrl .val{color:var(--deep);font-size:12px;font-weight:850;font-variant-numeric:tabular-nums}
+  input[type=range]{width:100%;accent-color:var(--blue)}
+  .row{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-top:9px}
+  .row.tight{margin-top:0}
+  .btn{padding:7px 12px;border:1px solid #cdd9e8;border-radius:10px;background:#fff;color:var(--ink2);font-size:11.5px;font-weight:850;cursor:pointer}
+  .btn:hover{color:var(--blue);border-color:#8fb0df}
+  .btn.primary{border-color:#8fb0df;background:#edf4ff;color:var(--blue)}
+  select,input[type=number]{padding:6px 9px;border:1px solid #cdd9e8;border-radius:9px;background:#fff;color:var(--ink2);font-size:11.5px;font-weight:800;max-width:100%}
+  select{flex:1 1 auto;min-width:0}
+  .readout{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:11.5px}
+  .readout .k{color:var(--ink3);font-weight:800}
+  .readout .v{color:var(--deep);font-weight:850;font-variant-numeric:tabular-nums;text-align:right}
+  .readout .v.dep{color:var(--accent)}
+  .note{margin:9px 0 0;color:var(--ink2);font-size:11px;font-weight:700;line-height:1.6}
+  .verdict{margin-top:9px;padding:8px 11px;border-left:4px solid var(--blue);border-radius:9px;background:#eef4ff;color:#31445f;font-size:12px;font-weight:800;line-height:1.6}
+  .verdict.warn{border-left-color:var(--limit);background:#fef2f2;color:#7f1d1d}
+  .verdict.ok{border-left-color:var(--vol);background:#f0fdf4;color:#14532d}
+
+  table.calc{width:100%;border-collapse:collapse;font-size:11px;font-variant-numeric:tabular-nums}
+  table.calc th,table.calc td{padding:5px 6px;border-bottom:1px solid #e7edf5;text-align:right;font-weight:800}
+  table.calc th{color:var(--ink3);font-size:9.5px}
+  table.calc td{color:var(--deep)}
+  table.calc td.el,table.calc th.el{text-align:left;color:var(--ink2)}
+
+  /* ⑥ 演習 */
+  .quiz-card{border:1px solid var(--line);border-top:4px solid var(--accent);border-radius:18px;background:var(--card);box-shadow:var(--shadow-sm);padding:20px 24px 24px;min-height:420px;display:flex;flex-direction:column}
+  .quiz-meta{display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+  .chip{padding:4px 10px;border-radius:999px;background:#edf4ff;color:var(--blue);font-size:10.5px;font-weight:850;letter-spacing:.04em}
+  .chip.lv{background:#fff7ed;color:#c2410c}
+  .quiz-q{margin:0 0 16px;color:var(--ink);font-size:clamp(16px,1.7vw,21px);font-weight:800;line-height:1.85}
+  .quiz-q b{color:var(--deep)}
+  .quiz-given{margin:0 0 16px;padding:11px 14px;border-radius:11px;background:#f5f8fc;color:var(--ink2);font-size:12.5px;font-weight:800;line-height:1.7}
+  .quiz-steps{margin:0;padding:0;list-style:none;border-top:1px dashed #dbe4ef;padding-top:12px}
+  .quiz-steps li{margin-bottom:9px;color:var(--ink2);font-size:13px;font-weight:750;line-height:1.7}
+  .quiz-steps li b{color:var(--deep);font-weight:850}
+  .quiz-steps li::before{content:counter(s);counter-increment:s;display:inline-grid;place-items:center;width:19px;height:19px;margin-right:8px;border-radius:6px;background:#e4ebf4;color:var(--deep);font-size:10.5px;font-weight:900;vertical-align:1px}
+  .quiz-steps{counter-reset:s}
+  .quiz-answer{margin-top:auto;padding-top:14px}
+  .answer-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .answer-row input[type=number]{width:150px;font-size:16px;font-weight:850;color:var(--deep);text-align:right}
+  .answer-unit{color:var(--ink2);font-size:13px;font-weight:850}
+  .judge{margin-top:11px;padding:10px 13px;border-radius:11px;font-size:13.5px;font-weight:850;line-height:1.6}
+  .judge.correct{background:#f0fdf4;color:#14532d;border-left:4px solid var(--vol)}
+  .judge.wrong{background:#fef2f2;color:#7f1d1d;border-left:4px solid var(--limit)}
+  .judge[hidden]{display:none}
+
+  footer{padding:0 20px 26px;text-align:center;color:#a3adbc;font-size:10px;font-weight:600;letter-spacing:.04em}
+
+  body.is-fullscreen{height:100vh;overflow:hidden;display:flex;flex-direction:column}
+  body.is-fullscreen header{position:static;padding:8px clamp(12px,2vw,30px) 0;flex:0 0 auto}
+  body.is-fullscreen .header-row{margin-bottom:5px}
+  body.is-fullscreen h1{font-size:21px}
+  body.is-fullscreen .back-link{display:none}
+  body.is-fullscreen .tabs button{padding:6px 12px 8px;font-size:12.5px}
+  body.is-fullscreen main{padding:7px clamp(10px,2vw,26px) 8px;max-width:none;width:100%;flex:1;min-height:0;display:flex;flex-direction:column}
+  body.is-fullscreen .panel.active{flex:1;min-height:0;display:flex;flex-direction:column}
+  body.is-fullscreen .panel-tools{flex:0 0 auto;margin-bottom:6px}
+  body.is-fullscreen .layout{flex:1;min-height:0;grid-template-columns:minmax(0,1.75fr) minmax(300px,.85fr)}
+  body.is-fullscreen .chart-card{min-height:0;display:flex;flex-direction:column;padding:6px 10px 8px}
+  body.is-fullscreen .chart-card svg{flex:1;min-height:0;height:100%}
+  body.is-fullscreen .quiz-card{min-height:0}
+  body.is-fullscreen .quiz-q{font-size:clamp(19px,2vw,27px)}
+  body.is-fullscreen .quiz-steps li{font-size:15px}
+  body.is-fullscreen .side{min-height:0;overflow:auto;gap:8px}
+  body.is-fullscreen .card{padding:9px 11px 10px}
+  body.is-fullscreen .law-copy{font-size:13.5px}
+  body.is-fullscreen .readout{font-size:12.5px}
+  body.is-fullscreen .ctrl label{font-size:12.5px}
+  body.is-fullscreen footer{display:none}
+
+  @media(max-width:1000px){
+    .layout{grid-template-columns:1fr}
+    body.is-fullscreen{height:auto;overflow:auto;display:block}
+    body.is-fullscreen .layout{grid-template-columns:1fr}
+  }
+  @media(max-width:560px){
+    header{position:static;padding:14px 12px 0}
+    .btn-text{display:none}
+    main{padding:16px 11px 30px}
+    .tabs button{padding:9px 11px 11px;font-size:12px}
+    .quiz-card{padding:15px 16px 18px}
+  }
+  @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<link rel="stylesheet" href="site-shell.css">
+</head>
+<body>
+<header>
+  <div class="header-row">
+    <div class="title-block">
+      <a class="back-link" href="index.html">← 一覧に戻る</a>
+      <h1>モル・化学量論トレーナー</h1>
+    </div>
+    <button class="outline-btn site-fullscreen-btn" id="fullscreenBtn" type="button" aria-label="全画面表示"><span class="site-fullscreen-icon" aria-hidden="true">⛶</span><span class="btn-text">全画面表示</span></button>
+  </div>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="学習テーマ">
+    <button type="button" role="tab" aria-selected="true"  data-tab="hub">① mol 変換ハブ</button>
+    <button type="button" role="tab" aria-selected="false" data-tab="formula">② 組成式・分子式</button>
+    <button type="button" role="tab" aria-selected="false" data-tab="conc">③ 濃度</button>
+    <button type="button" role="tab" aria-selected="false" data-tab="react">④ 反応式の量的関係</button>
+    <button type="button" role="tab" aria-selected="false" data-tab="limit">⑤ 限定反応物・収率</button>
+    <button type="button" role="tab" aria-selected="false" data-tab="drill">⑥ 演習ジェネレータ</button>
+  </nav>
+</header>
+<main>
+
+  <!-- ① mol 変換ハブ -->
+  <section class="panel active" id="panel-hub">
+    <div class="layout">
+      <div class="chart-card" data-label="CONVERSION MAP" id="chartwrap-hub">
+        <svg id="chart-hub" viewBox="0 0 760 480" role="img" aria-label="質量・物質量・粒子数・気体の体積の変換図"></svg>
+      </div>
+      <div class="side">
+        <div class="card law">
+          <div class="law-copy">
+            <b>すべては mol を経由する</b><br>
+            質量・粒子数・気体の体積は直接は結びつかない。いったん<b>物質量 n</b> に直してから、別の量へ移す。<br>
+            <span class="eq">n = m / M ＝ N / N<sub>A</sub> ＝ V / 22.4</span>
+          </div>
+        </div>
+        <div class="card">
+          <h2>物質と入力</h2>
+          <div class="row tight">
+            <select id="hub-sub" aria-label="物質を選ぶ"></select>
+          </div>
+          <div class="row">
+            <select id="hub-input" aria-label="入力する量を選ぶ">
+              <option value="mass">質量から求める</option>
+              <option value="mol" selected>物質量から求める</option>
+              <option value="num">粒子数から求める</option>
+              <option value="vol">気体の体積から求める</option>
+            </select>
+          </div>
+          <div class="ctrl" style="margin-top:11px">
+            <label><span id="hub-slider-label">物質量 n</span> <span class="val"><span id="hub-slider-val">1.00</span> <span id="hub-slider-unit">mol</span></span></label>
+            <input type="range" id="hub-slider" min="0.01" max="10" step="0.01" value="1">
+          </div>
+          <div class="row">
+            <button class="btn" id="hub-reset" type="button">初期値</button>
+          </div>
+        </div>
+        <div class="card">
+          <h2>4つの量</h2>
+          <div class="readout" id="hub-readout"></div>
+          <div class="verdict" id="hub-verdict"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ② 組成式・分子式 -->
+  <section class="panel" id="panel-formula">
+    <div class="layout">
+      <div class="chart-card" data-label="EMPIRICAL FORMULA" id="chartwrap-formula">
+        <svg id="chart-formula" viewBox="0 0 760 480" role="img" aria-label="質量パーセントから組成式を求める手順"></svg>
+      </div>
+      <div class="side">
+        <div class="card law">
+          <div class="law-copy">
+            <b>組成式は「mol の比」から出る</b><br>
+            質量の比のままでは原子の個数の比にならない。各元素の質量を原子量で割って mol に直し、その比を最も簡単な整数比にする。<br>
+            <span class="eq">分子式 ＝ 組成式 × n（n ＝ 分子量 ÷ 組成式量）</span>
+          </div>
+        </div>
+        <div class="card">
+          <h2>試料を選ぶ</h2>
+          <div class="row tight">
+            <select id="f-preset" aria-label="試料を選ぶ"></select>
+          </div>
+          <div class="row">
+            <button class="btn primary" id="f-next" type="button">次の段階へ ▶</button>
+            <button class="btn" id="f-all" type="button">すべて表示</button>
+            <button class="btn" id="f-reset" type="button">最初から</button>
+          </div>
+          <p class="note">段階を1つずつ出しながら、生徒に次の計算を予想させる使い方を想定。</p>
+        </div>
+        <div class="card">
+          <h2>計算の内訳</h2>
+          <table class="calc">
+            <thead><tr><th class="el">元素</th><th>質量%</th><th>質量(g)</th><th>原子量</th><th>mol</th><th>比</th></tr></thead>
+            <tbody id="f-table"></tbody>
+          </table>
+        </div>
+        <div class="card">
+          <h2>結果</h2>
+          <div class="readout" id="f-readout"></div>
+          <div class="verdict" id="f-verdict"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ③ 濃度 -->
+  <section class="panel" id="panel-conc">
+    <div class="layout">
+      <div class="chart-card" data-label="DILUTION CURVE" id="chartwrap-conc">
+        <svg id="chart-conc" viewBox="0 0 760 480" role="img" aria-label="水を加えたときのモル濃度の変化"></svg>
+        <div class="tooltip" id="tip-conc"></div>
+      </div>
+      <div class="side">
+        <div class="card law">
+          <div class="law-copy">
+            <b>3つの濃度は「何で割るか」が違うだけ</b><br>
+            <span class="eq">質量% ＝ 溶質の質量 ÷ <b>溶液</b>の質量</span><br>
+            <span class="eq">モル濃度 ＝ 溶質の mol ÷ <b>溶液</b>の体積(L)</span><br>
+            <span class="eq">質量モル濃度 ＝ 溶質の mol ÷ <b>溶媒</b>の質量(kg)</span>
+          </div>
+          <div class="diagram-block" style="margin-top:9px;padding-top:9px;border-top:1px dashed #dbe4ef">
+            <span style="display:block;margin-bottom:3px;color:var(--ink3);font:850 9px/1.3 Inter,Arial,sans-serif;letter-spacing:.11em">BEAKER MODEL</span>
+            <svg id="beaker-conc" viewBox="0 0 300 150" role="img" aria-label="ビーカーの模式図"></svg>
+          </div>
+        </div>
+        <div class="card">
+          <h2>変数（スライダーで操作）</h2>
+          <div class="row tight">
+            <select id="c-sub" aria-label="溶質を選ぶ"></select>
+          </div>
+          <div class="ctrl" style="margin-top:11px">
+            <label>溶質の質量 <span class="val"><span id="c-w-val">58.4</span> g</span></label>
+            <input type="range" id="c-w" min="1" max="200" step="0.1" value="58.4">
+          </div>
+          <div class="ctrl">
+            <label>溶液の体積 <span class="val"><span id="c-v-val">1000</span> mL</span></label>
+            <input type="range" id="c-v" min="50" max="1000" step="10" value="1000">
+          </div>
+          <div class="ctrl">
+            <label>溶液の密度 <span class="val"><span id="c-d-val">1.05</span> g/cm³</span></label>
+            <input type="range" id="c-d" min="0.9" max="1.4" step="0.01" value="1.05">
+          </div>
+          <div class="ctrl">
+            <label>加える水 <span class="val"><span id="c-add-val">0</span> mL</span></label>
+            <input type="range" id="c-add" min="0" max="1000" step="10" value="0">
+          </div>
+          <div class="row">
+            <button class="btn" id="c-reset" type="button">初期値</button>
+          </div>
+        </div>
+        <div class="card">
+          <h2>現在の状態</h2>
+          <div class="readout" id="c-readout"></div>
+          <div class="verdict" id="c-verdict"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ④ 反応式の量的関係 -->
+  <section class="panel" id="panel-react">
+    <div class="panel-tools">
+      <div class="switch" role="group" aria-label="表示する単位">
+        <button type="button" data-runit="mol" aria-pressed="true">物質量（mol）</button>
+        <button type="button" data-runit="g" aria-pressed="false">質量（g）</button>
+      </div>
+    </div>
+    <div class="layout">
+      <div class="chart-card" data-label="STOICHIOMETRIC RATIO" id="chartwrap-react">
+        <svg id="chart-react" viewBox="0 0 760 480" role="img" aria-label="反応式の係数と量の関係"></svg>
+      </div>
+      <div class="side">
+        <div class="card law">
+          <div class="law-copy">
+            <b>係数の比 ＝ mol の比</b><br>
+            係数は質量の比ではない。質量から質量を求めるときも、いったん mol に直してから係数比を使い、また質量へ戻す。<br>
+            <span class="eq">g → mol → （係数比）→ mol → g</span>
+          </div>
+        </div>
+        <div class="card">
+          <h2>反応と基準</h2>
+          <div class="row tight"><select id="r-rx" aria-label="反応を選ぶ"></select></div>
+          <div class="row"><select id="r-base" aria-label="基準にする物質を選ぶ"></select></div>
+          <div class="ctrl" style="margin-top:11px">
+            <label><span id="r-amt-label">基準の量</span> <span class="val"><span id="r-amt-val">2.00</span> <span id="r-amt-unit">mol</span></span></label>
+            <input type="range" id="r-amt" min="0.1" max="10" step="0.1" value="2">
+          </div>
+          <div class="row">
+            <button class="btn" id="r-reset" type="button">初期値</button>
+          </div>
+        </div>
+        <div class="card">
+          <h2>各物質の量</h2>
+          <div class="readout" id="r-readout"></div>
+          <div class="verdict" id="r-verdict"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑤ 限定反応物・収率 -->
+  <section class="panel" id="panel-limit">
+    <div class="layout">
+      <div class="chart-card" data-label="BEFORE AND AFTER REACTION" id="chartwrap-limit">
+        <svg id="chart-limit" viewBox="0 0 760 480" role="img" aria-label="反応前と反応後の物質量の棒グラフ"></svg>
+      </div>
+      <div class="side">
+        <div class="card law">
+          <div class="law-copy">
+            <b>足りない方が反応を打ち切る</b><br>
+            反応は、先に無くなった物質（限定反応物）のところで止まる。もう一方は余る。<br>
+            <span class="eq">どちらが限定か ＝ 「量 ÷ 係数」が小さい方</span>
+          </div>
+        </div>
+        <div class="card">
+          <h2>反応と仕込み量</h2>
+          <div class="row tight"><select id="l-rx" aria-label="反応を選ぶ"></select></div>
+          <div class="ctrl" style="margin-top:11px">
+            <label><span id="l-a-label">物質A</span> <span class="val"><span id="l-a-val">3.00</span> mol</span></label>
+            <input type="range" id="l-a" min="0" max="10" step="0.1" value="3">
+          </div>
+          <div class="ctrl">
+            <label><span id="l-b-label">物質B</span> <span class="val"><span id="l-b-val">2.00</span> mol</span></label>
+            <input type="range" id="l-b" min="0" max="10" step="0.1" value="2">
+          </div>
+          <div class="ctrl">
+            <label>実際に得られた量 <span class="val"><span id="l-y-val">100</span> ％</span></label>
+            <input type="range" id="l-y" min="0" max="100" step="1" value="100">
+          </div>
+          <div class="row">
+            <button class="btn" id="l-reset" type="button">初期値</button>
+          </div>
+        </div>
+        <div class="card">
+          <h2>現在の状態</h2>
+          <div class="readout" id="l-readout"></div>
+          <div class="verdict" id="l-verdict"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑥ 演習ジェネレータ -->
+  <section class="panel" id="panel-drill">
+    <div class="layout">
+      <div class="quiz-card">
+        <div class="quiz-meta">
+          <span class="chip lv" id="d-level">基礎</span>
+          <span class="chip" id="d-seed">問題 #1</span>
+        </div>
+        <p class="quiz-q" id="d-question"></p>
+        <div class="quiz-given" id="d-given"></div>
+        <ol class="quiz-steps" id="d-steps" hidden></ol>
+        <div class="quiz-answer">
+          <div class="answer-row">
+            <label for="d-answer" style="color:var(--ink2);font-size:13px;font-weight:850">答え</label>
+            <input type="number" id="d-answer" step="any" placeholder="数値を入力">
+            <span class="answer-unit" id="d-unit"></span>
+            <button class="btn primary" id="d-check" type="button">答え合わせ</button>
+          </div>
+          <div class="judge" id="d-judge" hidden></div>
+        </div>
+      </div>
+      <div class="side">
+        <div class="card law">
+          <div class="law-copy">
+            <b>問題番号を板書すれば全員同じ問題</b><br>
+            同じ番号なら、どの端末でも必ず同じ問題が出る。小テストや宿題の指定に使える。
+          </div>
+        </div>
+        <div class="card">
+          <h2>出題設定</h2>
+          <div class="row tight">
+            <select id="d-diff" aria-label="難易度">
+              <option value="basic" selected>基礎（mol の変換）</option>
+              <option value="std">標準（反応式の量的関係）</option>
+              <option value="adv">応用（限定反応物・収率）</option>
+            </select>
+          </div>
+          <div class="row">
+            <label for="d-seed-input" style="color:var(--ink2);font-size:11.5px;font-weight:800">問題番号</label>
+            <input type="number" id="d-seed-input" min="1" max="9999" step="1" value="1" style="width:88px">
+            <button class="btn" id="d-go" type="button">この番号で出題</button>
+          </div>
+          <div class="row">
+            <button class="btn primary" id="d-next" type="button">次の問題 ▶</button>
+            <button class="btn" id="d-show" type="button">解き方を見る</button>
+          </div>
+          <p class="note">答えは有効数字3桁程度で入力。誤差2％以内なら正解と判定する。</p>
+        </div>
+        <div class="card">
+          <h2>成績</h2>
+          <div class="readout" id="d-score"></div>
+          <div class="row">
+            <button class="btn" id="d-clear" type="button">成績をリセット</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+<footer>大阪女学院中学校・高等学校　Yuto Yamaguchi</footer>
+<script>
+'use strict';
+
+/* ============================================================
+   共通ユーティリティ（他教材と同じ描画エンジン）
+   ============================================================ */
+const $ = id => document.getElementById(id);
+const fmt = (x, d) => (isFinite(x) ? x.toFixed(d) : '–');
+const clamp = (x, lo, hi) => Math.max(lo, Math.min(hi, x));
+const NA = 6.02e23;          // アボガドロ定数 /mol
+const VM = 22.4;             // 標準状態の気体のモル体積 L/mol
+
+const SUP = '⁰¹²³⁴⁵⁶⁷⁸⁹';
+function fmtSci(x, digits) {
+  if (!isFinite(x)) return '–';
+  if (x === 0) return '0';
+  const sign = x < 0 ? '−' : '';
+  x = Math.abs(x);
+  let e = Math.floor(Math.log10(x));
+  let m = (x / Math.pow(10, e)).toPrecision(digits ?? 3);
+  if (+m >= 10) { m = (+m / 10).toPrecision(digits ?? 3); e++; }
+  const es = String(e).split('').map(c => (c === '-' ? '⁻' : SUP[+c])).join('');
+  return `${sign}${m}×10${es}`;
+}
+// 有効数字3桁で読みやすく
+const sig3 = x => (!isFinite(x) ? '–' : Math.abs(x) >= 1000 || (Math.abs(x) < 0.01 && x !== 0) ? fmtSci(x) : (+x.toPrecision(3)).toString());
+
+const W = 760, H = 480, ML = 80, MR = 26, MT = 26, MB = 62;
+const PW = W - ML - MR, PH = H - MT - MB;
+
+function frame(o) {
+  const xMin = o.xMin ?? 0, yMin = o.yMin ?? 0;
+  const sx = x => ML + ((x - xMin) / (o.xMax - xMin)) * PW;
+  const sy = y => MT + PH - ((y - yMin) / (o.yMax - yMin)) * PH;
+  let s = '';
+  for (const t of (o.xTicks || [])) {
+    if (t.v === xMin) continue;
+    s += `<line x1="${fmt(sx(t.v),1)}" y1="${MT}" x2="${fmt(sx(t.v),1)}" y2="${MT + PH}" stroke="var(--grid)" stroke-width="1"/>`;
+  }
+  for (const t of (o.yTicks || [])) {
+    if (t.v === yMin) continue;
+    s += `<line x1="${ML}" y1="${fmt(sy(t.v),1)}" x2="${ML + PW}" y2="${fmt(sy(t.v),1)}" stroke="var(--grid)" stroke-width="1"/>`;
+  }
+  s += `<line x1="${ML}" y1="${MT + PH}" x2="${ML + PW}" y2="${MT + PH}" stroke="var(--axis)" stroke-width="1.5"/>`;
+  s += `<line x1="${ML}" y1="${MT}" x2="${ML}" y2="${MT + PH}" stroke="var(--axis)" stroke-width="1.5"/>`;
+  for (const t of (o.xTicks || [])) s += `<text x="${fmt(sx(t.v),1)}" y="${MT + PH + 22}" text-anchor="middle" font-size="14" fill="var(--ink2)">${t.label}</text>`;
+  for (const t of (o.yTicks || [])) s += `<text x="${ML - 10}" y="${fmt(sy(t.v) + 5,1)}" text-anchor="end" font-size="14" fill="var(--ink2)">${t.label}</text>`;
+  if (o.xLabel) s += `<text x="${ML + PW / 2}" y="${H - 14}" text-anchor="middle" font-size="16" fill="var(--ink)">${o.xLabel}</text>`;
+  if (o.yLabel) s += `<text x="20" y="${MT + PH / 2}" text-anchor="middle" font-size="16" fill="var(--ink)" transform="rotate(-90 20 ${MT + PH / 2})">${o.yLabel}</text>`;
+  return { sx, sy, axesSvg: s };
+}
+
+function ticks(min, max, step, dec) {
+  const out = [];
+  for (let v = min; v <= max + step * 1e-6; v += step) out.push({ v, label: fmt(v, dec ?? 0) });
+  return out;
+}
+
+function polyline(pts, sx, sy, stroke, width, dash) {
+  if (!pts.length) return '';
+  const d = pts.map((p, i) => (i ? 'L' : 'M') + fmt(sx(p[0]), 1) + ' ' + fmt(sy(p[1]), 1)).join(' ');
+  return `<path d="${d}" fill="none" stroke="${stroke}" stroke-width="${width}"${dash ? ` stroke-dasharray="${dash}"` : ''} stroke-linejoin="round" stroke-linecap="round"/>`;
+}
+
+function marker(x, y, sx, sy, color) {
+  return `<circle cx="${fmt(sx(x),1)}" cy="${fmt(sy(y),1)}" r="7" fill="${color || 'var(--accent)'}" stroke="#fff" stroke-width="2.4"/>`;
+}
+
+function guideLines(x, y, sx, sy) {
+  const gx = fmt(sx(x), 1), gy = fmt(sy(y), 1);
+  return `<line x1="${gx}" y1="${gy}" x2="${gx}" y2="${MT + PH}" stroke="var(--accent)" stroke-width="1" stroke-dasharray="4 4"/>`
+       + `<line x1="${ML}" y1="${gy}" x2="${gx}" y2="${gy}" stroke="var(--accent)" stroke-width="1" stroke-dasharray="4 4"/>`;
+}
+
+function setReadout(el, rows) {
+  el.innerHTML = rows.map(r => `<span class="k">${r[0]}</span><span class="v${r[2] ? ' dep' : ''}">${r[1]}</span>`).join('');
+}
+
+// 種類ごとに1〜2本の棒を並べる汎用グラフ
+// o: {yMax, yLabel, cats:[{label, bars:[{v,color,opacity}]}], legend:[{label,color}], footNote}
+function drawBars(id, o) {
+  const { sy, axesSvg } = frame({ xMax: 1, yMax: o.yMax, yTicks: o.yTicks, yLabel: o.yLabel });
+  let s = axesSvg;
+  const n = o.cats.length, gw = PW / n;
+  o.cats.forEach((cat, ci) => {
+    const gx = ML + gw * ci + gw / 2;
+    const bn = cat.bars.length, bw = Math.min(64, (gw - 26) / bn);
+    cat.bars.forEach((b, bi) => {
+      const cx = gx + (bi - (bn - 1) / 2) * (bw + 8);
+      const y = sy(Math.max(0, b.v)), h = Math.max(0, MT + PH - y);
+      s += `<rect x="${fmt(cx - bw / 2,1)}" y="${fmt(y,1)}" width="${fmt(bw,1)}" height="${fmt(h,1)}" rx="5" fill="${b.color}" opacity="${b.opacity ?? 1}"/>`;
+      if (h > 1 || b.v === 0) s += `<text x="${fmt(cx,1)}" y="${fmt(y - 8,1)}" text-anchor="middle" font-size="13" font-weight="800" fill="var(--ink2)">${b.text ?? sig3(b.v)}</text>`;
+    });
+    s += `<text x="${fmt(gx,1)}" y="${MT + PH + 24}" text-anchor="middle" font-size="15" font-weight="850" fill="${cat.color || 'var(--deep)'}">${cat.label}</text>`;
+    if (cat.sub) s += `<text x="${fmt(gx,1)}" y="${MT + PH + 44}" text-anchor="middle" font-size="12" font-weight="800" fill="var(--ink3)">${cat.sub}</text>`;
+  });
+  if (o.legend) {
+    let dx = 0;
+    o.legend.forEach(it => {
+      s += `<rect x="${ML + 16 + dx}" y="${MT + 8}" width="12" height="12" rx="3" fill="${it.color}" opacity="${it.opacity ?? 1}"/>`;
+      s += `<text x="${ML + 16 + dx + 17}" y="${MT + 18}" font-size="13" fill="var(--ink2)" font-weight="700">${it.label}</text>`;
+      dx += 26 + String(it.label).length * 8.6;
+    });
+  }
+  $(id).innerHTML = s;
+}
+
+/* ============================================================
+   物質・反応のデータ
+   ============================================================ */
+const ATOMIC = { H: 1.008, C: 12.01, N: 14.01, O: 16.00, Na: 22.99, Mg: 24.31, S: 32.07, Cl: 35.45, Ca: 40.08, Fe: 55.85 };
+
+const SUBSTANCES = [
+  { f: 'H₂',        name: '水素',            M: 2.02,   gas: true },
+  { f: 'O₂',        name: '酸素',            M: 32.00,  gas: true },
+  { f: 'N₂',        name: '窒素',            M: 28.02,  gas: true },
+  { f: 'CO₂',       name: '二酸化炭素',      M: 44.01,  gas: true },
+  { f: 'CH₄',       name: 'メタン',          M: 16.04,  gas: true },
+  { f: 'NH₃',       name: 'アンモニア',      M: 17.03,  gas: true },
+  { f: 'H₂O',       name: '水',              M: 18.02,  gas: false },
+  { f: 'NaCl',      name: '塩化ナトリウム',  M: 58.44,  gas: false },
+  { f: 'CaCO₃',     name: '炭酸カルシウム',  M: 100.09, gas: false },
+  { f: 'C₆H₁₂O₆',   name: 'グルコース',      M: 180.16, gas: false },
+];
+
+// side: -1 反応物 / +1 生成物
+const REACTIONS = [
+  { id: 'water', eq: '2H₂ + O₂ → 2H₂O', sp: [
+    { f: 'H₂', c: 2, M: 2.02, gas: true, side: -1 },
+    { f: 'O₂', c: 1, M: 32.00, gas: true, side: -1 },
+    { f: 'H₂O', c: 2, M: 18.02, gas: false, side: 1 }] },
+  { id: 'methane', eq: 'CH₄ + 2O₂ → CO₂ + 2H₂O', sp: [
+    { f: 'CH₄', c: 1, M: 16.04, gas: true, side: -1 },
+    { f: 'O₂', c: 2, M: 32.00, gas: true, side: -1 },
+    { f: 'CO₂', c: 1, M: 44.01, gas: true, side: 1 },
+    { f: 'H₂O', c: 2, M: 18.02, gas: false, side: 1 }] },
+  { id: 'ammonia', eq: 'N₂ + 3H₂ → 2NH₃', sp: [
+    { f: 'N₂', c: 1, M: 28.02, gas: true, side: -1 },
+    { f: 'H₂', c: 3, M: 2.02, gas: true, side: -1 },
+    { f: 'NH₃', c: 2, M: 17.03, gas: true, side: 1 }] },
+  { id: 'magnesium', eq: '2Mg + O₂ → 2MgO', sp: [
+    { f: 'Mg', c: 2, M: 24.31, gas: false, side: -1 },
+    { f: 'O₂', c: 1, M: 32.00, gas: true, side: -1 },
+    { f: 'MgO', c: 2, M: 40.31, gas: false, side: 1 }] },
+  { id: 'limestone', eq: 'CaCO₃ → CaO + CO₂', sp: [
+    { f: 'CaCO₃', c: 1, M: 100.09, gas: false, side: -1 },
+    { f: 'CaO', c: 1, M: 56.08, gas: false, side: 1 },
+    { f: 'CO₂', c: 1, M: 44.01, gas: true, side: 1 }] },
+  { id: 'glucose', eq: 'C₆H₁₂O₆ + 6O₂ → 6CO₂ + 6H₂O', sp: [
+    { f: 'C₆H₁₂O₆', c: 1, M: 180.16, gas: false, side: -1 },
+    { f: 'O₂', c: 6, M: 32.00, gas: true, side: -1 },
+    { f: 'CO₂', c: 6, M: 44.01, gas: true, side: 1 },
+    { f: 'H₂O', c: 6, M: 18.02, gas: false, side: 1 }] },
+];
+const TWO_REACTANT = REACTIONS.filter(r => r.sp.filter(s => s.side < 0).length === 2);
+
+/* ============================================================
+   ① mol 変換ハブ
+   ============================================================ */
+const hub = { sub: 0, input: 'mol' };
+const HUB_RANGES = {
+  mass: { min: 0.1, max: 500, step: 0.1, unit: 'g', label: '質量 m', dec: 1 },
+  mol:  { min: 0.01, max: 10, step: 0.01, unit: 'mol', label: '物質量 n', dec: 2 },
+  num:  { min: 0.06, max: 60, step: 0.01, unit: '×10²³ 個', label: '粒子数 N', dec: 2 },
+  vol:  { min: 0.1, max: 224, step: 0.1, unit: 'L', label: '気体の体積 V', dec: 1 },
+};
+
+SUBSTANCES.forEach((s, i) => {
+  const o = document.createElement('option');
+  o.value = i; o.textContent = `${s.f}（${s.name}）　M = ${s.M}`;
+  $('hub-sub').appendChild(o);
+});
+$('hub-sub').value = 6;   // 既定は水
+
+// 現在の入力値から物質量 n を出す
+function hubMol() {
+  const v = +$('hub-slider').value, s = SUBSTANCES[+$('hub-sub').value];
+  if (hub.input === 'mass') return v / s.M;
+  if (hub.input === 'num') return v * 1e23 / NA;
+  if (hub.input === 'vol') return v / VM;
+  return v;
+}
+
+function hubBox(b, title, value, color, hot) {
+  const x = b.cx - b.hw, y = b.cy - b.hh, w = b.hw * 2, h = b.hh * 2;
+  return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="14" fill="${hot ? '#fff7ed' : '#fff'}" stroke="${hot ? 'var(--accent)' : color}" stroke-width="${hot ? 3 : 2}"/>`
+    + `<text x="${b.cx}" y="${y + 28}" text-anchor="middle" font-size="15" font-weight="850" fill="${color}">${title}</text>`
+    + `<text x="${b.cx}" y="${y + 62}" text-anchor="middle" font-size="21" font-weight="850" fill="var(--deep)">${value}</text>`;
+}
+
+// 箱の中心から (dx,dy) 方向へ進んだとき、箱の枠と交わる点
+function edgePoint(b, dx, dy) {
+  const tx = dx !== 0 ? b.hw / Math.abs(dx) : Infinity;
+  const ty = dy !== 0 ? b.hh / Math.abs(dy) : Infinity;
+  const t = Math.min(tx, ty);
+  return [b.cx + dx * t, b.cy + dy * t];
+}
+
+// 箱 a の縁から箱 b の縁へ矢印を引く。offset で往復2本を左右に振り分ける
+function hubArrow(a, b, label, hot, offset) {
+  const dx = b.cx - a.cx, dy = b.cy - a.cy, len = Math.hypot(dx, dy) || 1;
+  const ux = dx / len, uy = dy / len, px = -uy, py = ux;
+  const o = offset ?? 0;
+  const [sx0, sy0] = edgePoint(a, ux, uy), [ex0, ey0] = edgePoint(b, -ux, -uy);
+  const x1 = sx0 + px * o + ux * 5, y1 = sy0 + py * o + uy * 5;
+  const x2 = ex0 + px * o - ux * 5, y2 = ey0 + py * o - uy * 5;
+  const hx = x2 - ux * 12, hy = y2 - uy * 12;
+  const color = hot ? 'var(--accent)' : '#c3cfdd';
+  let s = `<line x1="${fmt(x1,1)}" y1="${fmt(y1,1)}" x2="${fmt(hx,1)}" y2="${fmt(hy,1)}" stroke="${color}" stroke-width="${hot ? 3.2 : 2}"/>`;
+  s += `<polygon points="${fmt(x2,1)},${fmt(y2,1)} ${fmt(hx + px * 6,1)},${fmt(hy + py * 6,1)} ${fmt(hx - px * 6,1)},${fmt(hy - py * 6,1)}" fill="${color}"/>`;
+  // ラベルは矢印の上に白い札で載せる
+  const mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
+  const wl = label.length * 8.4 + 16;
+  s += `<rect x="${fmt(mx - wl / 2,1)}" y="${fmt(my - 11,1)}" width="${fmt(wl,1)}" height="22" rx="7" fill="#fff" stroke="${color}" stroke-width="1.3"/>`;
+  s += `<text x="${fmt(mx,1)}" y="${fmt(my + 5,1)}" text-anchor="middle" font-size="12.5" font-weight="850" fill="${hot ? '#c2410c' : 'var(--ink2)'}">${label}</text>`;
+  return s;
+}
+
+function drawHub() {
+  const s = SUBSTANCES[+$('hub-sub').value];
+  const r = HUB_RANGES[hub.input];
+  $('hub-slider-label').textContent = r.label;
+  $('hub-slider-unit').textContent = r.unit;
+  $('hub-slider-val').textContent = fmt(+$('hub-slider').value, r.dec);
+
+  const n = hubMol();
+  const m = n * s.M, N = n * NA, V = n * VM;
+
+  const MOL  = { cx: 380, cy: 245, hw: 100, hh: 48 };
+  const MASS = { cx: 128, cy: 245, hw: 86,  hh: 44 };
+  const NUM  = { cx: 634, cy: 118, hw: 90,  hh: 44 };
+  const VOL  = { cx: 634, cy: 372, hw: 90,  hh: 44 };
+  const volOK = s.gas;
+  let g = '';
+  // 入力した量 → mol → 残りの量、という経路をオレンジで光らせる
+  // 往復の2本は同じ offset を渡す。向きが逆になると垂直方向も反転するので、
+  // 同符号のまま自動的に反対側へ振り分けられる
+  const OFF = 15;
+  g += hubArrow(MASS, MOL, '÷ M', hub.input === 'mass', OFF);
+  g += hubArrow(MOL, MASS, '× M', hub.input !== 'mass', OFF);
+  g += hubArrow(NUM, MOL, '÷ Nᴀ', hub.input === 'num', OFF);
+  g += hubArrow(MOL, NUM, '× Nᴀ', hub.input !== 'num', OFF);
+  if (volOK) {
+    g += hubArrow(VOL, MOL, '÷ 22.4', hub.input === 'vol', OFF);
+    g += hubArrow(MOL, VOL, '× 22.4', hub.input !== 'vol', OFF);
+  }
+  g += hubBox(MASS, '質量 m（g）', sig3(m), 'var(--mass)', hub.input === 'mass');
+  g += hubBox(MOL, '物質量 n（mol）', sig3(n), 'var(--mol)', hub.input === 'mol');
+  g += hubBox(NUM, '粒子数 N（個）', fmtSci(N), 'var(--num)', hub.input === 'num');
+  g += volOK
+    ? hubBox(VOL, '気体の体積 V（L）', sig3(V), 'var(--vol)', hub.input === 'vol')
+    : `<rect x="${VOL.cx - VOL.hw}" y="${VOL.cy - VOL.hh}" width="${VOL.hw * 2}" height="${VOL.hh * 2}" rx="14" fill="#f5f8fc" stroke="#dbe4ef" stroke-width="2" stroke-dasharray="6 5"/>`
+      + `<text x="${VOL.cx}" y="${VOL.cy - 6}" text-anchor="middle" font-size="14" font-weight="800" fill="var(--ink3)">気体の体積</text>`
+      + `<text x="${VOL.cx}" y="${VOL.cy + 18}" text-anchor="middle" font-size="12" font-weight="800" fill="var(--ink3)">（気体ではない）</text>`;
+  g += `<text x="380" y="452" text-anchor="middle" font-size="14.5" font-weight="800" fill="var(--ink3)">${s.f}（${s.name}）　モル質量 M = ${s.M} g/mol　　気体の体積は標準状態</text>`;
+  $('chart-hub').innerHTML = g;
+
+  setReadout($('hub-readout'), [
+    ['質量 m', `${sig3(m)} g`, hub.input === 'mass'],
+    ['物質量 n', `${sig3(n)} mol`, hub.input === 'mol'],
+    ['粒子数 N', `${fmtSci(N)} 個`, hub.input === 'num'],
+    ['気体の体積 V', volOK ? `${sig3(V)} L` : '—', hub.input === 'vol'],
+  ]);
+  $('hub-verdict').textContent = volOK
+    ? `${s.f} が ${sig3(n)} mol あるとき、質量は ${sig3(m)} g、粒子は ${fmtSci(N)} 個、標準状態の体積は ${sig3(V)} L。`
+    : `${s.f} は標準状態で気体ではないので、22.4 L/mol は使えない。`;
+}
+
+// 入力する量を切り替えても、同じ物質量が保たれるようにスライダーを設定し直す
+function hubSwitchInput(next) {
+  const s = SUBSTANCES[+$('hub-sub').value];
+  const n = hubMol();
+  hub.input = next;
+  const r = HUB_RANGES[next];
+  const el = $('hub-slider');
+  el.min = r.min; el.max = r.max; el.step = r.step;
+  const v = next === 'mass' ? n * s.M : next === 'num' ? n * NA / 1e23 : next === 'vol' ? n * VM : n;
+  el.value = clamp(v, r.min, r.max);
+  drawHub();
+}
+
+$('hub-sub').addEventListener('change', drawHub);
+$('hub-input').addEventListener('change', e => hubSwitchInput(e.target.value));
+$('hub-slider').addEventListener('input', drawHub);
+$('hub-reset').addEventListener('click', () => {
+  $('hub-sub').value = 6; $('hub-input').value = 'mol'; hub.input = 'mol';
+  const r = HUB_RANGES.mol; const el = $('hub-slider');
+  el.min = r.min; el.max = r.max; el.step = r.step; el.value = 1;
+  drawHub();
+});
+
+/* ============================================================
+   ② 組成式・分子式
+   ============================================================ */
+const FORMULA_SETS = [
+  { name: 'グルコース', M: 180.16, els: [['C', 40.00], ['H', 6.71], ['O', 53.29]] },
+  { name: 'エタノール', M: 46.07, els: [['C', 52.14], ['H', 13.13], ['O', 34.73]] },
+  { name: 'ベンゼン', M: 78.11, els: [['C', 92.26], ['H', 7.74]] },
+  { name: '四酸化二窒素', M: 92.02, els: [['N', 30.43], ['O', 69.57]] },
+  { name: 'シュウ酸', M: 90.04, els: [['C', 26.68], ['H', 2.24], ['O', 71.08]] },
+];
+const formula = { stage: 0 };
+const F_STAGES = ['質量パーセント', '100 g 中の質量', '原子量で割って mol', '最も簡単な整数比', '組成式と分子式'];
+
+FORMULA_SETS.forEach((f, i) => {
+  const o = document.createElement('option');
+  o.value = i; o.textContent = `${f.name}（分子量 ${f.M}）`;
+  $('f-preset').appendChild(o);
+});
+
+// mol の比を最も簡単な整数比にする（1〜8倍を試して誤差が最小の組を選ぶ）
+function integerRatio(mols) {
+  const min = Math.min(...mols);
+  const base = mols.map(v => v / min);
+  let best = { mult: 1, err: Infinity, ints: base.map(v => Math.round(v)) };
+  for (let mult = 1; mult <= 8; mult++) {
+    const scaled = base.map(v => v * mult);
+    const ints = scaled.map(v => Math.round(v));
+    if (ints.some(v => v < 1)) continue;
+    const err = scaled.reduce((sum, v, i) => sum + Math.abs(v - ints[i]), 0);
+    if (err < best.err - 1e-9) best = { mult, err, ints };
+    if (err < 0.06) break;
+  }
+  return best.ints;
+}
+const subNum = n => String(n).split('').map(c => '₀₁₂₃₄₅₆₇₈₉'[+c]).join('');
+const formulaText = (els, counts) => els.map((e, i) => e + (counts[i] === 1 ? '' : subNum(counts[i]))).join('');
+
+function formulaData() {
+  const set = FORMULA_SETS[+$('f-preset').value];
+  const els = set.els.map(e => e[0]), pcts = set.els.map(e => e[1]);
+  const mass = pcts.slice();                                  // 100 g 中の質量＝質量パーセントの数値
+  const mols = els.map((e, i) => mass[i] / ATOMIC[e]);
+  const ints = integerRatio(mols);
+  const empirical = formulaText(els, ints);
+  const empM = els.reduce((sum, e, i) => sum + ATOMIC[e] * ints[i], 0);
+  const nTimes = Math.max(1, Math.round(set.M / empM));
+  const molecular = formulaText(els, ints.map(v => v * nTimes));
+  return { set, els, pcts, mass, mols, ints, empirical, empM, nTimes, molecular };
+}
+
+function drawFormula() {
+  const d = formulaData();
+  const st = formula.stage;
+  const rowY = i => 132 + i * 58;
+  const colX = [110, 245, 380, 515, 650];
+  let g = '';
+
+  g += `<text x="380" y="46" text-anchor="middle" font-size="19" font-weight="850" fill="var(--deep)">${d.set.name}の組成を調べる</text>`;
+  g += `<text x="380" y="72" text-anchor="middle" font-size="13" font-weight="800" fill="var(--ink3)">段階 ${Math.min(st + 1, 5)} / 5　${F_STAGES[Math.min(st, 4)]}</text>`;
+
+  const heads = ['質量 %', '質量（g）', '÷ 原子量', 'mol', '最も簡単な整数比'];
+  heads.forEach((h, i) => {
+    const on = st >= i;
+    g += `<text x="${colX[i]}" y="106" text-anchor="middle" font-size="13.5" font-weight="850" fill="${on ? 'var(--deep)' : '#cbd5e1'}">${h}</text>`;
+  });
+
+  d.els.forEach((el, i) => {
+    const y = rowY(i);
+    g += `<text x="42" y="${y + 6}" font-size="17" font-weight="850" fill="var(--ink)">${el}</text>`;
+    const cells = [
+      { v: `${fmt(d.pcts[i], 2)} %`, show: st >= 0, color: 'var(--ink2)' },
+      { v: `${fmt(d.mass[i], 2)} g`, show: st >= 1, color: 'var(--mass)' },
+      { v: `÷ ${ATOMIC[el]}`, show: st >= 2, color: 'var(--ink3)' },
+      { v: fmt(d.mols[i], 3), show: st >= 2, color: 'var(--mol)' },
+      { v: String(d.ints[i]), show: st >= 3, color: 'var(--accent)' },
+    ];
+    cells.forEach((c, ci) => {
+      if (!c.show) { g += `<text x="${colX[ci]}" y="${y + 6}" text-anchor="middle" font-size="17" font-weight="800" fill="#dbe4ef">—</text>`; return; }
+      g += `<text x="${colX[ci]}" y="${y + 6}" text-anchor="middle" font-size="${ci === 4 ? 22 : 17}" font-weight="850" fill="${c.color}">${c.v}</text>`;
+    });
+  });
+
+  if (st >= 4) {
+    const y = 358;
+    g += `<rect x="90" y="${y}" width="580" height="86" rx="16" fill="#f0f7ff" stroke="#bfd0e7" stroke-width="2"/>`;
+    g += `<text x="200" y="${y + 33}" text-anchor="middle" font-size="13" font-weight="850" fill="var(--ink3)">組成式</text>`;
+    g += `<text x="200" y="${y + 66}" text-anchor="middle" font-size="26" font-weight="850" fill="var(--deep)">${d.empirical}</text>`;
+    g += `<text x="380" y="${y + 33}" text-anchor="middle" font-size="13" font-weight="850" fill="var(--ink3)">分子量 ÷ 組成式量</text>`;
+    g += `<text x="380" y="${y + 66}" text-anchor="middle" font-size="20" font-weight="850" fill="var(--ink2)">${d.set.M} ÷ ${fmt(d.empM, 2)} ≒ ${d.nTimes}</text>`;
+    g += `<text x="565" y="${y + 33}" text-anchor="middle" font-size="13" font-weight="850" fill="var(--ink3)">分子式</text>`;
+    g += `<text x="565" y="${y + 66}" text-anchor="middle" font-size="26" font-weight="850" fill="var(--accent)">${d.molecular}</text>`;
+  }
+  $('chart-formula').innerHTML = g;
+
+  $('f-table').innerHTML = d.els.map((el, i) =>
+    `<tr><td class="el">${el}</td><td>${fmt(d.pcts[i], 2)}</td><td>${st >= 1 ? fmt(d.mass[i], 2) : '—'}</td><td>${ATOMIC[el]}</td><td>${st >= 2 ? fmt(d.mols[i], 3) : '—'}</td><td>${st >= 3 ? d.ints[i] : '—'}</td></tr>`
+  ).join('');
+
+  setReadout($('f-readout'), [
+    ['組成式', st >= 4 ? d.empirical : '—', st >= 4],
+    ['組成式量', st >= 4 ? fmt(d.empM, 2) : '—'],
+    ['分子量', String(d.set.M)],
+    ['倍率 n', st >= 4 ? String(d.nTimes) : '—'],
+    ['分子式', st >= 4 ? d.molecular : '—', st >= 4],
+  ]);
+  $('f-verdict').textContent = st >= 4
+    ? `組成式 ${d.empirical} を ${d.nTimes} 倍すると分子式 ${d.molecular} になる。`
+    : `「次の段階へ」で ${F_STAGES[Math.min(st + 1, 4)]} に進む。`;
+  $('f-next').disabled = st >= 4;
+}
+
+$('f-preset').addEventListener('change', () => { formula.stage = 0; drawFormula(); });
+$('f-next').addEventListener('click', () => { formula.stage = Math.min(4, formula.stage + 1); drawFormula(); });
+$('f-all').addEventListener('click', () => { formula.stage = 4; drawFormula(); });
+$('f-reset').addEventListener('click', () => { formula.stage = 0; drawFormula(); });
+
+/* ============================================================
+   ③ 濃度
+   ============================================================ */
+SUBSTANCES.filter(s => !s.gas).forEach(s => {
+  const i = SUBSTANCES.indexOf(s);
+  const o = document.createElement('option');
+  o.value = i; o.textContent = `${s.f}（${s.name}）　M = ${s.M}`;
+  $('c-sub').appendChild(o);
+});
+$('c-sub').value = 7;   // 既定は NaCl
+
+function concState() {
+  const s = SUBSTANCES[+$('c-sub').value];
+  const w = +$('c-w').value, V = +$('c-v').value, d = +$('c-d').value, add = +$('c-add').value;
+  const n = w / s.M;
+  const massSol = V * d;              // 溶液の質量（g）
+  const massSolvent = massSol - w;    // 溶媒の質量（g）
+  return {
+    s, w, V, d, add, n, massSol, massSolvent,
+    pct: massSol > 0 ? w / massSol * 100 : NaN,
+    molar: n / (V / 1000),
+    molal: massSolvent > 0 ? n / (massSolvent / 1000) : NaN,
+    diluted: n / ((V + add) / 1000),
+  };
+}
+
+function drawConc() {
+  const c = concState();
+  $('c-w-val').textContent = fmt(c.w, 1);
+  $('c-v-val').textContent = fmt(c.V, 0);
+  $('c-d-val').textContent = fmt(c.d, 2);
+  $('c-add-val').textContent = fmt(c.add, 0);
+
+  const pts = [];
+  for (let a = 0; a <= 1000.001; a += 5) pts.push([a, c.n / ((c.V + a) / 1000)]);
+  const yMax = Math.max(...pts.map(p => p[1])) * 1.15;
+  const o = {
+    xMax: 1000, yMax,
+    xTicks: ticks(0, 1000, 200, 0), yTicks: ticks(0, yMax, yMax / 5, 2),
+    xLabel: '加えた水の体積（mL）', yLabel: 'モル濃度（mol/L）',
+  };
+  const { sx, sy, axesSvg } = frame(o);
+  let g = axesSvg;
+  g += polyline(pts, sx, sy, 'var(--mol)', 3.6);
+  g += guideLines(c.add, c.diluted, sx, sy);
+  g += marker(c.add, c.diluted, sx, sy);
+  g += `<text x="${ML + 16}" y="${MT + 22}" font-size="13.5" font-weight="800" fill="var(--ink2)">溶質の物質量は変わらない（${sig3(c.n)} mol）ので、体積が増えた分だけ薄くなる</text>`;
+  $('chart-conc').innerHTML = g;
+
+  // ビーカー模式図
+  {
+    const totalV = c.V + c.add, maxV = 2000;
+    const hMax = 104, h = clamp(totalV / maxV * hMax * 2, 12, hMax);
+    const top = 126 - h;
+    let b = `<path d="M78 18 L78 126 Q78 132 84 132 L216 132 Q222 132 222 126 L222 18" fill="none" stroke="#9fb0c5" stroke-width="2.5" stroke-linecap="round"/>`;
+    b += `<path d="M79 ${fmt(top,1)} L79 126 Q79 131 84 131 L216 131 Q221 131 221 126 L221 ${fmt(top,1)} Z" fill="#dbeafe" opacity=".85"/>`;
+    const dots = Math.round(clamp(c.molar * 6, 1, 26));
+    let seed = 4242;
+    const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+    for (let i = 0; i < dots; i++) {
+      const x = 88 + rnd() * 124, y = top + 8 + rnd() * Math.max(4, h - 16);
+      b += `<circle cx="${fmt(x,1)}" cy="${fmt(y,1)}" r="4.2" fill="var(--num)" opacity=".85"/>`;
+    }
+    b += `<text x="150" y="147" text-anchor="middle" font-size="11" font-weight="800" fill="var(--ink3)">溶液 ${fmt(totalV,0)} mL　溶質 ${sig3(c.n)} mol</text>`;
+    $('beaker-conc').innerHTML = b;
+  }
+
+  const rows = [
+    ['溶質', `${c.s.f}　${fmt(c.w, 1)} g`],
+    ['溶質の物質量', `${sig3(c.n)} mol`],
+    ['溶液の質量', `${fmt(c.massSol, 1)} g`],
+    ['溶媒の質量', isFinite(c.massSolvent) && c.massSolvent > 0 ? `${fmt(c.massSolvent, 1)} g` : '—'],
+    ['質量パーセント濃度', isFinite(c.pct) ? `${fmt(c.pct, 2)} ％` : '—', true],
+    ['モル濃度', `${sig3(c.molar)} mol/L`, true],
+    ['質量モル濃度', isFinite(c.molal) ? `${sig3(c.molal)} mol/kg` : '—', true],
+  ];
+  if (c.add > 0) rows.push(['希釈後のモル濃度', `${sig3(c.diluted)} mol/L`, true]);
+  setReadout($('c-readout'), rows);
+
+  const vd = $('c-verdict');
+  if (c.massSolvent <= 0) {
+    vd.className = 'verdict warn';
+    vd.textContent = '溶質の質量が溶液の質量を超えている。溶液の体積か密度を大きくするか、溶質を減らす。';
+  } else if (c.add > 0) {
+    vd.className = 'verdict';
+    vd.textContent = `水を ${fmt(c.add, 0)} mL 加えると ${sig3(c.molar)} → ${sig3(c.diluted)} mol/L。溶質の mol は変わらない。`;
+  } else {
+    vd.className = 'verdict';
+    vd.textContent = 'モル濃度は溶液の体積で、質量モル濃度は溶媒の質量で割る。分母が違うので値も違う。';
+  }
+}
+
+['c-w', 'c-v', 'c-d', 'c-add'].forEach(id => $(id).addEventListener('input', drawConc));
+$('c-sub').addEventListener('change', drawConc);
+$('c-reset').addEventListener('click', () => {
+  $('c-sub').value = 7; $('c-w').value = 58.4; $('c-v').value = 1000; $('c-d').value = 1.05; $('c-add').value = 0;
+  drawConc();
+});
+
+/* ============================================================
+   ④ 反応式の量的関係
+   ============================================================ */
+const react = { unit: 'mol' };
+REACTIONS.forEach((r, i) => {
+  const o = document.createElement('option');
+  o.value = i; o.textContent = r.eq;
+  $('r-rx').appendChild(o);
+});
+
+function reactFillBase() {
+  const rx = REACTIONS[+$('r-rx').value];
+  const sel = $('r-base');
+  const keep = sel.value;
+  sel.replaceChildren();
+  rx.sp.forEach((s, i) => {
+    const o = document.createElement('option');
+    o.value = i; o.textContent = `${s.f}（係数 ${s.c}）`;
+    sel.appendChild(o);
+  });
+  sel.value = (keep !== '' && +keep < rx.sp.length) ? keep : 0;
+}
+
+function drawReact() {
+  const rx = REACTIONS[+$('r-rx').value];
+  const base = rx.sp[+$('r-base').value] || rx.sp[0];
+  const amt = +$('r-amt').value;
+  $('r-amt-val').textContent = fmt(amt, react.unit === 'mol' ? 2 : 1);
+  $('r-amt-unit').textContent = react.unit === 'mol' ? 'mol' : 'g';
+  $('r-amt-label').textContent = `${base.f} の量`;
+
+  // 基準の量から反応進行度を出す
+  const nBase = react.unit === 'mol' ? amt : amt / base.M;
+  const xi = nBase / base.c;
+  const all = rx.sp.map(s => ({ sp: s, n: s.c * xi, g: s.c * xi * s.M, L: s.gas ? s.c * xi * VM : NaN }));
+
+  const yMax = Math.max(...all.map(a => react.unit === 'mol' ? a.n : a.g)) * 1.25 || 1;
+  drawBars('chart-react', {
+    yMax,
+    yTicks: ticks(0, yMax, yMax / 5, yMax < 5 ? 2 : 1),
+    yLabel: react.unit === 'mol' ? '物質量（mol）' : '質量（g）',
+    cats: all.map(a => ({
+      label: a.sp.f,
+      sub: `係数 ${a.sp.c}${a.sp === base ? '（基準）' : ''}`,
+      color: a.sp === base ? 'var(--accent)' : (a.sp.side < 0 ? 'var(--react)' : 'var(--prod)'),
+      bars: [{ v: react.unit === 'mol' ? a.n : a.g, color: a.sp === base ? 'var(--accent)' : (a.sp.side < 0 ? 'var(--react)' : 'var(--prod)') }],
+    })),
+    legend: [{ label: '反応物', color: 'var(--react)' }, { label: '生成物', color: 'var(--prod)' }, { label: '基準', color: 'var(--accent)' }],
+  });
+  // 反応式を上に添える
+  $('chart-react').innerHTML += `<text x="${ML + PW / 2}" y="${MT + 42}" text-anchor="middle" font-size="21" font-weight="850" fill="var(--deep)">${rx.eq}</text>`;
+
+  setReadout($('r-readout'), all.flatMap(a => {
+    const val = react.unit === 'mol'
+      ? `${sig3(a.n)} mol`
+      : `${sig3(a.g)} g`;
+    const extra = a.sp.gas ? `　（${sig3(a.L)} L）` : '';
+    return [[a.sp.f, val + extra, a.sp === base]];
+  }));
+  $('r-verdict').textContent = `${base.f} が ${sig3(nBase)} mol 反応するとき、係数比 ${rx.sp.map(s => s.c).join(' : ')} にしたがって各物質の mol が決まる。`;
+}
+
+$('r-rx').addEventListener('change', () => { reactFillBase(); drawReact(); });
+$('r-base').addEventListener('change', drawReact);
+$('r-amt').addEventListener('input', drawReact);
+$('r-reset').addEventListener('click', () => { $('r-rx').value = 0; reactFillBase(); $('r-amt').value = 2; drawReact(); });
+document.querySelectorAll('[data-runit]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    react.unit = btn.dataset.runit;
+    document.querySelectorAll('[data-runit]').forEach(b => b.setAttribute('aria-pressed', b === btn));
+    const el = $('r-amt');
+    if (react.unit === 'g') { el.min = 1; el.max = 400; el.step = 1; el.value = 50; }
+    else { el.min = 0.1; el.max = 10; el.step = 0.1; el.value = 2; }
+    drawReact();
+  });
+});
+
+/* ============================================================
+   ⑤ 限定反応物・収率
+   ============================================================ */
+TWO_REACTANT.forEach((r, i) => {
+  const o = document.createElement('option');
+  o.value = i; o.textContent = r.eq;
+  $('l-rx').appendChild(o);
+});
+
+function limitState() {
+  const rx = TWO_REACTANT[+$('l-rx').value];
+  const reactants = rx.sp.filter(s => s.side < 0);
+  const products = rx.sp.filter(s => s.side > 0);
+  const nA = +$('l-a').value, nB = +$('l-b').value;
+  const given = [nA, nB];
+  const ratios = reactants.map((s, i) => given[i] / s.c);
+  const xi = Math.min(...ratios);
+  const limIdx = ratios[0] <= ratios[1] ? 0 : 1;
+  const tie = Math.abs(ratios[0] - ratios[1]) < 1e-9;
+  const after = rx.sp.map(s => {
+    const i = reactants.indexOf(s);
+    return i >= 0 ? given[i] - s.c * xi : s.c * xi;
+  });
+  const before = rx.sp.map(s => {
+    const i = reactants.indexOf(s);
+    return i >= 0 ? given[i] : 0;
+  });
+  const main = products[0];
+  const theoretical = main.c * xi;
+  const yieldPct = +$('l-y').value;
+  return { rx, reactants, products, given, ratios, xi, limIdx, tie, after, before, main, theoretical, actual: theoretical * yieldPct / 100, yieldPct };
+}
+
+function drawLimit() {
+  const st = limitState();
+  const rA = st.reactants[0], rB = st.reactants[1];
+  $('l-a-label').textContent = `${rA.f}（係数 ${rA.c}）`;
+  $('l-b-label').textContent = `${rB.f}（係数 ${rB.c}）`;
+  $('l-a-val').textContent = fmt(st.given[0], 2);
+  $('l-b-val').textContent = fmt(st.given[1], 2);
+  $('l-y-val').textContent = fmt(st.yieldPct, 0);
+
+  const yMax = Math.max(...st.before, ...st.after, 0.1) * 1.28;
+  drawBars('chart-limit', {
+    yMax,
+    yTicks: ticks(0, yMax, yMax / 5, 2),
+    yLabel: '物質量（mol）',
+    cats: st.rx.sp.map((s, i) => {
+      const isLim = !st.tie && st.reactants[st.limIdx] === s;
+      return {
+        label: s.f,
+        sub: isLim ? `係数 ${s.c}・限定反応物` : `係数 ${s.c}`,
+        color: isLim ? 'var(--limit)' : (s.side < 0 ? 'var(--react)' : 'var(--prod)'),
+        bars: [
+          { v: st.before[i], color: s.side < 0 ? 'var(--react)' : 'var(--prod)', opacity: .34 },
+          { v: st.after[i], color: isLim ? 'var(--limit)' : (s.side < 0 ? 'var(--react)' : 'var(--prod)') },
+        ],
+      };
+    }),
+    legend: [{ label: '反応前', color: '#94a3b8', opacity: .5 }, { label: '反応後', color: 'var(--react)' }, { label: '限定反応物', color: 'var(--limit)' }],
+  });
+  $('chart-limit').innerHTML += `<text x="${ML + PW / 2}" y="${MT + 42}" text-anchor="middle" font-size="21" font-weight="850" fill="var(--deep)">${st.rx.eq}</text>`;
+
+  const rows = [
+    [`${rA.f} ÷ 係数`, fmt(st.ratios[0], 3), st.limIdx === 0 && !st.tie],
+    [`${rB.f} ÷ 係数`, fmt(st.ratios[1], 3), st.limIdx === 1 && !st.tie],
+    ['反応の進行度', `${sig3(st.xi)}`],
+  ];
+  st.reactants.forEach((s, i) => rows.push([`残った ${s.f}`, `${sig3(st.after[st.rx.sp.indexOf(s)])} mol`]));
+  rows.push(['理論収量', `${sig3(st.theoretical)} mol（${sig3(st.theoretical * st.main.M)} g）`, true]);
+  rows.push(['実際の収量', `${sig3(st.actual)} mol（${sig3(st.actual * st.main.M)} g）`]);
+  rows.push(['収率', `${fmt(st.yieldPct, 0)} ％`, true]);
+  setReadout($('l-readout'), rows);
+
+  const vd = $('l-verdict');
+  if (st.xi <= 0) {
+    vd.className = 'verdict warn';
+    vd.textContent = 'どちらかが 0 mol なので反応が起こらない。両方を入れる。';
+  } else if (st.tie) {
+    vd.className = 'verdict ok';
+    vd.textContent = 'ちょうど過不足なく反応する量（量論比）。どちらも余らない。';
+  } else {
+    const lim = st.reactants[st.limIdx], other = st.reactants[1 - st.limIdx];
+    const left = st.after[st.rx.sp.indexOf(other)];
+    vd.className = 'verdict';
+    vd.textContent = `「量 ÷ 係数」が小さい ${lim.f} が限定反応物。${lim.f} は使い切られ、${other.f} が ${sig3(left)} mol 余る。`;
+  }
+}
+
+['l-a', 'l-b', 'l-y'].forEach(id => $(id).addEventListener('input', drawLimit));
+$('l-rx').addEventListener('change', drawLimit);
+$('l-reset').addEventListener('click', () => { $('l-rx').value = 0; $('l-a').value = 3; $('l-b').value = 2; $('l-y').value = 100; drawLimit(); });
+
+/* ============================================================
+   ⑥ 演習ジェネレータ
+   ============================================================ */
+const drill = { q: null, score: { asked: 0, correct: 0 } };
+
+// 問題番号から決まる擬似乱数（同じ番号なら必ず同じ問題）
+function rngFrom(seed) {
+  let s = (seed * 2654435761) % 2147483647;
+  if (s <= 0) s += 2147483646;
+  return () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
+}
+const pick = (r, arr) => arr[Math.floor(r() * arr.length) % arr.length];
+// 有効数字を揃えた「きれいな」数値にする
+const nice = (r, lo, hi, step) => Math.round((lo + r() * (hi - lo)) / step) * step;
+
+function makeQuestion(level, seed) {
+  const r = rngFrom(seed);
+  if (level === 'basic') {
+    const s = pick(r, SUBSTANCES);
+    // 気体でない物質には 22.4 L/mol を使う問題を出さない
+    const kind = pick(r, s.gas ? ['massToMol', 'molToMass', 'molToNum', 'volToMol', 'molToVol'] : ['massToMol', 'molToMass', 'molToNum']);
+    if (kind === 'massToMol') {
+      const m = nice(r, 5, 200, 0.5);
+      return { q: `${s.f}（${s.name}）${m} g は何 mol か。`, given: `モル質量 M(${s.f}) = ${s.M} g/mol`, unit: 'mol', ans: m / s.M,
+        steps: [`求めるのは物質量。質量から mol へは <b>÷ M</b>。`, `n = ${m} ÷ ${s.M}`, `n = <b>${sig3(m / s.M)} mol</b>`] };
+    }
+    if (kind === 'molToMass') {
+      const n = nice(r, 0.2, 5, 0.1);
+      return { q: `${s.f}（${s.name}）${fmt(n, 1)} mol の質量は何 g か。`, given: `モル質量 M(${s.f}) = ${s.M} g/mol`, unit: 'g', ans: n * s.M,
+        steps: [`mol から質量へは <b>× M</b>。`, `m = ${fmt(n, 1)} × ${s.M}`, `m = <b>${sig3(n * s.M)} g</b>`] };
+    }
+    if (kind === 'molToNum') {
+      const n = nice(r, 0.2, 5, 0.1);
+      return { q: `${s.f}（${s.name}）${fmt(n, 1)} mol に含まれる粒子は何個か。<b>×10²³ 個</b>の形で、係数を答えよ。`, given: `アボガドロ定数 Nᴀ = 6.02×10²³ /mol`, unit: '×10²³ 個', ans: n * NA / 1e23,
+        steps: [`mol から粒子数へは <b>× Nᴀ</b>。`, `N = ${fmt(n, 1)} × 6.02×10²³`, `N = ${fmtSci(n * NA)} 個 → 係数は <b>${sig3(n * NA / 1e23)}</b>`] };
+    }
+    if (kind === 'volToMol') {
+      const V = nice(r, 2, 120, 0.1);
+      return { q: `標準状態で ${s.f}（${s.name}）${fmt(V, 1)} L は何 mol か。`, given: `標準状態の気体 1 mol の体積 = 22.4 L`, unit: 'mol', ans: V / VM,
+        steps: [`気体の体積から mol へは <b>÷ 22.4</b>。`, `n = ${fmt(V, 1)} ÷ 22.4`, `n = <b>${sig3(V / VM)} mol</b>`] };
+    }
+    const n = nice(r, 0.2, 5, 0.1);
+    return { q: `標準状態で ${s.f}（${s.name}）${fmt(n, 1)} mol は何 L か。`, given: `標準状態の気体 1 mol の体積 = 22.4 L`, unit: 'L', ans: n * VM,
+      steps: [`mol から気体の体積へは <b>× 22.4</b>。`, `V = ${fmt(n, 1)} × 22.4`, `V = <b>${sig3(n * VM)} L</b>`] };
+  }
+
+  if (level === 'std') {
+    const rx = pick(r, REACTIONS);
+    const from = pick(r, rx.sp.filter(s => s.side < 0));
+    const to = pick(r, rx.sp.filter(s => s !== from));
+    const m = nice(r, 5, 150, 0.5);
+    const nFrom = m / from.M, xi = nFrom / from.c, nTo = to.c * xi, mTo = nTo * to.M;
+    return {
+      q: `${rx.eq}　この反応で ${from.f} ${m} g が完全に反応するとき、${to.f} は何 g 生じるか（または必要か）。`,
+      given: `M(${from.f}) = ${from.M}　M(${to.f}) = ${to.M}`,
+      unit: 'g', ans: mTo,
+      steps: [
+        `質量から質量へ直接は行けない。<b>g → mol → 係数比 → mol → g</b> の順。`,
+        `${from.f} の mol：${m} ÷ ${from.M} = ${sig3(nFrom)} mol`,
+        `係数比 ${from.f} : ${to.f} = ${from.c} : ${to.c} なので、${to.f} は ${sig3(nFrom)} × ${to.c}/${from.c} = ${sig3(nTo)} mol`,
+        `質量に戻す：${sig3(nTo)} × ${to.M} = <b>${sig3(mTo)} g</b>`,
+      ],
+    };
+  }
+
+  const rx = pick(r, TWO_REACTANT);
+  const [a, b] = rx.sp.filter(s => s.side < 0);
+  const prod = rx.sp.filter(s => s.side > 0)[0];
+  const nA = nice(r, 0.5, 6, 0.1), nB = nice(r, 0.5, 6, 0.1);
+  const rA = nA / a.c, rB = nB / b.c, xi = Math.min(rA, rB);
+  const lim = rA <= rB ? a : b, nProd = prod.c * xi, mProd = nProd * prod.M;
+  return {
+    q: `${rx.eq}　${a.f} ${fmt(nA, 1)} mol と ${b.f} ${fmt(nB, 1)} mol を反応させた。生じる ${prod.f} は最大何 g か。`,
+    given: `M(${prod.f}) = ${prod.M}`,
+    unit: 'g', ans: mProd,
+    steps: [
+      `まずどちらが先に無くなるかを調べる。<b>量 ÷ 係数</b> が小さい方が限定反応物。`,
+      `${a.f}：${fmt(nA, 1)} ÷ ${a.c} = ${sig3(rA)}　${b.f}：${fmt(nB, 1)} ÷ ${b.c} = ${sig3(rB)}`,
+      `小さいのは <b>${lim.f}</b> なので、これが限定反応物。反応の進行度は ${sig3(xi)}。`,
+      `${prod.f} の mol：${prod.c} × ${sig3(xi)} = ${sig3(nProd)} mol`,
+      `質量に直す：${sig3(nProd)} × ${prod.M} = <b>${sig3(mProd)} g</b>`,
+    ],
+  };
+}
+
+const LEVEL_NAME = { basic: '基礎', std: '標準', adv: '応用' };
+
+function renderDrill() {
+  const level = $('d-diff').value, seed = clamp(Math.round(+$('d-seed-input').value) || 1, 1, 9999);
+  $('d-seed-input').value = seed;
+  drill.q = makeQuestion(level, seed * 1000 + { basic: 1, std: 2, adv: 3 }[level]);
+  $('d-level').textContent = LEVEL_NAME[level];
+  $('d-seed').textContent = `問題 #${seed}`;
+  $('d-question').innerHTML = drill.q.q;
+  $('d-given').innerHTML = `与えられている値：${drill.q.given}`;
+  $('d-unit').textContent = drill.q.unit;
+  $('d-answer').value = '';
+  $('d-judge').hidden = true;
+  $('d-steps').hidden = true;
+  $('d-steps').innerHTML = drill.q.steps.map(s => `<li>${s}</li>`).join('');
+  drawScore();
+}
+
+function drawScore() {
+  const sc = drill.score;
+  setReadout($('d-score'), [
+    ['解いた問題', `${sc.asked} 問`],
+    ['正解', `${sc.correct} 問`, true],
+    ['正答率', sc.asked ? `${fmt(sc.correct / sc.asked * 100, 0)} ％` : '—'],
+  ]);
+}
+
+$('d-check').addEventListener('click', () => {
+  const raw = $('d-answer').value;
+  const el = $('d-judge');
+  if (raw === '' || !isFinite(+raw)) {
+    el.hidden = false; el.className = 'judge wrong';
+    el.textContent = '数値を入力してから答え合わせをする。';
+    return;
+  }
+  const got = +raw, want = drill.q.ans;
+  const ok = Math.abs(got - want) <= Math.abs(want) * 0.02;
+  drill.score.asked++;
+  if (ok) drill.score.correct++;
+  el.hidden = false;
+  el.className = 'judge ' + (ok ? 'correct' : 'wrong');
+  el.innerHTML = ok
+    ? `正解。答えは <b>${sig3(want)} ${drill.q.unit}</b>。`
+    : `おしい。正しい答えは <b>${sig3(want)} ${drill.q.unit}</b>。「解き方を見る」で手順を確認しよう。`;
+  if (!ok) { $('d-steps').hidden = false; }
+  drawScore();
+});
+$('d-show').addEventListener('click', () => { $('d-steps').hidden = !$('d-steps').hidden; });
+$('d-next').addEventListener('click', () => {
+  $('d-seed-input').value = clamp((Math.round(+$('d-seed-input').value) || 1) + 1, 1, 9999);
+  renderDrill();
+});
+$('d-go').addEventListener('click', renderDrill);
+$('d-diff').addEventListener('change', renderDrill);
+$('d-seed-input').addEventListener('change', renderDrill);
+$('d-answer').addEventListener('keydown', e => { if (e.key === 'Enter') $('d-check').click(); });
+$('d-clear').addEventListener('click', () => { drill.score = { asked: 0, correct: 0 }; drawScore(); });
+
+/* ============================================================
+   タブ切り替え・全画面
+   ============================================================ */
+const DRAW = { hub: drawHub, formula: drawFormula, conc: drawConc, react: drawReact, limit: drawLimit, drill: renderDrill };
+
+document.querySelectorAll('#tabs [data-tab]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const key = btn.dataset.tab;
+    document.querySelectorAll('#tabs [data-tab]').forEach(b => b.setAttribute('aria-selected', b === btn));
+    document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === `panel-${key}`));
+    if (key !== 'drill') DRAW[key]();
+  });
+});
+
+const fsBtn = $('fullscreenBtn');
+fsBtn.addEventListener('click', async () => {
+  try {
+    if (!document.fullscreenElement) await document.documentElement.requestFullscreen();
+    else await document.exitFullscreen();
+  } catch (e) { /* 全画面が使えない環境では何もしない */ }
+});
+document.addEventListener('fullscreenchange', () => {
+  const on = !!document.fullscreenElement;
+  document.body.classList.toggle('is-fullscreen', on);
+  fsBtn.querySelector('.btn-text').textContent = on ? '全画面を終了' : '全画面表示';
+  fsBtn.setAttribute('aria-label', on ? '全画面を終了' : '全画面表示');
+});
+
+// 初期描画
+reactFillBase();
+drawHub(); drawFormula(); drawConc(); drawReact(); drawLimit(); renderDrill();
+</script>
+<script src="site-shell.js"></script>
+</body>
+</html>
