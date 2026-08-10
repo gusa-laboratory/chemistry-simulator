@@ -263,7 +263,7 @@ function drawGlyph(name, cx, cy, unit, opacity) {
   if (!atoms) {
     return `<g opacity="${opacity ?? 1}"><circle cx="${fmt(cx,1)}" cy="${fmt(cy,1)}" r="${fmt(unit,1)}" fill="#cbd5e1" stroke="#64748b" stroke-width="1.2"/></g>`;
   }
-  const s = unit / Math.max(EXTENT[name], 1.55);
+  const s = unit / Math.max(EXTENT[name], 1.25);
   let out = `<g opacity="${opacity ?? 1}">`;
   for (const [e, x, y] of atoms) {
     const a = ATOM[e];
@@ -388,38 +388,76 @@ function drawRatio() {
   const R = reactantsOf(rx), P = productsOf(rx);
   const sub = s => ratio.label === 'mol' ? `${s.c * N} mol` : `${sig3(s.c * N * s.M)} g`;
 
-  let g = `<text x="380" y="34" text-anchor="middle" font-size="23" font-weight="850" fill="var(--deep)">${rx.eq}</text>`;
-  g += `<text x="380" y="58" text-anchor="middle" font-size="13.5" font-weight="800" fill="var(--ink3)">この反応が ${N} 回分（分子の絵1個 ＝ 1 mol 分）</text>`;
-
-  const X0 = 46, X1 = 714, TOP = 74, BOTTOM = 444, LABEL_H = 46, ARROW_H = 46;
-  // 上下2段が同じ大きさで収まるよう、行数の組み合わせを総当たりで選ぶ
-  const itemsR = R.map(s => ({ f: s.f, n: s.c * N, color: 'var(--react)', sub: sub(s) }));
-  const itemsP = P.map(s => ({ f: s.f, n: s.c * N, color: 'var(--prod)', sub: sub(s) }));
-  const bandW = X1 - X0, bandH = BOTTOM - TOP - ARROW_H - LABEL_H * 2;
-  let pick = null;
-  for (let rr = 1; rr <= 3; rr++) for (let pp = 1; pp <= 3; pp++) {
-    const a = planRow(itemsR, 34, rr), b = planRow(itemsP, 34, pp);
-    if (!a || !b) continue;
-    const cell = Math.min(
-      (bandW - a.sepTotal) / a.totalCols, (bandW - b.sepTotal) / b.totalCols,
-      bandH / (a.rows + b.rows), 62);
-    if (!pick || cell > pick.cell) pick = { cell, a, b };
+  // 反応式の各項と、その真下に置く分子のかたまりを 1 列に並べる
+  const terms = rx.sp.map(s => ({
+    s, n: s.c * N,
+    text: (s.c === 1 ? '' : s.c) + s.f,
+    color: s.side < 0 ? 'var(--react)' : 'var(--prod)',
+  }));
+  const seps = [];
+  for (let i = 0; i < terms.length - 1; i++) {
+    seps.push(terms[i].s.side !== terms[i + 1].s.side ? { t: '→', w: 62 } : { t: '＋', w: 46 });
   }
-  const planR = pick.a, planP = pick.b, cell = Math.max(12, pick.cell);
+  const sepW = seps.reduce((a, s) => a + s.w, 0);
 
-  // 使う高さが band より小さいときは、全体を縦方向の中央に寄せる
-  const contentH = (planR.rows + planP.rows) * cell + LABEL_H * 2 + ARROW_H;
-  const startY = TOP + Math.max(0, (BOTTOM - TOP - contentH) / 2);
-  const ycR = startY + planR.rows * cell / 2;
-  const arrowTop = ycR + planR.rows * cell / 2 + LABEL_H;
-  const ycP = arrowTop + ARROW_H + planP.rows * cell / 2;
-  g += renderRow(planR, X0, X1, ycR, cell);
-  g += `<path d="M380 ${fmt(arrowTop + 8,1)} L380 ${fmt(arrowTop + ARROW_H - 14,1)}" stroke="var(--ink3)" stroke-width="3.4" stroke-linecap="round"/>`;
-  g += `<polygon points="380,${fmt(arrowTop + ARROW_H - 3,1)} 372,${fmt(arrowTop + ARROW_H - 17,1)} 388,${fmt(arrowTop + ARROW_H - 17,1)}" fill="var(--ink3)"/>`;
-  g += renderRow(planP, X0, X1, ycP, cell);
+  const BAND_W = 700, GLYPH_TOP = 116, MAX_BLOCK_H = 290, EQ_Y = 64;
+  // 1〜3行を試す。式らしく1行を優先し、はっきり大きく描けるときだけ行を増やす
+  let pick = null;
+  for (let rows = 1; rows <= 3; rows++) {
+    const per = terms.map(t => { const r = Math.min(rows, t.n); return { r, c: Math.ceil(t.n / r) }; });
+    const rowsUsed = Math.max(...per.map(p => p.r));
+    const totalCols = per.reduce((a, p) => a + p.c, 0);
+    const cell = Math.min((BAND_W - sepW) / totalCols, MAX_BLOCK_H / rowsUsed, 68);
+    if (!pick || cell > pick.cell * 1.25) pick = { per, rowsUsed, totalCols, cell };
+  }
+  // 化学式の文字幅（下付き文字は狭い）。分子の列より式の方が広いことがあるので見積もる
+  const textW = s => [...s].reduce((w, ch) => w + (/[₀-₉]/.test(ch) ? 9 : /[0-9]/.test(ch) ? 15 : 17), 0);
+  // 各項の場所は「分子の列の幅」と「式の文字幅」の広い方。収まらなければ分子を小さくする
+  const slotsFor = c => terms.map((t, i) => Math.max(pick.per[i].c * c, textW(t.text) + 10));
+  let cell = Math.max(12, pick.cell);
+  for (let k = 0; k < 24; k++) {
+    if (slotsFor(cell).reduce((a, b) => a + b, 0) + sepW <= BAND_W || cell <= 12) break;
+    cell = Math.max(12, cell * 0.94);
+  }
+  const slots = slotsFor(cell);
+
+  // 分子は式のすぐ下に置く。空いた分だけ図を縮めるので、下に余白が残らない
+  const yc = GLYPH_TOP + pick.rowsUsed * cell / 2;
+  const labelY = yc + pick.rowsUsed * cell / 2 + 26;
+  const massY = labelY + 46;
+  $('chart-ratio').setAttribute('viewBox', `0 0 760 ${fmt(massY + 22, 0)}`);
+
+  // 各項の中心 x を決める（式の項も分子も、この x に揃える）
+  let x = 380 - (slots.reduce((a, b) => a + b, 0) + sepW) / 2;
+  terms.forEach((t, i) => {
+    t.cx = x + slots[i] / 2;
+    x += slots[i];
+    if (i < seps.length) { seps[i].cx = x + seps[i].w / 2; x += seps[i].w; }
+  });
+
+  let g = '';
+  // 反応式（項ごとに、真下のかたまりと同じ x に置く）
+  terms.forEach(t => {
+    g += `<text x="${fmt(t.cx,1)}" y="${EQ_Y}" text-anchor="middle" font-size="27" font-weight="850" fill="${t.color}">${t.text}</text>`;
+  });
+  seps.forEach(s => {
+    g += `<text x="${fmt(s.cx,1)}" y="${EQ_Y}" text-anchor="middle" font-size="26" font-weight="850" fill="var(--ink3)">${s.t}</text>`;
+    g += `<text x="${fmt(s.cx,1)}" y="${fmt(yc + 9,1)}" text-anchor="middle" font-size="26" font-weight="850" fill="#c8d3e0">${s.t}</text>`;
+  });
+  g += `<text x="380" y="90" text-anchor="middle" font-size="13.5" font-weight="800" fill="var(--ink3)">この反応が ${N} 回分（分子の絵1個 ＝ 1 mol 分）</text>`;
+
+  // 分子と、その下の量
+  terms.forEach((t, i) => {
+    const { r, c } = pick.per[i], left = t.cx - c * cell / 2;
+    for (let k = 0; k < t.n; k++) {
+      const row = Math.floor(k / c), col = k % c;
+      g += drawGlyph(t.s.f, left + col * cell + cell / 2, yc + (row - (r - 1) / 2) * cell, cell * 0.46);
+    }
+    g += `<text x="${fmt(t.cx,1)}" y="${fmt(labelY,1)}" text-anchor="middle" font-size="15.5" font-weight="850" fill="${t.color}">${sub(t.s)}</text>`;
+  });
 
   const mL = R.reduce((t, s) => t + s.c * N * s.M, 0), mR = P.reduce((t, s) => t + s.c * N * s.M, 0);
-  g += `<text x="380" y="462" text-anchor="middle" font-size="14.5" font-weight="850" fill="var(--ink2)">質量の合計　左辺 ${sig3(mL)} g　＝　右辺 ${sig3(mR)} g　（質量は保存される）</text>`;
+  g += `<text x="380" y="${fmt(massY,0)}" text-anchor="middle" font-size="14.5" font-weight="850" fill="var(--ink2)">質量の合計　左辺 ${sig3(mL)} g　＝　右辺 ${sig3(mR)} g　（質量は保存される）</text>`;
   $('chart-ratio').innerHTML = g;
 
   setReadout($('t1-readout'), rx.sp.map(s => {
