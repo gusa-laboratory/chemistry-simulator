@@ -169,8 +169,8 @@
           </div>
           <div class="diagram-block">
             <span class="diagram-label">PARTICLE MODEL</span>
-            <svg id="cont-intro" viewBox="0 0 300 132" role="img" aria-label="現在時刻の分子の様子"></svg>
-            <p>見かけ上は止まっていても、正反応と逆反応は同じ速さで進み続けている（動的平衡）。</p>
+            <svg id="cont-intro" viewBox="0 0 300 130" role="img" aria-label="現在時刻の分子の様子。反応が起きた分子は光る"></svg>
+            <p>オレンジに光った分子＝いま反応したもの。平衡に達すると<b>個数は変わらなくなる</b>が、正反応と逆反応は同じ速さで<b>起こり続ける</b>（動的平衡）。</p>
           </div>
         </div>
         <div class="card">
@@ -764,22 +764,63 @@ function diatomic(cx, cy, c1, c2, rr) {
 }
 // 四面体型（NH3）を1個描く
 function ammoniaGlyph(cx, cy, rr) {
-  let s = `<circle cx="${fmt(cx,1)}" cy="${fmt(cy,1)}" r="${rr}" fill="var(--nh3)" stroke="rgba(23,32,51,.45)" stroke-width=".8"/>`;
+  let s = `<circle cx="${fmt(cx,1)}" cy="${fmt(cy,1)}" r="${fmt(rr,1)}" fill="var(--nh3)" stroke="rgba(23,32,51,.45)" stroke-width=".8"/>`;
   [[-1, .7], [1, .7], [0, -1]].forEach(d => {
     s += `<circle cx="${fmt(cx + d[0] * rr * 1.25,1)}" cy="${fmt(cy + d[1] * rr * 1.25,1)}" r="${fmt(rr * .52,1)}" fill="#dbeafe" stroke="rgba(23,32,51,.35)" stroke-width=".7"/>`;
   });
-  return s;
+  return `<g>${s}</g>`;
 }
 
-// 箱の中に分子を並べる。specs:[{n, draw(cx,cy)}]
-function fillBox(x, y, w, h, specs, pad) {
-  const p = pad ?? 12;
+// 分子どうしが重ならない配置をつくる。
+// 箱を格子に切って1マスに1分子ずつ入れ、マス内の余白の範囲でだけ位置をずらす。
+// こうすると「散らばって見える」のに重なりは原理的に起こらない。
+// wf・hf は分子の見かけの大きさ（半径 r の何倍の幅・高さを占めるか）
+function gridLayout(x, y, w, h, n, wf, hf, baseR) {
+  if (n <= 0) return { slots: [], r: baseR };
+  let best = null;
+  for (let cols = 1; cols <= n; cols++) {
+    const rows = Math.ceil(n / cols);
+    const cw = w / cols, ch = h / rows;
+    const r = Math.min(cw / wf, ch / hf);
+    if (!best || r > best.r) best = { cols, rows, cw, ch, r };
+  }
+  const r = Math.min(baseR, best.r);
+  const slots = [];
+  for (let i = 0; i < n; i++) {
+    slots.push({
+      cx: x + best.cw * ((i % best.cols) + 0.5),
+      cy: y + best.ch * (Math.floor(i / best.cols) + 0.5),
+      fx: Math.max(0, best.cw - wf * r) / 2,   // マス内で左右に動ける余白
+      fy: Math.max(0, best.ch - hf * r) / 2,
+    });
+  }
+  return { slots, r };
+}
+
+// 決定的なシャッフル（同じ n・seed なら常に同じ並び）
+function shuffled(n, seed) {
+  const a = [...Array(n).keys()];
+  let s = seed;
+  const rnd = () => { s = (s * 16807) % 2147483647; return s / 2147483647; };
+  for (let i = n - 1; i > 0; i--) {
+    const j = Math.floor(rnd() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// 箱の中に分子を重ならないように並べる。specs:[{n, draw(cx,cy,r)}]
+function drawMolecules(x, y, w, h, specs, o) {
+  const total = specs.reduce((sum, sp) => sum + sp.n, 0);
+  const { slots, r } = gridLayout(x, y, w, h, total, o.wf, o.hf, o.baseR);
+  if (!slots.length) return '';
+  const order = shuffled(total, 20260810);   // 種類が偏って並ばないように席を散らす
   let s = '', i = 0;
   for (const sp of specs) {
-    for (let k = 0; k < sp.n && i < PARTS.length; k++, i++) {
-      const cx = x + p + PARTS[i][0] * (w - 2 * p);
-      const cy = y + p + PARTS[i][1] * (h - 2 * p);
-      s += sp.draw(cx, cy);
+    for (let k = 0; k < sp.n; k++, i++) {
+      const slot = slots[order[i]];
+      const j = i % PARTS.length;
+      s += sp.draw(slot.cx + (PARTS[j][0] - 0.5) * 2 * slot.fx, slot.cy + (PARTS[j][1] - 0.5) * 2 * slot.fy, r);
     }
   }
   return s;
@@ -797,6 +838,63 @@ function lerpColor(a, b, t) {
    ============================================================ */
 const intro = { view: 'conc', playing: false, raf: 0, series: null };
 const INTRO_TMAX = 12;
+
+/* --- ①の粒子モデル：動的平衡を見せるしくみ ------------------------------
+   分子の総数はこの反応では変わらない（1+1→2）ので、席を24個に固定し、
+   各席の「中身」だけを入れ替える。
+     ・ODE から求めた目標個数に合わせる（＝マクロな濃度変化）
+     ・それとは別に、正反応1回と逆反応1回を必ず対で起こし続ける（＝動的平衡）
+   平衡に達すると前者はゼロになるが後者は止まらないので、
+   「個数は変わらないのに反応は進み続けている」ことが見える。 */
+const INTRO_N = 24;
+const introBox = {
+  ids: Array(INTRO_N).fill(0),   // 各席の中身 0=H₂ 1=I₂ 2=HI
+  layout: null,
+  order: shuffled(INTRO_N, 31415),
+  cursor: 0,
+  churn: 0,
+  flash: new Map(),              // 直前に反応した席 → 光らせる期限
+  last: null,
+  raf: 0,
+};
+const CHURN_RATE = 11;           // 反応速度を「1秒あたり何回の入れ替え」に見せるかの倍率
+const REDUCED_MOTION = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// 席を1つ from → to に変える。走査開始位置をずらして、変化が一箇所に固まらないようにする
+function introConvert(from, to, out, now) {
+  for (let k = 0; k < INTRO_N; k++) {
+    const s = introBox.order[(introBox.cursor + k) % INTRO_N];
+    if (introBox.ids[s] === from) {
+      introBox.ids[s] = to;
+      introBox.cursor = (introBox.cursor + k + 1) % INTRO_N;
+      introBox.flash.set(s, now + 520);
+      out.push(s);
+      return true;
+    }
+  }
+  return false;
+}
+const introCount = () => introBox.ids.reduce((c, v) => (c[v]++, c), [0, 0, 0]);
+// 正反応：H₂ + I₂ → 2HI（席2つがHIに変わる）
+function introForward(now) {
+  const c = introCount();
+  if (c[0] < 1 || c[1] < 1) return false;
+  const out = [];
+  return introConvert(0, 2, out, now) && introConvert(1, 2, out, now);
+}
+// 逆反応：2HI → H₂ + I₂
+function introReverse(now) {
+  if (introCount()[2] < 2) return false;
+  const out = [];
+  return introConvert(2, 0, out, now) && introConvert(2, 1, out, now);
+}
+
+// 濃度から目標の個数を出す。HIは2個ずつ増えるので偶数に丸める
+function introTargets(c, unit) {
+  const n2 = clamp(2 * Math.round(c[2] / (2 * unit)), 0, INTRO_N);
+  const n0 = clamp(Math.round(c[0] / unit), 0, INTRO_N - n2);
+  return [n0, INTRO_N - n2 - n0, n2];
+}
 
 function introParams() {
   return {
@@ -861,17 +959,6 @@ function drawIntro() {
     $('chart-intro').innerHTML = s;
   }
 
-  // 粒子モデル：この反応は分子の総数が変わらないので、常に24個で描ける
-  const unit = (p.a + p.b) / 24;
-  const nH2 = Math.round(cur[1] / unit), nI2 = Math.round(cur[2] / unit), nHI = Math.round(cur[3] / unit);
-  let box = `<rect x="6" y="6" width="288" height="120" rx="12" fill="#f7fbff" stroke="#c9d8ea" stroke-width="2"/>`;
-  box += fillBox(6, 6, 288, 120, [
-    { n: nH2, draw: (cx, cy) => diatomic(cx, cy, '#cfe9ff', '#cfe9ff', 5.4) },
-    { n: nI2, draw: (cx, cy) => diatomic(cx, cy, 'var(--sp2)', 'var(--sp2)', 5.4) },
-    { n: nHI, draw: (cx, cy) => diatomic(cx, cy, '#cfe9ff', 'var(--sp2)', 5.4) },
-  ], 16);
-  $('cont-intro').innerHTML = box;
-
   const vf = p.kf * cur[1] * cur[2], vr = p.kr * cur[3] * cur[3];
   const Q = (cur[1] * cur[2] > 1e-9) ? (cur[3] * cur[3]) / (cur[1] * cur[2]) : Infinity;
   const atEq = Math.abs(vf - vr) < 0.01 * Math.max(vf, 1e-9);
@@ -890,6 +977,68 @@ function drawIntro() {
     : (vf > vr ? '正反応が優勢：HI が増えている途中。' : '逆反応が優勢：HI が減っている途中。');
 }
 
+// 粒子モデルの毎フレーム処理。再生の有無に関わらず動き続ける（＝平衡でも反応は止まらない）
+function introParticleFrame(ts) {
+  introBox.raf = requestAnimationFrame(introParticleFrame);
+  if (!$('panel-intro').classList.contains('active') || document.hidden) { introBox.last = ts; return; }
+  const dt = introBox.last === null ? 0 : Math.min(0.05, (ts - introBox.last) / 1000);
+  introBox.last = ts;
+
+  const p = introParams();
+  if (!intro.series) introRebuild();
+  const cur = sampleAt(intro.series, p.t);
+  const unit = (p.a + p.b) / INTRO_N;
+  const now = ts;
+
+  // ① マクロな変化：目標の個数に合わせる
+  const tgt = introTargets([cur[1], cur[2], cur[3]], unit);
+  for (let guard = 0; guard < 40; guard++) {
+    const c = introCount();
+    if (c[0] === tgt[0] && c[1] === tgt[1] && c[2] === tgt[2]) break;
+    if (c[2] < tgt[2]) { if (!introForward(now)) break; }
+    else if (c[2] > tgt[2]) { if (!introReverse(now)) break; }
+    else {
+      const over = c.findIndex((v, i) => v > tgt[i]), under = c.findIndex((v, i) => v < tgt[i]);
+      if (over < 0 || under < 0) break;
+      introConvert(over, under, [], now);
+    }
+  }
+
+  // ② ミクロな入れ替え：正反応と逆反応を必ず対で起こす（個数は変わらない）
+  introBox.churn += p.kf * cur[1] * cur[2] * dt * CHURN_RATE;
+  for (let n = 0; n < 2 && introBox.churn >= 1; n++) {
+    introBox.churn -= 1;
+    if (introForward(now)) introReverse(now);
+  }
+  if (introBox.churn > 3) introBox.churn = 3;
+
+  drawIntroParticles(ts);
+}
+
+function drawIntroParticles(ts) {
+  if (!introBox.layout) introBox.layout = gridLayout(10, 10, 280, 110, INTRO_N, 4.3, 2.9, 5.4);
+  const { slots, r } = introBox.layout;
+  const t = ts / 1000;
+  let s = `<rect x="4" y="4" width="292" height="122" rx="12" fill="#f7fbff" stroke="#c9d8ea" stroke-width="2"/>`;
+  for (let i = 0; i < INTRO_N; i++) {
+    const slot = slots[i], j = i % PARTS.length;
+    // マス内の余白の中だけで漂わせる。はみ出さないので重なりは起きない
+    const dx = REDUCED_MOTION ? (PARTS[j][0] - .5) * 2 * slot.fx : Math.sin(t * .55 + PARTS[j][0] * 6.3) * slot.fx;
+    const dy = REDUCED_MOTION ? (PARTS[j][1] - .5) * 2 * slot.fy : Math.sin(t * .78 + PARTS[j][1] * 6.3) * slot.fy;
+    const cx = slot.cx + dx, cy = slot.cy + dy;
+    const until = introBox.flash.get(i);
+    if (until && until > ts) {
+      const k = (until - ts) / 520;
+      s += `<circle cx="${fmt(cx,1)}" cy="${fmt(cy,1)}" r="${fmt(r * 2.5,1)}" fill="var(--accent)" opacity="${fmt(k * .38, 2)}"/>`;
+    } else if (until) introBox.flash.delete(i);
+    const id = introBox.ids[i];
+    s += id === 0 ? diatomic(cx, cy, '#cfe9ff', '#cfe9ff', r)
+      : id === 1 ? diatomic(cx, cy, 'var(--sp2)', 'var(--sp2)', r)
+      : diatomic(cx, cy, '#cfe9ff', 'var(--sp2)', r);
+  }
+  $('cont-intro').innerHTML = s;
+}
+
 function introTogglePlay(on) {
   intro.playing = on ?? !intro.playing;
   $('intro-play').textContent = intro.playing ? '⏸ 停止' : '▶ 再生';
@@ -899,7 +1048,7 @@ function introTogglePlay(on) {
       if (!intro.playing) return;
       if (last === null) last = ts;
       const dt = (ts - last) / 1000; last = ts;
-      let t = +$('intro-t').value + dt * 2;
+      let t = +$('intro-t').value + dt;
       if (t >= INTRO_TMAX) { t = INTRO_TMAX; introTogglePlay(false); }
       $('intro-t').value = t;
       drawIntro();
@@ -1181,7 +1330,6 @@ function drawVolume() {
     const hMax = 108, hMin = 26, h = clamp(hMin + (V / 20) * (hMax - hMin), hMin, hMax);
     const top = 8 + (hMax - h);
     // 箱が薄いときは分子も小さく描く（重なって潰れて見えるのを防ぐ）
-    const rs = clamp(h / hMax, 0.58, 1);
     let g = `<rect x="60" y="${fmt(top - 12,1)}" width="180" height="12" rx="4" fill="#94a3b8"/>`;
     g += `<rect x="140" y="4" width="20" height="${fmt(Math.max(4, top - 16),1)}" fill="#cbd5e1"/>`;
     g += `<rect x="60" y="${fmt(top,1)}" width="180" height="${fmt(h,1)}" rx="6" fill="#f7fbff" stroke="#c9d8ea" stroke-width="2"/>`;
@@ -1190,19 +1338,19 @@ function drawVolume() {
     if (vol.rx === 'nh3') {
       const u = (V_N1 + V_N2) / 22;
       specs = [
-        { n: Math.round(cur.amounts[0] / u), draw: (cx, cy) => diatomic(cx, cy, 'var(--n2)', 'var(--n2)', 4.8 * rs) },
-        { n: Math.round(cur.amounts[1] / u), draw: (cx, cy) => diatomic(cx, cy, '#cfe9ff', '#cfe9ff', 4.4 * rs) },
-        { n: Math.round(cur.amounts[2] / u), draw: (cx, cy) => ammoniaGlyph(cx, cy, 5.0 * rs) },
+        { n: Math.round(cur.amounts[0] / u), draw: (cx, cy, r) => diatomic(cx, cy, 'var(--n2)', 'var(--n2)', r) },
+        { n: Math.round(cur.amounts[1] / u), draw: (cx, cy, r) => diatomic(cx, cy, '#cfe9ff', '#cfe9ff', r * .9) },
+        { n: Math.round(cur.amounts[2] / u), draw: (cx, cy, r) => ammoniaGlyph(cx, cy, r * .85) },
       ];
     } else {
       const u = (V_HI_A + V_HI_B) / 22;
       specs = [
-        { n: Math.round(cur.amounts[0] / u), draw: (cx, cy) => diatomic(cx, cy, '#cfe9ff', '#cfe9ff', 4.8 * rs) },
-        { n: Math.round(cur.amounts[1] / u), draw: (cx, cy) => diatomic(cx, cy, 'var(--sp2)', 'var(--sp2)', 4.8 * rs) },
-        { n: Math.round(cur.amounts[2] / u), draw: (cx, cy) => diatomic(cx, cy, '#cfe9ff', 'var(--sp2)', 4.8 * rs) },
+        { n: Math.round(cur.amounts[0] / u), draw: (cx, cy, r) => diatomic(cx, cy, '#cfe9ff', '#cfe9ff', r) },
+        { n: Math.round(cur.amounts[1] / u), draw: (cx, cy, r) => diatomic(cx, cy, 'var(--sp2)', 'var(--sp2)', r) },
+        { n: Math.round(cur.amounts[2] / u), draw: (cx, cy, r) => diatomic(cx, cy, '#cfe9ff', 'var(--sp2)', r) },
       ];
     }
-    g += fillBox(60, top, 180, h, specs, Math.min(13, h / 3.2));
+    g += drawMolecules(60, top, 180, h, specs, { baseR: 5.2, wf: 4.3, hf: 4.2 });
     g += `<text x="150" y="140" text-anchor="middle" font-size="11" font-weight="800" fill="var(--ink3)">V = ${fmt(V, 1)} L　分子の総数 ${fmt(cur.total, 2)} mol</text>`;
     $('cont-volume').innerHTML = g;
   }
@@ -1303,11 +1451,11 @@ function drawTemp() {
     const tf = (T - 250) / (800 - 250);
     let g = `<rect x="6" y="6" width="288" height="120" rx="12" fill="${lerpColor(COOL, WARM, tf)}" fill-opacity=".38" stroke="#c9d8ea" stroke-width="2"/>`;
     const u = 2 / 22;
-    g += fillBox(6, 6, 288, 120, [
-      { n: Math.round(cur.eq[0] / u), draw: (cx, cy) => diatomic(cx, cy, '#cfe9ff', '#cfe9ff', 5.2) },
-      { n: Math.round(cur.eq[1] / u), draw: (cx, cy) => diatomic(cx, cy, 'var(--sp2)', 'var(--sp2)', 5.2) },
-      { n: Math.round(cur.eq[2] / u), draw: (cx, cy) => diatomic(cx, cy, '#cfe9ff', 'var(--sp2)', 5.2) },
-    ], 16);
+    g += drawMolecules(10, 10, 280, 112, [
+      { n: Math.round(cur.eq[0] / u), draw: (cx, cy, r) => diatomic(cx, cy, '#cfe9ff', '#cfe9ff', r) },
+      { n: Math.round(cur.eq[1] / u), draw: (cx, cy, r) => diatomic(cx, cy, 'var(--sp2)', 'var(--sp2)', r) },
+      { n: Math.round(cur.eq[2] / u), draw: (cx, cy, r) => diatomic(cx, cy, '#cfe9ff', 'var(--sp2)', r) },
+    ], { baseR: 5.4, wf: 4.3, hf: 2.9 });
     g += `<text x="150" y="142" text-anchor="middle" font-size="11" font-weight="800" fill="var(--ink3)">T = ${fmt(T, 0)} K　生成物 ${fmt(cur.pct, 1)} ％</text>`;
     $('cont-temp').innerHTML = g;
   }
@@ -1552,6 +1700,7 @@ attachHover('chart-haber', 'tip-haber', () => ({
 // 初期描画
 introRebuild();
 Object.values(DRAW).forEach(fn => fn());
+introBox.raf = requestAnimationFrame(introParticleFrame);
 </script>
 <script src="site-shell.js"></script>
 </body>
