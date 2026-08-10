@@ -193,7 +193,7 @@
           </div>
           <div class="ctrl">
             <label>時刻 t <span class="val"><span id="intro-t-val">0.0</span> s</span></label>
-            <input type="range" id="intro-t" min="0" max="12" step="0.05" value="0">
+            <input type="range" id="intro-t" min="0" max="12" step="0.01" value="0">
           </div>
           <div class="row">
             <button class="btn primary play" id="intro-play" type="button">▶ 再生</button>
@@ -836,8 +836,11 @@ function lerpColor(a, b, t) {
 /* ============================================================
    ① 平衡状態とは
    ============================================================ */
-const intro = { view: 'conc', playing: false, raf: 0, series: null };
+// 時刻 t はここで持つ。スライダーの value は step に丸められてしまうので、
+// 1フレーム分の細かい増分（1/60秒）を足す用途には使えない
+const intro = { view: 'conc', playing: false, raf: 0, series: null, t: 0 };
 const INTRO_TMAX = 12;
+const INTRO_SPEED = 1.5;   // 再生の速さ（秒あたりに進む t）
 
 /* --- ①の粒子モデル：動的平衡を見せるしくみ ------------------------------
    分子の総数はこの反応では変わらない（1+1→2）ので、席を24個に固定し、
@@ -854,11 +857,11 @@ const introBox = {
   cursor: 0,
   churn: 0,
   flash: new Map(),              // 直前に反応した席 → 光らせる期限
+  dirty: true,                   // 中身か光に変化があったときだけ描き直す
   last: null,
   raf: 0,
 };
 const CHURN_RATE = 11;           // 反応速度を「1秒あたり何回の入れ替え」に見せるかの倍率
-const REDUCED_MOTION = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // 席を1つ from → to に変える。走査開始位置をずらして、変化が一箇所に固まらないようにする
 function introConvert(from, to, out, now) {
@@ -868,6 +871,7 @@ function introConvert(from, to, out, now) {
       introBox.ids[s] = to;
       introBox.cursor = (introBox.cursor + k + 1) % INTRO_N;
       introBox.flash.set(s, now + 520);
+      introBox.dirty = true;
       out.push(s);
       return true;
     }
@@ -900,7 +904,7 @@ function introParams() {
   return {
     a: +$('intro-a').value, b: +$('intro-b').value,
     kf: +$('intro-kf').value, kr: +$('intro-kr').value,
-    t: +$('intro-t').value,
+    t: intro.t,
   };
 }
 
@@ -1012,20 +1016,22 @@ function introParticleFrame(ts) {
   }
   if (introBox.churn > 3) introBox.churn = 3;
 
-  drawIntroParticles(ts);
+  // 分子は静止しているので、変化があるときと光が残っているときだけ描き直す
+  if (introBox.dirty || introBox.flash.size) {
+    drawIntroParticles(ts);
+    introBox.dirty = false;
+  }
 }
 
 function drawIntroParticles(ts) {
   if (!introBox.layout) introBox.layout = gridLayout(10, 10, 280, 110, INTRO_N, 4.3, 2.9, 5.4);
   const { slots, r } = introBox.layout;
-  const t = ts / 1000;
   let s = `<rect x="4" y="4" width="292" height="122" rx="12" fill="#f7fbff" stroke="#c9d8ea" stroke-width="2"/>`;
   for (let i = 0; i < INTRO_N; i++) {
     const slot = slots[i], j = i % PARTS.length;
-    // マス内の余白の中だけで漂わせる。はみ出さないので重なりは起きない
-    const dx = REDUCED_MOTION ? (PARTS[j][0] - .5) * 2 * slot.fx : Math.sin(t * .55 + PARTS[j][0] * 6.3) * slot.fx;
-    const dy = REDUCED_MOTION ? (PARTS[j][1] - .5) * 2 * slot.fy : Math.sin(t * .78 + PARTS[j][1] * 6.3) * slot.fy;
-    const cx = slot.cx + dx, cy = slot.cy + dy;
+    // 位置は固定。動くと何が変わったのか分かりにくいので、変化するのは中身と光だけにする
+    const cx = slot.cx + (PARTS[j][0] - .5) * 2 * slot.fx;
+    const cy = slot.cy + (PARTS[j][1] - .5) * 2 * slot.fy;
     const until = introBox.flash.get(i);
     if (until && until > ts) {
       const k = (until - ts) / 520;
@@ -1047,10 +1053,10 @@ function introTogglePlay(on) {
     const step = ts => {
       if (!intro.playing) return;
       if (last === null) last = ts;
-      const dt = (ts - last) / 1000; last = ts;
-      let t = +$('intro-t').value + dt;
-      if (t >= INTRO_TMAX) { t = INTRO_TMAX; introTogglePlay(false); }
-      $('intro-t').value = t;
+      const dt = Math.min(0.1, (ts - last) / 1000); last = ts;
+      intro.t += dt * INTRO_SPEED;
+      if (intro.t >= INTRO_TMAX) { intro.t = INTRO_TMAX; introTogglePlay(false); }
+      $('intro-t').value = intro.t;   // 表示用（丸められてもよい）
       drawIntro();
       if (intro.playing) intro.raf = requestAnimationFrame(step);
     };
@@ -1063,14 +1069,15 @@ function introTogglePlay(on) {
 ['intro-a', 'intro-b', 'intro-kf', 'intro-kr'].forEach(id => {
   $(id).addEventListener('input', () => { introRebuild(); drawIntro(); });
 });
-$('intro-t').addEventListener('input', () => { introTogglePlay(false); drawIntro(); });
+$('intro-t').addEventListener('input', () => { introTogglePlay(false); intro.t = +$('intro-t').value; drawIntro(); });
 $('intro-play').addEventListener('click', () => {
-  if (!intro.playing && +$('intro-t').value >= INTRO_TMAX - 1e-6) $('intro-t').value = 0;
+  if (!intro.playing && intro.t >= INTRO_TMAX - 1e-6) { intro.t = 0; $('intro-t').value = 0; }
   introTogglePlay();
 });
 $('intro-reset').addEventListener('click', () => {
   introTogglePlay(false);
-  $('intro-a').value = 1; $('intro-b').value = 1; $('intro-kf').value = 1; $('intro-kr').value = 0.2; $('intro-t').value = 0;
+  $('intro-a').value = 1; $('intro-b').value = 1; $('intro-kf').value = 1; $('intro-kr').value = 0.2;
+  intro.t = 0; $('intro-t').value = 0;
   introRebuild(); drawIntro();
 });
 document.querySelectorAll('[data-introview]').forEach(btn => {
