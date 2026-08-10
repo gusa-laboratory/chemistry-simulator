@@ -254,9 +254,11 @@ class VSEPRView{
    if(verts.length===2){ctx.beginPath();ctx.moveTo(p[0].x,p[0].y);ctx.lineTo(p[1].x,p[1].y);ctx.strokeStyle='rgba(220,38,38,.42)';ctx.lineWidth=14*s;ctx.stroke()}
    else{const faces=this.guideFaces(verts,center);
     const fillPath=(pts,color)=>{ctx.beginPath();pts.forEach((q,n)=>n?ctx.lineTo(q.x,q.y):ctx.moveTo(q.x,q.y));ctx.closePath();ctx.fillStyle=color;ctx.fill()};
-    faces.forEach(f=>{if(f.every(isAtom))fillPath(f.map(i=>p[i]),'rgba(239,68,68,.22)')});
-    // 結合が2本（折れ線形）のときは中心を含む面が「分子の形」なのでそこを濃く塗る
-    if(nb===2&&verts.length>2)fillPath([c0,p[0],p[1]],'rgba(239,68,68,.22)');
+    // 濃い側＝実際の分子の形。非共有電子対があるときは中心原子も頂点に加えた立体
+    // （NH₃なら N＋3H の三角錐、H₂Oなら O＋2H の折れ線の面）にする
+    if(verts.length>nb&&nb>=2){const sp=verts.slice(0,nb).concat([center]),spP=sp.map(q=>this.point(q));
+     this.guideFaces(sp,center).forEach(f=>fillPath(f.map(i=>spP[i]),'rgba(239,68,68,.17)'))}
+    else faces.forEach(f=>{if(f.every(isAtom))fillPath(f.map(i=>p[i]),'rgba(239,68,68,.22)')});
     const edges=new Map();faces.forEach(f=>[[f[0],f[1]],[f[1],f[2]],[f[2],f[0]]].forEach(([a,b])=>edges.set(a<b?a+'-'+b:b+'-'+a,isAtom(a)&&isAtom(b))));
     const strokeSet=(atomSide,color,width,halo,dash)=>{const list=[...edges].filter(([,v])=>v===atomSide);if(!list.length)return;
      const path=()=>{ctx.beginPath();list.forEach(([k])=>{const[a,b]=k.split('-').map(Number);ctx.moveTo(p[a].x,p[a].y);ctx.lineTo(p[b].x,p[b].y)})};
