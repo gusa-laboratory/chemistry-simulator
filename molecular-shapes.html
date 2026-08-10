@@ -245,28 +245,29 @@ class VSEPRView{
    for(let m=0;m<n;m++){if(m===i||m===j||m===k)continue;const d=((v[m][0]-a[0])*nx+(v[m][1]-a[1])*ny+(v[m][2]-a[2])*nz)/len;if(d>1e-4)pos++;else if(d<-1e-4)neg++}
    if(!pos||!neg)faces.push([i,j,k])}
   return faces}
- drawGuides(){const groups=GUIDE_GROUPS[this.model.key]||[];if(!groups.length)return;const ctx=this.ctx,s=this.zoom;
+ // phase='fill'（原子より背面）/'edges'（原子より前面）で2回呼ぶ。輪郭を前面に出すと球に隠れない
+ drawGuides(phase){const groups=GUIDE_GROUPS[this.model.key]||[];if(!groups.length)return;const ctx=this.ctx,s=this.zoom;
   groups.forEach(gi=>{const group=this.model.vsepr[gi];if(!group)return;const verts=this.guideVertices(group);if(verts.length<2)return;
-   const center=this.model.atoms[group.center],p=verts.map(q=>this.point(q));
-   // 原子のある部分（＝実際の分子の形）は濃い赤、非共有電子対で正四面体を完成させる部分はかなり薄い赤
-   const nb=group.bonds.length,isAtom=i=>i<nb,c0=this.point(center);
+   const nb=group.bonds.length,center=this.model.atoms[group.center],p=verts.map(q=>this.point(q)),isAtom=i=>i<nb;
    ctx.save();ctx.lineJoin='round';ctx.lineCap='round';
-   if(verts.length===2){ctx.beginPath();ctx.moveTo(p[0].x,p[0].y);ctx.lineTo(p[1].x,p[1].y);ctx.strokeStyle='rgba(220,38,38,.42)';ctx.lineWidth=14*s;ctx.stroke()}
-   else{const faces=this.guideFaces(verts,center);
-    const fillPath=(pts,color)=>{ctx.beginPath();pts.forEach((q,n)=>n?ctx.lineTo(q.x,q.y):ctx.moveTo(q.x,q.y));ctx.closePath();ctx.fillStyle=color;ctx.fill()};
-    // 濃い側＝実際の分子の形。非共有電子対があるときは中心原子も頂点に加えた立体
-    // （NH₃なら N＋3H の三角錐、H₂Oなら O＋2H の折れ線の面）にする
-    if(verts.length>nb&&nb>=2){const sp=verts.slice(0,nb).concat([center]),spP=sp.map(q=>this.point(q));
-     this.guideFaces(sp,center).forEach(f=>fillPath(f.map(i=>spP[i]),'rgba(239,68,68,.17)'))}
-    else faces.forEach(f=>{if(f.every(isAtom))fillPath(f.map(i=>p[i]),'rgba(239,68,68,.22)')});
-    const edges=new Map();faces.forEach(f=>[[f[0],f[1]],[f[1],f[2]],[f[2],f[0]]].forEach(([a,b])=>edges.set(a<b?a+'-'+b:b+'-'+a,isAtom(a)&&isAtom(b))));
-    const strokeSet=(atomSide,color,width,halo,dash)=>{const list=[...edges].filter(([,v])=>v===atomSide);if(!list.length)return;
-     const path=()=>{ctx.beginPath();list.forEach(([k])=>{const[a,b]=k.split('-').map(Number);ctx.moveTo(p[a].x,p[a].y);ctx.lineTo(p[b].x,p[b].y)})};
-     ctx.setLineDash(dash||[]);
-     if(halo){path();ctx.strokeStyle='rgba(255,255,255,.85)';ctx.lineWidth=width+2.8*s;ctx.stroke()}
-     path();ctx.strokeStyle=color;ctx.lineWidth=width;ctx.stroke();ctx.setLineDash([])};
-    strokeSet(false,'rgba(220,38,38,.5)',2*s,false,[7*s,5*s]);
-    strokeSet(true,'rgba(220,38,38,.85)',3*s,true)}
+   if(verts.length===2){if(phase==='fill'){ctx.beginPath();ctx.moveTo(p[0].x,p[0].y);ctx.lineTo(p[1].x,p[1].y);ctx.strokeStyle='rgba(220,38,38,.42)';ctx.lineWidth=14*s;ctx.stroke()}ctx.restore();return}
+   const faces=this.guideFaces(verts,center);
+   // 濃い側＝実際の分子の形。非共有電子対があるときは中心原子も頂点に加えた立体
+   // （NH₃なら N＋3H の三角錐、H₂Oなら O＋2H の折れ線の面）にする
+   let shapeP,shapeFaces;
+   if(verts.length>nb&&nb>=2){const sp=verts.slice(0,nb).concat([center]);shapeP=sp.map(q=>this.point(q));shapeFaces=this.guideFaces(sp,center)}
+   else{shapeP=p;shapeFaces=faces.filter(f=>f.every(isAtom))}
+   if(phase==='fill'){shapeFaces.forEach(f=>{ctx.beginPath();f.forEach((i,n)=>n?ctx.lineTo(shapeP[i].x,shapeP[i].y):ctx.moveTo(shapeP[i].x,shapeP[i].y));ctx.closePath();ctx.fillStyle='rgba(239,68,68,.17)';ctx.fill()});ctx.restore();return}
+   const edgeSet=(fs)=>{const m=new Set();fs.forEach(f=>[[f[0],f[1]],[f[1],f[2]],[f[2],f[0]]].forEach(([a,b])=>m.add(a<b?a+'-'+b:b+'-'+a)));return[...m].map(k=>k.split('-').map(Number))};
+   const strong=edgeSet(shapeFaces);
+   const light=edgeSet(faces).filter(([a,b])=>!(isAtom(a)&&isAtom(b)));
+   const stroke=(list,pts,color,width,halo,dash)=>{if(!list.length)return;
+    const path=()=>{ctx.beginPath();list.forEach(([a,b])=>{ctx.moveTo(pts[a].x,pts[a].y);ctx.lineTo(pts[b].x,pts[b].y)})};
+    ctx.setLineDash(dash||[]);
+    if(halo){path();ctx.strokeStyle='rgba(255,255,255,.9)';ctx.lineWidth=width+3*s;ctx.stroke()}
+    path();ctx.strokeStyle=color;ctx.lineWidth=width;ctx.stroke();ctx.setLineDash([])};
+   stroke(light,p,'rgba(220,38,38,.55)',2*s,true,[7*s,5*s]);
+   stroke(strong,shapeP,'rgba(220,38,38,.9)',3*s,true);
    ctx.restore()})}
  drawElectronClouds(p){
   const s=this.zoom;
@@ -279,11 +280,11 @@ class VSEPRView{
   if(state.electrons)this.drawElectronClouds(p);
   const s=this.zoom;
   [...this.model.bonds].sort((u,v)=>(p[u.a].z+p[u.b].z)-(p[v.a].z+p[v.b].z)).forEach(b=>{const a=p[b.a],z=p[b.b],dx=z.x-a.x,dy=z.y-a.y,len=Math.hypot(dx,dy)||1,nx=-dy/len,ny=dx/len;for(let k=0;k<b.o;k++){const off=(k-(b.o-1)/2)*10*s;this.ctx.beginPath();this.ctx.moveTo(a.x+nx*off,a.y+ny*off);this.ctx.lineTo(z.x+nx*off,z.y+ny*off);this.ctx.strokeStyle='#64748b';this.ctx.lineWidth=(b.o===1?9:6)*s;this.ctx.lineCap='round';this.ctx.stroke()}});
-  if(state.guides)this.drawGuides();
+  if(state.guides)this.drawGuides('fill');
   if(state.repulsion)this.drawRepulsion();
   if(state.angles)this.drawAngleGuides(false);
   if(state.electrons)this.drawSharedElectronDots(p);
-  this.model.atoms.map((a,i)=>i).sort((i,j)=>p[i].z-p[j].z).forEach(i=>{const a=this.model.atoms[i],q=p[i],r=radii[a.e]*2.8*q.scale*s,gr=this.ctx.createRadialGradient(q.x-r*.34,q.y-r*.38,r*.12,q.x,q.y,r);gr.addColorStop(0,'#fff');gr.addColorStop(.24,colors[a.e]);gr.addColorStop(1,outlines[a.e]);this.ctx.beginPath();this.ctx.arc(q.x,q.y,r,0,Math.PI*2);this.ctx.fillStyle=gr;this.ctx.fill();this.ctx.strokeStyle=outlines[a.e];this.ctx.lineWidth=1.4*s;this.ctx.stroke();this.ctx.fillStyle=a.e==='H'?'#475569':'#fff';this.ctx.font=`800 ${(a.e.length>1?23:26)*s}px Inter,Arial`;this.ctx.textAlign='center';this.ctx.textBaseline='middle';this.ctx.fillText(a.e,q.x,q.y+.5*s)});if(state.angles)this.drawAngleGuides(true)
+  this.model.atoms.map((a,i)=>i).sort((i,j)=>p[i].z-p[j].z).forEach(i=>{const a=this.model.atoms[i],q=p[i],r=radii[a.e]*2.8*q.scale*s,gr=this.ctx.createRadialGradient(q.x-r*.34,q.y-r*.38,r*.12,q.x,q.y,r);gr.addColorStop(0,'#fff');gr.addColorStop(.24,colors[a.e]);gr.addColorStop(1,outlines[a.e]);this.ctx.beginPath();this.ctx.arc(q.x,q.y,r,0,Math.PI*2);this.ctx.fillStyle=gr;this.ctx.fill();this.ctx.strokeStyle=outlines[a.e];this.ctx.lineWidth=1.4*s;this.ctx.stroke();this.ctx.fillStyle=a.e==='H'?'#475569':'#fff';this.ctx.font=`800 ${(a.e.length>1?23:26)*s}px Inter,Arial`;this.ctx.textAlign='center';this.ctx.textBaseline='middle';this.ctx.fillText(a.e,q.x,q.y+.5*s)});if(state.guides)this.drawGuides('edges');if(state.angles)this.drawAngleGuides(true)
  }
 }
 
