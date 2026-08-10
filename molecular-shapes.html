@@ -37,7 +37,8 @@
   .electron-toggle[aria-pressed="true"]{border-color:#b9a0ee;background:#f5f0ff;color:#6026bc}
   .repulsion-toggle[aria-pressed="true"]{border-color:#fdba74;background:#fff7ed;color:#c2410c}
   .angle-toggle[aria-pressed="true"]{border-color:#f9a8d4;background:#fdf2f8;color:#be185d}
-  .repulsion-toggle:disabled,.angle-toggle:disabled{cursor:not-allowed;border-color:#d8e1ed;background:#edf2f7;color:#8290a5;opacity:.72}
+  .guide-toggle[aria-pressed="true"]{border-color:#ef9a9a;background:#fff1f2;color:#b91c1c}
+  .repulsion-toggle:disabled,.angle-toggle:disabled,.guide-toggle:disabled{cursor:not-allowed;border-color:#d8e1ed;background:#edf2f7;color:#8290a5;opacity:.72}
   .lesson-head{text-align:center;margin-bottom:12px}
   .lesson-head h2{margin:0 0 9px;color:var(--blue-deep);font-size:clamp(21px,2.4vw,29px);letter-spacing:-.025em}
   .facts{display:flex;justify-content:center;align-items:center;gap:7px;flex-wrap:wrap}
@@ -124,6 +125,7 @@
     <button class="outline-btn electron-toggle" id="electronToggle" type="button" aria-pressed="true">電子対表示 ON</button>
     <button class="outline-btn repulsion-toggle" id="repulsionToggle" type="button" aria-pressed="true">反発矢印 ON</button>
     <button class="outline-btn angle-toggle" id="angleToggle" type="button" aria-pressed="false">結合角 OFF</button>
+    <button class="outline-btn guide-toggle" id="guideToggle" type="button" aria-pressed="false">補助図形 OFF</button>
   </div>
   <div class="lesson-head">
     <h2 id="moleculeTitle">H₂</h2>
@@ -186,7 +188,11 @@ const formulaData={
  sf6:{atoms:[['S',210,150],['F',210,50],['F',297,100],['F',297,200],['F',210,250],['F',123,200],['F',123,100]],bonds:[[210,112,210,88,1],[244,130,263,119,1],[244,170,263,181,1],[210,188,210,212,1],[176,170,157,181,1],[176,130,157,119,1]],pairs:[...E3(210,50,0,-1),...E3(297,100,.866,-.5),...E3(297,200,.866,.5),...E3(210,250,0,1),...E3(123,200,-.866,.5),...E3(123,100,-.866,-.5)]}
 };
 
-const state={molecule:'h2',formula:'structure',electrons:true,repulsion:true,angles:false,compare:'none',compareFocus:null};
+// 補助図形（電子対がつくる立体）を描く vsepr グループ。中心原子の電子領域を多面体で示す
+// ※2原子分子（H₂・O₂・N₂・HCl）は形が自明なので補助図形なし
+const GUIDE_GROUPS={h2:[],o2:[],n2:[],hcl:[],ch4:[0],h2o:[0],co2:[1],nh3:[0],becl2:[0],bf3:[0],pcl5:[0],sf6:[0]};
+Object.entries(molecules).forEach(([key,m])=>{m.key=key});
+const state={molecule:'h2',formula:'structure',electrons:true,repulsion:true,angles:false,guides:false,compare:'none',compareFocus:null};
 const compareSets={
  'co2-h2o':{title:'CO₂ と H₂O',keys:['co2','h2o']},
  'ch4-nh3-h2o':{title:'CH₄・NH₃・H₂O',keys:['ch4','nh3','h2o']}
@@ -225,6 +231,41 @@ class VSEPRView{
  drawRepulsion(){this.model.vsepr.forEach(group=>{const pts=this.domainCoords(group),center=this.model.atoms[group.center];if(pts.length<2)return;const pairs=group.pairs||pts.flatMap((_,i)=>pts.slice(i+1).map((__,j)=>[i,i+j+1]));pairs.forEach(([i,j])=>this.drawProjectedDoubleArrow(this.point(pts[i]),this.point(pts[j]),this.point(this.repulsionControl(pts[i],pts[j],center,group))))})}
  angleGeometry(guide){const center=this.model.atoms[guide.center],a=this.model.atoms[guide.a],b=this.model.atoms[guide.b],va=[a.x-center.x,a.y-center.y,a.z-center.z],vb=[b.x-center.x,b.y-center.y,b.z-center.z],na=Math.hypot(...va)||1,nb=Math.hypot(...vb)||1,u=va.map(x=>x/na),q=vb.map(x=>x/nb),dot=Math.max(-1,Math.min(1,u[0]*q[0]+u[1]*q[1]+u[2]*q[2])),angle=Math.acos(dot);let v;if(Math.PI-angle<.002){const ref=guide.arcDir||[0,1,0],d=ref[0]*u[0]+ref[1]*u[1]+ref[2]*u[2];v=[ref[0]-u[0]*d,ref[1]-u[1]*d,ref[2]-u[2]*d];let n=Math.hypot(...v);if(n<.001){const fallback=Math.abs(u[0])<.8?[1,0,0]:[0,0,1],fd=fallback[0]*u[0]+fallback[1]*u[1]+fallback[2]*u[2];v=[fallback[0]-u[0]*fd,fallback[1]-u[1]*fd,fallback[2]-u[2]*fd];n=Math.hypot(...v)||1}v=v.map(x=>x/n)}else{const sin=Math.sin(angle)||1;v=[(q[0]-u[0]*dot)/sin,(q[1]-u[1]*dot)/sin,(q[2]-u[2]*dot)/sin]}const radius=guide.radius??.68,at=(t,r=radius)=>A('',center.x+r*(u[0]*Math.cos(t)+v[0]*Math.sin(t)),center.y+r*(u[1]*Math.cos(t)+v[1]*Math.sin(t)),center.z+r*(u[2]*Math.cos(t)+v[2]*Math.sin(t))),steps=Math.max(18,Math.ceil(angle*20)),points=Array.from({length:steps+1},(_,i)=>at(angle*i/steps));return{points,label:at(angle/2,guide.labelRadius??radius+.13)}}
  drawAngleGuides(labelsOnly=false){(this.model.angleGuides||[]).forEach(guide=>{const geometry=this.angleGeometry(guide),s=this.zoom;if(labelsOnly){const p=this.point(geometry.label),fontSize=Math.max(12,15*s);this.ctx.save();this.ctx.font=`850 ${fontSize}px Inter,Arial`;this.ctx.textAlign='center';this.ctx.textBaseline='middle';const width=this.ctx.measureText(guide.label).width+14*s,height=fontSize+10*s;this.ctx.beginPath();this.ctx.roundRect(p.x-width/2,p.y-height/2,width,height,7*s);this.ctx.fillStyle='rgba(255,255,255,.96)';this.ctx.fill();this.ctx.strokeStyle='#f472b6';this.ctx.lineWidth=1.5*s;this.ctx.stroke();this.ctx.fillStyle='#9d174d';this.ctx.fillText(guide.label,p.x,p.y+.3*s);this.ctx.restore();return}const pts=geometry.points.map(p=>this.point(p)),stroke=(color,width)=>{this.ctx.beginPath();pts.forEach((p,i)=>i?this.ctx.lineTo(p.x,p.y):this.ctx.moveTo(p.x,p.y));this.ctx.strokeStyle=color;this.ctx.lineWidth=width;this.ctx.lineCap='round';this.ctx.lineJoin='round';this.ctx.stroke()};stroke('rgba(255,255,255,.96)',8*s);stroke('#db2777',4*s);[pts[0],pts[pts.length-1]].forEach(p=>{this.ctx.beginPath();this.ctx.arc(p.x,p.y,4.5*s,0,Math.PI*2);this.ctx.fillStyle='#db2777';this.ctx.fill();this.ctx.strokeStyle='#fff';this.ctx.lineWidth=1.5*s;this.ctx.stroke()})})}
+ // 補助図形：中心原子まわりの電子領域を頂点とする多面体（正四面体・三方両錐・正八面体など）
+ guideVertices(group){const c=this.model.atoms[group.center],out=[],dists=[];
+  group.bonds.forEach(i=>{const t=this.model.atoms[i],d=Math.hypot(t.x-c.x,t.y-c.y,t.z-c.z)||1;dists.push(d);out.push(A('',t.x,t.y,t.z))});
+  const avg=dists.length?dists.reduce((a,b)=>a+b,0)/dists.length:1;
+  group.lone.forEach(i=>{const lp=this.model.lonePairs[i],n=Math.hypot(...lp.dir)||1;out.push(this.coord(lp.atom,lp.dir.map(v=>v/n),avg))});
+  return out}
+ guideFaces(pts,center){const n=pts.length;if(n<3)return[];const v=pts.map(q=>[q.x-center.x,q.y-center.y,q.z-center.z]),faces=[];
+  for(let i=0;i<n;i++)for(let j=i+1;j<n;j++)for(let k=j+1;k<n;k++){
+   const a=v[i],u=[v[j][0]-a[0],v[j][1]-a[1],v[j][2]-a[2]],w=[v[k][0]-a[0],v[k][1]-a[1],v[k][2]-a[2]];
+   const nx=u[1]*w[2]-u[2]*w[1],ny=u[2]*w[0]-u[0]*w[2],nz=u[0]*w[1]-u[1]*w[0],len=Math.hypot(nx,ny,nz);if(len<1e-6)continue;
+   let pos=0,neg=0;
+   for(let m=0;m<n;m++){if(m===i||m===j||m===k)continue;const d=((v[m][0]-a[0])*nx+(v[m][1]-a[1])*ny+(v[m][2]-a[2])*nz)/len;if(d>1e-4)pos++;else if(d<-1e-4)neg++}
+   if(!pos||!neg)faces.push([i,j,k])}
+  return faces}
+ drawGuides(){const groups=GUIDE_GROUPS[this.model.key]||[];if(!groups.length)return;const ctx=this.ctx,s=this.zoom;
+  groups.forEach(gi=>{const group=this.model.vsepr[gi];if(!group)return;const verts=this.guideVertices(group);if(verts.length<2)return;
+   const center=this.model.atoms[group.center],p=verts.map(q=>this.point(q));
+   // 原子のある部分（＝実際の分子の形）は濃い赤、非共有電子対で正四面体を完成させる部分はかなり薄い赤
+   const nb=group.bonds.length,isAtom=i=>i<nb,c0=this.point(center);
+   ctx.save();ctx.lineJoin='round';ctx.lineCap='round';
+   if(verts.length===2){ctx.beginPath();ctx.moveTo(p[0].x,p[0].y);ctx.lineTo(p[1].x,p[1].y);ctx.strokeStyle='rgba(220,38,38,.42)';ctx.lineWidth=14*s;ctx.stroke()}
+   else{const faces=this.guideFaces(verts,center);
+    const fillPath=(pts,color)=>{ctx.beginPath();pts.forEach((q,n)=>n?ctx.lineTo(q.x,q.y):ctx.moveTo(q.x,q.y));ctx.closePath();ctx.fillStyle=color;ctx.fill()};
+    faces.forEach(f=>{if(f.every(isAtom))fillPath(f.map(i=>p[i]),'rgba(239,68,68,.22)')});
+    // 結合が2本（折れ線形）のときは中心を含む面が「分子の形」なのでそこを濃く塗る
+    if(nb===2&&verts.length>2)fillPath([c0,p[0],p[1]],'rgba(239,68,68,.22)');
+    const edges=new Map();faces.forEach(f=>[[f[0],f[1]],[f[1],f[2]],[f[2],f[0]]].forEach(([a,b])=>edges.set(a<b?a+'-'+b:b+'-'+a,isAtom(a)&&isAtom(b))));
+    const strokeSet=(atomSide,color,width,halo,dash)=>{const list=[...edges].filter(([,v])=>v===atomSide);if(!list.length)return;
+     const path=()=>{ctx.beginPath();list.forEach(([k])=>{const[a,b]=k.split('-').map(Number);ctx.moveTo(p[a].x,p[a].y);ctx.lineTo(p[b].x,p[b].y)})};
+     ctx.setLineDash(dash||[]);
+     if(halo){path();ctx.strokeStyle='rgba(255,255,255,.85)';ctx.lineWidth=width+2.8*s;ctx.stroke()}
+     path();ctx.strokeStyle=color;ctx.lineWidth=width;ctx.stroke();ctx.setLineDash([])};
+    strokeSet(false,'rgba(220,38,38,.5)',2*s,false,[7*s,5*s]);
+    strokeSet(true,'rgba(220,38,38,.85)',3*s,true)}
+   ctx.restore()})}
  drawElectronClouds(p){
   const s=this.zoom;
   this.model.bonds.forEach(b=>{const a=p[b.a],z=p[b.b];this.ellipseBetween(a,z,(13+b.o*2)*s,'rgba(8,145,178,.16)','rgba(8,145,178,.5)')});
@@ -236,6 +277,7 @@ class VSEPRView{
   if(state.electrons)this.drawElectronClouds(p);
   const s=this.zoom;
   [...this.model.bonds].sort((u,v)=>(p[u.a].z+p[u.b].z)-(p[v.a].z+p[v.b].z)).forEach(b=>{const a=p[b.a],z=p[b.b],dx=z.x-a.x,dy=z.y-a.y,len=Math.hypot(dx,dy)||1,nx=-dy/len,ny=dx/len;for(let k=0;k<b.o;k++){const off=(k-(b.o-1)/2)*10*s;this.ctx.beginPath();this.ctx.moveTo(a.x+nx*off,a.y+ny*off);this.ctx.lineTo(z.x+nx*off,z.y+ny*off);this.ctx.strokeStyle='#64748b';this.ctx.lineWidth=(b.o===1?9:6)*s;this.ctx.lineCap='round';this.ctx.stroke()}});
+  if(state.guides)this.drawGuides();
   if(state.repulsion)this.drawRepulsion();
   if(state.angles)this.drawAngleGuides(false);
   if(state.electrons)this.drawSharedElectronDots(p);
@@ -245,13 +287,14 @@ class VSEPRView{
 
 const tabs=document.getElementById('moleculeTabs'),compareSwitch=document.getElementById('compareSwitch');
 Object.entries(molecules).forEach(([key,m],i)=>{const b=document.createElement('button');b.type='button';b.id=`tab-${key}`;b.dataset.molecule=key;b.setAttribute('role','tab');b.setAttribute('aria-controls','moleculePanel');b.setAttribute('aria-selected',i===0);b.tabIndex=i===0?0:-1;b.textContent=m.label;tabs.insertBefore(b,compareSwitch)});
-const formulaHost=document.getElementById('formulaHost'),facts=document.getElementById('facts'),title=document.getElementById('moleculeTitle'),formulaLabel=document.getElementById('formulaLabel'),live=document.getElementById('live'),electronToggle=document.getElementById('electronToggle'),repulsionToggle=document.getElementById('repulsionToggle'),angleToggle=document.getElementById('angleToggle'),electronKey=document.getElementById('electronKey'),sharedLegend=document.getElementById('sharedLegend'),loneLegend=document.getElementById('loneLegend'),repulsionLegend=document.getElementById('repulsionLegend'),moleculePanel=document.getElementById('moleculePanel'),comparisonPanel=document.getElementById('comparisonPanel'),comparisonTitle=document.getElementById('comparisonTitle'),compareGrid=document.getElementById('compareGrid');
+const formulaHost=document.getElementById('formulaHost'),facts=document.getElementById('facts'),title=document.getElementById('moleculeTitle'),formulaLabel=document.getElementById('formulaLabel'),live=document.getElementById('live'),electronToggle=document.getElementById('electronToggle'),repulsionToggle=document.getElementById('repulsionToggle'),angleToggle=document.getElementById('angleToggle'),guideToggle=document.getElementById('guideToggle'),electronKey=document.getElementById('electronKey'),sharedLegend=document.getElementById('sharedLegend'),loneLegend=document.getElementById('loneLegend'),repulsionLegend=document.getElementById('repulsionLegend'),moleculePanel=document.getElementById('moleculePanel'),comparisonPanel=document.getElementById('comparisonPanel'),comparisonTitle=document.getElementById('comparisonTitle'),compareGrid=document.getElementById('compareGrid');
 const view=new VSEPRView(document.getElementById('molCanvas'));
 let compareViews=[];
 function activeModels(){return state.compare==='none'?[molecules[state.molecule]]:compareSets[state.compare].keys.map(key=>molecules[key])}
 function repulsionAvailable(){return activeModels().some(model=>model.vsepr.some(group=>group.bonds.length+group.lone.length>=2))}
 function angleAvailable(){return activeModels().some(model=>model.angleGuides?.length)}
-function updateLegend(){const available=repulsionAvailable(),angle=angleAvailable();sharedLegend.hidden=!state.electrons;loneLegend.hidden=!state.electrons;repulsionLegend.hidden=!state.repulsion||!available;electronKey.hidden=!state.electrons&&(!state.repulsion||!available);repulsionToggle.disabled=!available;repulsionToggle.setAttribute('aria-pressed',available&&state.repulsion);repulsionToggle.textContent=available?`反発矢印 ${state.repulsion?'ON':'OFF'}`:'反発対象なし';angleToggle.disabled=!angle;angleToggle.setAttribute('aria-pressed',angle&&state.angles);angleToggle.textContent=angle?`結合角 ${state.angles?'ON':'OFF'}`:'結合角対象なし'}
+function guideAvailable(){return activeModels().some(model=>(GUIDE_GROUPS[model.key]||[]).length)}
+function updateLegend(){const available=repulsionAvailable(),angle=angleAvailable();sharedLegend.hidden=!state.electrons;loneLegend.hidden=!state.electrons;repulsionLegend.hidden=!state.repulsion||!available;electronKey.hidden=!state.electrons&&(!state.repulsion||!available);repulsionToggle.disabled=!available;repulsionToggle.setAttribute('aria-pressed',available&&state.repulsion);repulsionToggle.textContent=available?`反発矢印 ${state.repulsion?'ON':'OFF'}`:'反発対象なし';angleToggle.disabled=!angle;angleToggle.setAttribute('aria-pressed',angle&&state.angles);angleToggle.textContent=angle?`結合角 ${state.angles?'ON':'OFF'}`:'結合角対象なし';const guide=guideAvailable();guideToggle.disabled=!guide;guideToggle.setAttribute('aria-pressed',guide&&state.guides);guideToggle.textContent=guide?`補助図形 ${state.guides?'ON':'OFF'}`:'補助図形なし'}
 function drawViews(){view.draw();compareViews.forEach(item=>item.view.draw())}
 function resizeViews(){view.resize();compareViews.forEach(item=>item.view.resize())}
 function renderComparison(){const set=compareSets[state.compare];comparisonTitle.textContent=set.title;compareGrid.replaceChildren();compareViews=[];set.keys.forEach(key=>{const m=molecules[key],card=document.createElement('article');card.className='compare-card';card.innerHTML=`<div class="compare-head"><h3>${m.label}　${m.name}</h3></div><div class="compare-facts"><span>電子領域：${m.domainCount}</span><span>${m.electronShape}</span><span>${m.shape}</span><span>${m.angle}</span></div><div class="compare-canvas-wrap"><canvas class="compare-canvas" tabindex="0" aria-label="${m.label}の3D VSEPRモデル。ドラッグまたは矢印キーで回転"></canvas><span class="canvas-help">ドラッグ：回転　ホイール：拡大</span></div>`;compareGrid.appendChild(card);const compareView=new VSEPRView(card.querySelector('canvas'));compareView.setModel(m);compareViews.push({key,card,view:compareView})});requestAnimationFrame(resizeViews)}
@@ -266,6 +309,7 @@ document.querySelectorAll('[data-formula]').forEach(btn=>btn.addEventListener('c
 electronToggle.addEventListener('click',()=>{state.electrons=!state.electrons;electronToggle.setAttribute('aria-pressed',state.electrons);electronToggle.textContent=`電子対表示 ${state.electrons?'ON':'OFF'}`;updateLegend();drawViews();live.textContent=`電子対を${state.electrons?'表示':'非表示'}にしました`});
 repulsionToggle.addEventListener('click',()=>{state.repulsion=!state.repulsion;repulsionToggle.setAttribute('aria-pressed',state.repulsion);repulsionToggle.textContent=`反発矢印 ${state.repulsion?'ON':'OFF'}`;updateLegend();drawViews();live.textContent=`反発矢印を${state.repulsion?'表示':'非表示'}にしました`});
 angleToggle.addEventListener('click',()=>{state.angles=!state.angles;updateLegend();drawViews();live.textContent=`結合角を${state.angles?'表示':'非表示'}にしました`});
+guideToggle.addEventListener('click',()=>{state.guides=!state.guides;updateLegend();drawViews();live.textContent=`補助図形を${state.guides?'表示':'非表示'}にしました`});
 document.getElementById('resetView').addEventListener('click',()=>view.reset());
 const ro=new ResizeObserver(resizeViews);ro.observe(document.body);
 const fs=document.getElementById('fullscreenBtn');fs.addEventListener('click',async()=>{try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen();else await document.exitFullscreen()}catch(e){live.textContent='このブラウザでは全画面表示を開始できませんでした'}});document.addEventListener('fullscreenchange',()=>{const active=!!document.fullscreenElement;document.body.classList.toggle('is-fullscreen',active);if(active)window.scrollTo(0,0);fs.querySelector('.btn-text').textContent=active?'全画面を終了':'全画面表示';fs.setAttribute('aria-label',active?'全画面を終了':'全画面表示');requestAnimationFrame(resizeViews)});
