@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>機器分析（IR・MS・NMR）｜Interactive Lab</title>
+<meta name="description" content="IRスペクトル・質量分析・¹H/¹³C NMRのピークを読み解き、未知試料の構造決定まで練習できる授業用教材。">
+<meta name="theme-color" content="#2563eb">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="site-shell.css">
+<style>
+:root{--blue:#2563eb;--deep:#173b75;--ink:#172033;--ink2:#526078;--ink3:#8190a6;--bg:#eef3f9;--card:#fff;--line:#d8e1ed;--cyan:#0891b2;--orange:#ea580c;--violet:#7c3aed;--green:#0f766e;--shadow:0 18px 45px rgba(31,55,89,.10);--shadow-sm:0 7px 22px rgba(31,55,89,.075)}
+*{box-sizing:border-box}html{min-width:320px;background:var(--bg)}body{margin:0;min-height:100vh;color:var(--ink);font-family:Inter,'Yu Gothic UI','Yu Gothic',Meiryo,sans-serif;-webkit-font-smoothing:antialiased;background:radial-gradient(circle at 5% -4%,rgba(37,99,235,.13),transparent 27rem),radial-gradient(circle at 97% 2%,rgba(14,165,233,.09),transparent 25rem),linear-gradient(180deg,#f6f9fd 0,var(--bg) 30rem)}
+button,select,input{font:inherit}button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid rgba(37,99,235,.34);outline-offset:3px}
+header{padding:20px clamp(16px,4vw,54px) 0;background:rgba(250,252,255,.95);border-bottom:1px solid #cbd8e8;box-shadow:0 4px 18px rgba(31,55,89,.05);position:sticky;top:0;z-index:20}.head-row{max-width:1500px;margin:0 auto 14px;display:flex;align-items:center;justify-content:space-between;gap:18px}.title-block{display:flex;flex-direction:column;align-items:flex-start;gap:8px;min-width:0}h1{margin:0;color:var(--deep);font-size:clamp(23px,2.6vw,33px);line-height:1.2;letter-spacing:-.035em}.tabs{display:flex;max-width:1500px;margin:0 auto;gap:6px;overflow-x:auto;scrollbar-width:thin}.tabs button{appearance:none;flex:0 0 auto;min-height:42px;padding:10px 15px 12px;border:1px solid transparent;border-bottom:0;border-radius:11px 11px 0 0;background:transparent;color:#59677c;font-size:13px;font-weight:800;cursor:pointer}.tabs button[aria-selected="true"]{border-color:#cfd9e6;background:var(--bg);color:var(--blue);box-shadow:inset 0 3px 0 var(--blue)}
+main{max-width:1500px;margin:0 auto;padding:20px clamp(14px,3.5vw,50px) 46px}.panel{display:none}.panel.active{display:block}.toolbar{display:flex;align-items:center;justify-content:center;gap:9px;margin-bottom:14px;flex-wrap:wrap}.field{display:flex;align-items:center;gap:8px;color:var(--ink2);font-size:12px;font-weight:800}.field select{min-height:38px;padding:0 34px 0 12px;border:1px solid #c7d5e7;border-radius:11px;background:#fff;color:var(--deep);font-weight:800}.lesson-title{text-align:center;margin:0 0 14px;color:var(--deep);font-size:clamp(20px,2.2vw,28px)}
+.layout{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(280px,.75fr);gap:14px;align-items:stretch}.card{min-width:0;border:1px solid #d6e0ed;border-radius:18px;background:rgba(255,255,255,.96);box-shadow:var(--shadow);padding:13px}.visual-card{border-top:4px solid var(--cyan)}.side-card{display:flex;flex-direction:column;gap:11px}.eyebrow{margin:0 0 7px;color:var(--ink3);font:900 10px/1 Inter,Arial,sans-serif;letter-spacing:.11em}.chart{display:block;width:100%;height:clamp(360px,54vh,590px);min-height:360px}.chart text{font-family:Inter,'Yu Gothic UI','Yu Gothic',Meiryo,sans-serif}.axis{stroke:#53657d;stroke-width:1.4}.grid-line{stroke:#dce5f0;stroke-width:1}.tick-label{fill:#617188;font-size:11px}.axis-label{fill:#35465e;font-size:12px;font-weight:800}.peak-buttons{display:flex;gap:6px;flex-wrap:wrap}.peak-buttons button{padding:7px 10px;border:1px solid #cbd8e8;border-radius:999px;background:#fff;color:var(--ink2);font-size:11px;font-weight:800;cursor:pointer}.peak-buttons button[aria-pressed="true"]{border-color:var(--blue);background:var(--blue);color:#fff}.detail{padding:10px 12px;border-left:4px solid var(--blue);border-radius:9px;background:#eef4ff;color:#31445f;font-size:12px;line-height:1.6}.detail strong{color:var(--deep)}
+.vibration{width:100%;height:210px;border:1px solid #e0e7f0;border-radius:14px;background:radial-gradient(circle at 50% 42%,#fff,#f1f6fb)}.vib-caption{text-align:center;color:var(--ink2);font-size:12px;font-weight:800}.atom-label{fill:#fff;font-size:16px;font-weight:900;text-anchor:middle;dominant-baseline:central;paint-order:stroke;stroke:#172033;stroke-width:3px;stroke-linejoin:round}.bond{stroke:#64748b;stroke-width:7;stroke-linecap:round}.motion-arrow{stroke:#ea580c;stroke-width:2;fill:none;marker-end:url(#arrowhead)}
+.fragment-box{display:grid;place-items:center;min-height:190px;border:1px solid #e0e7f0;border-radius:14px;background:radial-gradient(circle at 50% 42%,#fff,#f1f6fb);text-align:center}.fragment-formula{font-size:clamp(28px,4vw,46px);font-weight:900;color:var(--deep)}.fragment-charge{color:var(--orange)}.mz{font-size:13px;color:var(--ink2);font-weight:800}.stick{cursor:pointer}.stick:hover{stroke:#ea580c}
+.fragment-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.fragment-option{display:grid;place-items:center;min-height:94px;padding:10px 6px;border:2px solid #d4dfec;border-radius:14px;background:radial-gradient(circle at 50% 35%,#fff,#f3f7fc);color:var(--deep);cursor:pointer;transition:border-color .15s,background .15s,transform .15s}.fragment-option:hover{border-color:#7aa7ec;transform:translateY(-1px)}.fragment-option[aria-pressed="true"]{border-color:var(--blue);background:#eaf2ff;box-shadow:0 0 0 2px rgba(37,99,235,.12)}.fragment-option-formula{font-size:clamp(19px,2vw,27px);font-weight:900;line-height:1.1;white-space:nowrap}.fragment-option-meta{margin-top:7px;color:var(--ink2);font-size:10px;font-weight:800;white-space:nowrap}
+.ms-source-map{display:block;width:100%;height:190px;border:1px solid #dce5f0;border-radius:13px;background:#f8fbff}.ms-source-bond{stroke:#8da0b8;stroke-width:5;stroke-linecap:round}.ms-source-bond.kept{stroke:#2563eb}.ms-source-bond.cut{stroke:#ea580c;stroke-width:4;stroke-dasharray:7 6}.ms-source-group{fill:#60728a;font-size:22px;font-weight:900;text-anchor:middle;dominant-baseline:middle}.ms-source-group.kept{fill:#123f83}.ms-source-halo{fill:#f8fbff;stroke:#cbd8e8;stroke-width:2}.ms-source-halo.kept{fill:#dbeafe;stroke:#60a5fa}.ms-source-note{margin-top:-5px;color:var(--ink2);font-size:11px;font-weight:800;text-align:center}.ms-source-key{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;color:var(--ink3);font-size:10px;font-weight:800}.ms-source-key span::before{content:'';display:inline-block;width:14px;height:5px;margin-right:4px;border-radius:4px;background:#2563eb;vertical-align:middle}.ms-source-key span:last-child::before{background:repeating-linear-gradient(90deg,#ea580c 0 5px,transparent 5px 8px)}
+.ms-kekule-fill{fill:#f8fbff;stroke:#cbd8e8;stroke-width:2}.ms-kekule-fill.kept{fill:#dbeafe;stroke:#60a5fa}
+.structure{display:flex;align-items:center;justify-content:center;min-height:116px;padding:15px;border:1px solid #e0e7f0;border-radius:14px;background:#f8fbff;font-size:clamp(21px,3vw,34px);font-weight:900;letter-spacing:.01em;flex-wrap:wrap}.structure span{padding:4px 5px;border-radius:8px}.structure span.active{background:#dbeafe;color:#1d4ed8;box-shadow:0 0 0 2px #93c5fd}.signal-info{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.signal-info div{padding:8px;border:1px solid #dbe4ef;border-radius:9px;background:#f8fbff}.signal-info small{display:block;color:var(--ink3);font-size:10px;font-weight:800}.signal-info strong{display:block;margin-top:3px;color:var(--deep);font-size:13px}
+.ir-map{display:block;width:100%;height:210px;min-height:210px;padding:7px;border:1px solid #e0e7f0;border-radius:14px;background:#f8fbff}.ir-map .formula-bond{stroke:#172033;stroke-width:5;stroke-linecap:round}.ir-map .formula-atom{fill:#172033;font-size:25px;font-weight:700;text-anchor:middle;dominant-baseline:central}.ir-map .active-bond{stroke:#2563eb;animation:ir-bond-pulse .8s ease-in-out infinite alternate}.ir-map .active-atom{fill:#1d4ed8;paint-order:stroke;stroke:#dbeafe;stroke-width:8px;stroke-linejoin:round;animation:ir-atom-pulse .8s ease-in-out infinite alternate}.ir-map .bend-mark{fill:none;stroke:#7c3aed;stroke-width:3;stroke-linecap:round;stroke-dasharray:5 4}.vibration-kind{display:inline-flex;align-self:center;padding:5px 9px;border-radius:999px;background:#fff7ed;color:#c2410c;font-size:11px;font-weight:900}.ir-guide{text-align:center;color:var(--ink3);font-size:11px;font-weight:700}@keyframes ir-bond-pulse{from{stroke-width:5;opacity:.65}to{stroke-width:9;opacity:1}}@keyframes ir-atom-pulse{from{opacity:.72}to{opacity:1}}
+.ir-reference{margin-bottom:14px;border-top:4px solid var(--violet)}.ir-reference[hidden]{display:none}.ir-reference-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.ir-reference-head h3{margin:0;color:var(--deep);font-size:17px}.ir-reference-chart{display:block;width:100%;height:470px}.range-bar{cursor:pointer}.range-label{fill:#26374f;font-size:11px;font-weight:800;pointer-events:none}.range-value{fill:#617188;font-size:10px;pointer-events:none}.reference-links{display:flex;gap:12px;flex-wrap:wrap;font-size:11px}.reference-links a{color:var(--blue);font-weight:800}.range-highlight{fill:#f97316;fill-opacity:.14;stroke:#ea580c;stroke-width:1.5;stroke-dasharray:5 4}
+.ir-overlay-bar{cursor:pointer}.ir-overlay-label{fill:#172033;font-size:9px;font-weight:900;pointer-events:none;paint-order:stroke;stroke:rgba(255,255,255,.88);stroke-width:3px;stroke-linejoin:round}.ir-overlay-info{margin-top:8px}.ir-overlay-info[hidden]{display:none}
+.peak-region-highlight{fill:#f97316;fill-opacity:.10;stroke:#ea580c;stroke-width:2;stroke-dasharray:6 4;pointer-events:none}
+.nmr-region-highlight{fill:#7c3aed;fill-opacity:.09;stroke:#7c3aed;stroke-width:2;stroke-dasharray:6 4;pointer-events:none}.nmr-overlay-label{fill:#172033;font-size:9px;font-weight:900;pointer-events:none;paint-order:stroke;stroke:rgba(255,255,255,.9);stroke-width:3px;stroke-linejoin:round}.nmr-range-info{margin-top:8px}.nmr-range-info[hidden]{display:none}
+.beer-layout{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(310px,.7fr);gap:14px}.beer-controls{display:flex;flex-direction:column;gap:11px}.slider label{display:flex;justify-content:space-between;gap:10px;margin-bottom:5px;color:var(--ink2);font-size:12px;font-weight:800}.slider output{color:var(--deep);font-variant-numeric:tabular-nums}.slider input{width:100%;accent-color:var(--blue)}.equation{padding:13px;border-radius:12px;background:#eef4ff;color:var(--deep);text-align:center;font-size:clamp(20px,3vw,31px);font-weight:900}.equation small{display:block;margin-top:5px;color:var(--ink2);font-size:11px}.cuvette-stage{display:grid;place-items:center;min-height:220px;border:1px solid #e0e7f0;border-radius:14px;background:linear-gradient(90deg,#f8fbff,#eef5fb)}.cuvette{position:relative;width:92px;height:150px;border:5px solid #94a3b8;border-top:0;border-radius:0 0 14px 14px;background:rgba(255,255,255,.7);overflow:hidden}.solution{position:absolute;inset:25px 4px 4px;background:rgba(37,99,235,.35);border-radius:0 0 7px 7px;transition:background .18s ease}.beam{position:absolute;left:-86px;right:-86px;top:72px;height:7px;background:linear-gradient(90deg,#facc15,#fb923c);box-shadow:0 0 10px rgba(250,204,21,.8)}.beam.out{left:92px;right:-86px;opacity:var(--beam-opacity,.5)}.beer-readout{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.beer-readout div{padding:9px;border:1px solid #dbe4ef;border-radius:10px;background:#f8fbff}.beer-readout small{display:block;color:var(--ink3);font-size:10px;font-weight:800}.beer-readout strong{display:block;margin-top:3px;color:var(--deep);font-size:17px;font-variant-numeric:tabular-nums}
+.compact-controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.action{min-height:36px;padding:7px 11px;border:1px solid #bfd0e7;border-radius:10px;background:#fff;color:var(--deep);font-size:12px;font-weight:800;cursor:pointer}.action.primary,.action[aria-pressed="true"]{border-color:var(--blue);background:var(--blue);color:#fff}.check{display:inline-flex;align-items:center;gap:6px;color:var(--ink2);font-size:12px;font-weight:800}.mini-note{color:var(--ink3);font-size:11px;line-height:1.5}.reaction{padding:10px;border-radius:10px;background:#f8fbff;color:var(--deep);font-size:15px;font-weight:900;text-align:center}.split-stage{padding:10px;border:1px solid #dbe4ef;border-radius:10px;background:#f8fbff;text-align:center;color:var(--deep);font-size:12px;font-weight:800}.field input[type="range"]{width:120px;accent-color:var(--blue)}.quiz-layout{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(290px,.75fr);gap:14px}.evidence-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.evidence{min-height:220px}.evidence h3{margin:0 0 9px;color:var(--deep);font-size:15px}.evidence-body{color:var(--ink2);font-size:13px;line-height:1.65}.locked{display:grid;place-items:center;min-height:150px;color:var(--ink3);font-weight:800}.answer-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.answer-grid button{min-height:108px;padding:6px}.answer-choice{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}.answer-structure-svg{display:block;width:100%;height:78px;overflow:visible}.answer-structure-svg .answer-bond{stroke:#111827;stroke-width:3.5;stroke-linecap:round}.answer-structure-svg .answer-atom{fill:#0f3d7a;font:900 20px/1 Inter,'Yu Gothic UI',sans-serif;text-anchor:middle;dominant-baseline:middle}.answer-structure-svg .answer-carbon{fill:#111827;font:900 18px/1 Inter,'Yu Gothic UI',sans-serif;text-anchor:middle;dominant-baseline:middle}.feedback{min-height:52px}.zone-label{fill:#64748b;font-size:10px;font-weight:800}.integral{fill:none;stroke:#0f766e;stroke-width:2}.nmr-integral-curve{fill:none;stroke:#ef4444;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}.nmr-integral-label{fill:#dc2626;font-size:11px;font-weight:900;paint-order:stroke;stroke:#fff;stroke-width:4px}.magnet{display:flex;justify-content:center;gap:14px;align-items:center;color:var(--ink2);font-size:12px;font-weight:800}.magnet .arrow{color:var(--orange);font-size:20px}.regression{font-variant-numeric:tabular-nums}
+.unknown-analysis-tabs{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:0 0 10px}.unknown-analysis-tabs .action{min-width:94px}.unknown-chart{height:clamp(430px,60vh,650px)}
+.unknown-signal-label{fill:#52657d;font-size:11px;paint-order:stroke;stroke:#fff;stroke-width:5px;stroke-linejoin:round}
+.nmr-detailed-structure{display:block;width:100%;height:220px;border:1px solid #dce5f0;border-radius:14px;background:#f8fbff}.nmr-detail-bond{stroke:#1f2937;stroke-width:4;stroke-linecap:round}.nmr-detail-atom{fill:#172033;font-size:24px;font-weight:900;text-anchor:middle;dominant-baseline:middle}.nmr-detail-atom.selected{fill:#1d4ed8}.nmr-detail-halo.selected{fill:#dbeafe;stroke:#3b82f6;stroke-width:2}.nmr-detail-halo.neighbor{fill:#ffedd5;stroke:#f97316;stroke-width:2}.nmr-detail-h.selected{fill:#1d4ed8}.nmr-detail-h.neighbor{fill:#c2410c}.nmr-carbon-index{fill:#1d4ed8;font-size:10px;font-weight:900;text-anchor:middle;paint-order:stroke;stroke:#fff;stroke-width:3px}.nmr-h-legend{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;color:var(--ink2);font-size:10px;font-weight:800}.nmr-h-legend span::before{content:'';display:inline-block;width:11px;height:11px;margin-right:5px;border-radius:50%;vertical-align:-2px}.nmr-h-legend .assigned::before{background:#dbeafe;border:2px solid #3b82f6}.nmr-h-legend .coupling::before{background:#ffedd5;border:2px solid #f97316}.nmr-coupling-note{padding:9px 11px;border-radius:9px;background:#f8fbff;color:var(--deep);font-size:11px;font-weight:800;line-height:1.55}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}footer{padding:0 20px 25px;text-align:center;color:#a3adbc;font-size:10px;font-weight:600}
+body.is-fullscreen{height:100vh;overflow:hidden;display:flex;flex-direction:column}body.is-fullscreen header{position:static;padding-top:9px;flex:0 0 auto}body.is-fullscreen .head-row{margin-bottom:7px}body.is-fullscreen h1{font-size:24px}body.is-fullscreen main{max-width:none;width:100%;padding:9px 22px 10px;flex:1;min-height:0;display:flex}body.is-fullscreen .panel.active{width:100%;min-height:0;display:flex;flex-direction:column}body.is-fullscreen .layout,body.is-fullscreen .beer-layout,body.is-fullscreen .quiz-layout{flex:1;min-height:0}body.is-fullscreen .card{min-height:0}body.is-fullscreen .chart{height:100%;min-height:350px}body.is-fullscreen .beer-controls{overflow:auto}body.is-fullscreen .ir-reference{max-height:45vh;overflow:auto;flex:0 0 auto}body.is-fullscreen footer{display:none}
+@media(max-width:900px){header{position:static}.layout,.beer-layout,.quiz-layout{grid-template-columns:1fr}.chart{height:430px}.side-card{display:grid;grid-template-columns:minmax(250px,.7fr) minmax(0,1fr)}.side-card .eyebrow,.side-card .peak-buttons,.side-card .fragment-options{grid-column:1/-1}.vibration,.fragment-box{min-height:210px}.beer-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.beer-controls .equation,.beer-controls .cuvette-stage{grid-column:1/-1}}
+@media(max-width:560px){header{padding:14px 12px 0}.head-row{gap:10px}h1{font-size:21px}.tabs button{padding:8px 11px 10px;font-size:12px}main{padding:14px 10px 30px}.layout,.beer-layout,.quiz-layout{gap:11px}.card{padding:10px}.chart{height:350px;min-height:350px}.side-card{display:flex}.lesson-title{font-size:20px}.beer-controls{display:flex}.signal-info{grid-template-columns:1fr 1fr}.answer-grid{grid-template-columns:1fr}.structure{font-size:21px}.evidence-grid{grid-template-columns:1fr}.field input[type="range"]{width:95px}}
+@media(prefers-reduced-motion:reduce){*{transition-duration:.01ms!important}.solution{transition:none}}
+</style>
+</head>
+<body>
+<header>
+  <div class="head-row">
+    <div class="title-block"><a class="back-link" href="index.html">← 一覧に戻る</a><h1>機器分析（IR・MS・NMR）</h1></div>
+    <button class="site-fullscreen-btn" id="fullscreen" type="button" aria-label="全画面表示"><span class="site-fullscreen-icon" aria-hidden="true">⛶</span><span class="btn-text">全画面表示</span></button>
+  </div>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="分析方法">
+    <button type="button" role="tab" aria-selected="true" data-tab="ir">① IRスペクトル</button>
+    <button type="button" role="tab" aria-selected="false" data-tab="ms">② 質量分析</button>
+    <button type="button" role="tab" aria-selected="false" data-tab="nmr" data-nmr-nucleus="h1">③ ¹H NMR</button>
+    <button type="button" role="tab" aria-selected="false" data-tab="nmr" data-nmr-nucleus="c13">④ ¹³C NMR</button>
+    <button type="button" role="tab" aria-selected="false" data-tab="unknown">⑤ 未知試料</button>
+  </nav>
+</header>
+<main>
+  <section class="panel active" id="panel-ir">
+    <h2 class="lesson-title">IRスペクトルと結合振動</h2>
+    <div class="toolbar">
+      <label class="field">試料<select id="ir-select"><option value="ethanol">エタノール</option><option value="methanol">メタノール</option><option value="propanol">1-プロパノール</option><option value="isopropanol">2-プロパノール</option><option value="propanal">プロピオンアルデヒド</option><option value="acetone">アセトン</option><option value="acetic">酢酸</option><option value="ethylAcetate">酢酸エチル</option><option value="acetonitrile">アセトニトリル</option></select></label>
+      <label class="field">比較<select id="ir-compare"><option value="">なし</option><option value="ethanol">エタノール</option><option value="methanol">メタノール</option><option value="propanol">1-プロパノール</option><option value="isopropanol">2-プロパノール</option><option value="propanal">プロピオンアルデヒド</option><option value="acetone">アセトン</option><option value="acetic">酢酸</option><option value="ethylAcetate">酢酸エチル</option><option value="acetonitrile">アセトニトリル</option></select></label>
+      <button class="action" id="ir-reference-toggle" type="button" aria-pressed="false">振動域を重ねる</button>
+      <label class="field">帯の濃さ <input id="ir-overlay-opacity" type="range" min="0.15" max="0.65" step="0.05" value="0.30"><output id="ir-opacity-out">30%</output></label>
+    </div>
+    <section class="card ir-reference" id="ir-reference" hidden>
+      <div class="ir-reference-head"><h3>代表的な結合振動と波数範囲</h3><span class="mini-note">帯を選ぶと、上のスペクトルにも同じ範囲を表示</span></div>
+      <svg class="ir-reference-chart" id="ir-reference-chart" role="img" aria-label="代表的な赤外吸収の波数範囲"></svg>
+      <div class="detail" id="ir-range-detail">帯を選択すると、振動の種類と読み取りのポイントを表示します。</div>
+      <div class="mini-note">範囲は官能基・水素結合・共役・測定状態などで移動します。数値は同定に用いる代表的な目安です。</div>
+      <div class="reference-links"><span>参照：</span><a href="https://openstax.org/books/organic-chemistry/pages/12-7-interpreting-infrared-spectra" target="_blank" rel="noopener">OpenStax IR correlation table</a><a href="https://goldbook.iupac.org/terms/view/08618" target="_blank" rel="noopener">IUPAC Gold Book</a><a href="https://webbook.nist.gov/chemistry/" target="_blank" rel="noopener">NIST Chemistry WebBook</a></div>
+    </section>
+    <div class="layout">
+      <div class="card visual-card"><p class="eyebrow">IR SPECTRUM</p><svg class="chart" id="ir-chart" role="img" aria-label="赤外吸収スペクトル"></svg><div class="detail ir-overlay-info" id="ir-overlay-info" hidden>半透明の帯を選ぶと、代表範囲と読み取りのポイントを表示します。</div></div>
+      <aside class="card side-card"><p class="eyebrow">VIBRATING PART</p><svg class="ir-map" id="ir-structure" viewBox="0 0 500 210" role="img" aria-label="選択した吸収に対応する分子の2D構造式"></svg><div class="ir-guide">青く動いている原子・結合が、この吸収に主に関係する部分</div><div class="vibration-kind" id="vibration-kind"></div><p class="eyebrow">BOND VIBRATION</p><svg class="vibration" id="vibration" viewBox="0 0 360 210" role="img" aria-label="選択した結合の振動"></svg><div class="vib-caption" id="vib-caption"></div><div class="peak-buttons" id="ir-peaks"></div><div class="detail" id="ir-detail"></div><div class="mini-note">青：官能基領域　灰：指紋領域。比較線は破線で表示。</div></aside>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-ms">
+    <h2 class="lesson-title">質量スペクトルとフラグメント</h2>
+    <div class="toolbar"><label class="field">試料<select id="ms-select"><option value="ethanol">エタノール</option><option value="methanol">メタノール</option><option value="propanol">1-プロパノール</option><option value="isopropanol">2-プロパノール</option><option value="propanal">プロピオンアルデヒド</option><option value="acetic">酢酸</option><option value="acetone">アセトン</option><option value="toluene">トルエン</option><option value="dichloromethane">ジクロロメタン（Cl同位体）</option><option value="bromoethane">ブロモエタン（Br同位体）</option></select></label></div>
+    <div class="layout">
+      <div class="card visual-card"><p class="eyebrow">MASS SPECTRUM</p><svg class="chart" id="ms-chart" role="img" aria-label="質量スペクトル"></svg></div>
+      <aside class="card side-card"><p class="eyebrow">SELECT A FRAGMENT ION</p><div class="fragment-options" id="ms-peaks" aria-label="フラグメントイオンを選択"></div><p class="eyebrow">SOURCE IN THE MOLECULE</p><svg class="ms-source-map" id="ms-source-map" viewBox="0 0 440 220" role="img" aria-label="選択したフラグメントイオンが元の分子のどの部分に由来するか"></svg><div class="ms-source-key"><span>イオンに残る部分</span><span>開裂する結合</span></div><div class="ms-source-note" id="ms-source-note"></div><p class="eyebrow">FRAGMENT PATHWAY</p><div class="reaction" id="ms-reaction"></div><div class="detail" id="ms-detail"></div></aside>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-nmr">
+    <h2 class="lesson-title" id="nmr-title">¹H NMR：化学的環境とシグナル</h2>
+    <div class="toolbar"><select id="nmr-nucleus" class="sr-only" tabindex="-1" aria-hidden="true"><option value="h1">¹H NMR</option><option value="c13">¹³C NMR</option></select><label class="field">試料<select id="nmr-select"><option value="ethanol">エタノール</option><option value="methanol">メタノール</option><option value="propanol">1-プロパノール</option><option value="isopropanol">2-プロパノール</option><option value="propanal">プロピオンアルデヒド</option><option value="acetic">酢酸</option><option value="ethylAcetate">酢酸エチル</option><option value="acetone">アセトン</option><option value="toluene">トルエン</option></select></label><button class="action" id="nmr-range-toggle" type="button" aria-pressed="false">化学シフト範囲を重ねる</button><label class="field" id="nmr-opacity-field">帯の濃さ <input id="nmr-overlay-opacity" type="range" min="0.15" max="0.65" step="0.05" value="0.30"><output id="nmr-opacity-out">30%</output></label></div>
+    <div class="layout">
+      <div class="card visual-card"><p class="eyebrow" id="nmr-spectrum-label">¹H NMR SPECTRUM</p><svg class="chart" id="nmr-chart" role="img" aria-label="プロトンNMRスペクトル"></svg><div class="detail nmr-range-info" id="nmr-range-info" hidden>半透明の帯を選ぶと、化学シフト範囲と代表的な環境を表示します。</div></div>
+      <aside class="card side-card"><p class="eyebrow">CHEMICAL ENVIRONMENT</p><svg class="nmr-detailed-structure" id="nmr-structure" viewBox="0 0 520 250" role="img" aria-label="選択したピークに帰属する水素と分裂に影響する隣接水素"></svg><div class="nmr-h-legend"><span class="assigned">ピークに帰属するH</span><span class="coupling">分裂させる隣接H</span></div><div class="nmr-coupling-note" id="nmr-coupling-note"></div><div class="magnet"><span>B₀ →</span><span class="arrow">⇢</span><span id="shielding-label">局所磁場</span></div><div class="peak-buttons" id="nmr-signals"></div><div class="signal-info" id="signal-info"></div><div class="split-stage" id="split-stage"></div><button class="action" id="split-step" type="button">分裂を段階表示</button><div class="detail" id="nmr-detail"></div></aside>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-unknown">
+    <h2 class="lesson-title">未知試料の構造決定</h2>
+    <div class="toolbar"><label class="field">問題<select id="unknown-select"><option value="u1">未知試料 A</option><option value="u2">未知試料 B</option><option value="u3">未知試料 C</option><option value="u4">未知試料 D</option><option value="u5">未知試料 E</option><option value="u6">未知試料 F</option><option value="u7">未知試料 G</option><option value="u8">未知試料 H</option></select></label><button class="action" id="reset-unknown" type="button">解答をリセット</button></div>
+    <div class="quiz-layout">
+      <div class="card visual-card"><div class="unknown-analysis-tabs" role="group" aria-label="表示する分析結果"><button class="action primary" type="button" data-unknown-spectrum="ir" aria-pressed="true">IR</button><button class="action" type="button" data-unknown-spectrum="ms" aria-pressed="false">質量分析</button><button class="action" type="button" data-unknown-spectrum="nmr" aria-pressed="false">¹H NMR</button><button class="action" id="unknown-hint-toggle" type="button" aria-pressed="false">振動域を重ねる</button></div><p class="eyebrow" id="unknown-spectrum-title">IR SPECTRUM</p><svg class="chart unknown-chart" id="unknown-chart" role="img" aria-label="未知試料の分析スペクトル"></svg></div>
+      <aside class="card side-card"><p class="eyebrow">IDENTIFICATION</p><div class="detail">IR・質量分析・¹H NMRのグラフを切り替えて、未知試料を特定します。</div><div class="answer-grid" id="unknown-answers"></div><div class="detail feedback" id="unknown-feedback">候補を選んでください。</div></aside>
+    </div>
+  </section>
+  <div class="sr-only" id="live" aria-live="polite"></div>
+</main>
+<footer>大阪女学院中学校・高等学校　Yuto Yamaguchi　｜　スペクトル参照：<a href="https://sdbs.db.aist.go.jp/SearchInformation.aspx" target="_blank" rel="noopener">SDBSWeb（産業技術総合研究所）</a></footer>
+<script type="text/plain" id="legacy-script">
+(()=>{
+const $=id=>document.getElementById(id),NS='http://www.w3.org/2000/svg';
+const el=(name,attrs={},text='')=>{const node=document.createElementNS(NS,name);Object.entries(attrs).forEach(([k,v])=>node.setAttribute(k,v));if(text)node.textContent=text;return node};
+const clear=node=>{while(node.firstChild)node.removeChild(node.firstChild)};
+const dims=svg=>{const w=Math.max(520,svg.clientWidth||800),h=Math.max(330,svg.clientHeight||460);svg.setAttribute('viewBox',`0 0 ${w} ${h}`);return{w,h,left:58,right:20,top:25,bottom:48}};
+function axes(svg,d,xTicks,yTicks,xMap,yMap,xLabel,yLabel){xTicks.forEach(v=>{const x=xMap(v);svg.append(el('line',{x1:x,y1:d.top,x2:x,y2:d.h-d.bottom,class:'grid-line'}));svg.append(el('text',{x,y:d.h-d.bottom+20,'text-anchor':'middle',class:'tick-label'},String(v)))});yTicks.forEach(v=>{const y=yMap(v);svg.append(el('line',{x1:d.left,y1:y,x2:d.w-d.right,y2:y,class:'grid-line'}));svg.append(el('text',{x:d.left-9,y:y+4,'text-anchor':'end',class:'tick-label'},String(v)))});svg.append(el('line',{x1:d.left,y1:d.top,x2:d.left,y2:d.h-d.bottom,class:'axis'}));svg.append(el('line',{x1:d.left,y1:d.h-d.bottom,x2:d.w-d.right,y2:d.h-d.bottom,class:'axis'}));svg.append(el('text',{x:(d.left+d.w-d.right)/2,y:d.h-8,'text-anchor':'middle',class:'axis-label'},xLabel));const yl=el('text',{x:15,y:(d.top+d.h-d.bottom)/2,'text-anchor':'middle',class:'axis-label',transform:`rotate(-90 15 ${(d.top+d.h-d.bottom)/2})`},yLabel);svg.append(yl)}
+
+const IR={
+ ethanol:{name:'エタノール',peaks:[{wn:3350,depth:72,width:250,label:'O–H 伸縮',bond:['O','H'],note:'水素結合のため、3200–3600 cm⁻¹付近に幅広い吸収。'},{wn:2970,depth:34,width:85,label:'C–H 伸縮',bond:['C','H'],note:'sp³ C–H伸縮は約2850–3000 cm⁻¹。'},{wn:1050,depth:60,width:65,label:'C–O 伸縮',bond:['C','O'],note:'アルコールのC–O伸縮による強い吸収。'}]},
+ acetone:{name:'プロパノン',peaks:[{wn:1715,depth:82,width:45,label:'C=O 伸縮',bond:['C','O'],double:true,note:'ケトンのカルボニル伸縮による強い吸収。'},{wn:2960,depth:36,width:80,label:'C–H 伸縮',bond:['C','H'],note:'メチル基のsp³ C–H伸縮。'},{wn:1360,depth:31,width:55,label:'CH₃ 変角',bond:['C','H'],note:'メチル基の変角振動に対応する吸収。'}]},
+ acetic:{name:'エタン酸',peaks:[{wn:3000,depth:70,width:390,label:'O–H 伸縮',bond:['O','H'],note:'カルボン酸のO–Hは約2500–3300 cm⁻¹に非常に幅広く現れる。'},{wn:1710,depth:84,width:50,label:'C=O 伸縮',bond:['C','O'],double:true,note:'カルボン酸のC=O伸縮による強い吸収。'},{wn:1210,depth:55,width:70,label:'C–O 伸縮',bond:['C','O'],note:'カルボン酸のC–O伸縮。'}]}
+};
+let irKey='ethanol',irIndex=0,vibPhase=0;
+function drawIR(){const svg=$('ir-chart'),d=dims(svg);clear(svg);const x=v=>d.left+(4000-v)/3600*(d.w-d.left-d.right),y=v=>d.top+(100-v)/100*(d.h-d.top-d.bottom);axes(svg,d,[4000,3500,3000,2500,2000,1500,1000,500],[0,25,50,75,100],x,y,'波数 [cm⁻¹]','透過率 [%]');const data=IR[irKey],pts=[];for(let wn=4000;wn>=400;wn-=6){let t=94;data.peaks.forEach(p=>t-=p.depth*Math.exp(-.5*((wn-p.wn)/p.width)**2));pts.push(`${x(wn).toFixed(1)},${y(Math.max(4,t)).toFixed(1)}`)}svg.append(el('polyline',{points:pts.join(' '),fill:'none',stroke:'#0891b2','stroke-width':'2.5','stroke-linejoin':'round'}));data.peaks.forEach((p,i)=>{const px=x(p.wn),py=y(94-p.depth);svg.append(el('circle',{cx:px,cy:py,r:i===irIndex?6:4,fill:i===irIndex?'#ea580c':'#fff',stroke:'#ea580c','stroke-width':'2'}));svg.append(el('text',{x:px,y:py-10,'text-anchor':'middle',class:'tick-label'},p.wn))});renderIRSide()}
+function renderIRSide(){const data=IR[irKey],host=$('ir-peaks');host.innerHTML='';data.peaks.forEach((p,i)=>{const b=document.createElement('button');b.type='button';b.textContent=`${p.wn} ${p.label}`;b.setAttribute('aria-pressed',i===irIndex);b.addEventListener('click',()=>{irIndex=i;drawIR();$('live').textContent=`${p.label}を選択`});host.append(b)});const p=data.peaks[irIndex];$('vib-caption').textContent=`${p.wn} cm⁻¹　${p.label}`;$('ir-detail').innerHTML=`<strong>${data.name}</strong><br>${p.note}`}
+const atomColor={C:'#374151',H:'#f8fafc',O:'#ef4444'};
+function drawVibration(){const svg=$('vibration'),p=IR[irKey].peaks[irIndex],a=p.bond[0],b=p.bond[1],amp=9*Math.sin(vibPhase),x1=118-amp,x2=242+amp;clear(svg);const defs=el('defs');const marker=el('marker',{id:'arrowhead',markerWidth:8,markerHeight:8,refX:6,refY:3,orient:'auto'});marker.append(el('path',{d:'M0 0 6 3 0 6Z',fill:'#ea580c'}));defs.append(marker);svg.append(defs);svg.append(el('line',{x1:x1+24,y1:105,x2:x2-24,y2:105,class:'bond'}));if(p.double)svg.append(el('line',{x1:x1+24,y1:96,x2:x2-24,y2:96,class:'bond','stroke-width':4}));[[x1,a],[x2,b]].forEach(([xv,s])=>{svg.append(el('circle',{cx:xv,cy:105,r:s==='H'?22:28,fill:atomColor[s],stroke:'#64748b','stroke-width':2}));svg.append(el('text',{x:xv,y:105,class:'atom-label',fill:s==='H'?'#172033':'#fff'},s))});svg.append(el('line',{x1:x1-32,y1:105,x2:x1-58,y2:105,class:'motion-arrow'}));svg.append(el('line',{x1:x2+32,y1:105,x2:x2+58,y2:105,class:'motion-arrow'}));vibPhase+=.09;requestAnimationFrame(drawVibration)}
+$('ir-select').addEventListener('change',e=>{irKey=e.target.value;irIndex=0;drawIR()});
+
+const MS={
+ ethanol:{name:'エタノール',max:60,peaks:[{mz:15,int:15,formula:'CH₃⁺',note:'メチルカチオン。'},{mz:29,int:25,formula:'C₂H₅⁺',note:'C–O結合の開裂で生じる炭化水素フラグメント。'},{mz:31,int:100,formula:'CH₂OH⁺',note:'酸素上の正電荷が安定化する主要フラグメント（基準ピーク）。'},{mz:45,int:45,formula:'C₂H₅O⁺',note:'分子イオンからHラジカルが脱離したイオン。'},{mz:46,int:22,formula:'C₂H₆O⁺•',note:'分子イオン。m/zは分子量に対応。'}]},
+ acetone:{name:'プロパノン',max:70,peaks:[{mz:15,int:18,formula:'CH₃⁺',note:'メチルカチオン。'},{mz:42,int:12,formula:'CH₂CO⁺',note:'H原子の脱離を伴うフラグメント。'},{mz:43,int:100,formula:'CH₃CO⁺',note:'α開裂で生じるアシリウムイオン（基準ピーク）。'},{mz:58,int:23,formula:'C₃H₆O⁺•',note:'分子イオン。'}]},
+ toluene:{name:'トルエン',max:105,peaks:[{mz:39,int:8,formula:'C₃H₃⁺',note:'小さな芳香族由来フラグメント。'},{mz:65,int:12,formula:'C₅H₅⁺',note:'環構造の開裂で生じるフラグメント。'},{mz:91,int:100,formula:'C₇H₇⁺',note:'ベンジルカチオンから再配列したトロピリウムイオン（基準ピーク）。'},{mz:92,int:35,formula:'C₇H₈⁺•',note:'分子イオン。'}]}
+};
+MS.acetone.name='アセトン';
+let msKey='ethanol',msIndex=2;
+function drawMS(){const svg=$('ms-chart'),d=dims(svg);clear(svg);const data=MS[msKey],x=v=>d.left+v/data.max*(d.w-d.left-d.right),y=v=>d.h-d.bottom-v/110*(d.h-d.top-d.bottom);axes(svg,d,[0,10,20,30,40,50,60,70,80,90,100].filter(v=>v<=data.max),[0,25,50,75,100],x,y,'m/z','相対強度 [%]');data.peaks.forEach((p,i)=>{const line=el('line',{x1:x(p.mz),y1:y(0),x2:x(p.mz),y2:y(p.int),stroke:i===msIndex?'#ea580c':'#2563eb','stroke-width':i===msIndex?6:4,class:'stick'});line.addEventListener('click',()=>{msIndex=i;drawMS()});svg.append(line);svg.append(el('text',{x:x(p.mz),y:y(p.int)-9,'text-anchor':'middle',class:'tick-label'},p.mz))});renderMSSide()}
+function renderMSSide(){const data=MS[msKey],p=data.peaks[msIndex];$('fragment-formula').innerHTML=p.formula.replace('⁺','<span class="fragment-charge">⁺</span>');$('fragment-mz').textContent=`m/z = ${p.mz}　相対強度 ${p.int}%`;$('ms-detail').innerHTML=`<strong>${data.name}</strong><br>${p.note}`;const host=$('ms-peaks');host.innerHTML='';data.peaks.forEach((peak,i)=>{const b=document.createElement('button');b.type='button';b.textContent=`m/z ${peak.mz}`;b.setAttribute('aria-pressed',i===msIndex);b.addEventListener('click',()=>{msIndex=i;drawMS()});host.append(b)})}
+$('ms-select').addEventListener('change',e=>{msKey=e.target.value;msIndex=MS[msKey].peaks.reduce((best,p,i,a)=>p.int>a[best].int?i:best,0);drawMS()});
+
+const NMR={
+ ethanol:{name:'エタノール',structure:[['CH₃','ch3'],['–',''],['CH₂','ch2'],['–OH','oh']],signals:[{ppm:3.65,mult:'四重線',h:'2H',group:'ch2',neighbors:'3個',note:'Oに隣接するCH₂は低磁場側。隣のCH₃により四重線。',pattern:[1,3,3,1]},{ppm:1.20,mult:'三重線',h:'3H',group:'ch3',neighbors:'2個',note:'CH₃は隣のCH₂により三重線。',pattern:[1,2,1]},{ppm:2.20,mult:'幅広い一重線',h:'1H',group:'oh',neighbors:'交換',note:'OHの位置は溶媒・濃度・温度で変化しやすい。',pattern:[1],broad:true}]},
+ ethylAcetate:{name:'酢酸エチル',structure:[['CH₃','acyl'],['COO',''],['CH₂','ch2'],['CH₃','ethyl']],signals:[{ppm:4.12,mult:'四重線',h:'2H',group:'ch2',neighbors:'3個',note:'Oに結合するCH₂。隣のCH₃により四重線。',pattern:[1,3,3,1]},{ppm:2.05,mult:'一重線',h:'3H',group:'acyl',neighbors:'0個',note:'カルボニルに隣接するCH₃。隣接炭素にHがないため一重線。',pattern:[1]},{ppm:1.25,mult:'三重線',h:'3H',group:'ethyl',neighbors:'2個',note:'末端CH₃は隣のCH₂により三重線。',pattern:[1,2,1]}]},
+ acetone:{name:'プロパノン',structure:[['CH₃','methyl'],['CO',''],['CH₃','methyl']],signals:[{ppm:2.15,mult:'一重線',h:'6H',group:'methyl',neighbors:'0個',note:'対称性により2個のCH₃は等価。隣接炭素にHがなく一重線。',pattern:[1]}]}
+};
+let nmrKey='ethanol',nmrIndex=0;
+function drawNMR(){const svg=$('nmr-chart'),d=dims(svg);clear(svg);const data=NMR[nmrKey],x=v=>d.left+(12-v)/12*(d.w-d.left-d.right),base=d.h-d.bottom,yTop=d.top+10;axes(svg,d,[12,10,8,6,4,2,0],[0,25,50,75,100],x,v=>base-v/100*(base-d.top),'δ [ppm]','相対強度');svg.append(el('line',{x1:d.left,y1:base,x2:d.w-d.right,y2:base,stroke:'#334155','stroke-width':1.5}));data.signals.forEach((s,i)=>{const spacing=s.broad?.12:.045,pattern=s.pattern,max=Math.max(...pattern);pattern.forEach((int,j)=>{const offset=(j-(pattern.length-1)/2)*spacing,xx=x(s.ppm+offset),top=base-(int/max)*(base-yTop)*(s.broad?.55:1);svg.append(el('line',{x1:xx,y1:base,x2:xx,y2:top,stroke:i===nmrIndex?'#ea580c':'#7c3aed','stroke-width':s.broad?9:2.4,'stroke-linecap':s.broad?'round':'butt'}))});svg.append(el('text',{x:x(s.ppm),y:yTop-3,'text-anchor':'middle',class:'tick-label'},`${s.ppm} (${s.h})`))});renderNMRSide()}
+function renderNMRSide(){const data=NMR[nmrKey],s=data.signals[nmrIndex],structure=$('nmr-structure');structure.innerHTML='';data.structure.forEach(([text,group])=>{const span=document.createElement('span');span.textContent=text;if(group&&group===s.group)span.className='active';structure.append(span)});const host=$('nmr-signals');host.innerHTML='';data.signals.forEach((sig,i)=>{const b=document.createElement('button');b.type='button';b.textContent=`δ ${sig.ppm}　${sig.h}`;b.setAttribute('aria-pressed',i===nmrIndex);b.addEventListener('click',()=>{nmrIndex=i;drawNMR()});host.append(b)});$('signal-info').innerHTML=`<div><small>化学シフト</small><strong>δ ${s.ppm} ppm</strong></div><div><small>積分比</small><strong>${s.h}</strong></div><div><small>多重度</small><strong>${s.mult}</strong></div><div><small>隣接H</small><strong>${s.neighbors}</strong></div>`;$('nmr-detail').innerHTML=`<strong>${data.name}</strong><br>${s.note}`}
+$('nmr-select').addEventListener('change',e=>{nmrKey=e.target.value;nmrIndex=0;drawNMR()});
+
+function drawBeer(){const svg=$('beer-chart'),d=dims(svg);clear(svg);const c=+$('concentration').value,b=+$('path-length').value,eps=+$('epsilon').value,A=eps*b*c*1e-6,T=10**(-A),maxC=150,maxA=Math.max(1,eps*b*maxC*1e-6*1.08),x=v=>d.left+v/maxC*(d.w-d.left-d.right),y=v=>d.h-d.bottom-v/maxA*(d.h-d.top-d.bottom);axes(svg,d,[0,25,50,75,100,125,150],[0,.5,1,1.5,2,2.5,3].filter(v=>v<=maxA+.1),x,y,'濃度 [µmol L⁻¹]','吸光度 A');svg.append(el('line',{x1:x(0),y1:y(0),x2:x(maxC),y2:y(eps*b*maxC*1e-6),stroke:'#2563eb','stroke-width':3}));svg.append(el('line',{x1:x(c),y1:y(0),x2:x(c),y2:y(A),stroke:'#94a3b8','stroke-width':1.5,'stroke-dasharray':'5 4'}));svg.append(el('line',{x1:x(0),y1:y(A),x2:x(c),y2:y(A),stroke:'#94a3b8','stroke-width':1.5,'stroke-dasharray':'5 4'}));svg.append(el('circle',{cx:x(c),cy:y(A),r:7,fill:'#ea580c',stroke:'#fff','stroke-width':3}));svg.append(el('text',{x:x(c)+10,y:y(A)-10,class:'tick-label'},`A = ${A.toFixed(3)}`));$('c-out').textContent=`${c} µmol L⁻¹`;$('b-out').textContent=`${b.toFixed(1)} cm`;$('e-out').textContent=`${eps.toLocaleString()} L mol⁻¹ cm⁻¹`;$('absorbance').textContent=A.toFixed(3);$('transmittance').textContent=`${(T*100).toFixed(1)}%`;$('solution').style.background=`rgba(37,99,235,${Math.min(.88,.12+(1-T)*.8)})`;$('beam-out').style.setProperty('--beam-opacity',Math.max(.06,T).toFixed(3));}
+['concentration','path-length','epsilon'].forEach(id=>$(id).addEventListener('input',drawBeer));
+
+const tabs=[...document.querySelectorAll('[role="tab"]')];function activateTab(index){tabs.forEach((t,i)=>{const on=i===index;t.setAttribute('aria-selected',on);t.tabIndex=on?0:-1;$(`panel-${t.dataset.tab}`).classList.toggle('active',on)});requestAnimationFrame(()=>{if(tabs[index].dataset.tab==='ir')drawIR();if(tabs[index].dataset.tab==='ms')drawMS();if(tabs[index].dataset.tab==='nmr')drawNMR();if(tabs[index].dataset.tab==='beer')drawBeer()})}
+tabs.forEach((tab,i)=>{tab.addEventListener('click',()=>activateTab(i));tab.addEventListener('keydown',e=>{let n;if(e.key==='ArrowRight')n=(i+1)%tabs.length;if(e.key==='ArrowLeft')n=(i-1+tabs.length)%tabs.length;if(e.key==='Home')n=0;if(e.key==='End')n=tabs.length-1;if(n!==undefined){e.preventDefault();tabs[n].focus();activateTab(n)}})});
+const fs=$('fullscreen');fs.addEventListener('click',async()=>{try{document.fullscreenElement?await document.exitFullscreen():await document.documentElement.requestFullscreen()}catch(_){}});document.addEventListener('fullscreenchange',()=>{const active=!!document.fullscreenElement;document.body.classList.toggle('is-fullscreen',active);fs.querySelector('.btn-text').textContent=active?'全画面を終了':'全画面表示';fs.setAttribute('aria-label',active?'全画面を終了':'全画面表示');requestAnimationFrame(()=>{drawIR();drawMS();drawNMR();drawBeer()})});
+new ResizeObserver(()=>{const active=document.querySelector('.panel.active')?.id;if(active==='panel-ir')drawIR();if(active==='panel-ms')drawMS();if(active==='panel-nmr')drawNMR();if(active==='panel-beer')drawBeer()}).observe(document.body);
+drawIR();drawMS();drawNMR();drawBeer();drawVibration();
+})();
+</script>
+<script>
+(()=>{
+const $=id=>document.getElementById(id),NS='http://www.w3.org/2000/svg';
+const el=(name,attrs={},text='')=>{const n=document.createElementNS(NS,name);Object.entries(attrs).forEach(([k,v])=>n.setAttribute(k,v));if(text)n.textContent=text;return n};
+const clear=n=>{while(n.firstChild)n.removeChild(n.firstChild)};
+const dims=svg=>{const w=Math.max(520,svg.clientWidth||800),h=Math.max(330,svg.clientHeight||460);svg.setAttribute('viewBox',`0 0 ${w} ${h}`);return{w,h,left:58,right:20,top:25,bottom:48}};
+function axes(svg,d,xTicks,yTicks,xMap,yMap,xLabel,yLabel){xTicks.forEach(v=>{const x=xMap(v);svg.append(el('line',{x1:x,y1:d.top,x2:x,y2:d.h-d.bottom,class:'grid-line'}));svg.append(el('text',{x,y:d.h-d.bottom+20,'text-anchor':'middle',class:'tick-label'},String(v)))});yTicks.forEach(v=>{const y=yMap(v);svg.append(el('line',{x1:d.left,y1:y,x2:d.w-d.right,y2:y,class:'grid-line'}));svg.append(el('text',{x:d.left-9,y:y+4,'text-anchor':'end',class:'tick-label'},String(v)))});svg.append(el('line',{x1:d.left,y1:d.top,x2:d.left,y2:d.h-d.bottom,class:'axis'}));svg.append(el('line',{x1:d.left,y1:d.h-d.bottom,x2:d.w-d.right,y2:d.h-d.bottom,class:'axis'}));svg.append(el('text',{x:(d.left+d.w-d.right)/2,y:d.h-8,'text-anchor':'middle',class:'axis-label'},xLabel));svg.append(el('text',{x:15,y:(d.top+d.h-d.bottom)/2,'text-anchor':'middle',class:'axis-label',transform:`rotate(-90 15 ${(d.top+d.h-d.bottom)/2})`},yLabel))}
+function button(text,active,fn){const b=document.createElement('button');b.type='button';b.textContent=text;b.setAttribute('aria-pressed',active);b.addEventListener('click',fn);return b}
+
+const IR={
+ethanol:{name:'エタノール',structure:[['CH₃','ch3'],['–','cc'],['CH₂','ch2'],['–','co'],['O','oxygen'],['–','oh'],['H','oh']],peaks:[{wn:3350,depth:72,width:250,label:'O–H 伸縮',bond:['O','H'],groups:['oxygen','oh'],mode:'stretch',note:'水素結合により3200–3600 cm⁻¹に幅広く現れる。'},{wn:2970,depth:34,width:85,label:'C–H 伸縮',bond:['C','H'],groups:['ch3','ch2'],mode:'stretch',note:'sp³ C–H伸縮は約2850–3000 cm⁻¹。'},{wn:1450,depth:22,width:45,label:'CH₃ 変角',bond:['C','H'],groups:['ch3'],mode:'bend',note:'H–C–H結合角が周期的に変化する変角振動。'},{wn:1050,depth:60,width:65,label:'C–O 伸縮',bond:['C','O'],groups:['ch2','co','oxygen'],mode:'stretch',note:'アルコールのC–O伸縮による強い吸収。'}]},
+acetone:{name:'プロパノン',structure:[['CH₃','methyl'],['–','cc'],['C','carbonyl'],['(=O)','carbonyl'],['–','cc'],['CH₃','methyl']],peaks:[{wn:2960,depth:34,width:80,label:'C–H 伸縮',bond:['C','H'],groups:['methyl'],mode:'stretch',note:'メチル基のsp³ C–H伸縮。'},{wn:1715,depth:82,width:45,label:'C=O 伸縮',bond:['C','O'],groups:['carbonyl'],double:true,mode:'stretch',note:'ケトンのカルボニル伸縮による強い吸収。'},{wn:1360,depth:31,width:55,label:'CH₃ 変角',bond:['C','H'],groups:['methyl'],mode:'bend',note:'メチル基の変角振動。'}]},
+acetic:{name:'エタン酸',structure:[['CH₃','methyl'],['–','cc'],['C','carbonyl'],['(=O)','carbonyl'],['–','co'],['O','oxygen'],['–','oh'],['H','oh']],peaks:[{wn:3000,depth:70,width:390,label:'O–H 伸縮',bond:['O','H'],groups:['oxygen','oh'],mode:'stretch',note:'カルボン酸のO–Hは2500–3300 cm⁻¹に非常に幅広く現れる。'},{wn:1710,depth:84,width:50,label:'C=O 伸縮',bond:['C','O'],groups:['carbonyl'],double:true,mode:'stretch',note:'カルボン酸のC=O伸縮。'},{wn:1210,depth:55,width:70,label:'C–O 伸縮',bond:['C','O'],groups:['co','oxygen'],mode:'stretch',note:'カルボン酸のC–O伸縮。'}]},
+ethylAcetate:{name:'酢酸エチル',structure:[['CH₃','acyl'],['–','cc'],['C','carbonyl'],['(=O)','carbonyl'],['–','co'],['O','oxygen'],['–CH₂CH₃','ethyl']],peaks:[{wn:2980,depth:30,width:80,label:'C–H 伸縮',bond:['C','H'],groups:['acyl','ethyl'],mode:'stretch',note:'アルキル基のsp³ C–H伸縮。'},{wn:1740,depth:84,width:45,label:'C=O 伸縮',bond:['C','O'],groups:['carbonyl'],double:true,mode:'stretch',note:'エステルのC=Oはケトンよりやや高波数側。'},{wn:1240,depth:62,width:65,label:'C–O 伸縮',bond:['C','O'],groups:['co','oxygen','ethyl'],mode:'stretch',note:'エステルの強いC–O伸縮。'}]},
+acetonitrile:{name:'アセトニトリル',structure:[['CH₃','methyl'],['–','cc'],['C','nitrile'],['≡','nitrile'],['N','nitrile']],peaks:[{wn:2940,depth:28,width:75,label:'C–H 伸縮',bond:['C','H'],groups:['methyl'],mode:'stretch',note:'メチル基のC–H伸縮。'},{wn:2250,depth:56,width:32,label:'C≡N 伸縮',bond:['C','N'],groups:['nitrile'],triple:true,mode:'stretch',note:'ニトリルの鋭い吸収は約2210–2260 cm⁻¹。'},{wn:1380,depth:24,width:50,label:'CH₃ 変角',bond:['C','H'],groups:['methyl'],mode:'bend',note:'メチル基の変角振動。'}]}}
+const IR_RANGES=[
+{label:'O–H 伸縮（アルコール）',high:3600,low:3300,mode:'伸縮',color:'#2563eb',note:'強く幅広い。水素結合が強いほど低波数側へ広がる。'},
+{label:'O–H 伸縮（カルボン酸）',high:3300,low:2500,mode:'伸縮',color:'#2563eb',note:'非常に幅広く、C–H伸縮領域まで重なることがある。'},
+{label:'N–H 伸縮',high:3500,low:3300,mode:'伸縮',color:'#2563eb',note:'O–Hより鋭い。第一級アミンでは通常2本、第二級では1本が目安。'},
+{label:'≡C–H 伸縮',high:3330,low:3270,mode:'伸縮',color:'#0f766e',note:'末端アルキンに見られる鋭い吸収。'},
+{label:'=C–H 伸縮（sp²）',high:3100,low:3020,mode:'伸縮',color:'#0f766e',note:'アルケン・芳香族のC–H。3000 cm⁻¹より高波数側。'},
+{label:'C–H 伸縮（sp³）',high:3000,low:2850,mode:'伸縮',color:'#0f766e',note:'アルカンのC–H。およそ3000 cm⁻¹より低波数側。'},
+{label:'C≡N 伸縮',high:2260,low:2210,mode:'伸縮',color:'#0891b2',note:'ニトリルの比較的鋭い吸収。'},
+{label:'N=C=O 伸縮',high:2275,low:2250,mode:'伸縮',color:'#0891b2',note:'イソシアネート基に特徴的な強い吸収。'},
+{label:'C≡C 伸縮',high:2260,low:2100,mode:'伸縮',color:'#0891b2',note:'アルキン。対称性が高いと弱い、または見えにくいことがある。'},
+{label:'C=O 伸縮',high:1780,low:1670,mode:'伸縮',color:'#ea580c',note:'強い吸収。アルデヒド、ケトン、カルボン酸、エステルなどで位置が少し異なる。'},
+{label:'C=C 伸縮',high:1680,low:1640,mode:'伸縮',color:'#ea580c',note:'アルケンの中程度の吸収。共役によって低波数側へ移動する。'},
+{label:'N–H 変角',high:1650,low:1550,mode:'変角',color:'#7c3aed',note:'アミン・アミドなどで見られる変角振動。'},
+{label:'芳香環 C=C 伸縮',high:1600,low:1450,mode:'伸縮',color:'#ea580c',note:'芳香環ではこの範囲に複数の吸収が現れやすい。'},
+{label:'C–H 変角',high:1470,low:1350,mode:'変角',color:'#7c3aed',note:'CH₂・CH₃のはさみ、変角振動など。'},
+{label:'C–O 伸縮',high:1300,low:1000,mode:'伸縮',color:'#0f766e',note:'アルコール、エーテル、エステルなど。化合物の種類で範囲が変わる。'},
+{label:'C–N 伸縮',high:1230,low:1030,mode:'伸縮',color:'#0f766e',note:'アミンなど。指紋領域内の他の吸収と重なりやすい。'},
+{label:'C–C 骨格振動',high:1200,low:800,mode:'伸縮・変角',color:'#64748b',note:'指紋領域に多数現れる。単独の帯として官能基を決めるより、全体のパターン比較に使う。'},
+{label:'芳香族C–H 面外変角',high:900,low:690,mode:'変角',color:'#7c3aed',note:'置換様式の推定に使われる強い面外変角振動。'},
+{label:'CH₂ 横揺れ',high:750,low:700,mode:'変角',color:'#7c3aed',note:'長いメチレン鎖では約720 cm⁻¹付近が目安。'},
+{label:'C–Cl 伸縮',high:800,low:600,mode:'伸縮',color:'#64748b',note:'低波数側の指紋領域に現れる。'},
+{label:'アルデヒド C–H 伸縮',high:2830,low:2695,mode:'伸縮',color:'#0891b2',note:'アルデヒドに特徴的な弱い吸収。しばしば約2820 cm⁻¹と2720 cm⁻¹付近にフェルミ共鳴による2本組として現れる。'}];
+let irRangeIndex=-1,irOverlayVisible=false;
+const atomColor={C:'#374151',H:'#f8fafc',O:'#ef4444',N:'#3b82f6'};
+IR.acetone.name='アセトン';IR.acetic.name='酢酸';
+Object.assign(IR,{
+methanol:{name:'メタノール',structure:[['CH₃','methyl'],['–','co'],['O','oxygen'],['–','oh'],['H','oh']],peaks:[{wn:3340,depth:62,width:210,label:'O–H 伸縮',bond:['O','H'],groups:['oxygen','oh'],mode:'stretch',note:'水素結合により幅広いアルコールO–H吸収。'},{wn:2940,depth:30,width:75,label:'C–H 伸縮',bond:['C','H'],groups:['methyl'],mode:'stretch',note:'メチル基のsp³ C–H伸縮。'},{wn:1030,depth:58,width:65,label:'C–O 伸縮',bond:['C','O'],groups:['co','oxygen'],mode:'stretch',note:'第一級アルコールのC–O伸縮。'}]},
+propanol:{name:'1-プロパノール',structure:[['CH₃','methyl'],['–CH₂–','middle'],['CH₂','ch2o'],['–O–H','oh']],peaks:[{wn:3340,depth:61,width:210,label:'O–H 伸縮',bond:['O','H'],groups:['oxygen','oh'],mode:'stretch',note:'水素結合したアルコールO–Hの幅広い吸収。'},{wn:2960,depth:34,width:78,label:'C–H 伸縮',bond:['C','H'],groups:['methyl','middle','ch2o'],mode:'stretch',note:'アルキル鎖のsp³ C–H伸縮。'},{wn:1055,depth:61,width:62,label:'C–O 伸縮',bond:['C','O'],groups:['co','oxygen'],mode:'stretch',note:'第一級アルコールに特徴的なC–O伸縮。'},{wn:1460,depth:28,width:46,label:'C–H 変角',bond:['C','H'],groups:['methyl','middle','ch2o'],mode:'bend',note:'CH₂・CH₃に由来する変角振動。'}]},
+isopropanol:{name:'2-プロパノール',structure:[['(CH₃)₂','methyl'],['CH','methine'],['–','co'],['O','oxygen'],['–','oh'],['H','oh']],peaks:[{wn:3350,depth:60,width:205,label:'O–H 伸縮',bond:['O','H'],groups:['oxygen','oh'],mode:'stretch',note:'水素結合したアルコールO–Hの幅広い吸収。'},{wn:2970,depth:34,width:78,label:'C–H 伸縮',bond:['C','H'],groups:['methyl','methine'],mode:'stretch',note:'アルキル基のsp³ C–H伸縮。'},{wn:1120,depth:60,width:62,label:'C–O 伸縮',bond:['C','O'],groups:['co','oxygen'],mode:'stretch',note:'第二級アルコールのC–O伸縮。'},{wn:1380,depth:30,width:48,label:'CH₃ 変角',bond:['C','H'],groups:['methyl'],mode:'bend',note:'2個のメチル基に由来する変角振動。'}]},
+propanal:{name:'プロピオンアルデヒド',structure:[['CH₃CH₂','alkyl'],['–','cc'],['C','carbonyl'],['(=O)','carbonyl'],['–H','aldehyde']],peaks:[{wn:2960,depth:30,width:76,label:'C–H 伸縮',bond:['C','H'],groups:['alkyl'],mode:'stretch',note:'アルキル基のsp³ C–H伸縮。'},{wn:1730,depth:85,width:46,label:'C=O 伸縮',bond:['C','O'],groups:['carbonyl'],double:true,mode:'stretch',note:'飽和アルデヒドの強いC=O伸縮。'},{wn:2725,depth:25,width:42,label:'アルデヒドC–H',bond:['C','H'],groups:['aldehyde'],mode:'stretch',note:'アルデヒドに特徴的な弱いC–H吸収。'}]}})
+IR.propanal.peaks.splice(2,0,{wn:2820,depth:18,width:38,label:'アルデヒドC–H',bond:['C','H'],groups:['aldehyde'],mode:'stretch',note:'アルデヒドC–Hに由来する弱い吸収。約2725 cm⁻¹の帯と2本組で現れやすい。'});
+const SDBS_IR={
+ethanol:{no:1300,condition:'液膜法',peaks:[[3358,12,190],[2974,13,28],[2927,38,24],[2887,35,24],[1455,59,22],[1381,54,20],[1330,68,18],[1274,74,18],[1090,22,24],[1050,7,22],[881,37,18],[669,67,18]]},
+methanol:{no:3302,condition:'液膜法',peaks:[[3340,18,190],[2945,26,30],[2835,42,26],[1455,62,22],[1110,55,20],[1033,8,24],[650,70,22]]},
+propanol:{no:1212,condition:'液膜法',peaks:[[3330,18,190],[2963,18,28],[2938,28,24],[2877,34,24],[1463,50,22],[1380,58,20],[1330,66,18],[1260,72,18],[1095,34,22],[1055,10,24],[970,55,18],[890,62,18],[665,68,18]]},
+isopropanol:{no:2149,condition:'液膜法',peaks:[[3350,20,185],[2970,14,28],[2930,31,24],[2880,38,22],[1465,48,22],[1383,34,20],[1370,38,18],[1325,65,18],[1165,42,20],[1130,12,24],[950,56,18],[817,50,18]]},
+propanal:{no:2899,condition:'液膜法',peaks:[[2964,32,26],[2935,42,22],[2875,48,22],[2820,70,18],[2720,72,18],[1730,7,24],[1460,55,20],[1390,66,18],[1250,58,18],[1080,62,18],[970,60,18]]},
+acetone:{no:319,condition:'液膜法',peaks:[[3005,70,18],[2963,32,26],[2924,62,20],[1715,5,25],[1420,46,20],[1362,28,22],[1220,58,18],[1090,65,18],[900,68,18]]},
+acetic:{no:306,condition:'液膜法',peaks:[[3000,18,360],[1714,5,28],[1415,38,22],[1290,12,26],[1180,30,22],[1015,54,18],[930,25,24],[650,56,18]]},
+ethylAcetate:{no:889,condition:'液膜法',peaks:[[2984,36,25],[2940,50,22],[1743,5,24],[1447,48,20],[1370,42,20],[1245,8,26],[1195,18,22],[1045,12,24],[850,58,18]]},
+acetonitrile:{no:1218,condition:'液膜法',peaks:[[3000,58,18],[2940,35,25],[2253,22,17],[1450,55,20],[1375,48,20],[1040,66,18],[920,62,18]]}
+};
+Object.entries(SDBS_IR).forEach(([key,record])=>Object.assign(IR[key],{sdbsNo:record.no,sdbsCondition:record.condition,sdbsPeaks:record.peaks}));
+const IR_DIAGRAMS={
+ethanol:{atoms:[['c1',110,105,'C','ch3'],['h1',35,105,'H','ch3'],['h2',110,30,'H','ch3'],['h3',110,180,'H','ch3'],['c2',245,105,'C','ch2'],['h4',245,30,'H','ch2'],['h5',245,180,'H','ch2'],['o',360,105,'O','oxygen'],['ho',455,105,'H','oh']],bonds:[['c1','h1',1,'ch3'],['c1','h2',1,'ch3'],['c1','h3',1,'ch3'],['c1','c2',1,'cc'],['c2','h4',1,'ch2'],['c2','h5',1,'ch2'],['c2','o',1,'co'],['o','ho',1,'oh']]},
+acetone:{atoms:[['c1',95,95,'C','methyl'],['h1',25,95,'H','methyl'],['h2',95,25,'H','methyl'],['h3',95,170,'H','methyl'],['c2',250,95,'C','carbonyl'],['o',250,180,'O','carbonyl'],['c3',405,95,'C','methyl'],['h4',475,95,'H','methyl'],['h5',405,25,'H','methyl'],['h6',405,170,'H','methyl']],bonds:[['c1','h1',1,'methyl'],['c1','h2',1,'methyl'],['c1','h3',1,'methyl'],['c1','c2',1,'cc'],['c2','o',2,'carbonyl'],['c2','c3',1,'cc'],['c3','h4',1,'methyl'],['c3','h5',1,'methyl'],['c3','h6',1,'methyl']]},
+acetic:{atoms:[['c1',80,95,'C','methyl'],['h1',20,95,'H','methyl'],['h2',80,25,'H','methyl'],['h3',80,170,'H','methyl'],['c2',215,95,'C','carbonyl'],['o1',215,180,'O','carbonyl'],['o2',345,95,'O','oxygen'],['ho',455,95,'H','oh']],bonds:[['c1','h1',1,'methyl'],['c1','h2',1,'methyl'],['c1','h3',1,'methyl'],['c1','c2',1,'cc'],['c2','o1',2,'carbonyl'],['c2','o2',1,'co'],['o2','ho',1,'oh']]},
+ethylAcetate:{atoms:[['c1',45,100,'C','acyl'],['h1',15,40,'H','acyl'],['h2',15,160,'H','acyl'],['h3',85,40,'H','acyl'],['c2',145,100,'C','carbonyl'],['o1',145,180,'O','carbonyl'],['o2',245,100,'O','oxygen'],['c3',340,100,'C','ethyl'],['h4',340,35,'H','ethyl'],['h5',340,170,'H','ethyl'],['c4',445,100,'C','ethyl'],['h6',485,45,'H','ethyl'],['h7',485,155,'H','ethyl'],['h8',445,35,'H','ethyl']],bonds:[['c1','h1',1,'acyl'],['c1','h2',1,'acyl'],['c1','h3',1,'acyl'],['c1','c2',1,'cc'],['c2','o1',2,'carbonyl'],['c2','o2',1,'co'],['o2','c3',1,'co'],['c3','h4',1,'ethyl'],['c3','h5',1,'ethyl'],['c3','c4',1,'ethyl'],['c4','h6',1,'ethyl'],['c4','h7',1,'ethyl'],['c4','h8',1,'ethyl']]},
+acetonitrile:{atoms:[['c1',105,105,'C','methyl'],['h1',30,105,'H','methyl'],['h2',105,30,'H','methyl'],['h3',105,180,'H','methyl'],['c2',285,105,'C','nitrile'],['n',440,105,'N','nitrile']],bonds:[['c1','h1',1,'methyl'],['c1','h2',1,'methyl'],['c1','h3',1,'methyl'],['c1','c2',1,'cc'],['c2','n',3,'nitrile']]}}
+Object.assign(IR_DIAGRAMS,{
+methanol:{atoms:[['c',150,105,'C','methyl'],['h1',65,105,'H','methyl'],['h2',150,25,'H','methyl'],['h3',150,185,'H','methyl'],['o',310,105,'O',['oxygen','co']],['ho',445,105,'H','oh']],bonds:[['c','h1',1,'methyl'],['c','h2',1,'methyl'],['c','h3',1,'methyl'],['c','o',1,'co'],['o','ho',1,'oh']]},
+propanol:{atoms:[['c1',55,105,'C','methyl'],['c2',170,105,'C','middle'],['c3',285,105,'C',['ch2o','co']],['o',390,105,'O',['oxygen','co','oh']],['ho',475,105,'H','oh'],['h1',55,30,'H','methyl'],['h2',20,170,'H','methyl'],['h3',90,170,'H','methyl'],['h4',170,30,'H','middle'],['h5',170,180,'H','middle'],['h6',285,30,'H','ch2o'],['h7',285,180,'H','ch2o']],bonds:[['c1','c2',1,'cc'],['c2','c3',1,'cc'],['c3','o',1,'co'],['o','ho',1,'oh'],['c1','h1',1,'methyl'],['c1','h2',1,'methyl'],['c1','h3',1,'methyl'],['c2','h4',1,'middle'],['c2','h5',1,'middle'],['c3','h6',1,'ch2o'],['c3','h7',1,'ch2o']]},
+isopropanol:{atoms:[['c1',80,105,'C','methyl'],['c2',250,105,'C','methine'],['c3',420,105,'C','methyl'],['o',250,190,'O',['oxygen','co']],['ho',355,190,'H','oh'],['h1',80,30,'H','methyl'],['h2',35,165,'H','methyl'],['h3',125,165,'H','methyl'],['hc',250,30,'H','methine'],['h4',420,30,'H','methyl'],['h5',375,165,'H','methyl'],['h6',465,165,'H','methyl']],bonds:[['c1','c2',1,'cc'],['c2','c3',1,'cc'],['c2','o',1,'co'],['o','ho',1,'oh'],['c1','h1',1,'methyl'],['c1','h2',1,'methyl'],['c1','h3',1,'methyl'],['c2','hc',1,'methine'],['c3','h4',1,'methyl'],['c3','h5',1,'methyl'],['c3','h6',1,'methyl']]},
+propanal:{atoms:[['c1',65,105,'C','alkyl'],['c2',190,105,'C','alkyl'],['c3',330,105,'C','carbonyl'],['o',330,190,'O','carbonyl'],['ha',455,105,'H','aldehyde'],['h1',65,30,'H','alkyl'],['h2',30,170,'H','alkyl'],['h3',105,170,'H','alkyl'],['h4',190,30,'H','alkyl'],['h5',190,180,'H','alkyl']],bonds:[['c1','c2',1,'cc'],['c2','c3',1,'cc'],['c3','o',2,'carbonyl'],['c3','ha',1,'aldehyde'],['c1','h1',1,'alkyl'],['c1','h2',1,'alkyl'],['c1','h3',1,'alkyl'],['c2','h4',1,'alkyl'],['c2','h5',1,'alkyl']]}})
+function setIRAtomTags(molecule,id,tags){const atom=IR_DIAGRAMS[molecule].atoms.find(a=>a[0]===id);if(atom)atom[4]=tags}
+setIRAtomTags('ethanol','c2',['ch2','co']);setIRAtomTags('ethanol','o',['oxygen','oh','co']);IR.ethanol.peaks[3].groups=['co','oxygen'];
+setIRAtomTags('acetic','c2',['carbonyl','co']);setIRAtomTags('acetic','o2',['oxygen','oh','co']);
+setIRAtomTags('ethylAcetate','c2',['carbonyl','co']);setIRAtomTags('ethylAcetate','o2',['oxygen','co']);setIRAtomTags('ethylAcetate','c3',['ethyl','co']);IR.ethylAcetate.peaks[2].groups=['co','oxygen'];
+setIRAtomTags('propanal','c3',['carbonyl','aldehyde']);
+function drawIRStructure(data,p){const svg=$('ir-structure'),diagram=IR_DIAGRAMS[irKey],atoms=Object.fromEntries(diagram.atoms.map(a=>[a[0],a])),matches=tags=>(Array.isArray(tags)?tags:[tags]).some(tag=>p.groups.includes(tag));clear(svg);svg.append(el('title',{},`${data.name}：${p.label}に対応する部分を青色で表示`));diagram.bonds.forEach(([from,to,order,tags])=>{const a=atoms[from],b=atoms[to],dx=b[1]-a[1],dy=b[2]-a[2],len=Math.hypot(dx,dy),ux=dx/len,uy=dy/len,nx=-uy*5,ny=ux*5,offsets=order===1?[0]:order===2?[-1,1]:[-1.4,0,1.4],active=matches(tags);offsets.forEach(o=>svg.append(el('line',{x1:a[1]+ux*23+nx*o,y1:a[2]+uy*23+ny*o,x2:b[1]-ux*23+nx*o,y2:b[2]-uy*23+ny*o,class:`formula-bond${active?' active-bond':''}`})))});diagram.atoms.forEach(([,x,y,label,tags])=>svg.append(el('text',{x,y,class:`formula-atom${matches(tags)?' active-atom':''}`},label)));if(p.mode==='bend'){const target=diagram.atoms.find(a=>matches(a[4]));if(target)svg.append(el('path',{d:`M${target[1]-34} ${target[2]-32} Q${target[1]} ${target[2]-58} ${target[1]+34} ${target[2]-32}`,class:'bend-mark'}))}}
+function drawIRRangeMap(){const svg=$('ir-reference-chart'),w=Math.max(700,svg.clientWidth||1100),left=175,right=25,top=34,bottom=30,row=20,h=top+IR_RANGES.length*row+bottom+5,x=v=>left+(4000-v)/3400*(w-left-right);svg.setAttribute('viewBox',`0 0 ${w} ${h}`);clear(svg);[[4000,2500,'#dbeafe'],[2500,2000,'#dcfce7'],[2000,1500,'#ffedd5'],[1500,600,'#fef9c3']].forEach(([hi,lo,color])=>svg.append(el('rect',{x:x(hi),y:top-18,width:x(lo)-x(hi),height:h-top-bottom+18,fill:color,'fill-opacity':.55})));[4000,3500,3000,2500,2000,1500,1000,600].forEach(v=>{const xx=x(v);svg.append(el('line',{x1:xx,y1:top-18,x2:xx,y2:h-bottom,class:'grid-line'}));svg.append(el('text',{x:xx,y:18,'text-anchor':'middle',class:'tick-label'},v))});IR_RANGES.forEach((r,i)=>{const yy=top+i*row,selected=i===irRangeIndex;svg.append(el('text',{x:4,y:yy+4,class:'range-label'},r.label));svg.append(el('text',{x:left-8,y:yy+4,'text-anchor':'end',class:'range-value'},`${r.low}–${r.high}`));const rect=el('rect',{x:x(r.high),y:yy-7,width:Math.max(5,x(r.low)-x(r.high)),height:14,rx:7,fill:r.color,'fill-opacity':selected?1:.72,stroke:selected?'#172033':'none','stroke-width':selected?2:0,class:'range-bar'});rect.addEventListener('click',()=>{irRangeIndex=i;drawIRRangeMap();drawIR();$('ir-range-detail').innerHTML=`<strong>${r.label}</strong>　${r.low}–${r.high} cm⁻¹（${r.mode}）<br>${r.note}`});svg.append(rect)});svg.append(el('text',{x:(left+w-right)/2,y:h-5,'text-anchor':'middle',class:'axis-label'},'波数 [cm⁻¹]'))}
+let irKey='ethanol',irIndex=0,vibPhase=0;
+const irScale=()=>1;
+function irTransmission(data,wn,scale){
+  if(data.sdbsPeaks){
+    const baseline=96,floor=2;
+    let absorbance=0;
+    data.sdbsPeaks.forEach(([peak,minimum,width])=>{
+      const target=Math.max(floor+.15,Math.min(baseline-.15,minimum));
+      const strength=-Math.log((target-floor)/(baseline-floor));
+      absorbance+=strength*Math.exp(-.5*((wn-peak*scale)/width)**2);
+    });
+    return floor+(baseline-floor)*Math.exp(-absorbance);
+  }
+  const baseline=94,floor=2;
+  let absorbance=0;
+  data.peaks.forEach(p=>{
+    const target=Math.max(floor+.15,baseline-p.depth);
+    const strength=-Math.log((target-floor)/(baseline-floor));
+    absorbance+=strength*Math.exp(-.5*((wn-p.wn*scale)/p.width)**2);
+  });
+  return floor+(baseline-floor)*Math.exp(-absorbance)
+}
+function irPath(data,x,y,scale){const pts=[];for(let wn=4000;wn>=400;wn-=6)pts.push(`${x(wn).toFixed(1)},${y(irTransmission(data,wn,scale)).toFixed(1)}`);return pts.join(' ')}
+function drawIR(){const svg=$('ir-chart'),d=dims(svg);clear(svg);const x=v=>d.left+(4000-v)/3600*(d.w-d.left-d.right),y=v=>d.top+(100-v)/100*(d.h-d.top-d.bottom),scale=irScale();svg.append(el('rect',{x:x(4000),y:d.top,width:x(1500)-x(4000),height:d.h-d.top-d.bottom,fill:'#dbeafe','fill-opacity':.42}));svg.append(el('rect',{x:x(1500),y:d.top,width:x(400)-x(1500),height:d.h-d.top-d.bottom,fill:'#e2e8f0','fill-opacity':.42}));svg.append(el('text',{x:(x(4000)+x(1500))/2,y:d.top+14,'text-anchor':'middle',class:'zone-label'},'官能基領域'));svg.append(el('text',{x:(x(1500)+x(400))/2,y:d.top+14,'text-anchor':'middle',class:'zone-label'},'指紋領域'));axes(svg,d,[4000,3500,3000,2500,2000,1500,1000,500],[0,25,50,75,100],x,y,'波数 [cm⁻¹]','透過率 [%]');const data=IR[irKey];svg.append(el('polyline',{points:irPath(data,x,y,scale),fill:'none',stroke:'#0891b2','stroke-width':1.65,'stroke-linejoin':'round'}));const compare=$('ir-compare').value;if(compare&&compare!==irKey)svg.append(el('polyline',{points:irPath(IR[compare],x,y,1),fill:'none',stroke:'#7c3aed','stroke-width':1.35,'stroke-dasharray':'7 5'}));data.peaks.forEach((p,i)=>{const wn=p.wn*scale,px=x(wn),py=y(irTransmission(data,wn,scale));const c=el('circle',{cx:px,cy:py,r:i===irIndex?6:4,fill:i===irIndex?'#ea580c':'#fff',stroke:'#ea580c','stroke-width':2,style:'cursor:pointer'});c.addEventListener('click',()=>{irIndex=i;drawIR()});svg.append(c);svg.append(el('text',{x:px,y:py-10,'text-anchor':'middle',class:'tick-label'},Math.round(wn)))});renderIRSide()}
+const IR_SHORT=['O–H','酸 O–H','N–H','≡C–H','=C–H','sp³ C–H','C≡N','N=C=O','C≡C','C=O','C=C','N–H変角','芳香環C=C','C–H変角','C–O','C–N','C–C骨格','芳香族C–H','CH₂横揺れ','C–Cl','CHO C–H'];
+function getIRPeakRangeIndex(key,p){if(p.label.includes('O–H'))return key==='acetic'?1:0;if(p.label.includes('アルデヒドC–H'))return 20;if(p.label.includes('C–H 伸縮'))return 5;if(p.label.includes('C–H 変角')||p.label.includes('CH₃ 変角'))return 13;if(p.label.includes('C≡N'))return 6;if(p.label.includes('C=O'))return 9;if(p.label.includes('C–O'))return 14;return IR_RANGES.findIndex(r=>p.wn<=r.high&&p.wn>=r.low)}
+function renderIRRangeHighlight(){if(!irOverlayVisible)return;const svg=$('ir-chart'),d=dims(svg),x=v=>d.left+(4000-v)/3600*(d.w-d.left-d.right),plotH=d.h-d.top-d.bottom,lane=plotH/IR_RANGES.length,opacity=+$('ir-overlay-opacity').value,peak=IR[irKey].peaks[irIndex],peakRange=getIRPeakRangeIndex(irKey,peak),activeRange=IR_RANGES[peakRange];if(activeRange){svg.append(el('rect',{x:x(activeRange.high),y:d.top,width:x(activeRange.low)-x(activeRange.high),height:plotH,class:'peak-region-highlight'}));svg.append(el('text',{x:d.w-d.right-8,y:d.top+15,'text-anchor':'end',class:'axis-label'},`${peak.wn} cm⁻¹ → ${activeRange.label}（${activeRange.low}–${activeRange.high}）`))}IR_RANGES.forEach((r,i)=>{const y=d.top+i*lane+1,h=Math.max(7,Math.min(12,lane-3)),manual=i===irRangeIndex,belongs=i===peakRange,rect=el('rect',{x:x(r.high),y,width:Math.max(4,x(r.low)-x(r.high)),height:h,rx:h/2,fill:r.color,'fill-opacity':Math.min(.95,opacity+(belongs?.42:manual?.28:0)),stroke:belongs?'#1d4ed8':manual?'#172033':'none','stroke-width':belongs?3:manual?2:0,class:'ir-overlay-bar'});rect.append(el('title',{},`${r.label}：${r.low}–${r.high} cm⁻¹`));rect.addEventListener('click',()=>{irRangeIndex=i;$('ir-overlay-info').innerHTML=`<strong>${r.label}</strong>　${r.low}–${r.high} cm⁻¹（${r.mode}）<br>${r.note}`;drawIR()});svg.append(rect);svg.append(el('text',{x:Math.max(d.left+2,x(r.high)+3),y:y+h-2,class:'ir-overlay-label'},IR_SHORT[i]))})}
+function renderIRSide(){renderIRRangeHighlight();const data=IR[irKey],host=$('ir-peaks');host.innerHTML='';data.peaks.forEach((p,i)=>host.append(button(`${p.wn} ${p.label}`,i===irIndex,()=>{irIndex=i;drawIR()})));const p=data.peaks[irIndex];drawIRStructure(data,p);$('vibration-kind').textContent=p.mode==='bend'?'∠ 変角振動：結合角が変化':'↔ 伸縮振動：結合距離が変化';$('vib-caption').textContent=`${p.wn} cm⁻¹　${p.label}`;$('ir-detail').innerHTML=`<strong>${data.name}</strong><br>${p.note}<br>2D構造式で青く強調された原子・結合と、下の振動モデルが対応しています。<br><small>SDBS No. ${data.sdbsNo}／IR：${data.sdbsCondition}。掲載ピーク位置を教材用の線幅で再描画。</small>`}
+function drawVibration(){const svg=$('vibration'),p=IR[irKey].peaks[irIndex],a=p.bond[0],b=p.bond[1],s=Math.sin(vibPhase),bend=p.mode==='bend',x1=bend?125:118-9*s,x2=bend?235:242+9*s,y1=bend?105-18*s:105,y2=bend?105+18*s:105;clear(svg);const defs=el('defs'),marker=el('marker',{id:'arrowhead',markerWidth:8,markerHeight:8,refX:6,refY:3,orient:'auto'});marker.append(el('path',{d:'M0 0 6 3 0 6Z',fill:'#ea580c'}));defs.append(marker);svg.append(defs);svg.append(el('line',{x1:x1+24,y1,x2:x2-24,y2,class:'bond'}));if(p.double||p.triple)svg.append(el('line',{x1:x1+24,y1:y1-9,x2:x2-24,y2:y2-9,class:'bond','stroke-width':4}));if(p.triple)svg.append(el('line',{x1:x1+24,y1:y1+9,x2:x2-24,y2:y2+9,class:'bond','stroke-width':4}));[[x1,y1,a],[x2,y2,b]].forEach(([x,y,sym])=>{svg.append(el('circle',{cx:x,cy:y,r:sym==='H'?22:28,fill:atomColor[sym],stroke:'#64748b','stroke-width':2}));svg.append(el('text',{x,y,class:'atom-label'},sym))});if(bend){svg.append(el('path',{d:'M92 70 Q125 50 156 72',class:'motion-arrow'}));svg.append(el('path',{d:'M268 140 Q235 160 204 138',class:'motion-arrow'}))}else{svg.append(el('line',{x1:x1-32,y1:105,x2:x1-58,y2:105,class:'motion-arrow'}));svg.append(el('line',{x1:x2+32,y1:105,x2:x2+58,y2:105,class:'motion-arrow'}))}vibPhase+=.08;requestAnimationFrame(drawVibration)}
+$('ir-select').addEventListener('change',e=>{irKey=e.target.value;irIndex=0;drawIR()});$('ir-compare').addEventListener('change',drawIR);
+const irReferenceToggle=$('ir-reference-toggle');irReferenceToggle.addEventListener('click',()=>{irOverlayVisible=!irOverlayVisible;irReferenceToggle.setAttribute('aria-pressed',irOverlayVisible);irReferenceToggle.textContent=irOverlayVisible?'振動域を隠す':'振動域を重ねる';$('ir-overlay-info').hidden=!irOverlayVisible;if(!irOverlayVisible){irRangeIndex=-1;$('ir-overlay-info').textContent='半透明の帯を選ぶと、代表範囲と読み取りのポイントを表示します。'}drawIR()});$('ir-overlay-opacity').addEventListener('input',e=>{$('ir-opacity-out').textContent=`${Math.round(+e.target.value*100)}%`;if(irOverlayVisible)drawIR()});
+
+const MS={
+ethanol:{name:'エタノール',formula:'C₂H₆O⁺•',max:60,peaks:[{mz:15,int:15,formula:'CH₃⁺',neutral:'•CH₂OH',reaction:'C₂H₆O⁺• → CH₃⁺ + •CH₂OH',note:'C–C結合が切れ、メチルカチオンを生じる。'},{mz:29,int:25,formula:'C₂H₅⁺',neutral:'•OH',reaction:'C₂H₆O⁺• → C₂H₅⁺ + •OH',note:'C–O結合の開裂。'},{mz:31,int:100,formula:'CH₂OH⁺',neutral:'•CH₃',reaction:'C₂H₆O⁺• → CH₂OH⁺ + •CH₃',note:'酸素によって安定化される主要フラグメント。基準ピーク。'},{mz:45,int:45,formula:'C₂H₅O⁺',neutral:'H•',reaction:'C₂H₆O⁺• → C₂H₅O⁺ + H•',note:'分子イオンからHラジカルが脱離。'},{mz:46,int:22,formula:'C₂H₆O⁺•',neutral:'—',reaction:'電子衝撃 → C₂H₆O⁺• + 2e⁻',note:'分子イオンピークM。'}]},
+acetone:{name:'プロパノン',formula:'C₃H₆O⁺•',max:70,peaks:[{mz:15,int:18,formula:'CH₃⁺',neutral:'•COCH₃',reaction:'C₃H₆O⁺• → CH₃⁺ + •COCH₃',note:'メチルカチオン。'},{mz:43,int:100,formula:'CH₃CO⁺',neutral:'•CH₃',reaction:'C₃H₆O⁺• → CH₃CO⁺ + •CH₃',note:'カルボニル隣接結合のα開裂。基準ピーク。'},{mz:58,int:23,formula:'C₃H₆O⁺•',neutral:'—',reaction:'電子衝撃 → C₃H₆O⁺• + 2e⁻',note:'分子イオンピークM。'}]},
+toluene:{name:'トルエン',formula:'C₇H₈⁺•',max:105,peaks:[{mz:65,int:12,formula:'C₅H₅⁺',neutral:'C₂H₃•',reaction:'環開裂を伴う二段階フラグメント',note:'芳香環由来の小さなフラグメント。'},{mz:91,int:100,formula:'C₇H₇⁺',neutral:'H•',reaction:'C₇H₈⁺• → C₇H₇⁺ → トロピリウムイオン',note:'ベンジルカチオンから環拡大して安定化。基準ピーク。'},{mz:92,int:35,formula:'C₇H₈⁺•',neutral:'—',reaction:'電子衝撃 → C₇H₈⁺• + 2e⁻',note:'分子イオンピークM。'}]},
+dichloromethane:{name:'ジクロロメタン',formula:'CH₂Cl₂⁺•',max:90,peaks:[{mz:49,int:100,formula:'CH₂³⁵Cl⁺',neutral:'³⁵Cl•',reaction:'CH₂Cl₂⁺• → CH₂Cl⁺ + Cl•',note:'Clを1個含むフラグメント。m/z 49:51がおよそ3:1。'},{mz:51,int:32,formula:'CH₂³⁷Cl⁺',neutral:'³⁵Cl•',reaction:'³⁷Clを含むM+2フラグメント',note:'³⁷Clの存在によるM+2ピーク。'},{mz:84,int:58,formula:'CH₂³⁵Cl₂⁺•',neutral:'—',reaction:'分子イオンM',note:'³⁵Clを2個含む分子イオン。'},{mz:86,int:38,formula:'CH₂³⁵Cl³⁷Cl⁺•',neutral:'—',reaction:'分子イオンM+2',note:'Clが2個なのでM:M+2:M+4は概ね9:6:1。'},{mz:88,int:6,formula:'CH₂³⁷Cl₂⁺•',neutral:'—',reaction:'分子イオンM+4',note:'³⁷Clを2個含む同位体ピーク。'}]},
+bromoethane:{name:'ブロモエタン',formula:'C₂H₅Br⁺•',max:112,peaks:[{mz:29,int:100,formula:'C₂H₅⁺',neutral:'Br•',reaction:'C₂H₅Br⁺• → C₂H₅⁺ + Br•',note:'C–Br結合の開裂。基準ピーク。'},{mz:108,int:48,formula:'C₂H₅⁷⁹Br⁺•',neutral:'—',reaction:'分子イオンM',note:'⁷⁹Brを含む分子イオン。'},{mz:110,int:46,formula:'C₂H₅⁸¹Br⁺•',neutral:'—',reaction:'分子イオンM+2',note:'Brの2同位体はほぼ1:1なのでMとM+2もほぼ同じ高さ。'}]}}
+Object.assign(MS,{
+methanol:{name:'メタノール',formula:'CH₄O⁺•',max:40,peaks:[{mz:15,int:18,formula:'CH₃⁺',neutral:'•OH',reaction:'CH₄O⁺• → CH₃⁺ + •OH',note:'C–O結合の開裂。'},{mz:29,int:45,formula:'CHO⁺',neutral:'H₂•',reaction:'CH₄O⁺• → CHO⁺ + H₂•',note:'脱水素で生じるフラグメント。'},{mz:31,int:100,formula:'CH₃O⁺',neutral:'H•',reaction:'CH₄O⁺• → CH₃O⁺ + H•',note:'酸素で安定化された基準ピーク。'},{mz:32,int:66,formula:'CH₄O⁺•',neutral:'—',reaction:'電子衝撃 → CH₄O⁺• + 2e⁻',note:'分子イオンピークM。'}]},
+propanol:{name:'1-プロパノール',formula:'C₃H₈O⁺•',max:70,peaks:[{mz:29,int:36,formula:'C₂H₅⁺',neutral:'•CH₂OH',reaction:'C₃H₈O⁺• → C₂H₅⁺ + •CH₂OH',note:'C–C結合が切れて生じるエチルカチオン。'},{mz:31,int:100,formula:'CH₂OH⁺',neutral:'•C₂H₅',reaction:'C₃H₈O⁺• → CH₂OH⁺ + •C₂H₅',note:'OH隣接結合のα開裂で生じる基準ピーク。'},{mz:42,int:55,formula:'C₃H₆⁺',neutral:'H₂O',reaction:'C₃H₈O⁺• → C₃H₆⁺ + H₂O',note:'脱水によって生じるフラグメント。'},{mz:59,int:18,formula:'C₃H₇O⁺',neutral:'H•',reaction:'C₃H₈O⁺• → C₃H₇O⁺ + H•',note:'Hラジカルの脱離。'},{mz:60,int:10,formula:'C₃H₈O⁺•',neutral:'—',reaction:'電子衝撃 → C₃H₈O⁺• + 2e⁻',note:'分子イオンピークM。'}]},
+isopropanol:{name:'2-プロパノール',formula:'C₃H₈O⁺•',max:70,peaks:[{mz:43,int:18,formula:'C₃H₇⁺',neutral:'•OH',reaction:'C₃H₈O⁺• → C₃H₇⁺ + •OH',note:'C–O結合の開裂。'},{mz:45,int:100,formula:'C₂H₅O⁺',neutral:'•CH₃',reaction:'C₃H₈O⁺• → C₂H₅O⁺ + •CH₃',note:'OH隣接結合のα開裂。基準ピーク。'},{mz:59,int:12,formula:'C₃H₇O⁺',neutral:'H•',reaction:'C₃H₈O⁺• → C₃H₇O⁺ + H•',note:'Hラジカルの脱離。'},{mz:60,int:8,formula:'C₃H₈O⁺•',neutral:'—',reaction:'分子イオンM',note:'分子イオンは弱い。'}]},
+propanal:{name:'プロピオンアルデヒド',formula:'C₃H₆O⁺•',max:70,peaks:[{mz:29,int:100,formula:'C₂H₅⁺',neutral:'•CHO',reaction:'C₃H₆O⁺• → C₂H₅⁺ + •CHO',note:'アルデヒド基側との開裂。基準ピーク。'},{mz:44,int:72,formula:'C₂H₄O⁺',neutral:'CH₂•',reaction:'McLafferty型を含む再配列フラグメント',note:'カルボニル化合物に特徴的なフラグメント。'},{mz:57,int:36,formula:'C₃H₅O⁺',neutral:'H•',reaction:'C₃H₆O⁺• → C₃H₅O⁺ + H•',note:'Hラジカルの脱離。'},{mz:58,int:28,formula:'C₃H₆O⁺•',neutral:'—',reaction:'分子イオンM',note:'分子イオンピーク。'}]},
+acetic:{name:'酢酸',formula:'C₂H₄O₂⁺•',max:70,peaks:[{mz:15,int:16,formula:'CH₃⁺',neutral:'•COOH',reaction:'C₂H₄O₂⁺• → CH₃⁺ + •COOH',note:'メチルカチオン。'},{mz:43,int:100,formula:'CH₃CO⁺',neutral:'•OH',reaction:'C₂H₄O₂⁺• → CH₃CO⁺ + •OH',note:'アシリウムイオン。基準ピーク。'},{mz:45,int:58,formula:'COOH⁺',neutral:'•CH₃',reaction:'C₂H₄O₂⁺• → COOH⁺ + •CH₃',note:'カルボキシ基側のフラグメント。'},{mz:60,int:72,formula:'C₂H₄O₂⁺•',neutral:'—',reaction:'分子イオンM',note:'分子イオンピーク。'}]}})
+const SDBS_MS={
+ethanol:{no:1300,condition:'EI-MS',peaks:[[14,1.4],[15,3.4],[19,2.3],[26,4.9],[27,17.7],[28,4.2],[29,12],[30,5],[31,100],[32,1.4],[41,1],[42,3.4],[43,9.9],[44,1],[45,57.3],[46,24.6]]},
+methanol:{no:3302,condition:'EI-MS',peaks:[[14,1.7],[15,12.4],[28,4.6],[29,44.6],[30,6.5],[31,100],[32,74.4],[33,1.2]]},
+propanol:{no:1212,condition:'EI 70 eV',peaks:[[15,2],[27,16],[28,7],[29,37],[31,100],[39,8],[41,22],[42,55],[43,12],[44,4],[45,6],[59,18],[60,10]]},
+isopropanol:{no:2149,condition:'EI-MS',peaks:[[14,1.1],[15,4],[19,5.4],[26,1.3],[27,11.6],[28,1.7],[29,6.3],[31,4.8],[37,1],[38,1.5],[39,5.2],[41,7.3],[42,2.2],[43,10.4],[44,3.3],[45,100],[46,2.3],[59,3.8]]},
+propanal:{no:2899,condition:'EI-MS',peaks:[[14,2],[15,4.7],[18,5.2],[25,2.4],[26,16.4],[27,59],[28,90.8],[29,100],[30,7.8],[31,5.6],[37,2.4],[38,2.3],[39,4],[40,1.7],[56,1.7],[57,7.3],[58,85],[59,12.1],[70,1.4]]},
+acetic:{no:306,condition:'EI-MS',peaks:[[13,2.1],[14,4.9],[15,17.1],[16,2.4],[17,1.2],[18,2.8],[28,4.1],[29,8.5],[31,2.5],[41,3.6],[42,13.1],[43,100],[44,2.5],[45,90.4],[46,1.1],[60,74.8],[61,2]]},
+acetone:{no:319,condition:'EI-MS',peaks:[[14,2.9],[15,23.1],[26,3.5],[27,5.7],[28,1.2],[29,3.1],[37,1.8],[38,2.2],[39,4.2],[40,1],[41,2],[42,9.1],[43,100],[44,3.4],[57,1.7],[58,63.8],[59,3.1]]},
+toluene:{no:97,condition:'EI-MS',peaks:[[27,1.8],[37,1.1],[38,2.5],[39,10.8],[40,1.2],[41,1.2],[45,1.5],[46,1],[50,4.2],[51,6.5],[52,1.6],[61,1.5],[62,3.3],[63,7.5],[64,1.6],[65,12.2],[66,1.5],[77,1],[89,4],[90,2.2],[91,100],[92,77.7],[93,5.5]]},
+dichloromethane:{no:891,condition:'EI-MS',peaks:[[13,1.2],[14,1.4],[35,4.4],[36,2.4],[37,1.4],[41,3.7],[42,2.4],[47,13.7],[48,8],[49,100],[50,3.5],[51,31.2],[83,2.2],[84,65.5],[85,2.1],[86,42.9],[88,6.9]]},
+bromoethane:{no:901,condition:'EI-MS',peaks:[[14,1.1],[15,1.1],[18,1.5],[25,2.6],[26,17.9],[27,71.1],[28,18.1],[29,100],[30,2],[79,3.2],[80,1.4],[81,3.6],[82,1.3],[93,4.2],[95,3.4],[107,1.2],[108,94.7],[109,2.7],[110,91.5],[111,1.9]]},
+ethylAcetate:{no:889,condition:'EI-MS',peaks:[[14,1.3],[15,6.2],[18,2.1],[26,1.4],[27,6.5],[28,2.5],[29,13.7],[31,1],[42,4.9],[43,100],[44,2.7],[45,14.7],[61,14.9],[70,9.9],[73,4.7],[88,5.1]]}
+};
+Object.entries(SDBS_MS).forEach(([key,record])=>{if(MS[key])Object.assign(MS[key],{sdbsNo:record.no,sdbsCondition:record.condition,sdbsPeaks:record.peaks})});
+const MS_SOURCE={
+ethanol:{groups:[['methyl','CH₃',75,78],['methylene','CH₂',220,78],['oxygen','OH',365,78]],bonds:[['methyl','methylene',1],['methylene','oxygen',1]],states:[
+{kept:['methyl'],note:'左端のメチル部分が正電荷をもつ。'},
+{kept:['methyl','methylene'],note:'C–O結合が切れ、炭化水素側がイオンとして残る。'},
+{kept:['methylene','oxygen'],note:'CH₂OH部分がイオンとして残る主要な開裂。'},
+{kept:['methyl','methylene','oxygen'],note:'重原子骨格はすべて残り、Hラジカルだけが脱離する。'},
+{kept:['methyl','methylene','oxygen'],note:'分子全体から電子が失われた分子イオン。'}]},
+acetone:{groups:[['left','CH₃',55,92],['carbonyl','C',210,92],['oxygen','O',210,28],['right','CH₃',375,92]],bonds:[['left','carbonyl',1],['carbonyl','oxygen',2],['carbonyl','right',1]],states:[
+{kept:['left'],note:'一方のメチル部分がイオンとして現れる。'},
+{kept:['left','carbonyl','oxygen'],note:'カルボニル炭素を含むアシリウムイオン CH₃CO⁺ が残る。'},
+{kept:['left','carbonyl','oxygen','right'],note:'分子全体から電子が失われた分子イオン。'}]},
+toluene:{groups:[['ring','',150,78,'kekule'],['methyl','CH₃',345,78]],bonds:[['ring','methyl',1]],states:[
+{kept:['ring'],cut:false,note:'芳香環由来。実際にはトロピリウムイオンから再配列・二次開裂して生じる。'},
+{kept:['ring','methyl'],note:'炭素骨格全体が再配列し、安定なトロピリウムイオン C₇H₇⁺ になる。'},
+{kept:['ring','methyl'],note:'分子全体から電子が失われた分子イオン。'}]},
+dichloromethane:{groups:[['left','Cl',70,78],['carbon','CH₂',220,78],['right','Cl',370,78]],bonds:[['left','carbon',1],['carbon','right',1]],states:[
+{kept:['left','carbon'],note:'C–Cl結合が1本切れ、CH₂³⁵Cl⁺ が残る。'},
+{kept:['right','carbon'],note:'³⁷Clを含む同位体フラグメント CH₂³⁷Cl⁺。'},
+{kept:['left','carbon','right'],note:'³⁵Clを2個含む分子イオン M。'},
+{kept:['left','carbon','right'],note:'³⁵Clと³⁷Clを1個ずつ含む分子イオン M+2。'},
+{kept:['left','carbon','right'],note:'³⁷Clを2個含む分子イオン M+4。'}]},
+bromoethane:{groups:[['methyl','CH₃',75,78],['methylene','CH₂',220,78],['bromine','Br',365,78]],bonds:[['methyl','methylene',1],['methylene','bromine',1]],states:[
+{kept:['methyl','methylene'],note:'C–Br結合が切れ、エチルカチオン C₂H₅⁺ が残る。'},
+{kept:['methyl','methylene','bromine'],note:'⁷⁹Brを含む分子イオン M。'},
+{kept:['methyl','methylene','bromine'],note:'⁸¹Brを含む分子イオン M+2。'}]}}
+Object.assign(MS_SOURCE,{
+methanol:{groups:[['methyl','CH₃',145,78],['oxygen','OH',310,78]],bonds:[['methyl','oxygen',1]],states:[{kept:['methyl'],note:'C–O結合が切れ、CH₃⁺が残る。'},{kept:['methyl','oxygen'],note:'重原子骨格を保った脱水素フラグメント。'},{kept:['methyl','oxygen'],note:'CH₃O⁺が残る主要フラグメント。'},{kept:['methyl','oxygen'],note:'分子全体から電子が失われた分子イオン。'}]},
+propanol:{groups:[['methyl','CH₃',45,78],['middle','CH₂',180,78],['hydroxymethyl','CH₂OH',335,78]],bonds:[['methyl','middle',1],['middle','hydroxymethyl',1]],states:[{kept:['methyl','middle'],note:'C₂H₅⁺が残るC–C結合の開裂。'},{kept:['hydroxymethyl'],note:'OHを含むCH₂OH⁺が残るα開裂。'},{kept:['methyl','middle'],note:'脱水後のC₃H₆⁺に対応する炭素骨格。'},{kept:['methyl','middle','hydroxymethyl'],note:'Hラジカルが脱離する。'},{kept:['methyl','middle','hydroxymethyl'],note:'分子イオン。'}]},
+isopropanol:{groups:[['left','CH₃',65,78],['center','CH(OH)',220,78],['right','CH₃',375,78]],bonds:[['left','center',1],['center','right',1]],states:[{kept:['left','center','right'],note:'炭素骨格側がイオンとして残る。'},{kept:['left','center'],note:'OHを含む側が残るα開裂。'},{kept:['left','center','right'],note:'Hラジカルだけが脱離する。'},{kept:['left','center','right'],note:'分子イオン。'}]},
+propanal:{groups:[['methyl','CH₃',65,78],['methylene','CH₂',210,78],['aldehyde','CHO',365,78]],bonds:[['methyl','methylene',1],['methylene','aldehyde',1]],states:[{kept:['methyl','methylene'],note:'C₂H₅⁺が残る開裂。'},{kept:['methylene','aldehyde'],note:'カルボニルを含む再配列フラグメント。'},{kept:['methyl','methylene','aldehyde'],note:'Hラジカルが脱離する。'},{kept:['methyl','methylene','aldehyde'],note:'分子イオン。'}]},
+acetic:{groups:[['methyl','CH₃',95,78],['carbonyl','C(=O)',235,78],['hydroxy','OH',375,78]],bonds:[['methyl','carbonyl',1],['carbonyl','hydroxy',1]],states:[{kept:['methyl'],note:'メチルカチオン。'},{kept:['methyl','carbonyl'],note:'CH₃CO⁺が残る主要開裂。'},{kept:['carbonyl','hydroxy'],note:'カルボキシ基側がイオンとして残る。'},{kept:['methyl','carbonyl','hydroxy'],note:'分子イオン。'}]}})
+function drawMSSource(){
+  const svg=$('ms-source-map'),model=MS_SOURCE[msKey],state=model.states[msIndex],
+    groups=Object.fromEntries(model.groups.map(([id,label,x,y,shape])=>[id,[id,label,x,y+35,shape]])),
+    kept=new Set(state.kept);
+  clear(svg);
+  svg.append(el('title',{},`${MS[msKey].name}のうち、${MS[msKey].peaks[msIndex].formula}に残る部分`));
+  model.bonds.forEach(([a,b,order])=>{
+    const ga=groups[a],gb=groups[b],both=kept.has(a)&&kept.has(b),
+      boundary=kept.has(a)!==kept.has(b),
+      klass=`ms-source-bond${both?' kept':boundary&&state.cut!==false?' cut':''}`,
+      vertical=Math.abs(ga[2]-gb[2])<Math.abs(ga[3]-gb[3]),offsets=order===2?[-5,5]:[0];
+    offsets.forEach(o=>svg.append(el('line',{
+      x1:ga[2]+(vertical?o:0),y1:ga[3]+(vertical?0:o),
+      x2:gb[2]+(vertical?o:0),y2:gb[3]+(vertical?0:o),class:klass
+    })));
+  });
+  model.groups.forEach(([id])=>{
+    const [,label,x,y,shape]=groups[id],isKept=kept.has(id);
+    if(shape==='kekule'){
+      const radius=58,points=Array.from({length:6},(_,i)=>{
+        const angle=i*Math.PI/3;
+        return [x+radius*Math.cos(angle),y+radius*Math.sin(angle)];
+      }),pointText=points.map(p=>p.join(',')).join(' '),bondClass=`ms-source-bond${isKept?' kept':''}`;
+      svg.append(el('polygon',{points:pointText,class:`ms-kekule-fill${isKept?' kept':''}`}));
+      points.forEach((p,i)=>{const q=points[(i+1)%6];svg.append(el('line',{x1:p[0],y1:p[1],x2:q[0],y2:q[1],class:bondClass}))});
+      [[0,1],[2,3],[4,5]].forEach(([a,b])=>{const p=points[a],q=points[b],factor=.73;svg.append(el('line',{x1:x+(p[0]-x)*factor,y1:y+(p[1]-y)*factor,x2:x+(q[0]-x)*factor,y2:y+(q[1]-y)*factor,class:bondClass}))});
+      return;
+    }
+    const width=Math.max(54,label.length*17+24);
+    svg.append(el('rect',{x:x-width/2,y:y-28,width,height:56,rx:15,class:`ms-source-halo${isKept?' kept':''}`}));
+    svg.append(el('text',{x,y,class:`ms-source-group${isKept?' kept':''}`},label));
+  });
+  $('ms-source-note').textContent=state.note;
+}
+let msKey='ethanol',msIndex=2;
+function drawMS(){const svg=$('ms-chart'),d=dims(svg);clear(svg);const data=MS[msKey],selected=data.peaks[msIndex],plot=data.sdbsPeaks||data.peaks.map(p=>[p.mz,p.int]),x=v=>d.left+v/data.max*(d.w-d.left-d.right),y=v=>d.h-d.bottom-v/110*(d.h-d.top-d.bottom),step=data.max>100?20:10;axes(svg,d,Array.from({length:Math.floor(data.max/step)+1},(_,i)=>i*step),[0,25,50,75,100],x,y,'m/z','相対強度 [%]');plot.forEach(([mz,int])=>{const active=mz===selected.mz,line=el('line',{x1:x(mz),y1:y(0),x2:x(mz),y2:y(int),stroke:active?'#ea580c':'#2563eb','stroke-width':active?5:Math.max(1.2,data.max>100?1.6:2),class:'stick'});const interpreted=data.peaks.findIndex(p=>p.mz===mz);if(interpreted>=0)line.addEventListener('click',()=>{msIndex=interpreted;drawMS()});svg.append(line);if(active||int>=35)svg.append(el('text',{x:x(mz),y:y(int)-8,'text-anchor':'middle',class:'tick-label'},mz))});renderMSSide()}
+function renderMSSide(){MS.acetone.name='アセトン';const data=MS[msKey],p=data.peaks[msIndex],actual=(data.sdbsPeaks||[]).find(([mz])=>mz===p.mz)?.[1]??p.int;drawMSSource();$('ms-reaction').textContent=p.reaction;$('ms-detail').innerHTML=`<strong>${data.name}</strong><br>${p.note}<br>中性側：${p.neutral}<br><small>SDBS No. ${data.sdbsNo}／${data.sdbsCondition}。グラフはSDBS掲載ピークを表示。</small>`;const host=$('ms-peaks');host.innerHTML='';data.peaks.forEach((q,i)=>{const b=document.createElement('button'),formula=document.createElement('span'),meta=document.createElement('span'),shown=(data.sdbsPeaks||[]).find(([mz])=>mz===q.mz)?.[1]??q.int;b.type='button';b.className='fragment-option';b.setAttribute('aria-pressed',i===msIndex);b.setAttribute('aria-label',`${q.formula}、m/z ${q.mz}、相対強度 ${shown}%`);formula.className='fragment-option-formula';formula.innerHTML=q.formula.replace('⁺','<span class="fragment-charge">⁺</span>');meta.className='fragment-option-meta';meta.textContent=`m/z = ${q.mz}　相対強度 ${shown}%`;b.append(formula,meta);b.addEventListener('click',()=>{msIndex=i;drawMS()});host.append(b)})}
+$('ms-select').addEventListener('change',e=>{msKey=e.target.value;msIndex=MS[msKey].peaks.reduce((best,p,i,a)=>p.int>a[best].int?i:best,0);drawMS()});
+
+const NMR={
+ethanol:{name:'エタノール',structure:[['CH₃','ch3'],['–',''],['CH₂','ch2'],['–OH','oh']],h1:[{ppm:3.65,mult:'四重線',h:'2H',group:'ch2',neighbors:3,shield:'脱遮蔽：Oの誘起効果',note:'Oに隣接するCH₂は低磁場側。隣のCH₃により四重線。',pattern:[1,3,3,1]},{ppm:2.20,mult:'幅広い一重線',h:'1H',group:'oh',neighbors:'交換',shield:'交換が速く分裂しにくい',note:'OHの位置は溶媒・濃度・温度で変化する。D₂O添加で消失。',pattern:[1],broad:true},{ppm:1.20,mult:'三重線',h:'3H',group:'ch3',neighbors:2,shield:'比較的遮蔽',note:'CH₃は隣のCH₂により三重線。',pattern:[1,2,1]}],c13:[{ppm:58,group:'ch2',h:'CH₂',note:'Oに結合する炭素は脱遮蔽される。'},{ppm:18,group:'ch3',h:'CH₃',note:'末端メチル炭素。'}]},
+ethylAcetate:{name:'酢酸エチル',structure:[['CH₃','acyl'],['COO','carbonyl'],['CH₂','ch2'],['CH₃','ethyl']],h1:[{ppm:4.12,mult:'四重線',h:'2H',group:'ch2',neighbors:3,shield:'Oにより強く脱遮蔽',note:'Oに結合するCH₂。',pattern:[1,3,3,1]},{ppm:2.05,mult:'一重線',h:'3H',group:'acyl',neighbors:0,shield:'C=Oにより脱遮蔽',note:'カルボニルに隣接するCH₃。',pattern:[1]},{ppm:1.25,mult:'三重線',h:'3H',group:'ethyl',neighbors:2,shield:'比較的遮蔽',note:'末端CH₃。',pattern:[1,2,1]}],c13:[{ppm:171,group:'carbonyl',h:'C=O',note:'エステルのカルボニル炭素。'},{ppm:60,group:'ch2',h:'CH₂',note:'Oに結合する炭素。'},{ppm:21,group:'acyl',h:'CH₃',note:'カルボニル隣接メチル。'},{ppm:14,group:'ethyl',h:'CH₃',note:'末端メチル。'}]},
+acetone:{name:'プロパノン',structure:[['CH₃','methyl'],['CO','carbonyl'],['CH₃','methyl']],h1:[{ppm:2.15,mult:'一重線',h:'6H',group:'methyl',neighbors:0,shield:'C=Oにより脱遮蔽',note:'分子の対称性により2個のCH₃は等価で、シグナルは1本。',pattern:[1]}],c13:[{ppm:206,group:'carbonyl',h:'C=O',note:'ケトンのカルボニル炭素。'},{ppm:30,group:'methyl',h:'2×CH₃',note:'対称性により2個のメチル炭素は等価。'}]},
+toluene:{name:'トルエン',structure:[['C₆H₅','ring'],['–',''],['CH₃','methyl']],h1:[{ppm:7.20,mult:'多重線',h:'5H',group:'ring',neighbors:'複雑',shield:'環電流により脱遮蔽',note:'芳香環プロトンは環電流により低磁場側。',pattern:[1,2,3,2,1]},{ppm:2.34,mult:'一重線',h:'3H',group:'methyl',neighbors:0,shield:'ベンジル位',note:'隣接する芳香族炭素にHがないため一重線。',pattern:[1]}],c13:[{ppm:138,group:'ring',h:'ipso-C',note:'メチル基が結合した芳香族炭素。'},{ppm:129,group:'ring',h:'芳香族C',note:'芳香環の炭素群。'},{ppm:125,group:'ring',h:'芳香族C',note:'対称性により4種類の芳香族炭素環境。'},{ppm:21,group:'methyl',h:'CH₃',note:'メチル炭素。'}]}}
+NMR.acetone.name='アセトン';
+Object.assign(NMR,{
+methanol:{name:'メタノール',structure:[['CH₃','methyl'],['OH','oh']],h1:[{ppm:3.35,mult:'一重線',h:'3H',group:'methyl',neighbors:0,shield:'Oにより脱遮蔽',note:'Oに結合するCH₃。隣接炭素がないため一重線。',pattern:[1]},{ppm:2.50,mult:'幅広い一重線',h:'1H',group:'oh',neighbors:'交換',shield:'交換で変動',note:'OHは溶媒・濃度・温度によって位置と幅が変わる。',pattern:[1],broad:true}],c13:[{ppm:50,group:'methyl',h:'CH₃',note:'Oに結合するメチル炭素。'}]},
+propanol:{name:'1-プロパノール',structure:[['CH₃','ch3'],['CH₂','middle'],['CH₂OH','ch2o']],h1:[{ppm:3.60,mult:'三重線',h:'2H',group:'ch2o',neighbors:2,shield:'Oにより脱遮蔽',note:'Oに結合するCH₂。隣の中央CH₂ 2Hによって三重線。',pattern:[1,2,1]},{ppm:2.00,mult:'幅広い一重線',h:'1H',group:'oh',neighbors:'交換',shield:'交換で変動',note:'OHは溶媒・濃度・温度によって位置と幅が変わる。',pattern:[1],broad:true},{ppm:1.55,mult:'多重線',h:'2H',group:'middle',neighbors:5,shield:'アルキル鎖の中間',note:'中央CH₂。両側の非等価なCH₃ 3HとCH₂ 2Hの影響が重なり、多重線として現れる。',pattern:[1,5,10,10,5,1]},{ppm:0.92,mult:'三重線',h:'3H',group:'ch3',neighbors:2,shield:'比較的遮蔽',note:'末端CH₃。隣の中央CH₂ 2Hによって三重線。',pattern:[1,2,1]}],c13:[{ppm:63,group:'ch2o',h:'CH₂OH',note:'Oに結合するメチレン炭素。'},{ppm:25,group:'middle',h:'CH₂',note:'炭素鎖中央のメチレン炭素。'},{ppm:10,group:'ch3',h:'CH₃',note:'末端メチル炭素。'}]},
+isopropanol:{name:'2-プロパノール',structure:[['(CH₃)₂','methyl'],['CH','methine'],['OH','oh']],h1:[{ppm:3.95,mult:'七重線',h:'1H',group:'methine',neighbors:6,shield:'Oにより脱遮蔽',note:'Oに結合するCH。等価な2個のCH₃の6Hによって七重線。',pattern:[1,6,15,20,15,6,1]},{ppm:2.20,mult:'幅広い一重線',h:'1H',group:'oh',neighbors:'交換',shield:'交換で変動',note:'OHは交換が速く、通常は幅広い一重線。',pattern:[1],broad:true},{ppm:1.18,mult:'二重線',h:'6H',group:'methyl',neighbors:1,shield:'比較的遮蔽',note:'等価な2個のCH₃。中央のCH 1Hによって二重線。',pattern:[1,1]}],c13:[{ppm:64,group:'methine',h:'CH',note:'Oに結合するメチン炭素。'},{ppm:25,group:'methyl',h:'2×CH₃',note:'対称性により2個のメチル炭素は等価。'}]},
+propanal:{name:'プロピオンアルデヒド',structure:[['CH₃','ch3'],['CH₂','ch2'],['CHO','aldehyde']],h1:[{ppm:9.75,mult:'三重線',h:'1H',group:'aldehyde',neighbors:2,shield:'強く脱遮蔽',note:'アルデヒドH。隣のCH₂ 2Hによって三重線。',pattern:[1,2,1]},{ppm:2.45,mult:'多重線',h:'2H',group:'ch2',neighbors:4,shield:'C=Oにより脱遮蔽',note:'カルボニル隣接CH₂。左右の非等価なHとの結合により多重線。',pattern:[1,4,6,4,1]},{ppm:1.05,mult:'三重線',h:'3H',group:'ch3',neighbors:2,shield:'比較的遮蔽',note:'末端CH₃。隣のCH₂ 2Hによって三重線。',pattern:[1,2,1]}],c13:[{ppm:201,group:'carbonyl',h:'CHO',note:'アルデヒドのカルボニル炭素。'},{ppm:45,group:'ch2',h:'CH₂',note:'カルボニルα位のメチレン炭素。'},{ppm:7,group:'ch3',h:'CH₃',note:'末端メチル炭素。'}]},
+acetic:{name:'酢酸',structure:[['CH₃','methyl'],['COOH','acidOh']],h1:[{ppm:11.4,mult:'幅広い一重線',h:'1H',group:'acidOh',neighbors:'交換',shield:'強く脱遮蔽',note:'カルボン酸のOH。水素結合と交換により非常に低磁場側で幅広い。',pattern:[1],broad:true},{ppm:2.10,mult:'一重線',h:'3H',group:'methyl',neighbors:0,shield:'C=Oにより脱遮蔽',note:'カルボニルに隣接するCH₃。隣接炭素にHがないため一重線。',pattern:[1]}],c13:[{ppm:178,group:'carbonyl',h:'C=O',note:'カルボン酸のカルボニル炭素。'},{ppm:21,group:'methyl',h:'CH₃',note:'カルボニルα位のメチル炭素。'}]}})
+function applySdbsNMR(key,no,h1,c13,hCondition,cCondition){
+  const data=NMR[key];
+  h1.forEach((ppm,i)=>{if(data.h1[i])data.h1[i].ppm=ppm});
+  c13.forEach((ppm,i)=>{if(data.c13[i])data.c13[i].ppm=ppm});
+  Object.assign(data,{sdbsNo:no,h1Condition:hCondition,c13Condition:cCondition});
+}
+applySdbsNMR('ethanol',1300,[3.687,2.61,1.226],[57.79,18.13],'89.56 MHz／CDCl₃','25.16 MHz／CDCl₃');
+applySdbsNMR('methanol',3302,[3.66,3.43],[50.05],'89.56 MHz／CDCl₃','15.09 MHz／CDCl₃');
+applySdbsNMR('propanol',1212,[3.582,2.26,1.57,.94],[64.25,25.89,10.28],'89.56 MHz／CDCl₃','15.09 MHz／CDCl₃');
+applySdbsNMR('isopropanol',2149,[4.008,2.16,1.2],[64.04,25.29],'89.56 MHz／CDCl₃','15.09 MHz／CDCl₃');
+applySdbsNMR('propanal',2899,[9.75,2.45,1.05],[203.21,37.28,6.04],'300 MHz／CDCl₃','25.16 MHz／CDCl₃');
+applySdbsNMR('acetic',306,[11.42,2.098],[178.12,20.8],'89.56 MHz／CDCl₃','25.16 MHz／CDCl₃');
+applySdbsNMR('ethylAcetate',889,[4.119,2.038,1.26],[171.08,60.44,21,14.28],'89.56 MHz／CDCl₃','15.09 MHz／CDCl₃');
+applySdbsNMR('acetone',319,[2.17],[206.55,30.81],'300 MHz／CDCl₃','25.16 MHz／CDCl₃');
+NMR.toluene.c13=[
+  {ppm:137.83,group:'ipso',h:'ipso-C（1個）',note:'メチル基が結合した芳香族炭素。'},
+  {ppm:129.09,group:'ortho',h:'ortho-C（2個）',note:'メチル基に対してオルト位にある、等価な2個の炭素。'},
+  {ppm:128.28,group:'meta',h:'meta-C（2個）',note:'メチル基に対してメタ位にある、等価な2個の炭素。'},
+  {ppm:125.38,group:'para',h:'para-C（1個）',note:'メチル基に対してパラ位にある炭素。'},
+  {ppm:21.41,group:'methyl',h:'CH₃',note:'ベンジル位のメチル炭素。'}
+];
+applySdbsNMR('toluene',97,[7.38,2.34],[137.83,129.09,128.28,125.38,21.41],'89.56 MHz／CDCl₃','25.16 MHz／CDCl₃');
+const NMR_RANGES=[
+{label:'単純なアルキルH',high:1.8,low:.7,color:'#0f766e',note:'飽和炭素上のCH₃・CH₂・CH。一般に高磁場側。'},
+{label:'アリル位・ベンジル位',high:3.0,low:1.6,color:'#0891b2',note:'C=Cや芳香環に隣接する炭素上のH。'},
+{label:'カルボニルα位',high:2.7,low:2.0,color:'#ea580c',note:'C=Oに隣接する炭素上のH。電子求引効果で低磁場側へ移る。'},
+{label:'末端アルキンH',high:3.1,low:1.7,color:'#0891b2',note:'C≡C–H。異方性のためアルケンHより高磁場側。'},
+{label:'O・N・ハロゲン隣接H',high:4.5,low:3.0,color:'#2563eb',note:'電気陰性度の大きい原子に結合した炭素上のH。'},
+{label:'アルケンH',high:6.5,low:4.5,color:'#ea580c',note:'C=C上のH。置換基や共役によって移動する。'},
+{label:'芳香族H',high:8.5,low:6.5,color:'#7c3aed',note:'芳香環電流の影響で低磁場側に現れる。'},
+{label:'アルデヒドH',high:10.0,low:9.0,color:'#ea580c',note:'–CHOのH。特徴的に低磁場側。'},
+{label:'カルボン酸O–H',high:12.0,low:10.0,color:'#2563eb',note:'非常に低磁場側で幅広く現れやすい。'},
+{label:'O–H・N–H',high:5.5,low:.5,color:'#64748b',note:'溶媒・濃度・温度・交換速度により位置が大きく変化する。'}];
+const NMR_SHORT=['アルキルH','アリル/ベンジル','C=O α位','C≡C–H','O/N/X隣接','アルケンH','芳香族H','アルデヒドH','COOH','OH/NH'];
+const C13_NMR_RANGES=[
+{label:'アルキル炭素（sp³）',high:50,low:0,color:'#0f766e',note:'単純なCH₃・CH₂・CHなど。置換基や分岐によって移動する。'},
+{label:'O・N・ハロゲン隣接炭素',high:90,low:40,color:'#2563eb',note:'電気陰性度の大きい原子に結合したsp³炭素。一般に単純なアルキル炭素より低磁場側。'},
+{label:'C≡C・C≡Nの炭素',high:125,low:65,color:'#0891b2',note:'アルキン炭素やニトリル炭素の代表範囲。他の領域と一部重なる。'},
+{label:'アルケン・芳香族炭素（sp²）',high:160,low:100,color:'#7c3aed',note:'C=Cおよび芳香環の炭素。置換基や共役によって広い範囲に現れる。'},
+{label:'カルボン酸・エステルのC=O',high:185,low:160,color:'#ea580c',note:'カルボン酸とその誘導体のカルボニル炭素。'},
+{label:'アルデヒド・ケトンのC=O',high:220,low:190,color:'#dc2626',note:'アルデヒド・ケトンのカルボニル炭素。¹³C NMRで特に低磁場側に現れる。'}
+];
+const C13_NMR_SHORT=['アルキルC','C–O/N/X','C≡C/C≡N','C=C・芳香環','酸・エステルC=O','CHO・ケトンC=O'];
+let nmrKey='ethanol',nmrIndex=0,splitStep=0,nmrOverlayVisible=false,nmrRangeIndex=-1;
+function getNMRRangeIndex(key,s){if(key==='ethanol'){if(s.group==='ch3')return 0;if(s.group==='ch2')return 4;if(s.group==='oh')return 9}if(key==='methanol'){if(s.group==='methyl')return 4;if(s.group==='oh')return 9}if(key==='propanol'){if(s.group==='ch2o')return 4;if(s.group==='oh')return 9;if(s.group==='middle'||s.group==='ch3')return 0}if(key==='isopropanol'){if(s.group==='methine')return 4;if(s.group==='methyl')return 0;if(s.group==='oh')return 9}if(key==='propanal'){if(s.group==='aldehyde')return 7;if(s.group==='ch2')return 2;if(s.group==='ch3')return 0}if(key==='acetic'){if(s.group==='acidOh')return 8;if(s.group==='methyl')return 2}if(key==='ethylAcetate'){if(s.group==='ethyl')return 0;if(s.group==='acyl')return 2;if(s.group==='ch2')return 4}if(key==='acetone')return 2;if(key==='toluene'){if(s.group==='ring')return 6;if(s.group==='methyl')return 1}return NMR_RANGES.findIndex(r=>s.ppm<=r.high&&s.ppm>=r.low)}
+function getC13NMRRangeIndex(signal){const p=signal.ppm;if(p>=190)return 5;if(p>=160)return 4;if(p>=100)return 3;if(p>=50)return 1;return 0}
+function renderNMRRangeOverlay(){
+  if(!nmrOverlayVisible)return;
+  const nucleus=$('nmr-nucleus').value,isH1=nucleus==='h1',maxP=isH1?12:220,
+    ranges=isH1?NMR_RANGES:C13_NMR_RANGES,shortLabels=isH1?NMR_SHORT:C13_NMR_SHORT,
+    svg=$('nmr-chart'),d=dims(svg),x=v=>d.left+(maxP-v)/maxP*(d.w-d.left-d.right),
+    plotH=d.h-d.top-d.bottom,lane=plotH/ranges.length,
+    opacity=+$('nmr-overlay-opacity').value,signal=NMR[nmrKey][nucleus][nmrIndex],
+    signalRange=isH1?getNMRRangeIndex(nmrKey,signal):getC13NMRRangeIndex(signal),active=ranges[signalRange];
+  if(active){
+    svg.append(el('rect',{x:x(active.high),y:d.top,width:x(active.low)-x(active.high),height:plotH,class:'nmr-region-highlight'}));
+    if(nmrRangeIndex<0)$('nmr-range-info').innerHTML=`<strong>選択中のシグナル：${active.label}</strong>　δ ${signal.ppm} ppm<br>目安範囲 δ ${active.low}–${active.high} ppm　${active.note}`;
+  }
+  ranges.forEach((r,i)=>{
+    const y=d.top+i*lane+2,h=Math.max(9,Math.min(15,lane-4)),belongs=i===signalRange,manual=i===nmrRangeIndex,
+      high=Math.min(maxP,r.high),low=Math.max(0,r.low),
+      rect=el('rect',{x:x(high),y,width:Math.max(5,x(low)-x(high)),height:h,rx:h/2,fill:r.color,'fill-opacity':Math.min(.95,opacity+(belongs?.42:manual?.28:0)),stroke:belongs?'#6d28d9':manual?'#172033':'none','stroke-width':belongs?3:manual?2:0,class:'ir-overlay-bar'});
+    rect.append(el('title',{},`${r.label}：${r.low}–${r.high} ppm`));
+    rect.addEventListener('click',()=>{nmrRangeIndex=i;$('nmr-range-info').innerHTML=`<strong>${r.label}</strong>　δ ${r.low}–${r.high} ppm<br>${r.note}`;drawNMR()});
+    svg.append(rect);
+    svg.append(el('text',{x:Math.max(d.left+2,x(high)+3),y:y+h-2,class:'nmr-overlay-label'},shortLabels[i]));
+  });
+}
+function drawNMRIntegral(svg,d,x,signals,base){
+  const entries=signals.map(s=>({...s,count:parseInt(s.h)||1})).sort((a,b)=>b.ppm-a.ppm),
+    maxCount=Math.max(...entries.map(s=>s.count)),plotH=base-d.top,baseline=base-13;
+  entries.forEach((s,i)=>{
+    const leftGap=i?entries[i-1].ppm-s.ppm:2,rightGap=i<entries.length-1?s.ppm-entries[i+1].ppm:2,
+      halfWindow=Math.max(.22,Math.min(.62,Math.min(leftGap,rightGap)*.39)),
+      rise=plotH*.68*(s.count/maxCount),width=Math.max(.025,halfWindow*.09);
+    let path='';
+    for(let ppm=s.ppm+halfWindow;ppm>=s.ppm-halfWindow;ppm-=.012){
+      const y=baseline-rise/(1+Math.exp((ppm-s.ppm)/width));
+      path+=`${path?'L':'M'}${x(ppm).toFixed(1)} ${y.toFixed(1)} `;
+    }
+    svg.append(el('path',{d:path,class:'nmr-integral-curve'}));
+    const labelX=x(s.ppm-halfWindow)+10,labelY=baseline-rise+5,
+      label=el('text',{x:labelX,y:labelY,class:'nmr-integral-label',transform:`rotate(90 ${labelX} ${labelY})`},s.count.toFixed(2));
+    svg.append(label);
+  });
+}
+function drawNMR(){
+  const svg=$('nmr-chart'),d=dims(svg);clear(svg);
+  const nucleus=$('nmr-nucleus').value,data=NMR[nmrKey],signals=data[nucleus],
+    maxP=nucleus==='h1'?12:220,x=v=>d.left+(maxP-v)/maxP*(d.w-d.left-d.right),
+    base=d.h-d.bottom,yTop=d.top+24,ticks=nucleus==='h1'?[12,10,8,6,4,2,0]:[200,150,100,50,0];
+  axes(svg,d,ticks,[0,25,50,75,100],x,v=>base-v/100*(base-d.top),nucleus==='h1'?'δ [ppm]':'δ [ppm]（¹³C）','相対強度');
+  renderNMRRangeOverlay();
+  signals.forEach((s,i)=>{
+    const pattern=nucleus==='h1'?s.pattern:[1],spacing=s.broad?.12:(nucleus==='h1'?.045:.3),mx=Math.max(...pattern);
+    pattern.forEach((int,j)=>{
+      const xx=x(s.ppm+(j-(pattern.length-1)/2)*spacing),top=base-(int/mx)*(base-yTop)*(s.broad?.55:1),
+        selected=i===nmrIndex;
+      svg.append(el('line',{x1:xx,y1:base,x2:xx,y2:top,stroke:selected?'#ea580c':'#111827','stroke-width':s.broad?6:selected?2.1:1.35,'stroke-linecap':s.broad?'round':'butt'}));
+    });
+    svg.append(el('text',{x:x(s.ppm),y:yTop-5-(i%2)*14,'text-anchor':'middle',class:'unknown-signal-label'},`${s.ppm}`));
+  });
+  if(nucleus==='h1')drawNMRIntegral(svg,d,x,signals,base);
+  renderNMRSide();
+}
+const NMR_COUPLING={
+  ethanol:{
+    ch3:{neighbor:['ch2'],note:'青いCH₃の3Hに帰属。隣のオレンジ色のCH₂の2Hにより、n+1則で三重線に分裂。'},
+    ch2:{neighbor:['ch3'],note:'青いCH₂の2Hに帰属。隣のオレンジ色のCH₃の3Hにより、n+1則で四重線に分裂。'},
+    oh:{neighbor:[],note:'青いO–Hに帰属。OHは交換が速いため、通常は隣接Hとの分裂が明瞭に現れず幅広い一重線。'}},
+  methanol:{
+    methyl:{neighbor:[],note:'青いCH₃の3Hに帰属。隣接炭素がなく、OHとの結合も交換で通常は観測されないため一重線。'},
+    oh:{neighbor:[],note:'青いO–Hに帰属。交換が速いため、通常は幅広い一重線。'}},
+  propanol:{
+    ch2o:{neighbor:['middle'],note:'青いO–CH₂の2Hに帰属。オレンジ色の隣接CH₂ 2Hにより三重線。'},
+    middle:{neighbor:['ch3','ch2o'],note:'青い中央CH₂の2Hに帰属。両側の非等価なCH₃ 3HとO–CH₂ 2Hの影響が重なり、多重線。'},
+    ch3:{neighbor:['middle'],note:'青い末端CH₃の3Hに帰属。オレンジ色の隣接CH₂ 2Hにより三重線。'},
+    oh:{neighbor:[],note:'青いO–Hに帰属。交換が速いため、通常は隣接Hとの分裂が明瞭に現れない。'}},
+  isopropanol:{
+    methine:{neighbor:['methyl'],note:'青い中央CHの1Hに帰属。オレンジ色の等価な2個のCH₃、合計6Hによりn+1則で七重線。'},
+    methyl:{neighbor:['methine'],note:'青い2個のCH₃、合計6Hに帰属。オレンジ色の中央CH 1Hにより二重線。'},
+    oh:{neighbor:[],note:'青いO–Hに帰属。交換が速いため、通常は隣接Hとの分裂が明瞭に現れない。'}},
+  propanal:{
+    aldehyde:{neighbor:['ch2'],note:'青い–CHOの1Hに帰属。オレンジ色の隣接CH₂ 2Hにより三重線。'},
+    ch2:{neighbor:['aldehyde','ch3'],note:'青いカルボニルα位CH₂の2Hに帰属。両側の非等価なアルデヒドHとCH₃の影響が重なり、多重線として表す。'},
+    ch3:{neighbor:['ch2'],note:'青い末端CH₃の3Hに帰属。オレンジ色の隣接CH₂ 2Hにより三重線。'}},
+  acetic:{
+    acidOh:{neighbor:[],note:'青いカルボン酸O–Hに帰属。交換と水素結合により、非常に低磁場側の幅広い一重線。'},
+    methyl:{neighbor:[],note:'青いCH₃の3Hに帰属。隣接するカルボニル炭素にはHがないため一重線。'}},
+  ethylAcetate:{
+    acyl:{neighbor:[],note:'カルボニルに隣接するCH₃の3Hに帰属。隣の炭素にはHがないため一重線。'},
+    ch2:{neighbor:['ethyl'],note:'青いO–CH₂の2Hに帰属。隣のオレンジ色のCH₃の3Hにより四重線。'},
+    ethyl:{neighbor:['ch2'],note:'青い末端CH₃の3Hに帰属。隣のオレンジ色のCH₂の2Hにより三重線。'}},
+  acetone:{methyl:{neighbor:[],note:'左右2つのCH₃は対称で等価なため、合計6Hが1本のシグナル。隣接炭素にHがなく一重線。'}},
+  toluene:{
+    ring:{neighbor:[],note:'芳香環上の5Hに帰属。環内の他の芳香族Hとの複雑なスピン結合により多重線。'},
+    methyl:{neighbor:[],note:'ベンジル位CH₃の3Hに帰属。直接隣の環炭素にHがないため一重線。'}}};
+function drawNMRDetailedStructure(key,signal,nucleus){
+  const svg=$('nmr-structure'),coupling=NMR_COUPLING[key]?.[signal.group]||{neighbor:[],note:'選択した環境を表示しています。'},
+    neighbors=new Set(coupling.neighbor);clear(svg);
+  const status=group=>nucleus==='h1'?(group===signal.group?'selected':neighbors.has(group)?'neighbor':''):(group===signal.group?'selected':''),
+    bond=(x1,y1,x2,y2)=>svg.append(el('line',{x1,y1,x2,y2,class:'nmr-detail-bond'})),
+    atom=(x,y,text,group='')=>{const state=nucleus==='c13'?status(group):'';if(state)svg.append(el('circle',{cx:x,cy:y,r:25,class:`nmr-detail-halo ${state}`}));svg.append(el('text',{x,y,class:`nmr-detail-atom ${state}`},text))},
+    hydrogen=(x,y,group)=>{const state=nucleus==='h1'?status(group):'';if(state)svg.append(el('circle',{cx:x,cy:y,r:21,class:`nmr-detail-halo ${state}`}));svg.append(el('text',{x,y,class:`nmr-detail-atom nmr-detail-h ${state}`},'H'))},
+    carbonMarker=(x,y,group)=>{if(nucleus!=='c13'||status(group)!=='selected')return;svg.append(el('circle',{cx:x,cy:y,r:22,class:'nmr-detail-halo selected'}));svg.append(el('text',{x,y,class:'nmr-detail-atom selected'},'C'))};
+  if(key==='ethanol'){
+    bond(86,125,124,125);bond(177,125,258,125);bond(312,125,362,125);bond(418,125,448,125);
+    bond(150,65,150,98);bond(150,152,150,185);bond(285,65,285,98);bond(285,152,285,185);
+    atom(150,125,'C','ch3');atom(285,125,'C','ch2');atom(390,125,'O');
+    hydrogen(62,125,'ch3');hydrogen(150,40,'ch3');hydrogen(150,210,'ch3');
+    hydrogen(285,40,'ch2');hydrogen(285,210,'ch2');hydrogen(475,125,'oh');
+  }else if(key==='methanol'){
+    bond(95,125,174,125);bond(226,125,324,125);bond(376,125,446,125);
+    bond(200,65,200,98);bond(200,152,200,185);
+    atom(200,125,'C','methyl');atom(350,125,'O');
+    hydrogen(70,125,'methyl');hydrogen(200,40,'methyl');hydrogen(200,210,'methyl');hydrogen(475,125,'oh');
+  }else if(key==='propanol'){
+    bond(42,125,59,125);bond(111,125,179,125);bond(231,125,299,125);bond(351,125,394,125);bond(446,125,472,125);
+    bond(85,65,85,98);bond(85,152,85,185);bond(205,65,205,98);bond(205,152,205,185);bond(325,65,325,98);bond(325,152,325,185);
+    atom(85,125,'C','ch3');atom(205,125,'C','middle');atom(325,125,'C','ch2o');atom(420,125,'O');
+    hydrogen(20,125,'ch3');hydrogen(85,40,'ch3');hydrogen(85,210,'ch3');
+    hydrogen(205,40,'middle');hydrogen(205,210,'middle');
+    hydrogen(325,40,'ch2o');hydrogen(325,210,'ch2o');hydrogen(495,125,'oh');
+  }else if(key==='isopropanol'){
+    bond(120,130,234,130);bond(286,130,400,130);bond(260,156,260,179);bond(286,205,326,205);
+    bond(70,130,57,130);bond(95,70,95,98);bond(95,157,95,190);
+    bond(260,70,260,98);
+    bond(450,130,463,130);bond(425,70,425,98);bond(425,157,425,190);
+    atom(95,130,'C','methyl');atom(260,130,'C','methine');atom(425,130,'C','methyl');atom(260,205,'O');
+    hydrogen(32,130,'methyl');hydrogen(95,45,'methyl');hydrogen(95,215,'methyl');
+    hydrogen(260,45,'methine');
+    hydrogen(488,130,'methyl');hydrogen(425,45,'methyl');hydrogen(425,215,'methyl');
+    hydrogen(355,205,'oh');
+  }else if(key==='propanal'){
+    bond(52,125,64,125);bond(116,125,204,125);bond(256,125,344,125);bond(396,125,440,125);
+    bond(90,65,90,98);bond(90,152,90,185);bond(230,65,230,98);bond(230,152,230,185);
+    bond(364,152,364,185);bond(376,152,376,185);
+    atom(90,125,'C','ch3');atom(230,125,'C','ch2');atom(370,125,'C','carbonyl');atom(370,210,'O');
+    hydrogen(27,125,'ch3');hydrogen(90,40,'ch3');hydrogen(90,210,'ch3');
+    hydrogen(230,40,'ch2');hydrogen(230,210,'ch2');hydrogen(465,125,'aldehyde');
+  }else if(key==='acetic'){
+    bond(67,125,79,125);bond(131,125,234,125);bond(286,125,334,125);bond(386,125,440,125);
+    bond(105,65,105,98);bond(105,152,105,185);bond(254,152,254,185);bond(266,152,266,185);
+    atom(105,125,'C','methyl');atom(260,125,'C','carbonyl');atom(360,125,'O');atom(260,210,'O');
+    hydrogen(42,125,'methyl');hydrogen(105,40,'methyl');hydrogen(105,210,'methyl');hydrogen(465,125,'acidOh');
+  }else if(key==='ethylAcetate'){
+    bond(46,140,54,140);bond(88,140,134,140);bond(186,140,211,140);bond(260,140,304,140);bond(356,140,409,140);bond(463,140,475,140);
+    bond(65,78,65,112);bond(65,168,65,202);bond(330,78,330,112);bond(330,168,330,202);bond(435,78,435,112);bond(435,168,435,202);
+    bond(154,112,154,70);bond(166,112,166,70);
+    atom(65,140,'C','acyl');atom(160,140,'C','carbonyl');atom(235,140,'O');atom(330,140,'C','ch2');atom(435,140,'C','ethyl');atom(160,45,'O');
+    hydrogen(25,140,'acyl');hydrogen(65,55,'acyl');hydrogen(65,225,'acyl');
+    hydrogen(330,55,'ch2');hydrogen(330,225,'ch2');
+    hydrogen(435,55,'ethyl');hydrogen(435,225,'ethyl');hydrogen(493,140,'ethyl');
+  }else if(key==='acetone'){
+    bond(71,130,103,130);bond(157,130,233,130);bond(287,130,363,130);bond(417,130,449,130);
+    bond(130,70,130,103);bond(130,157,130,190);bond(390,70,390,103);bond(390,157,390,190);bond(254,103,254,61);bond(266,103,266,61);
+    atom(130,130,'C','methyl');atom(260,130,'C','carbonyl');atom(390,130,'C','methyl');atom(260,38,'O');
+    hydrogen(47,130,'methyl');hydrogen(130,45,'methyl');hydrogen(130,215,'methyl');
+    hydrogen(473,130,'methyl');hydrogen(390,45,'methyl');hydrogen(390,215,'methyl');
+  }else{
+    const cx=235,cy=125,r=67,points=Array.from({length:6},(_,i)=>{const a=i*Math.PI/3;return[cx+r*Math.cos(a),cy+r*Math.sin(a)]});
+    points.forEach((p,i)=>{const q=points[(i+1)%6];bond(p[0],p[1],q[0],q[1])});
+    [[0,1],[2,3],[4,5]].forEach(([a,b])=>{const p=points[a],q=points[b],f=.76;bond(cx+(p[0]-cx)*f,cy+(p[1]-cy)*f,cx+(q[0]-cx)*f,cy+(q[1]-cy)*f)});
+    points.forEach((p,i)=>{if(i===0)return;const dx=p[0]-cx,dy=p[1]-cy,len=Math.hypot(dx,dy),hx=cx+dx/len*(r+42),hy=cy+dy/len*(r+42);bond(p[0],p[1],cx+dx/len*(r+20),cy+dy/len*(r+20));hydrogen(hx,hy,'ring')});
+    bond(points[0][0],points[0][1],372,125);atom(405,125,'C');bond(429,125,467,125);bond(405,98,405,75);bond(405,152,405,175);
+    hydrogen(490,125,'methyl');hydrogen(405,52,'methyl');hydrogen(405,198,'methyl');
+    const ringGroups=['ipso','ortho','meta','para','meta','ortho'];
+    points.forEach((p,i)=>carbonMarker(p[0],p[1],ringGroups[i]));
+    if(nucleus==='c13'&&signal.group==='methyl'){svg.append(el('circle',{cx:405,cy:125,r:25,class:'nmr-detail-halo selected'}));svg.append(el('text',{x:405,y:125,class:'nmr-detail-atom selected'},'C'))}
+  }
+  $('nmr-coupling-note').textContent=nucleus==='h1'?coupling.note:`青色の炭素が δ ${signal.ppm} ppm（${signal.h}）に対応します。等価な炭素は同時に強調しています。`;
+}
+function renderNMRSide(){const data=NMR[nmrKey],nucleus=$('nmr-nucleus').value,signals=data[nucleus],s=signals[nmrIndex]||signals[0],condition=nucleus==='h1'?data.h1Condition:data.c13Condition;if(!signals[nmrIndex])nmrIndex=0;drawNMRDetailedStructure(nmrKey,s,nucleus);const host=$('nmr-signals');host.innerHTML='';signals.forEach((q,i)=>host.append(button(`δ ${q.ppm}　${q.h}`,i===nmrIndex,()=>{nmrIndex=i;splitStep=0;drawNMR()})));if(nucleus==='h1'){$('signal-info').innerHTML=`<div><small>化学シフト</small><strong>δ ${s.ppm} ppm</strong></div><div><small>積分比</small><strong>${s.h}</strong></div><div><small>多重度</small><strong>${s.mult}</strong></div><div><small>隣接H</small><strong>${s.neighbors}</strong></div>`;$('shielding-label').textContent=s.shield;$('split-step').hidden=false;const n=Number.isInteger(s.neighbors)?s.neighbors:0,shown=Math.min(splitStep,n);$('split-stage').textContent=n?`隣接Hを ${shown}/${n} 個まで考える → ${shown+1} 本に分裂${shown===n?`（${s.mult}）`:''}`:'隣接Hによる単純な分裂なし';$('nmr-detail').innerHTML=`<strong>${data.name}</strong><br>${s.note}<br>積分曲線の段差は水素数に対応。<br><small>SDBS No. ${data.sdbsNo}／¹H NMR：${condition}。化学シフトはSDBS掲載値。</small>`}else{$('signal-info').innerHTML=`<div><small>化学シフト</small><strong>δ ${s.ppm} ppm</strong></div><div><small>炭素環境</small><strong>${s.h}</strong></div>`;$('shielding-label').textContent='¹³Cの電子環境';$('split-stage').textContent=`¹³C{¹H}スペクトル：プロトンデカップリングにより基本的に一重線`;$('split-step').hidden=true;$('nmr-detail').innerHTML=`<strong>${data.name}</strong><br>${s.note}<br>シグナル数は異なる炭素環境の数に対応。<br><small>SDBS No. ${data.sdbsNo}／¹³C NMR：${condition}。化学シフトはSDBS掲載値。</small>`}}
+const renderNMRSideBase=renderNMRSide;renderNMRSide=()=>{renderNMRSideBase()};
+$('nmr-select').addEventListener('change',e=>{nmrKey=e.target.value;nmrIndex=0;splitStep=0;nmrRangeIndex=-1;drawNMR()});
+const nmrNucleus=$('nmr-nucleus');
+function syncNmrNucleus(){
+  nmrIndex=0;splitStep=0;nmrRangeIndex=-1;
+  const h1=nmrNucleus.value==='h1',legendItems=$('panel-nmr').querySelectorAll('.nmr-h-legend span');
+  $('nmr-title').textContent=h1?'¹H NMR：化学的環境とシグナル':'¹³C NMR：炭素環境とシグナル';
+  $('nmr-spectrum-label').textContent=h1?'¹H NMR SPECTRUM':'¹³C NMR SPECTRUM';
+  $('nmr-chart').setAttribute('aria-label',h1?'プロトンNMRスペクトル':'炭素13 NMRスペクトル');
+  legendItems[0].textContent=h1?'ピークに帰属するH':'選択した炭素環境';
+  legendItems[1].hidden=!h1;
+  nmrOverlayVisible=false;
+  $('nmr-range-toggle').disabled=false;$('nmr-opacity-field').hidden=false;
+  $('nmr-range-toggle').setAttribute('aria-pressed','false');$('nmr-range-toggle').textContent='化学シフト範囲を重ねる';$('nmr-range-info').hidden=true;
+  $('nmr-range-info').textContent=h1?'半透明の帯を選ぶと、¹Hの化学シフト範囲と代表的な環境を表示します。':'半透明の帯を選ぶと、¹³Cの化学シフト範囲と代表的な炭素環境を表示します。';
+  drawNMR();
+}
+nmrNucleus.addEventListener('change',syncNmrNucleus);
+$('split-step').addEventListener('click',()=>{const s=NMR[nmrKey].h1[nmrIndex],n=Number.isInteger(s.neighbors)?s.neighbors:0;splitStep=splitStep>=n?0:splitStep+1;renderNMRSideBase()});
+const nmrRangeToggle=$('nmr-range-toggle');nmrRangeToggle.addEventListener('click',()=>{nmrOverlayVisible=!nmrOverlayVisible;nmrRangeToggle.setAttribute('aria-pressed',nmrOverlayVisible);nmrRangeToggle.textContent=nmrOverlayVisible?'化学シフト範囲を隠す':'化学シフト範囲を重ねる';$('nmr-range-info').hidden=!nmrOverlayVisible;if(!nmrOverlayVisible){nmrRangeIndex=-1;$('nmr-range-info').textContent=nmrNucleus.value==='h1'?'半透明の帯を選ぶと、¹Hの化学シフト範囲と代表的な環境を表示します。':'半透明の帯を選ぶと、¹³Cの化学シフト範囲と代表的な炭素環境を表示します。'}drawNMR()});$('nmr-overlay-opacity').addEventListener('input',e=>{$('nmr-opacity-out').textContent=`${Math.round(+e.target.value*100)}%`;if(nmrOverlayVisible)drawNMR()});
+
+const UNKNOWN={
+u1:{answer:'ethylAcetate',irKey:'ethylAcetate',nmrKey:'ethylAcetate',ms:{max:100,sdbsPeaks:SDBS_MS.ethylAcetate.peaks,peaks:SDBS_MS.ethylAcetate.peaks.map(([mz,int])=>({mz,int}))},reason:'IRのエステルC=OとC–O、分子イオンm/z 88、¹H NMRの3:2:3の水素環境が一致する。'},
+u2:{answer:'ethanol',irKey:'ethanol',nmrKey:'ethanol',ms:MS.ethanol,reason:'IRの幅広いO–H、分子イオンm/z 46と基準ピークm/z 31、CH₃CH₂–の三重線と四重線が一致する。'},
+u3:{answer:'acetone',irKey:'acetone',nmrKey:'acetone',ms:MS.acetone,reason:'IRの強いC=O、分子イオンm/z 58と基準ピークm/z 43、δ 2.17の6H一重線が一致する。'},
+u4:{answer:'methanol',irKey:'methanol',nmrKey:'methanol',ms:MS.methanol,reason:'IRの幅広いO–HとC–O、分子イオンm/z 32、¹H NMRの3H一重線と交換性OHが一致する。'},
+u5:{answer:'isopropanol',irKey:'isopropanol',nmrKey:'isopropanol',ms:MS.isopropanol,reason:'IRのO–Hと第二級アルコールのC–O、分子イオンm/z 60、¹H NMRの6H二重線と1H七重線が一致する。'},
+u6:{answer:'propanal',irKey:'propanal',nmrKey:'propanal',ms:MS.propanal,reason:'IRの強いC=Oと約2725 cm⁻¹のアルデヒドC–H、分子イオンm/z 58、¹H NMRのδ 9.75のアルデヒドHが一致する。'},
+u7:{answer:'acetic',irKey:'acetic',nmrKey:'acetic',ms:MS.acetic,reason:'IRの非常に幅広いカルボン酸O–HとC=O、分子イオンm/z 60、¹H NMRのδ 11.4の酸性OHと3H一重線が一致する。'},
+u8:{answer:'propanol',irKey:'propanol',nmrKey:'propanol',ms:MS.propanol,reason:'IRの幅広いO–Hと第一級アルコールのC–O、分子イオンm/z 60と基準ピークm/z 31、¹H NMRの2H三重線・中央CH₂の多重線・3H三重線が一致する。'}}
+const ANSWERS=[
+{key:'ethanol',name:'エタノール',structure:'C₂H₅OH',mass:'46.07'},
+{key:'acetone',name:'アセトン',structure:'CH₃COCH₃',mass:'58.08'},
+{key:'ethylAcetate',name:'酢酸エチル',structure:'CH₃COOC₂H₅',mass:'88.11'},
+{key:'toluene',name:'トルエン',structure:'C₆H₅CH₃',mass:'92.14'},
+{key:'methanol',name:'メタノール',structure:'CH₃OH',mass:'32.04'},
+{key:'propanol',name:'1-プロパノール',structure:'CH₃CH₂CH₂OH',mass:'60.10'},
+{key:'isopropanol',name:'2-プロパノール',structure:'(CH₃)₂CHOH',mass:'60.10'},
+{key:'propanal',name:'プロピオンアルデヒド',structure:'CH₃CH₂CHO',mass:'58.08'},
+{key:'acetic',name:'酢酸',structure:'CH₃COOH',mass:'60.05'}];
+let unknownKey='u1',unknownSpectrum='ir',unknownHint=false,unknownAnswer=null;
+function drawUnknownIRHint(svg,d,x){
+  const plotH=d.h-d.top-d.bottom,lane=plotH/IR_RANGES.length;
+  IR_RANGES.forEach((r,i)=>{
+    const y=d.top+i*lane+2,h=Math.max(8,Math.min(13,lane-4)),rect=el('rect',{x:x(r.high),y,width:Math.max(4,x(r.low)-x(r.high)),height:h,rx:h/2,fill:r.color,'fill-opacity':.34});
+    rect.append(el('title',{},`${r.label}：${r.low}–${r.high} cm⁻¹`));svg.append(rect);
+    svg.append(el('text',{x:Math.max(d.left+2,x(r.high)+3),y:y+h-2,class:'ir-overlay-label'},IR_SHORT[i]));
+  });
+}
+function drawUnknownNMRHint(svg,d,x){
+  const plotH=d.h-d.top-d.bottom,lane=plotH/NMR_RANGES.length;
+  NMR_RANGES.forEach((r,i)=>{
+    const high=Math.min(12,r.high),low=Math.max(0,r.low),y=d.top+i*lane+2,h=Math.max(9,Math.min(15,lane-4)),rect=el('rect',{x:x(high),y,width:Math.max(5,x(low)-x(high)),height:h,rx:h/2,fill:r.color,'fill-opacity':.34});
+    rect.append(el('title',{},`${r.label}：δ ${r.low}–${r.high} ppm`));svg.append(rect);
+    svg.append(el('text',{x:Math.max(d.left+2,x(high)+3),y:y+h-2,class:'nmr-overlay-label'},NMR_SHORT[i]));
+  });
+}
+function drawUnknownSpectrum(){
+  const svg=$('unknown-chart'),d=dims(svg),q=UNKNOWN[unknownKey];
+  clear(svg);
+  if(unknownSpectrum==='ir'){
+    const data=IR[q.irKey],x=v=>d.left+(4000-v)/3600*(d.w-d.left-d.right),y=v=>d.top+(100-v)/100*(d.h-d.top-d.bottom);
+    axes(svg,d,[4000,3500,3000,2500,2000,1500,1000,500],[0,25,50,75,100],x,y,'波数 [cm⁻¹]','透過率 [%]');
+    if(unknownHint)drawUnknownIRHint(svg,d,x);
+    svg.append(el('polyline',{points:irPath(data,x,y,1),fill:'none',stroke:'#0891b2','stroke-width':1.65,'stroke-linejoin':'round'}));
+    data.peaks.forEach(p=>{const px=x(p.wn),py=y(irTransmission(data,p.wn,1));svg.append(el('text',{x:px,y:Math.max(d.top+14,py-9),'text-anchor':'middle',class:'tick-label'},p.wn))});
+    $('unknown-spectrum-title').textContent='IR SPECTRUM';
+    svg.setAttribute('aria-label','未知試料のIRスペクトル');
+  }else if(unknownSpectrum==='ms'){
+    const data=q.ms,plot=data.sdbsPeaks||data.peaks.map(p=>[p.mz,p.int]),x=v=>d.left+v/data.max*(d.w-d.left-d.right),y=v=>d.h-d.bottom-v/110*(d.h-d.top-d.bottom),step=data.max>80?20:10;
+    axes(svg,d,Array.from({length:Math.floor(data.max/step)+1},(_,i)=>i*step),[0,25,50,75,100],x,y,'m/z','相対強度 [%]');
+    plot.forEach(([mz,int])=>{svg.append(el('line',{x1:x(mz),y1:y(0),x2:x(mz),y2:y(int),stroke:'#2563eb','stroke-width':data.max>100?1.6:2}));if(int>=35)svg.append(el('text',{x:x(mz),y:y(int)-9,'text-anchor':'middle',class:'tick-label'},mz))});
+    $('unknown-spectrum-title').textContent='MASS SPECTRUM';
+    svg.setAttribute('aria-label','未知試料の質量スペクトル');
+  }else{
+    const signals=NMR[q.nmrKey].h1,x=v=>d.left+(12-v)/12*(d.w-d.left-d.right),base=d.h-d.bottom,yTop=d.top+22;
+    axes(svg,d,[12,10,8,6,4,2,0],[0,25,50,75,100],x,v=>base-v/100*(base-d.top),'δ [ppm]','相対強度');
+    if(unknownHint)drawUnknownNMRHint(svg,d,x);
+    signals.forEach((s,si)=>{const spacing=s.broad?.12:.045,mx=Math.max(...s.pattern);s.pattern.forEach((int,j)=>{const xx=x(s.ppm+(j-(s.pattern.length-1)/2)*spacing),top=base-(int/mx)*(base-yTop)*(s.broad?.55:1);svg.append(el('line',{x1:xx,y1:base,x2:xx,y2:top,stroke:'#111827','stroke-width':s.broad?6:1.35,'stroke-linecap':s.broad?'round':'butt'}))});svg.append(el('text',{x:x(s.ppm),y:yTop-5-(si%2)*15,'text-anchor':'middle',class:'unknown-signal-label'},`${s.ppm}`))});
+    drawNMRIntegral(svg,d,x,signals,base);
+    $('unknown-spectrum-title').textContent='¹H NMR SPECTRUM';
+    svg.setAttribute('aria-label','未知試料のプロトンNMRスペクトル');
+  }
+}
+function drawAnswerStructure(svg,key){
+  const bond=(x1,y1,x2,y2)=>svg.append(el('line',{x1,y1,x2,y2,class:'answer-bond'})),
+    atom=(x,y,text,carbon=false)=>svg.append(el('text',{x,y,class:carbon?'answer-carbon':'answer-atom'},text));
+  if(key==='ethanol'){
+    bond(61,51,91,51);bond(154,51,185,51);
+    atom(35,51,'H₃C');atom(123,51,'CH₂');atom(215,51,'OH');
+  }else if(key==='methanol'){
+    bond(74,51,133,51);bond(169,51,224,51);
+    atom(42,51,'H₃C');atom(151,51,'O');atom(250,51,'H');
+  }else if(key==='propanol'){
+    bond(48,51,74,51);bond(127,51,153,51);bond(207,51,232,51);
+    atom(23,51,'H₃C');atom(101,51,'CH₂');atom(180,51,'CH₂');atom(261,51,'OH');
+  }else if(key==='isopropanol'){
+    bond(69,62,114,62);bond(176,62,220,62);bond(145,47,145,23);
+    atom(35,62,'H₃C');atom(145,62,'CH');atom(255,62,'CH₃');atom(145,13,'OH');
+  }else if(key==='propanal'){
+    bond(49,62,73,62);bond(128,62,164,62);bond(216,62,247,62);bond(184,47,184,22);bond(196,47,196,22);
+    atom(24,62,'H₃C');atom(101,62,'CH₂');atom(190,62,'C',true);atom(270,62,'H');atom(190,12,'O');
+  }else if(key==='acetic'){
+    bond(49,62,94,62);bond(146,62,174,62);bond(218,62,244,62);bond(114,47,114,22);bond(126,47,126,22);
+    atom(24,62,'H₃C');atom(120,62,'C',true);atom(196,62,'O');atom(266,62,'H');atom(120,12,'O');
+  }else if(key==='acetone'){
+    bond(59,62,105,62);bond(145,62,201,62);bond(121,47,121,22);bond(131,47,131,22);
+    atom(31,62,'CH₃');atom(126,62,'C',true);atom(229,62,'CH₃');atom(126,12,'O');
+  }else if(key==='ethylAcetate'){
+    bond(47,65,73,65);bond(101,65,125,65);bond(151,65,174,65);bond(215,65,239,65);bond(85,49,85,24);bond(95,49,95,24);
+    atom(24,65,'CH₃');atom(90,65,'C',true);atom(138,65,'O');atom(195,65,'CH₂');atom(266,65,'CH₃');atom(90,14,'O');
+  }else{
+    const cx=105,cy=51,r=39,points=Array.from({length:6},(_,i)=>{const a=i*Math.PI/3;return[cx+r*Math.cos(a),cy+r*Math.sin(a)]});
+    points.forEach((p,i)=>{const q=points[(i+1)%6];bond(p[0],p[1],q[0],q[1])});
+    [[0,1],[2,3],[4,5]].forEach(([a,b])=>{const p=points[a],q=points[b],f=.72;bond(cx+(p[0]-cx)*f,cy+(p[1]-cy)*f,cx+(q[0]-cx)*f,cy+(q[1]-cy)*f)});
+    bond(points[0][0],points[0][1],190,51);atom(224,51,'CH₃');
+  }
+}
+function renderUnknown(){
+  const q=UNKNOWN[unknownKey],host=$('unknown-answers'),hint=$('unknown-hint-toggle');
+  host.innerHTML='';
+  ANSWERS.forEach(({key,name,structure,mass})=>{const b=document.createElement('button'),formula=el('svg',{viewBox:'0 0 290 100',class:'answer-structure-svg','aria-hidden':'true'}),mw=document.createElement('span');b.type='button';b.className='fragment-option answer-choice';b.setAttribute('aria-pressed',key===unknownAnswer);b.setAttribute('aria-label',`${name}、${structure}、分子量 ${mass}`);drawAnswerStructure(formula,key);mw.className='fragment-option-meta';mw.textContent=`分子量 ${mass}`;b.append(formula,mw);b.addEventListener('click',()=>{unknownAnswer=key;renderUnknown();$('unknown-feedback').innerHTML=key===q.answer?`<strong>正解：${name}。</strong><br>${q.reason}`:'<strong>不正解。</strong><br>IRの官能基、MSの分子イオン、NMRのシグナル数と積分比をもう一度対応させよう。'});host.append(b)});
+  document.querySelectorAll('[data-unknown-spectrum]').forEach(b=>{const on=b.dataset.unknownSpectrum===unknownSpectrum;b.setAttribute('aria-pressed',on);b.classList.toggle('primary',on)});
+  hint.hidden=unknownSpectrum==='ms';hint.setAttribute('aria-pressed',unknownHint);hint.textContent=unknownSpectrum==='nmr'?(unknownHint?'化学シフト領域を隠す':'化学シフト領域を重ねる'):(unknownHint?'振動域を隠す':'振動域を重ねる');
+  requestAnimationFrame(drawUnknownSpectrum);
+}
+document.querySelectorAll('[data-unknown-spectrum]').forEach(b=>b.addEventListener('click',()=>{unknownSpectrum=b.dataset.unknownSpectrum;unknownHint=false;renderUnknown()}));
+$('unknown-hint-toggle').addEventListener('click',()=>{unknownHint=!unknownHint;renderUnknown()});
+$('unknown-select').addEventListener('change',e=>{unknownKey=e.target.value;unknownSpectrum='ir';unknownHint=false;unknownAnswer=null;$('unknown-feedback').textContent='候補を選んでください。';renderUnknown()});
+$('reset-unknown').addEventListener('click',()=>{unknownSpectrum='ir';unknownHint=false;unknownAnswer=null;$('unknown-feedback').textContent='候補を選んでください。';renderUnknown()});
+
+const tabs=[...document.querySelectorAll('[role="tab"]')];function activateTab(index){const selected=tabs[index],key=selected.dataset.tab;tabs.forEach((t,i)=>{t.setAttribute('aria-selected',i===index);t.tabIndex=i===index?0:-1});document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));$(`panel-${key}`).classList.add('active');requestAnimationFrame(()=>{if(key==='ir')drawIR();if(key==='ms')drawMS();if(key==='nmr'){nmrNucleus.value=selected.dataset.nmrNucleus||'h1';syncNmrNucleus()}if(key==='unknown')renderUnknown()})}
+tabs.forEach((tab,i)=>{tab.addEventListener('click',()=>activateTab(i));tab.addEventListener('keydown',e=>{let n;if(e.key==='ArrowRight')n=(i+1)%tabs.length;if(e.key==='ArrowLeft')n=(i-1+tabs.length)%tabs.length;if(e.key==='Home')n=0;if(e.key==='End')n=tabs.length-1;if(n!==undefined){e.preventDefault();tabs[n].focus();activateTab(n)}})});
+const fs=$('fullscreen');fs.addEventListener('click',async()=>{try{document.fullscreenElement?await document.exitFullscreen():await document.documentElement.requestFullscreen()}catch(_){}});document.addEventListener('fullscreenchange',()=>{const active=!!document.fullscreenElement;document.body.classList.toggle('is-fullscreen',active);fs.querySelector('.btn-text').textContent=active?'全画面を終了':'全画面表示';requestAnimationFrame(()=>{drawIR();drawMS();drawNMR();if(document.querySelector('.panel.active')?.id==='panel-unknown')drawUnknownSpectrum()})});
+new ResizeObserver(()=>{const a=document.querySelector('.panel.active')?.id;if(a==='panel-ir')drawIR();if(a==='panel-ms')drawMS();if(a==='panel-nmr')drawNMR();if(a==='panel-unknown')drawUnknownSpectrum()}).observe(document.body);
+const params=new URLSearchParams(location.search),sample=params.get('sample'),
+  peak=Number(params.get('peak')),rangeParam=params.get('range'),
+  msSample=params.get('msSample'),msPeak=Number(params.get('msPeak')),
+  nmrSample=params.get('nmrSample'),nmrSignal=Number(params.get('nmrSignal')),
+  unknownSample=params.get('unknownSample'),unknownView=params.get('unknownSpectrum'),
+  unknownHintParam=params.get('unknownHint');
+if(sample&&IR[sample]){irKey=sample;$('ir-select').value=sample}
+if(Number.isInteger(peak)&&peak>=0&&peak<IR[irKey].peaks.length)irIndex=peak;
+if(rangeParam!==null){const range=Number(rangeParam);if(Number.isInteger(range)&&range>=0&&range<IR_RANGES.length)irRangeIndex=range}
+if(msSample&&MS[msSample]){msKey=msSample;$('ms-select').value=msSample}
+if(params.get('msPeak')!==null&&Number.isInteger(msPeak)&&msPeak>=0&&msPeak<MS[msKey].peaks.length)msIndex=msPeak;
+if(nmrSample&&NMR[nmrSample]){nmrKey=nmrSample;$('nmr-select').value=nmrSample}
+if(params.get('nmrSignal')!==null&&Number.isInteger(nmrSignal)&&nmrSignal>=0&&nmrSignal<NMR[nmrKey].h1.length)nmrIndex=nmrSignal;
+if(unknownSample&&UNKNOWN[unknownSample]){unknownKey=unknownSample;$('unknown-select').value=unknownSample}
+if(['ir','ms','nmr'].includes(unknownView))unknownSpectrum=unknownView;
+if(unknownHintParam==='1'&&unknownSpectrum!=='ms')unknownHint=true;
+drawIR();drawMS();drawNMR();renderUnknown();
+const requested=params.get('tab'),startIndex=tabs.findIndex(t=>t.dataset.tab===requested);
+if(startIndex>0)activateTab(startIndex);
+if(params.get('reference')==='1')irReferenceToggle.click();
+if(params.get('nmrReference')==='1')nmrRangeToggle.click();
+drawVibration();
+})();
+</script>
+<script src="site-shell.js"></script>
+</body>
+</html>
