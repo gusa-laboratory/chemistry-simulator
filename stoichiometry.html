@@ -310,60 +310,6 @@ const productsOf = rx => rx.sp.filter(s => s.side > 0);
 const sumC = list => list.reduce((t, s) => t + s.c, 0);
 
 /* ============================================================
-   分子のかたまりを1列に並べる（① と ② の下段で共用）
-   items: [{f, n, color, fadeFrom, label, sub}]
-   ============================================================ */
-// 何行に並べるかを指定して配置案をつくる。大きさは縦横の空きを見てから決めたいので分離する
-function planRow(items, sep, rows) {
-  const shown = items.filter(i => i.n > 0).map(i => ({ ...i }));
-  if (!shown.length) return null;
-  shown.forEach(i => { i.rows = Math.min(rows, i.n); i.cols = Math.ceil(i.n / i.rows); });
-  return {
-    shown, rows: Math.max(...shown.map(i => i.rows)),
-    totalCols: shown.reduce((t, i) => t + i.cols, 0),
-    sep, sepTotal: sep * (shown.length - 1),
-  };
-}
-
-// 1〜3行を試して、いちばん大きく描ける並べ方を選ぶ
-function bestPlan(items, sep, avail, maxCell) {
-  let best = null;
-  for (let rows = 1; rows <= 3; rows++) {
-    const p = planRow(items, sep, rows);
-    if (!p) return null;
-    const cell = Math.min((avail.w - p.sepTotal) / p.totalCols, avail.h / p.rows, maxCell);
-    if (!best || cell > best.cell) best = { plan: p, cell };
-  }
-  return best;
-}
-
-function renderRow(plan, x0, x1, yc, cell) {
-  if (!plan) return '';
-  const { shown, sep, sepTotal } = plan;
-  const width = plan.totalCols * cell + sepTotal;
-  let x = (x0 + x1) / 2 - width / 2, g = '';
-  shown.forEach((it, idx) => {
-    const w = it.cols * cell;
-    for (let k = 0; k < it.n; k++) {
-      const r = Math.floor(k / it.cols), c = k % it.cols;
-      const cx = x + c * cell + cell / 2;
-      const cy = yc + (r - (it.rows - 1) / 2) * cell;
-      const faded = it.fadeFrom !== undefined && k >= it.fadeFrom;
-      g += drawGlyph(it.f, cx, cy, cell * 0.42, faded ? .22 : 1);
-    }
-    const ly = yc + (it.rows / 2) * cell + 21;
-    g += `<text x="${fmt(x + w / 2,1)}" y="${fmt(ly,1)}" text-anchor="middle" font-size="16" font-weight="850" fill="${it.color}">${it.label ?? it.f}</text>`;
-    if (it.sub) g += `<text x="${fmt(x + w / 2,1)}" y="${fmt(ly + 19,1)}" text-anchor="middle" font-size="13" font-weight="800" fill="var(--ink2)">${it.sub}</text>`;
-    x += w;
-    if (idx < shown.length - 1) {
-      g += `<text x="${fmt(x + sep / 2,1)}" y="${fmt(yc + 9,1)}" text-anchor="middle" font-size="27" font-weight="850" fill="var(--ink3)">＋</text>`;
-      x += sep;
-    }
-  });
-  return g;
-}
-
-/* ============================================================
    ① 係数と粒子の個数
    ============================================================ */
 const ratio = { label: 'mol' };
@@ -540,60 +486,101 @@ function drawLimit() {
   ys.disabled = st.theo === 0;
   $('t2-y-val').textContent = st.theo > 0 ? `${st.got} / ${st.theo} 個（収率 ${fmt(st.yieldPct, 0)}％）` : '—';
 
-  const perSet = st.a.c + st.b.c;
-  const leftovers = st.leftA + st.leftB;
-  const frames = st.sets + (leftovers > 0 ? 1 : 0);
-  const totalCells = st.sets * perSet + leftovers;
-  const cell = totalCells > 0
-    ? clamp((650 - frames * 16 - Math.max(0, frames - 1) * 10) / totalCells, 13, 34)
-    : 30;
+  // 反応式の各項を列にして、その真下に分子を置く。
+  // 1行＝1組。行が横に揃うので、どちらが先に組をつくれなくなるかが見える
+  const terms = st.rx.sp.map(s => ({
+    s, text: (s.c === 1 ? '' : s.c) + s.f,
+    color: s === st.limiting ? 'var(--limit)' : (s.side < 0 ? 'var(--react)' : 'var(--prod)'),
+  }));
+  const seps = [];
+  for (let i = 0; i < terms.length - 1; i++) {
+    seps.push(terms[i].s.side !== terms[i + 1].s.side ? { t: '→', w: 62 } : { t: '＋', w: 46 });
+  }
+  const sepW = seps.reduce((a, s) => a + s.w, 0);
+  const rows = Math.max(st.setsA, st.setsB, 1);
+  const totalCols = st.rx.sp.reduce((t, s) => t + s.c, 0);
 
-  let g = `<text x="380" y="30" text-anchor="middle" font-size="21" font-weight="850" fill="var(--deep)">${st.rx.eq}</text>`;
-
-  // ---- 上段：反応前。1組ずつ枠で囲むと、組をつくれない余りが浮き上がる ----
-  g += `<text x="24" y="82" font-size="13.5" font-weight="850" fill="var(--ink3)">反応前</text>`;
-  const frameW = perSet * cell + 16, frameH = cell + 20, topY = 96;
-  const totalW = st.sets * frameW + (leftovers > 0 ? leftovers * cell + 16 : 0) + Math.max(0, frames - 1) * 10;
+  const BAND_W = 700, EQ_Y = 60, GLYPH_TOP = 108, MAX_H = 268;
+  const textW = s => [...s].reduce((w, ch) => w + (/[₀-₉]/.test(ch) ? 9 : /[0-9]/.test(ch) ? 15 : 17), 0);
+  const slotsFor = c => terms.map(t => Math.max(t.s.c * c, textW(t.text) + 10));
+  let cell = Math.min((BAND_W - sepW) / totalCols, MAX_H / rows, 72);
+  for (let k = 0; k < 24; k++) {
+    if (slotsFor(cell).reduce((a, b) => a + b, 0) + sepW <= BAND_W || cell <= 12) break;
+    cell = Math.max(12, cell * 0.94);
+  }
+  const slots = slotsFor(cell);
+  const totalW = slots.reduce((a, b) => a + b, 0) + sepW;
   let x = 380 - totalW / 2;
-  for (let s = 0; s < st.sets; s++) {
-    g += `<rect x="${fmt(x,1)}" y="${topY}" width="${fmt(frameW,1)}" height="${frameH}" rx="10" fill="#f0f9ff" stroke="#7dd3fc" stroke-width="2"/>`;
-    let gx = x + 8 + cell / 2;
-    for (let k = 0; k < st.a.c; k++, gx += cell) g += drawGlyph(st.a.f, gx, topY + frameH / 2, cell * 0.42);
-    for (let k = 0; k < st.b.c; k++, gx += cell) g += drawGlyph(st.b.f, gx, topY + frameH / 2, cell * 0.42);
-    x += frameW + 10;
-  }
-  if (leftovers > 0) {
-    const lw = leftovers * cell + 16;
-    g += `<rect x="${fmt(x,1)}" y="${topY}" width="${fmt(lw,1)}" height="${frameH}" rx="10" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="6 5"/>`;
-    let gx = x + 8 + cell / 2;
-    for (let k = 0; k < st.leftA; k++, gx += cell) g += drawGlyph(st.a.f, gx, topY + frameH / 2, cell * 0.42, .5);
-    for (let k = 0; k < st.leftB; k++, gx += cell) g += drawGlyph(st.b.f, gx, topY + frameH / 2, cell * 0.42, .5);
-    g += `<text x="${fmt(x + lw / 2,1)}" y="${topY + frameH + 17}" text-anchor="middle" font-size="13" font-weight="850" fill="var(--leftover)">組をつくれない（余る）</text>`;
-  }
-  g += `<text x="380" y="${topY + frameH + 40}" text-anchor="middle" font-size="14" font-weight="850" fill="var(--react)">${st.sets} 組できる${st.limiting ? `　→　${st.limiting.f} が先に足りなくなる` : '　→　どちらも余らない'}</text>`;
-
-  // ---- 下段：反応後 ----
-  g += `<text x="24" y="300" font-size="13.5" font-weight="850" fill="var(--ink3)">反応後</text>`;
-  const items = st.P.map(p => {
-    const total = p.c * st.sets;
-    // 主生成物と同じ割合で得られたものとして、個数で表す
-    const obtained = st.theo > 0 ? Math.round(total * st.got / st.theo) : 0;
-    return { f: p.f, n: total, color: 'var(--prod)', fadeFrom: obtained, sub: `${obtained} mol・${sig3(obtained * p.M)} g` };
+  const x0 = x;
+  terms.forEach((t, i) => {
+    t.cx = x + slots[i] / 2;
+    x += slots[i];
+    if (i < seps.length) { seps[i].cx = x + seps[i].w / 2; x += seps[i].w; }
   });
-  if (st.leftA > 0) items.push({ f: st.a.f, n: st.leftA, color: 'var(--leftover)', label: `${st.a.f}（余り）`, sub: `${st.leftA} mol` });
-  if (st.leftB > 0) items.push({ f: st.b.f, n: st.leftB, color: 'var(--leftover)', label: `${st.b.f}（余り）`, sub: `${st.leftB} mol` });
-  const pickB = bestPlan(items, 34, { w: 714 - 46, h: 440 - 312 - 46 }, 52);
-  if (pickB) {
-    const cellB = Math.max(12, pickB.cell);
-    g += renderRow(pickB.plan, 46, 714, 312 + pickB.plan.rows * cellB / 2, cellB);
+
+  const glyphBottom = GLYPH_TOP + rows * cell;
+  const labelY = glyphBottom + 26, legendY = labelY + 40;
+  $('chart-limit').setAttribute('viewBox', `0 0 760 ${fmt(legendY + 20, 0)}`);
+
+  let g = '';
+  terms.forEach(t => {
+    g += `<text x="${fmt(t.cx,1)}" y="${EQ_Y}" text-anchor="middle" font-size="26" font-weight="850" fill="${t.color}">${t.text}</text>`;
+  });
+  seps.forEach(s => {
+    g += `<text x="${fmt(s.cx,1)}" y="${EQ_Y}" text-anchor="middle" font-size="25" font-weight="850" fill="var(--ink3)">${s.t}</text>`;
+  });
+  g += `<text x="380" y="86" text-anchor="middle" font-size="13.5" font-weight="800" fill="var(--ink3)">横1行が1組。組がそろった行だけ反応が起きる</text>`;
+
+  // 生成物は、実際に得られた分だけ濃く描く
+  const obtainedOf = new Map(st.P.map(p => [p, st.theo > 0 ? Math.round(p.c * st.sets * st.got / st.theo) : 0]));
+  const drawn = new Map(st.P.map(p => [p, 0]));
+
+  for (let k = 0; k < rows; k++) {
+    const yTop = GLYPH_TOP + k * cell, yc = yTop + cell / 2;
+    const complete = k < st.sets;
+    g += `<rect x="${fmt(x0 - 8,1)}" y="${fmt(yTop + 2,1)}" width="${fmt(totalW + 16,1)}" height="${fmt(cell - 4,1)}" rx="9" fill="${complete ? '#f0f9ff' : '#f8fafc'}" stroke="${complete ? '#bae6fd' : '#d8e1ed'}" stroke-width="1.6"${complete ? '' : ' stroke-dasharray="6 5"'}/>`;
+    if (x0 > 74) {
+      g += `<text x="${fmt(x0 - 16,1)}" y="${fmt(yc + 5,1)}" text-anchor="end" font-size="12.5" font-weight="850" fill="${complete ? 'var(--react)' : 'var(--leftover)'}">${complete ? `${k + 1} 組目` : '余り'}</text>`;
+    }
+    terms.forEach((t, i) => {
+      const s = t.s;
+      const has = s.side < 0 ? k < (s === st.a ? st.setsA : st.setsB) : complete;
+      if (!has) return;
+      const left = t.cx - s.c * cell / 2;
+      for (let q = 0; q < s.c; q++) {
+        let op = complete ? 1 : .4;
+        if (s.side > 0) {
+          const idx = drawn.get(s); drawn.set(s, idx + 1);
+          if (idx >= obtainedOf.get(s)) op = .22;
+        }
+        g += drawGlyph(s.f, left + q * cell + cell / 2, yc, cell * 0.44, op);
+      }
+    });
   }
-  if (st.sets === 0) g += `<text x="380" y="358" text-anchor="middle" font-size="16" font-weight="850" fill="var(--ink3)">組がつくれないので、反応は起こらない</text>`;
-  if (st.theo > 0 && st.got < st.theo) g += `<text x="380" y="462" text-anchor="middle" font-size="13.5" font-weight="800" fill="var(--ink3)">薄い分子＝実際には得られなかった分（収率 ${fmt(st.yieldPct, 0)} ％）</text>`;
+
+  // 各列の下に量を書く
+  terms.forEach(t => {
+    const s = t.s;
+    if (s.side < 0) {
+      const n = s === st.a ? st.nA : st.nB, left = s === st.a ? st.leftA : st.leftB;
+      g += `<text x="${fmt(t.cx,1)}" y="${fmt(labelY,1)}" text-anchor="middle" font-size="15" font-weight="850" fill="${t.color}">${n} mol</text>`;
+      g += `<text x="${fmt(t.cx,1)}" y="${fmt(labelY + 19,1)}" text-anchor="middle" font-size="12.5" font-weight="800" fill="${left > 0 ? 'var(--leftover)' : 'var(--ink3)'}">${left > 0 ? `余り ${left} mol` : '余りなし'}</text>`;
+    } else {
+      const got = obtainedOf.get(s);
+      g += `<text x="${fmt(t.cx,1)}" y="${fmt(labelY,1)}" text-anchor="middle" font-size="15" font-weight="850" fill="${t.color}">${got} mol</text>`;
+      g += `<text x="${fmt(t.cx,1)}" y="${fmt(labelY + 19,1)}" text-anchor="middle" font-size="12.5" font-weight="800" fill="var(--ink3)">${sig3(got * s.M)} g</text>`;
+    }
+  });
+
+  const legend = st.sets === 0
+    ? '組がそろわないので反応は起こらない'
+    : `青い行が ${st.sets} 組${st.limiting ? `　／　${st.limiting.f} が先に足りなくなる` : '　／　どちらも余らない'}${st.got < st.theo ? `　／　薄い分子＝得られなかった分（収率 ${fmt(st.yieldPct, 0)} ％）` : ''}`;
+  g += `<text x="380" y="${fmt(legendY,0)}" text-anchor="middle" font-size="13.5" font-weight="850" fill="var(--ink2)">${legend}</text>`;
 
   $('chart-limit').innerHTML = g;
 
   const theo = st.theo, got = st.got;
-  const rows = [
+  const info = [
     [`${st.a.f} ÷ 係数`, `${sig3(st.setsA)} 組`, !st.tie && st.limiting === st.a],
     [`${st.b.f} ÷ 係数`, `${sig3(st.setsB)} 組`, !st.tie && st.limiting === st.b],
     ['できる組の数', `${st.sets} 組`],
@@ -602,9 +589,9 @@ function drawLimit() {
     [`残る ${st.b.f}`, `${st.leftB} mol`],
     ['理論収量', `${theo} mol・${sig3(theo * st.main.M)} g`, true],
     ['実際の収量', `${sig3(got)} mol・${sig3(got * st.main.M)} g`],
-    ['収率', `${st.yieldPct} ％`, true],
+    ['収率', `${fmt(st.yieldPct, 0)} ％`, true],
   ];
-  setReadout($('t2-readout'), rows);
+  setReadout($('t2-readout'), info);
 
   const vd = $('t2-verdict');
   if (st.sets === 0) {
