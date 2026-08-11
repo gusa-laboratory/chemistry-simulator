@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>化学インタラクティブ教材｜Interactive Lab</title>
-<meta name="description" content="原子・イオン半径、分子の形、有機化合物の立体構造、気体の法則、希薄溶液、コロイド、結晶格子、化学平衡、反応の量的関係を動かして学ぶ授業投影用インタラクティブ教材。">
+<meta name="description" content="原子・イオン半径、分子の形、結晶格子、反応の量的関係、気体の法則、希薄溶液、コロイド、錯体・有機化合物の立体構造、機器分析を動かして学ぶ授業投影用インタラクティブ教材。">
 <meta name="theme-color" content="#2563eb">
 <link rel="icon" href="icons/icon-192.png">
 <style>
@@ -117,20 +117,6 @@
         <p class="sim-desc">単位格子を回転し、配位数・充填率・断面を立体的に理解。</p>
       </div>
     </a>
-    <a class="sim" href="gas-laws.html">
-      <div class="ico">🎈</div>
-      <div class="sim-body">
-        <h2>気体の法則</h2>
-        <p class="sim-desc">状態量を動かし、グラフと粒子モデルの変化を同時に観察。</p>
-      </div>
-    </a>
-    <a class="sim" href="solutions.html">
-      <div class="ico">🧪</div>
-      <div class="sim-body">
-        <h2>希薄溶液・コロイド</h2>
-        <p class="sim-desc">束一的性質とコロイドの挙動をグラフ・模式図で確認。</p>
-      </div>
-    </a>
     <a class="sim" href="stoichiometry.html">
       <div class="ico" aria-hidden="true">
         <svg viewBox="0 0 56 56">
@@ -159,25 +145,18 @@
         <p class="sim-desc">mol の大きさ、分子に含まれる原子の mol、係数＝個数比、過不足のある反応を粒子で確認。</p>
       </div>
     </a>
-    <a class="sim" href="equilibrium.html">
-      <div class="ico" aria-hidden="true">
-        <svg viewBox="0 0 56 56">
-          <path d="M28 9 V20" fill="none" stroke="#8da3bd" stroke-width="2.4" stroke-linecap="round"/>
-          <path d="M9 20 H47" fill="none" stroke="#8da3bd" stroke-width="2.6" stroke-linecap="round"/>
-          <path d="M9 20 V26" fill="none" stroke="#8da3bd" stroke-width="2" stroke-linecap="round"/>
-          <path d="M47 20 V32" fill="none" stroke="#8da3bd" stroke-width="2" stroke-linecap="round"/>
-          <path d="M2.5 26 H15.5 A6.5 6.5 0 0 1 2.5 26Z" fill="#38bdf8" stroke="#0e7490" stroke-width="1.3" stroke-linejoin="round"/>
-          <path d="M40.5 32 H53.5 A6.5 6.5 0 0 1 40.5 32Z" fill="#ea580c" stroke="#9a3412" stroke-width="1.3" stroke-linejoin="round"/>
-          <circle cx="28" cy="7" r="4" fill="#2563eb" stroke="#173b75" stroke-width="1.4"/>
-          <path d="M20 43 H34" fill="none" stroke="#2563eb" stroke-width="2.6" stroke-linecap="round"/>
-          <path d="M30 39.5 34 43 30 46.5" fill="none" stroke="#2563eb" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M34 50 H20" fill="none" stroke="#ea580c" stroke-width="2.6" stroke-linecap="round"/>
-          <path d="M24 46.5 20 50 24 53.5" fill="none" stroke="#ea580c" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </div>
+    <a class="sim" href="gas-laws.html">
+      <div class="ico">🎈</div>
       <div class="sim-body">
-        <h2>化学平衡・ルシャトリエの原理</h2>
-        <p class="sim-desc">濃度・圧力・温度・触媒を動かし、平衡がどちらへ移動するかを観察。</p>
+        <h2>気体の法則</h2>
+        <p class="sim-desc">状態量を動かし、グラフと粒子モデルの変化を同時に観察。</p>
+      </div>
+    </a>
+    <a class="sim" href="solutions.html">
+      <div class="ico">🧪</div>
+      <div class="sim-body">
+        <h2>希薄溶液・コロイド</h2>
+        <p class="sim-desc">束一的性質とコロイドの挙動をグラフ・模式図で確認。</p>
       </div>
     </a>
     <a class="sim" href="coordination-compounds-3d.html">
@@ -197,22 +176,6 @@
       <div class="sim-body">
         <h2>配位化合物の立体構造</h2>
         <p class="sim-desc">配位数と異性体を2D構造式・3Dモデルで見比べ、錯体の空間配置を理解。</p>
-      </div>
-    </a>
-    <a class="sim" href="analytical-spectroscopy.html">
-      <div class="ico" aria-hidden="true">
-        <svg viewBox="0 0 56 56">
-          <path d="M6 46 H50" fill="none" stroke="#9fb0c5" stroke-width="2.2" stroke-linecap="round"/>
-          <path d="M6 44 V16" fill="none" stroke="#9fb0c5" stroke-width="2.2" stroke-linecap="round"/>
-          <path d="M8 42 h5l2.5-14 2.5 14h4l3-25 3 25h5l2.5-19 2.5 19h4l2-9 2 9h4"
-                fill="none" stroke="#2563eb" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
-          <circle cx="25" cy="17" r="3.1" fill="#ef4444"/>
-          <circle cx="35.5" cy="23" r="2.6" fill="#f6a24b"/>
-        </svg>
-      </div>
-      <div class="sim-body">
-        <h2>機器分析（IR・MS・NMR）</h2>
-        <p class="sim-desc">IR・質量・NMRのスペクトルを見比べ、未知試料の構造を決定。</p>
       </div>
     </a>
     <a class="sim" href="organic-compound-stereochemistry.html">
@@ -239,7 +202,23 @@
         <p class="sim-desc">2D構造式と3Dモデルを回転し、結合の形・立体異性・配座を比較。</p>
       </div>
     </a>
-  </div>
+    <a class="sim" href="analytical-spectroscopy.html">
+      <div class="ico" aria-hidden="true">
+        <svg viewBox="0 0 56 56">
+          <path d="M6 46 H50" fill="none" stroke="#9fb0c5" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M6 44 V16" fill="none" stroke="#9fb0c5" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M8 42 h5l2.5-14 2.5 14h4l3-25 3 25h5l2.5-19 2.5 19h4l2-9 2 9h4"
+                fill="none" stroke="#2563eb" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+          <circle cx="25" cy="17" r="3.1" fill="#ef4444"/>
+          <circle cx="35.5" cy="23" r="2.6" fill="#f6a24b"/>
+        </svg>
+      </div>
+      <div class="sim-body">
+        <h2>機器分析（IR・MS・NMR）</h2>
+        <p class="sim-desc">IR・質量・NMRのスペクトルを見比べ、未知試料の構造を決定。</p>
+      </div>
+    </a>
+</div>
 </main>
 <footer class="credit">大阪女学院中学校・高等学校　Yuto Yamaguchi</footer>
 </body>
