@@ -66,6 +66,10 @@
   input[type=range]{width:100%;accent-color:var(--blue)}
   .row{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-top:9px}
   .row.tight{margin-top:0}
+  .stepper{display:flex;align-items:center;gap:10px;margin-top:5px}
+  .stepper .btn{width:44px;height:38px;padding:0;font-size:18px;line-height:1}
+  .stepper .btn:disabled{opacity:.35;cursor:default;color:var(--ink3);border-color:#e2e8f0}
+  .stepper-val{flex:1;text-align:center;color:var(--deep);font-size:21px;font-weight:850;font-variant-numeric:tabular-nums}
   .btn{padding:7px 12px;border:1px solid #cdd9e8;border-radius:10px;background:#fff;color:var(--ink2);font-size:11.5px;font-weight:850;cursor:pointer}
   .btn:hover{color:var(--blue);border-color:#8fb0df}
   select{flex:1 1 auto;min-width:0;padding:6px 9px;border:1px solid #cdd9e8;border-radius:9px;background:#fff;color:var(--ink2);font-size:11.5px;font-weight:800}
@@ -141,8 +145,12 @@
           <h2>反応と回数</h2>
           <div class="row tight"><select id="t1-rx" aria-label="反応を選ぶ"></select></div>
           <div class="ctrl" style="margin-top:11px">
-            <label>反応の回数 <span class="val">×<span id="t1-n-val">2</span></span></label>
-            <input type="range" id="t1-n" min="1" max="8" step="1" value="2">
+            <label>反応の回数</label>
+            <div class="stepper">
+              <button class="btn" id="t1-minus" type="button" aria-label="回数を1減らす">−</button>
+              <span class="stepper-val">×<span id="t1-n-val">2</span></span>
+              <button class="btn" id="t1-plus" type="button" aria-label="回数を1増やす">＋</button>
+            </div>
           </div>
           <p class="note">回数を増やしても、粒子の個数の比は変わらない。増えるのは「組」の数だけ。</p>
         </div>
@@ -286,7 +294,7 @@ const sumC = list => list.reduce((t, s) => t + s.c, 0);
 /* ============================================================
    ① 係数と粒子の個数
    ============================================================ */
-const ratio = { label: 'mol' };
+const ratio = { n: 2 };   // 反応の回数（ボタンで増減する）
 REACTIONS.forEach((r, i) => {
   const o = document.createElement('option');
   o.value = i; o.textContent = r.eq;
@@ -299,11 +307,10 @@ const maxRounds = rx => clamp(Math.floor(30 / Math.max(sumC(reactantsOf(rx)), su
 function drawRatio() {
   const rx = REACTIONS[+$('t1-rx').value];
   const cap = maxRounds(rx);
-  const slider = $('t1-n');
-  slider.max = cap;
-  const N = clamp(+slider.value, 1, cap);
-  slider.value = N;
+  const N = ratio.n = clamp(ratio.n, 1, cap);
   $('t1-n-val').textContent = String(N);
+  $('t1-minus').disabled = N <= 1;
+  $('t1-plus').disabled = N >= cap;
 
   const sub = s => `${s.c * N} mol`;
 
@@ -319,7 +326,7 @@ function drawRatio() {
   }
   const sepW = seps.reduce((a, s) => a + s.w, 0);
 
-  const BAND_W = 700, GLYPH_TOP = 116, MAX_BLOCK_H = 290, EQ_Y = 64;
+  const BAND_W = 700, GLYPH_TOP = 98, MAX_BLOCK_H = 300, EQ_Y = 60;
   // 1〜3行を試す。式らしく1行を優先し、はっきり大きく描けるときだけ行を増やす
   let pick = null;
   for (let rows = 1; rows <= 3; rows++) {
@@ -362,7 +369,6 @@ function drawRatio() {
     g += `<text x="${fmt(s.cx,1)}" y="${EQ_Y}" text-anchor="middle" font-size="26" font-weight="850" fill="var(--ink3)">${s.t}</text>`;
     g += `<text x="${fmt(s.cx,1)}" y="${fmt(yc + 9,1)}" text-anchor="middle" font-size="26" font-weight="850" fill="#c8d3e0">${s.t}</text>`;
   });
-  g += `<text x="380" y="90" text-anchor="middle" font-size="13.5" font-weight="800" fill="var(--ink3)">この反応が ${N} 回分（分子の絵1個 ＝ 1 mol 分）</text>`;
 
   // 分子と、その下の量
   terms.forEach((t, i) => {
@@ -378,7 +384,8 @@ function drawRatio() {
 }
 
 $('t1-rx').addEventListener('change', drawRatio);
-$('t1-n').addEventListener('input', drawRatio);
+$('t1-minus').addEventListener('click', () => { ratio.n -= 1; drawRatio(); });
+$('t1-plus').addEventListener('click', () => { ratio.n += 1; drawRatio(); });
 
 /* ============================================================
    ② 限定反応物・収率
