@@ -143,7 +143,7 @@
     </div>
     <div class="layout">
       <div class="chart-card" data-label="HOW BIG IS A MOLE" id="chartwrap-mol">
-        <svg id="chart-mol" class="clickable" viewBox="0 0 760 400" role="img" aria-label="粒子を増やしていくと、はかりの表示がいつ動くかを見る図"></svg>
+        <svg id="chart-mol" class="clickable" viewBox="0 0 760 382" role="img" aria-label="粒子を増やしていくと、はかりの表示がいつ動くかを見る図"></svg>
       </div>
       <div class="side">
         <div class="card">
@@ -404,10 +404,10 @@ function drawMol() {
   g += `<rect x="${bx}" y="${by}" width="${fmt(Math.max(0, pos - bx),1)}" height="10" rx="5" fill="var(--accent)"/>`;
   g += `<circle cx="${fmt(pos,1)}" cy="${by + 5}" r="8" fill="var(--accent)" stroke="#fff" stroke-width="2.5"/>`;
 
-  const msg = weighable
-    ? '1 mol の質量 ＝ 分子量に g をつけた値（モル質量）。質量をはかれば粒子の個数が分かる'
-    : 'はかりの表示は 0.00 g のまま。粒子が軽すぎて、まだ量れない';
-  g += `<text x="380" y="384" text-anchor="middle" font-size="15" font-weight="850" fill="${weighable ? '#15803d' : 'var(--ink2)'}">${msg}</text>`;
+  // 途中は文字を出さない。量れる大きさに達したときだけ結論を出す
+  if (weighable) {
+    g += `<text x="380" y="370" text-anchor="middle" font-size="15" font-weight="850" fill="#15803d">1 mol の質量 ＝ 分子量に g をつけた値（モル質量）。質量をはかれば粒子の個数が分かる</text>`;
+  }
 
   $('chart-mol').innerHTML = g;
   $('m-next').disabled = molTab.step >= MOL_STEPS.length - 1;
