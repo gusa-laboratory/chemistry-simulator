@@ -159,12 +159,12 @@
   <!-- ② 分子の中の原子 -->
   <section class="panel wide" id="panel-atoms">
     <div class="panel-tools">
-      <button class="btn primary" id="a-split" type="button">▶ 原子に分ける</button>
-      <button class="btn" id="a-back" type="button">分子に戻す</button>
+      <button class="btn primary" id="a-focus" type="button">▶ 分子を1つずつ追う</button>
+      <button class="btn" id="a-all" type="button">すべて表示</button>
     </div>
     <div class="layout">
-      <div class="chart-card" data-label="ATOMS INSIDE THE MOLECULES" id="chartwrap-atoms">
-        <svg id="chart-atoms" class="clickable" viewBox="0 0 760 420" role="img" aria-label="分子を原子に分けて、元素ごとの物質量を数える図"></svg>
+      <div class="chart-card" data-label="MOLECULES AND THE ATOMS INSIDE" id="chartwrap-atoms">
+        <svg id="chart-atoms" class="clickable" viewBox="0 0 760 360" role="img" aria-label="左に分子、右にばらした原子を並べ、元素ごとの物質量を数える図"></svg>
       </div>
       <div class="side">
         <div class="card">
@@ -178,7 +178,7 @@
               <button class="btn" id="a-plus" type="button" aria-label="1 mol 増やす">＋</button>
             </div>
           </div>
-          <p class="note">分子1個の中の原子の数がそのまま mol の比になる。クリックで原子に分けて数えられる。</p>
+          <p class="note">左の分子を、右にすべての原子に分けて並べてある。クリックすると分子を1つずつ選び、その原子がどれかを追える。</p>
         </div>
       </div>
     </div>
@@ -462,7 +462,7 @@ const ATOM_SUBS = [
   { f: 'CaCO₃',   name: '炭酸カルシウム', atoms: [['Ca', 1], ['C', 1], ['O', 3]] },
   { f: 'C₆H₁₂O₆', name: 'グルコース',     atoms: [['C', 6], ['H', 12], ['O', 6]] },
 ];
-const atomTab = { n: 1, split: false };
+const atomTab = { n: 1, focus: -1 };   // focus: 追いかけている分子の番号（-1 は全部同じ扱い）
 
 ATOM_SUBS.forEach((s, i) => {
   const o = document.createElement('option');
@@ -481,9 +481,9 @@ function drawAtomCircle(el, cx, cy, unit) {
 }
 
 // 個数ぶんを格子に並べる案のうち、いちばん大きく描けるものを選ぶ
-function packGrid(count, w, h, maxCell) {
+function packGrid(count, w, h, maxCell, maxRows) {
   let best = null;
-  for (let rows = 1; rows <= Math.min(4, count); rows++) {
+  for (let rows = 1; rows <= Math.min(maxRows ?? 4, count); rows++) {
     const cols = Math.ceil(count / rows);
     const cell = Math.min(w / cols, h / rows, maxCell);
     if (!best || cell > best.cell) best = { rows, cols, cell };
@@ -495,69 +495,86 @@ function drawAtoms() {
   const s = ATOM_SUBS[+$('a-sub').value];
   const cap = atomCap(s);
   const n = atomTab.n = clamp(atomTab.n, 1, cap);
+  if (atomTab.focus >= n) atomTab.focus = -1;
+  const focus = atomTab.focus;
   $('a-n-val').textContent = String(n);
   $('a-minus').disabled = n <= 1;
   $('a-plus').disabled = n >= cap;
-  $('a-split').disabled = atomTab.split;
-  $('a-back').disabled = !atomTab.split;
+  $('a-all').disabled = focus < 0;
 
   const compo = s.atoms.map(([el, k]) => `${el} ${k}個`).join('・');
-  let g = `<text x="380" y="44" text-anchor="middle" font-size="30" font-weight="850" fill="var(--deep)">${s.f} が ${n} mol</text>`;
-  g += `<text x="380" y="70" text-anchor="middle" font-size="14.5" font-weight="800" fill="var(--ink3)">分子1個の中に　${compo}</text>`;
+  let g = `<text x="380" y="42" text-anchor="middle" font-size="29" font-weight="850" fill="var(--deep)">${s.f} が ${n} mol</text>`;
+  g += `<text x="380" y="68" text-anchor="middle" font-size="14.5" font-weight="800" fill="var(--ink3)">分子1個の中に　${compo}</text>`;
 
-  // 上段：分子そのもの
-  const molTop = 88, molBand = 118;
-  const mp = packGrid(n, 660, molBand, 92);
+  const BOX_Y = 92, BOX_H = 196;
+  const LEFT = { x: 26, y: BOX_Y, w: 264, h: BOX_H };
+  const RIGHT = { x: 362, y: BOX_Y, w: 372, h: BOX_H };
+  const dim = on => (focus < 0 || on) ? 1 : .16;
+
+  // ---- 左：分子そのもの ----
+  g += `<rect x="${LEFT.x}" y="${LEFT.y}" width="${LEFT.w}" height="${LEFT.h}" rx="16" fill="#f7fbff" stroke="#c9d8ea" stroke-width="2"/>`;
+  const mp = packGrid(n, LEFT.w - 20, LEFT.h - 20, 96, 3);
   const mw = mp.cols * mp.cell, mh = mp.rows * mp.cell;
+  const mx0 = LEFT.x + (LEFT.w - mw) / 2, my0 = LEFT.y + (LEFT.h - mh) / 2;
   for (let k = 0; k < n; k++) {
     const r = Math.floor(k / mp.cols), c = k % mp.cols;
-    g += drawGlyph(s.f, 380 - mw / 2 + c * mp.cell + mp.cell / 2, molTop + (molBand - mh) / 2 + r * mp.cell + mp.cell / 2, mp.cell * 0.44);
+    const cx = mx0 + c * mp.cell + mp.cell / 2, cy = my0 + r * mp.cell + mp.cell / 2;
+    if (k === focus) {
+      g += `<rect x="${fmt(cx - mp.cell / 2 + 3,1)}" y="${fmt(cy - mp.cell / 2 + 3,1)}" width="${fmt(mp.cell - 6,1)}" height="${fmt(mp.cell - 6,1)}" rx="12" fill="#fff7ed" stroke="var(--accent)" stroke-width="2.5"/>`;
+    }
+    g += drawGlyph(s.f, cx, cy, mp.cell * 0.42, dim(k === focus));
   }
-  g += `<text x="380" y="${molTop + molBand + 20}" text-anchor="middle" font-size="16" font-weight="850" fill="var(--react)">${s.f}　${n} mol</text>`;
+  g += `<text x="${LEFT.x + LEFT.w / 2}" y="${BOX_Y + BOX_H + 28}" text-anchor="middle" font-size="19" font-weight="850" fill="var(--react)">${s.f}　${n} mol</text>`;
+  g += `<text x="${LEFT.x + LEFT.w / 2}" y="${BOX_Y + BOX_H + 49}" text-anchor="middle" font-size="12.5" font-weight="800" fill="var(--ink3)">分子 ${n} 個</text>`;
 
-  let bottom = molTop + molBand + 40;
+  // ---- 中央：矢印 ----
+  const ay = BOX_Y + BOX_H / 2;
+  g += `<path d="M302 ${ay} L340 ${ay}" stroke="var(--ink3)" stroke-width="3.4" stroke-linecap="round"/>`;
+  g += `<polygon points="352,${ay} 338,${ay - 8} 338,${ay + 8}" fill="var(--ink3)"/>`;
+  g += `<text x="326" y="${ay - 18}" text-anchor="middle" font-size="12.5" font-weight="800" fill="var(--ink3)">分ける</text>`;
 
-  if (atomTab.split) {
-    // 矢印
-    g += `<path d="M380 ${bottom} L380 ${bottom + 22}" stroke="var(--ink3)" stroke-width="3.2" stroke-linecap="round"/>`;
-    g += `<polygon points="380,${bottom + 32} 372,${bottom + 18} 388,${bottom + 18}" fill="var(--ink3)"/>`;
-    g += `<text x="398" y="${bottom + 20}" font-size="13.5" font-weight="800" fill="var(--ink3)">原子に分ける</text>`;
+  // ---- 右：元素ごとにばらした原子 ----
+  const total = n * perMolecule(s);
+  const gap = 14, avail = RIGHT.w - gap * (s.atoms.length - 1);
+  const groups = s.atoms.map(([el, k]) => ({ el, per: k, count: k * n, w: Math.max(64, avail * (k * n) / total) }));
+  const sumW = groups.reduce((t, c) => t + c.w, 0) + gap * (groups.length - 1);
+  let gx = RIGHT.x + (RIGHT.w - sumW) / 2;
+  groups.forEach(c => {
+    g += `<rect x="${fmt(gx,1)}" y="${RIGHT.y}" width="${fmt(c.w,1)}" height="${RIGHT.h}" rx="14" fill="#fdf6f1" stroke="#f0d7c6" stroke-width="2"/>`;
+    const p = packGrid(c.count, c.w - 16, RIGHT.h - 16, 56, 6);
+    const cw = p.cols * p.cell, ch = p.rows * p.cell;
+    const x0 = gx + (c.w - cw) / 2, y0 = RIGHT.y + (RIGHT.h - ch) / 2;
+    for (let k = 0; k < c.count; k++) {
+      const from = Math.floor(k / c.per);          // この原子がどの分子から来たか
+      const r = Math.floor(k / p.cols), col = k % p.cols;
+      const cx = x0 + col * p.cell + p.cell / 2, cy = y0 + r * p.cell + p.cell / 2;
+      if (from === focus) g += `<circle cx="${fmt(cx,1)}" cy="${fmt(cy,1)}" r="${fmt(p.cell * 0.42,1)}" fill="var(--accent)" opacity=".26"/>`;
+      g += `<g opacity="${dim(from === focus)}">${drawAtomCircle(c.el, cx, cy, p.cell * 0.36)}</g>`;
+    }
+    g += `<text x="${fmt(gx + c.w / 2,1)}" y="${BOX_Y + BOX_H + 28}" text-anchor="middle" font-size="19" font-weight="850" fill="var(--prod)">${c.el}　${c.count} mol</text>`;
+    g += `<text x="${fmt(gx + c.w / 2,1)}" y="${BOX_Y + BOX_H + 49}" text-anchor="middle" font-size="12.5" font-weight="800" fill="var(--ink3)">${n} mol × ${c.per}</text>`;
+    gx += c.w + gap;
+  });
 
-    // 下段：元素ごとの列。列の幅は原子の数に応じて配ける
-    const cols = s.atoms.map(([el, k]) => ({ el, count: k * n }));
-    const totalAtoms = cols.reduce((t, c) => t + c.count, 0);
-    const gap = 40, avail = 680 - gap * (cols.length - 1);
-    const atomTop = bottom + 46, atomBand = 132;
-    cols.forEach(c => {
-      c.w = avail * c.count / totalAtoms;
-      c.p = packGrid(c.count, c.w, atomBand, 62);
-    });
-    const usedW = cols.reduce((t, c) => t + c.p.cols * c.p.cell, 0) + gap * (cols.length - 1);
-    let x = 380 - usedW / 2;
-    cols.forEach(c => {
-      const cw = c.p.cols * c.p.cell, ch = c.p.rows * c.p.cell;
-      for (let k = 0; k < c.count; k++) {
-        const r = Math.floor(k / c.p.cols), col = k % c.p.cols;
-        g += drawAtomCircle(c.el, x + col * c.p.cell + c.p.cell / 2, atomTop + (atomBand - ch) / 2 + r * c.p.cell + c.p.cell / 2, c.p.cell * 0.36);
-      }
-      g += `<text x="${fmt(x + cw / 2,1)}" y="${atomTop + atomBand + 22}" text-anchor="middle" font-size="19" font-weight="850" fill="var(--prod)">${c.el}　${c.count} mol</text>`;
-      g += `<text x="${fmt(x + cw / 2,1)}" y="${atomTop + atomBand + 43}" text-anchor="middle" font-size="12.5" font-weight="800" fill="var(--ink3)">${n} mol × ${c.count / n}</text>`;
-      x += cw + gap;
-    });
-    bottom = atomTop + atomBand + 58;
+  if (focus >= 0) {
+    g += `<text x="380" y="${BOX_Y + BOX_H + 80}" text-anchor="middle" font-size="14.5" font-weight="850" fill="#c2410c">${focus + 1} 個目の分子から出た原子を色つきで示している</text>`;
   }
 
-  $('chart-atoms').setAttribute('viewBox', `0 0 760 ${fmt(bottom + 8, 0)}`);
+  $('chart-atoms').setAttribute('viewBox', `0 0 760 ${focus >= 0 ? 382 : 348}`);
   $('chart-atoms').innerHTML = g;
 }
 
-const atomToggle = () => { atomTab.split = true; drawAtoms(); };
-$('a-split').addEventListener('click', atomToggle);
-$('chart-atoms').addEventListener('click', atomToggle);
-$('a-back').addEventListener('click', () => { atomTab.split = false; drawAtoms(); });
-$('a-minus').addEventListener('click', () => { atomTab.n -= 1; drawAtoms(); });
-$('a-plus').addEventListener('click', () => { atomTab.n += 1; drawAtoms(); });
-$('a-sub').addEventListener('change', () => { atomTab.n = 1; atomTab.split = false; drawAtoms(); });
+// クリックで 1個目 → 2個目 →…→ 全部表示、と順に切り替える
+const atomFocusNext = () => {
+  atomTab.focus = atomTab.focus + 1 >= atomTab.n ? -1 : atomTab.focus + 1;
+  drawAtoms();
+};
+$('a-focus').addEventListener('click', atomFocusNext);
+$('chart-atoms').addEventListener('click', atomFocusNext);
+$('a-all').addEventListener('click', () => { atomTab.focus = -1; drawAtoms(); });
+$('a-minus').addEventListener('click', () => { atomTab.n -= 1; atomTab.focus = -1; drawAtoms(); });
+$('a-plus').addEventListener('click', () => { atomTab.n += 1; atomTab.focus = -1; drawAtoms(); });
+$('a-sub').addEventListener('change', () => { atomTab.n = 1; atomTab.focus = -1; drawAtoms(); });
 
 /* ============================================================
    ③ 係数と粒子の個数
