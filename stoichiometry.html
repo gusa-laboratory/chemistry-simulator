@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>化学反応の量的関係｜粒子モデル</title>
-<meta name="description" content="反応式の係数が粒子の個数の比であることを分子モデルで確かめ、限定反応物と収率を粒子の「セット」で理解する授業用教材。">
+<meta name="description" content="反応式の係数が粒子の個数の比であることを分子モデルで確かめ、過不足のある反応が1組ずつ進んで止まる様子を確認する授業用教材。">
 <meta name="theme-color" content="#2563eb">
 <link rel="icon" href="icons/icon-192.png">
 <style>
@@ -166,7 +166,7 @@
       <button class="btn" id="t2-back" type="button">反応前に戻す</button>
     </div>
     <div class="layout">
-      <div class="chart-card" data-label="LIMITING REAGENT" id="chartwrap-limit">
+      <div class="chart-card" data-label="STEP BY STEP REACTION" id="chartwrap-limit">
         <svg id="chart-limit" class="clickable" viewBox="0 0 760 480" role="img" aria-label="反応が1組ずつ進む様子。クリックで次の組が反応する"></svg>
       </div>
       <div class="side">
@@ -388,7 +388,7 @@ $('t1-minus').addEventListener('click', () => { ratio.n -= 1; drawRatio(); });
 $('t1-plus').addEventListener('click', () => { ratio.n += 1; drawRatio(); });
 
 /* ============================================================
-   ② 限定反応物・収率
+   ② 過不足がある反応
    ============================================================ */
 const lim = { step: 0 };   // 何組目まで反応させたか（クリックで進む）
 TWO_REACTANT.forEach((r, i) => {
@@ -478,7 +478,8 @@ function drawLimit() {
   seps.forEach(s => {
     g += `<text x="${fmt(s.cx,1)}" y="${EQ_Y}" text-anchor="middle" font-size="25" font-weight="850" fill="var(--ink3)">${s.t}</text>`;
   });
-  const done = st.sets > 0 && st.step >= st.sets;
+  // これ以上反応が進まない状態（最後まで進めた／そもそも1組もつくれない）
+  const done = st.step >= st.sets;
   g += `<text x="380" y="86" text-anchor="middle" font-size="13.5" font-weight="800" fill="var(--ink3)">${
     st.sets === 0 ? '組がそろわないので反応は起こらない'
     : done ? '反応が止まった。組をつくれなかった分が残る'
@@ -486,8 +487,10 @@ function drawLimit() {
 
   for (let k = 0; k < rows; k++) {
     const yTop = GLYPH_TOP + k * cell, yc = yTop + cell / 2;
-    // reacted = 反応済み / pending = これから反応する / 余り = 組をつくれない
-    const state = k < st.step ? 'reacted' : k < st.sets ? 'pending' : 'left';
+    // reacted = 反応済み / pending = まだ / left = 余り
+    // 余りは「反応が止まってから」初めて示す。途中で先に答えを見せない
+    const hasAny = k < st.setsA || k < st.setsB;   // その行に分子があるか（空の行は余りではない）
+    const state = k < st.step ? 'reacted' : (done && k >= st.sets && hasAny) ? 'left' : 'pending';
     const band = state === 'reacted' ? { f: '#f0fdf4', s: '#86efac', d: '' }
       : state === 'pending' ? { f: '#fff', s: '#dbe4ef', d: '' }
       : { f: '#f8fafc', s: '#d8e1ed', d: ' stroke-dasharray="6 5"' };
@@ -529,7 +532,9 @@ function drawLimit() {
   const legend = st.sets === 0
     ? 'どちらかが足りず、1組もつくれない'
     : done
-      ? (st.limiting ? `${st.limiting.f} を使い切ったので反応は止まる（${st.limiting.f} が限定反応物）` : 'ちょうど過不足なく反応した。どちらも余らない')
+      ? (st.limiting
+          ? `${st.limiting.f} を使い切ったので、ここで反応は止まる。${st.limiting === st.a ? st.b.f : st.a.f} が ${st.limiting === st.a ? st.leftB : st.leftA} mol 余る`
+          : 'ちょうど過不足なく反応した。どちらも余らない')
       : `${st.step} / ${st.sets} 組が反応した`;
   g += `<text x="380" y="${fmt(legendY,0)}" text-anchor="middle" font-size="14" font-weight="850" fill="${done && st.limiting ? 'var(--limit)' : 'var(--ink2)'}">${legend}</text>`;
 
