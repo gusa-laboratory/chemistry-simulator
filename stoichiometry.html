@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>化学反応の量的関係｜粒子モデル</title>
-<meta name="description" content="反応式の係数が粒子の個数の比であることを分子モデルで確かめ、過不足のある反応が1組ずつ進んで止まる様子を確認する授業用教材。">
+<meta name="description" content="mol がどれだけ大きな数かをはかりの表示で実感し、反応式の係数＝粒子の個数の比、過不足のある反応が1組ずつ進んで止まる様子を分子モデルで確認する授業用教材。">
 <meta name="theme-color" content="#2563eb">
 <link rel="icon" href="icons/icon-192.png">
 <style>
@@ -128,14 +128,35 @@
     <button class="outline-btn site-fullscreen-btn" id="fullscreenBtn" type="button" aria-label="全画面表示"><span class="site-fullscreen-icon" aria-hidden="true">⛶</span><span class="btn-text">全画面表示</span></button>
   </div>
   <nav class="tabs" id="tabs" role="tablist" aria-label="学習テーマ">
-    <button type="button" role="tab" aria-selected="true"  data-tab="ratio">① 係数と粒子の個数</button>
-    <button type="button" role="tab" aria-selected="false" data-tab="limit">② 過不足がある反応</button>
+    <button type="button" role="tab" aria-selected="true"  data-tab="mol">① mol という数え方</button>
+    <button type="button" role="tab" aria-selected="false" data-tab="ratio">② 係数と粒子の個数</button>
+    <button type="button" role="tab" aria-selected="false" data-tab="limit">③ 過不足がある反応</button>
   </nav>
 </header>
 <main>
 
-  <!-- ① 係数と粒子の個数 -->
-  <section class="panel active wide" id="panel-ratio">
+  <!-- ① mol という数え方 -->
+  <section class="panel active wide" id="panel-mol">
+    <div class="panel-tools">
+      <button class="btn primary" id="m-next" type="button">▶ 粒子を増やす</button>
+      <button class="btn" id="m-back" type="button">最初から</button>
+    </div>
+    <div class="layout">
+      <div class="chart-card" data-label="HOW BIG IS A MOLE" id="chartwrap-mol">
+        <svg id="chart-mol" class="clickable" viewBox="0 0 760 415" role="img" aria-label="粒子を増やしていくと、はかりの表示がいつ動くかを見る図"></svg>
+      </div>
+      <div class="side">
+        <div class="card">
+          <h2>物質</h2>
+          <div class="row tight"><select id="m-sub" aria-label="物質を選ぶ"></select></div>
+          <p class="note">クリックすると粒子の数がけた違いに増える。はかりの表示がいつ動くかを見る。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ② 係数と粒子の個数 -->
+  <section class="panel wide" id="panel-ratio">
     <div class="layout">
       <div class="chart-card" data-label="PARTICLE MODEL OF THE EQUATION" id="chartwrap-ratio">
         <svg id="chart-ratio" viewBox="0 0 760 480" role="img" aria-label="反応式の係数を粒子の個数で表した図"></svg>
@@ -158,7 +179,7 @@
     </div>
   </section>
 
-  <!-- ② 過不足がある反応 -->
+  <!-- ③ 過不足がある反応 -->
   <section class="panel wide" id="panel-limit">
     <div class="panel-tools">
       <button class="btn primary" id="t2-step" type="button">▶ 1組ずつ反応させる</button>
@@ -292,7 +313,116 @@ const productsOf = rx => rx.sp.filter(s => s.side > 0);
 const sumC = list => list.reduce((t, s) => t + s.c, 0);
 
 /* ============================================================
-   ① 係数と粒子の個数
+   ① mol という数え方
+   粒子をけた違いに増やしても、はかりの表示は 0.00 g のまま。
+   1 mol に達したとき初めて日常的な数字になる、という筋で見せる
+   ============================================================ */
+const NA = 6.02e23;
+const MOL_SUBS = [
+  { f: 'H₂O', name: '水', M: 18.02 },
+  { f: 'CO₂', name: '二酸化炭素', M: 44.01 },
+  { f: 'O₂', name: '酸素', M: 32.00 },
+  { f: 'H₂', name: '水素', M: 2.02 },
+];
+const MOL_STEPS = [
+  { n: 1,    jp: '1 個',         sub: '分子 1 個' },
+  { n: 12,   jp: '12 個',        sub: '1 ダース' },
+  { n: 1e6,  jp: '100 万個',     sub: '1×10⁶ 個' },
+  { n: 1e12, jp: '1 兆個',       sub: '1×10¹² 個' },
+  { n: 1e18, jp: '100 京個',     sub: '1×10¹⁸ 個' },
+  { n: NA,   jp: '6.02×10²³ 個', sub: '＝ 1 mol' },
+];
+const MOL_DRAW_CAP = 320;   // 絵に描ける上限
+const molTab = { step: 0 };
+
+MOL_SUBS.forEach((s, i) => {
+  const o = document.createElement('option');
+  o.value = i; o.textContent = `${s.f}（${s.name}）　分子量 ${s.M}`;
+  $('m-sub').appendChild(o);
+});
+
+// 指数を上付き文字にした科学表記
+function sciText(x, digits) {
+  if (!isFinite(x) || x === 0) return '0';
+  let e = Math.floor(Math.log10(Math.abs(x)));
+  let m = (x / Math.pow(10, e)).toPrecision(digits ?? 2);
+  if (Math.abs(+m) >= 10) { m = (+m / 10).toPrecision(digits ?? 2); e++; }
+  const sup = String(e).split('').map(c => (c === '-' ? '⁻' : '⁰¹²³⁴⁵⁶⁷⁸⁹'[+c])).join('');
+  return `${m}×10${sup}`;
+}
+
+// 容器の中に分子を敷き詰める。描ける数には上限があるので、超えた分は描かない
+function fillDish(x, y, w, h, f, count) {
+  const m = Math.min(count, MOL_DRAW_CAP);
+  let best = null;
+  for (let cols = 1; cols <= m; cols++) {
+    const rows = Math.ceil(m / cols);
+    const cell = Math.min(w / cols, h / rows);
+    if (!best || cell > best.cell) best = { cols, rows, cell };
+  }
+  const cell = Math.min(best.cell, 78);
+  const gw = best.cols * cell, gh = best.rows * cell;
+  let g = '';
+  for (let k = 0; k < m; k++) {
+    const r = Math.floor(k / best.cols), c = k % best.cols;
+    g += drawGlyph(f, x + (w - gw) / 2 + c * cell + cell / 2, y + (h - gh) / 2 + r * cell + cell / 2, cell * 0.44);
+  }
+  return g;
+}
+
+function drawMol() {
+  const s = MOL_SUBS[+$('m-sub').value];
+  const st = MOL_STEPS[molTab.step];
+  const mass = st.n * s.M / NA;
+  const reading = mass.toFixed(2);
+  const weighable = +reading > 0;
+
+  const DISH = { x: 250, y: 92, w: 260, h: 112 };
+  let g = '';
+  g += `<text x="380" y="46" text-anchor="middle" font-size="34" font-weight="850" fill="var(--deep)">${s.f} が ${st.jp}</text>`;
+  // 読める大きさになったら科学表記をやめる
+  const massText = mass >= 0.01 ? `${mass.toFixed(2)} g` : `${sciText(mass)} g`;
+  g += `<text x="380" y="72" text-anchor="middle" font-size="15" font-weight="800" fill="var(--ink3)">${st.sub}　／　実際の質量 ${massText}</text>`;
+
+  g += `<rect x="${DISH.x}" y="${DISH.y}" width="${DISH.w}" height="${DISH.h}" rx="12" fill="#f7fbff" stroke="#c9d8ea" stroke-width="2"/>`;
+  g += fillDish(DISH.x + 8, DISH.y + 8, DISH.w - 16, DISH.h - 16, s.f, st.n);
+  if (st.n > MOL_DRAW_CAP) {
+    g += `<text x="380" y="${DISH.y + DISH.h + 17}" text-anchor="middle" font-size="12.5" font-weight="800" fill="var(--ink3)">絵に描けるのはここまで（実際はこの ${sciText(st.n / MOL_DRAW_CAP)} 倍）</text>`;
+  }
+
+  // デジタルはかり
+  g += `<rect x="228" y="224" width="304" height="11" rx="5" fill="#94a3b8"/>`;
+  g += `<rect x="252" y="235" width="256" height="76" rx="13" fill="#e8eef6" stroke="#9aa8bb" stroke-width="2"/>`;
+  g += `<rect x="288" y="251" width="184" height="45" rx="8" fill="#1e293b"/>`;
+  g += `<text x="380" y="282" text-anchor="middle" font-size="27" font-weight="850" fill="${weighable ? '#86efac' : '#64748b'}">${reading} g</text>`;
+
+  // 1個から 1 mol までの道のり（対数目盛）
+  const bx = 110, bw = 540, by = 344;
+  const pos = bx + (Math.log10(st.n) / Math.log10(NA)) * bw;
+  g += `<rect x="${bx}" y="${by}" width="${bw}" height="10" rx="5" fill="#e2e8f0"/>`;
+  g += `<rect x="${bx}" y="${by}" width="${fmt(Math.max(0, pos - bx),1)}" height="10" rx="5" fill="var(--accent)"/>`;
+  g += `<circle cx="${fmt(pos,1)}" cy="${by + 5}" r="8" fill="var(--accent)" stroke="#fff" stroke-width="2.5"/>`;
+  g += `<text x="${bx}" y="${by + 28}" font-size="12.5" font-weight="800" fill="var(--ink3)">1 個</text>`;
+  g += `<text x="${bx + bw}" y="${by + 28}" text-anchor="end" font-size="12.5" font-weight="800" fill="var(--ink3)">1 mol（6.02×10²³ 個）</text>`;
+
+  const msg = weighable
+    ? '1 mol の質量 ＝ 分子量に g をつけた値（モル質量）。質量をはかれば粒子の個数が分かる'
+    : 'はかりの表示は 0.00 g のまま。粒子が軽すぎて、まだ量れない';
+  g += `<text x="380" y="400" text-anchor="middle" font-size="15" font-weight="850" fill="${weighable ? '#15803d' : 'var(--ink2)'}">${msg}</text>`;
+
+  $('chart-mol').innerHTML = g;
+  $('m-next').disabled = molTab.step >= MOL_STEPS.length - 1;
+  $('m-back').disabled = molTab.step === 0;
+}
+
+const molNext = () => { if (molTab.step < MOL_STEPS.length - 1) { molTab.step++; drawMol(); } };
+$('m-next').addEventListener('click', molNext);
+$('chart-mol').addEventListener('click', molNext);
+$('m-back').addEventListener('click', () => { molTab.step = 0; drawMol(); });
+$('m-sub').addEventListener('change', drawMol);
+
+/* ============================================================
+   ② 係数と粒子の個数
    ============================================================ */
 const ratio = { n: 1 };   // 反応の回数（ボタンで増減する）。まず1回分から始める
 REACTIONS.forEach((r, i) => {
@@ -388,7 +518,7 @@ $('t1-minus').addEventListener('click', () => { ratio.n -= 1; drawRatio(); });
 $('t1-plus').addEventListener('click', () => { ratio.n += 1; drawRatio(); });
 
 /* ============================================================
-   ② 過不足がある反応
+   ③ 過不足がある反応
    ============================================================ */
 const lim = { step: 0 };   // 何組目まで反応させたか（クリックで進む）
 TWO_REACTANT.forEach((r, i) => {
@@ -561,7 +691,7 @@ $('t2-reset').addEventListener('click', () => { $('t2-rx').value = 0; syncLimitS
 /* ============================================================
    タブ切り替え・全画面
    ============================================================ */
-const DRAW = { ratio: drawRatio, limit: drawLimit };
+const DRAW = { mol: drawMol, ratio: drawRatio, limit: drawLimit };
 document.querySelectorAll('#tabs [data-tab]').forEach(btn => {
   btn.addEventListener('click', () => {
     const key = btn.dataset.tab;
@@ -587,7 +717,7 @@ document.addEventListener('fullscreenchange', () => {
 
 // 初期描画
 syncLimitSliders(false);
-drawRatio(); drawLimit();
+drawMol(); drawRatio(); drawLimit();
 </script>
 <script src="site-shell.js"></script>
 </body>
