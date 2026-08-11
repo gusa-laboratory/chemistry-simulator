@@ -148,7 +148,7 @@
             <label>反応の回数</label>
             <div class="stepper">
               <button class="btn" id="t1-minus" type="button" aria-label="回数を1減らす">−</button>
-              <span class="stepper-val">×<span id="t1-n-val">2</span></span>
+              <span class="stepper-val">×<span id="t1-n-val">1</span></span>
               <button class="btn" id="t1-plus" type="button" aria-label="回数を1増やす">＋</button>
             </div>
           </div>
@@ -174,12 +174,12 @@
           <h2>反応と仕込み量</h2>
           <div class="row tight"><select id="t2-rx" aria-label="反応を選ぶ"></select></div>
           <div class="ctrl" style="margin-top:11px">
-            <label><span id="t2-a-label">物質A</span> <span class="val"><span id="t2-a-val">6</span> mol</span></label>
-            <input type="range" id="t2-a" min="0" max="12" step="2" value="6">
+            <label><span id="t2-a-label">物質A</span> <span class="val"><span id="t2-a-val">2</span> mol</span></label>
+            <input type="range" id="t2-a" min="0" max="12" step="2" value="2">
           </div>
           <div class="ctrl">
-            <label><span id="t2-b-label">物質B</span> <span class="val"><span id="t2-b-val">4</span> mol</span></label>
-            <input type="range" id="t2-b" min="0" max="6" step="1" value="4">
+            <label><span id="t2-b-label">物質B</span> <span class="val"><span id="t2-b-val">1</span> mol</span></label>
+            <input type="range" id="t2-b" min="0" max="6" step="1" value="1">
           </div>
           <div class="row">
             <button class="btn" id="t2-reset" type="button">初期値</button>
@@ -294,7 +294,7 @@ const sumC = list => list.reduce((t, s) => t + s.c, 0);
 /* ============================================================
    ① 係数と粒子の個数
    ============================================================ */
-const ratio = { n: 2 };   // 反応の回数（ボタンで増減する）
+const ratio = { n: 1 };   // 反応の回数（ボタンで増減する）。まず1回分から始める
 REACTIONS.forEach((r, i) => {
   const o = document.createElement('option');
   o.value = i; o.textContent = r.eq;
@@ -410,8 +410,9 @@ function syncLimitSliders(keep) {
     el.min = 0; el.step = coef; el.max = coef * cap;
     el.value = clamp(prevSets, 0, cap) * coef;
   };
-  setup($('t2-a'), a.c, Math.min(3, cap));
-  setup($('t2-b'), b.c, Math.min(2, cap));
+  // 初期値は1組ぶんずつ（反応が成立する最小の量）。ここから増やして過不足をつくる
+  setup($('t2-a'), a.c, 1);
+  setup($('t2-b'), b.c, 1);
   $('t2-a-label').textContent = `${a.f}（係数 ${a.c}）`;
   $('t2-b-label').textContent = `${b.f}（係数 ${b.c}）`;
 }
