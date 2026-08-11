@@ -44,6 +44,9 @@
   .switch button[aria-pressed="true"]{background:#fff;color:var(--deep);box-shadow:0 2px 8px rgba(31,55,89,.14)}
 
   .layout{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(292px,.88fr);gap:14px;align-items:start}
+  /* 操作カードが1枚だけのパネルは、図をより広く使う */
+  .panel.wide .layout{grid-template-columns:minmax(0,2.7fr) minmax(268px,.72fr)}
+  .chart-card svg.clickable{cursor:pointer}
   .chart-card,.card{border:1px solid var(--line);border-radius:18px;background:var(--card);box-shadow:var(--shadow-sm)}
   .chart-card{position:relative;min-width:0;padding:10px 14px 14px;overflow:hidden;border-top:4px solid var(--react)}
   .chart-card::before{content:attr(data-label);display:block;margin:0 0 2px 3px;color:var(--ink3);font:850 9.5px/1.4 Inter,Arial,sans-serif;letter-spacing:.11em}
@@ -86,6 +89,7 @@
   body.is-fullscreen .panel.active{flex:1;min-height:0;display:flex;flex-direction:column}
   body.is-fullscreen .panel-tools{flex:0 0 auto;margin-bottom:6px}
   body.is-fullscreen .layout{flex:1;min-height:0;grid-template-columns:minmax(0,1.85fr) minmax(292px,.8fr)}
+  body.is-fullscreen .panel.wide .layout{grid-template-columns:minmax(0,3fr) minmax(258px,.65fr)}
   body.is-fullscreen .chart-card{min-height:0;display:flex;flex-direction:column;padding:6px 10px 8px}
   body.is-fullscreen .chart-card svg{flex:1;min-height:0;height:100%}
   body.is-fullscreen .side{min-height:0;overflow:auto;gap:8px}
@@ -121,31 +125,18 @@
   </div>
   <nav class="tabs" id="tabs" role="tablist" aria-label="学習テーマ">
     <button type="button" role="tab" aria-selected="true"  data-tab="ratio">① 係数と粒子の個数</button>
-    <button type="button" role="tab" aria-selected="false" data-tab="limit">② 限定反応物・収率</button>
+    <button type="button" role="tab" aria-selected="false" data-tab="limit">② 過不足がある反応</button>
   </nav>
 </header>
 <main>
 
   <!-- ① 係数と粒子の個数 -->
-  <section class="panel active" id="panel-ratio">
-    <div class="panel-tools">
-      <div class="switch" role="group" aria-label="ラベルに表示する量">
-        <button type="button" data-rlabel="mol" aria-pressed="true">mol で見る</button>
-        <button type="button" data-rlabel="g" aria-pressed="false">質量で見る</button>
-      </div>
-    </div>
+  <section class="panel active wide" id="panel-ratio">
     <div class="layout">
       <div class="chart-card" data-label="PARTICLE MODEL OF THE EQUATION" id="chartwrap-ratio">
         <svg id="chart-ratio" viewBox="0 0 760 480" role="img" aria-label="反応式の係数を粒子の個数で表した図"></svg>
       </div>
       <div class="side">
-        <div class="card law">
-          <div class="law-copy">
-            <b>係数の比 ＝ 粒子の個数の比 ＝ mol の比</b><br>
-            係数は「何個ずつ組になって反応するか」を表す。分子の絵1個が 1 mol 分のまとまり。<br>
-            <span class="eq">ただし<b>質量の比は係数の比とは違う</b></span>（分子1個の重さが違うため）。
-          </div>
-        </div>
         <div class="card">
           <h2>反応と回数</h2>
           <div class="row tight"><select id="t1-rx" aria-label="反応を選ぶ"></select></div>
@@ -155,29 +146,22 @@
           </div>
           <p class="note">回数を増やしても、粒子の個数の比は変わらない。増えるのは「組」の数だけ。</p>
         </div>
-        <div class="card">
-          <h2>各物質の量</h2>
-          <div class="readout" id="t1-readout"></div>
-          <div class="verdict" id="t1-verdict"></div>
-        </div>
       </div>
     </div>
   </section>
 
-  <!-- ② 限定反応物・収率 -->
-  <section class="panel" id="panel-limit">
+  <!-- ② 過不足がある反応 -->
+  <section class="panel wide" id="panel-limit">
+    <div class="panel-tools">
+      <button class="btn primary" id="t2-step" type="button">▶ 1組ずつ反応させる</button>
+      <button class="btn" id="t2-all" type="button">最後まで反応</button>
+      <button class="btn" id="t2-back" type="button">反応前に戻す</button>
+    </div>
     <div class="layout">
       <div class="chart-card" data-label="LIMITING REAGENT" id="chartwrap-limit">
-        <svg id="chart-limit" viewBox="0 0 760 480" role="img" aria-label="反応前後の粒子と限定反応物の図"></svg>
+        <svg id="chart-limit" class="clickable" viewBox="0 0 760 480" role="img" aria-label="反応が1組ずつ進む様子。クリックで次の組が反応する"></svg>
       </div>
       <div class="side">
-        <div class="card law">
-          <div class="law-copy">
-            <b>組をつくれる数だけ反応が進む</b><br>
-            反応物は決まった個数の「組」でしか反応できない。組をつくれなくなった時点で反応は止まり、相手が余る。<br>
-            <span class="eq">先に足りなくなる方 ＝ 限定反応物</span>
-          </div>
-        </div>
         <div class="card">
           <h2>反応と仕込み量</h2>
           <div class="row tight"><select id="t2-rx" aria-label="反応を選ぶ"></select></div>
@@ -189,19 +173,10 @@
             <label><span id="t2-b-label">物質B</span> <span class="val"><span id="t2-b-val">4</span> mol</span></label>
             <input type="range" id="t2-b" min="0" max="6" step="1" value="4">
           </div>
-          <div class="ctrl">
-            <label>実際に得られた数 <span class="val"><span id="t2-y-val">100</span></span></label>
-            <input type="range" id="t2-y" min="0" max="4" step="1" value="4">
-          </div>
           <div class="row">
             <button class="btn" id="t2-reset" type="button">初期値</button>
           </div>
           <p class="note">仕込み量は係数の倍数で動く。粒子の絵と mol の計算がずれないようにするため。</p>
-        </div>
-        <div class="card">
-          <h2>現在の状態</h2>
-          <div class="readout" id="t2-readout"></div>
-          <div class="verdict" id="t2-verdict"></div>
         </div>
       </div>
     </div>
@@ -215,7 +190,6 @@
 const $ = id => document.getElementById(id);
 const fmt = (x, d) => (isFinite(x) ? x.toFixed(d) : '–');
 const clamp = (x, lo, hi) => Math.max(lo, Math.min(hi, x));
-const VM = 22.4;
 const sig3 = x => (!isFinite(x) ? '–' : (+x.toPrecision(3)).toString());
 
 const W = 760, H = 480;
@@ -331,8 +305,7 @@ function drawRatio() {
   slider.value = N;
   $('t1-n-val').textContent = String(N);
 
-  const R = reactantsOf(rx), P = productsOf(rx);
-  const sub = s => ratio.label === 'mol' ? `${s.c * N} mol` : `${sig3(s.c * N * s.M)} g`;
+  const sub = s => `${s.c * N} mol`;
 
   // 反応式の各項と、その真下に置く分子のかたまりを 1 列に並べる
   const terms = rx.sp.map(s => ({
@@ -370,8 +343,7 @@ function drawRatio() {
   // 分子は式のすぐ下に置く。空いた分だけ図を縮めるので、下に余白が残らない
   const yc = GLYPH_TOP + pick.rowsUsed * cell / 2;
   const labelY = yc + pick.rowsUsed * cell / 2 + 26;
-  const massY = labelY + 46;
-  $('chart-ratio').setAttribute('viewBox', `0 0 760 ${fmt(massY + 22, 0)}`);
+  $('chart-ratio').setAttribute('viewBox', `0 0 760 ${fmt(labelY + 20, 0)}`);
 
   // 各項の中心 x を決める（式の項も分子も、この x に揃える）
   let x = 380 - (slots.reduce((a, b) => a + b, 0) + sepW) / 2;
@@ -402,37 +374,16 @@ function drawRatio() {
     g += `<text x="${fmt(t.cx,1)}" y="${fmt(labelY,1)}" text-anchor="middle" font-size="15.5" font-weight="850" fill="${t.color}">${sub(t.s)}</text>`;
   });
 
-  const mL = R.reduce((t, s) => t + s.c * N * s.M, 0), mR = P.reduce((t, s) => t + s.c * N * s.M, 0);
-  g += `<text x="380" y="${fmt(massY,0)}" text-anchor="middle" font-size="14.5" font-weight="850" fill="var(--ink2)">質量の合計　左辺 ${sig3(mL)} g　＝　右辺 ${sig3(mR)} g　（質量は保存される）</text>`;
   $('chart-ratio').innerHTML = g;
-
-  setReadout($('t1-readout'), rx.sp.map(s => {
-    const n = s.c * N;
-    const extra = s.gas ? `・${sig3(n * VM)} L` : '';
-    return [`${s.f}（係数 ${s.c}）`, `${n} mol・${sig3(n * s.M)} g${extra}`, s.side > 0];
-  }));
-  const rc = R.map(s => s.c).join(' : '), pc = P.map(s => s.c).join(' : ');
-  $('t1-verdict').textContent = `粒子の個数の比は ${rx.sp.map(s => s.c).join(' : ')} のまま。回数を ${N} 倍しても比は変わらない。`;
-}
-
-function setReadout(el, rows) {
-  el.innerHTML = rows.map(r => `<span class="k">${r[0]}</span><span class="v${r[2] ? ' dep' : ''}">${r[1]}</span>`).join('');
 }
 
 $('t1-rx').addEventListener('change', drawRatio);
 $('t1-n').addEventListener('input', drawRatio);
-document.querySelectorAll('[data-rlabel]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    ratio.label = btn.dataset.rlabel;
-    document.querySelectorAll('[data-rlabel]').forEach(b => b.setAttribute('aria-pressed', b === btn));
-    drawRatio();
-  });
-});
 
 /* ============================================================
    ② 限定反応物・収率
    ============================================================ */
-const lim = { gotFrac: 1 };   // 理論値のうち実際に得られた割合。組数が変わっても保つ
+const lim = { step: 0 };   // 何組目まで反応させたか（クリックで進む）
 TWO_REACTANT.forEach((r, i) => {
   const o = document.createElement('option');
   o.value = i; o.textContent = r.eq;
@@ -468,23 +419,14 @@ function limitState() {
   const tie = setsA === setsB;
   const limiting = tie ? null : (setsA < setsB ? a : b);
   const leftA = nA - sets * a.c, leftB = nB - sets * b.c;
-  const main = P[0], theo = main.c * sets;
-  // 収率は「実際に得られた分子の個数 ÷ 理論上の個数」。個数で持つので、絵と数値が必ず一致する
-  const got = clamp(Math.round(theo * lim.gotFrac), 0, theo);
-  return { rx, a, b, P, nA, nB, setsA, setsB, sets, tie, limiting, leftA, leftB, main, theo, got,
-    yieldPct: theo > 0 ? got / theo * 100 : 0 };
+  const step = clamp(lim.step, 0, sets);   // 何組目まで反応済みか
+  return { rx, a, b, P, nA, nB, setsA, setsB, sets, tie, limiting, leftA, leftB, step };
 }
 
 function drawLimit() {
   const st = limitState();
   $('t2-a-val').textContent = String(st.nA);
   $('t2-b-val').textContent = String(st.nB);
-  // 収率スライダーは理論上の個数を上限にする（半端な分子が生まれないようにする）
-  const ys = $('t2-y');
-  ys.max = Math.max(1, st.theo);
-  ys.value = st.got;
-  ys.disabled = st.theo === 0;
-  $('t2-y-val').textContent = st.theo > 0 ? `${st.got} / ${st.theo} 個（収率 ${fmt(st.yieldPct, 0)}％）` : '—';
 
   // 反応式の各項を列にして、その真下に分子を置く。
   // 1行＝1組。行が横に揃うので、どちらが先に組をつくれなくなるかが見える
@@ -529,93 +471,79 @@ function drawLimit() {
   seps.forEach(s => {
     g += `<text x="${fmt(s.cx,1)}" y="${EQ_Y}" text-anchor="middle" font-size="25" font-weight="850" fill="var(--ink3)">${s.t}</text>`;
   });
-  g += `<text x="380" y="86" text-anchor="middle" font-size="13.5" font-weight="800" fill="var(--ink3)">横1行が1組。組がそろった行だけ反応が起きる</text>`;
-
-  // 生成物は、実際に得られた分だけ濃く描く
-  const obtainedOf = new Map(st.P.map(p => [p, st.theo > 0 ? Math.round(p.c * st.sets * st.got / st.theo) : 0]));
-  const drawn = new Map(st.P.map(p => [p, 0]));
+  const done = st.sets > 0 && st.step >= st.sets;
+  g += `<text x="380" y="86" text-anchor="middle" font-size="13.5" font-weight="800" fill="var(--ink3)">${
+    st.sets === 0 ? '組がそろわないので反応は起こらない'
+    : done ? '反応が止まった。組をつくれなかった分が残る'
+    : 'クリックすると1組ずつ反応が進む'}</text>`;
 
   for (let k = 0; k < rows; k++) {
     const yTop = GLYPH_TOP + k * cell, yc = yTop + cell / 2;
-    const complete = k < st.sets;
-    g += `<rect x="${fmt(x0 - 8,1)}" y="${fmt(yTop + 2,1)}" width="${fmt(totalW + 16,1)}" height="${fmt(cell - 4,1)}" rx="9" fill="${complete ? '#f0f9ff' : '#f8fafc'}" stroke="${complete ? '#bae6fd' : '#d8e1ed'}" stroke-width="1.6"${complete ? '' : ' stroke-dasharray="6 5"'}/>`;
-    if (x0 > 74) {
-      g += `<text x="${fmt(x0 - 16,1)}" y="${fmt(yc + 5,1)}" text-anchor="end" font-size="12.5" font-weight="850" fill="${complete ? 'var(--react)' : 'var(--leftover)'}">${complete ? `${k + 1} 組目` : '余り'}</text>`;
+    // reacted = 反応済み / pending = これから反応する / 余り = 組をつくれない
+    const state = k < st.step ? 'reacted' : k < st.sets ? 'pending' : 'left';
+    const band = state === 'reacted' ? { f: '#f0fdf4', s: '#86efac', d: '' }
+      : state === 'pending' ? { f: '#fff', s: '#dbe4ef', d: '' }
+      : { f: '#f8fafc', s: '#d8e1ed', d: ' stroke-dasharray="6 5"' };
+    g += `<rect x="${fmt(x0 - 8,1)}" y="${fmt(yTop + 2,1)}" width="${fmt(totalW + 16,1)}" height="${fmt(cell - 4,1)}" rx="9" fill="${band.f}" stroke="${band.s}" stroke-width="1.6"${band.d}/>`;
+    if (x0 > 82) {
+      const tag = state === 'reacted' ? `${k + 1} 組目 済` : state === 'pending' ? `${k + 1} 組目` : '余り';
+      const col = state === 'reacted' ? '#15803d' : state === 'pending' ? 'var(--ink3)' : 'var(--leftover)';
+      g += `<text x="${fmt(x0 - 16,1)}" y="${fmt(yc + 5,1)}" text-anchor="end" font-size="12.5" font-weight="850" fill="${col}">${tag}</text>`;
     }
-    terms.forEach((t, i) => {
+    terms.forEach(t => {
       const s = t.s;
-      const has = s.side < 0 ? k < (s === st.a ? st.setsA : st.setsB) : complete;
-      if (!has) return;
-      const left = t.cx - s.c * cell / 2;
-      for (let q = 0; q < s.c; q++) {
-        let op = complete ? 1 : .4;
-        if (s.side > 0) {
-          const idx = drawn.get(s); drawn.set(s, idx + 1);
-          if (idx >= obtainedOf.get(s)) op = .22;
-        }
-        g += drawGlyph(s.f, left + q * cell + cell / 2, yc, cell * 0.44, op);
+      if (s.side < 0) {
+        // 反応物：その行に元々あるか。反応済みの行では使われて消える（跡だけ薄く残す）
+        if (k >= (s === st.a ? st.setsA : st.setsB)) return;
+        const op = state === 'reacted' ? .13 : state === 'left' ? .42 : 1;
+        const left = t.cx - s.c * cell / 2;
+        for (let q = 0; q < s.c; q++) g += drawGlyph(s.f, left + q * cell + cell / 2, yc, cell * 0.44, op);
+      } else {
+        // 生成物：反応済みの行にだけ現れる
+        if (state !== 'reacted') return;
+        const left = t.cx - s.c * cell / 2;
+        for (let q = 0; q < s.c; q++) g += drawGlyph(s.f, left + q * cell + cell / 2, yc, cell * 0.44, 1);
       }
     });
   }
 
-  // 各列の下に量を書く
+  // 各列の下に「いまの量」を書く。反応が進むほど反応物は減り、生成物は増える
   terms.forEach(t => {
     const s = t.s;
-    if (s.side < 0) {
-      const n = s === st.a ? st.nA : st.nB, left = s === st.a ? st.leftA : st.leftB;
-      g += `<text x="${fmt(t.cx,1)}" y="${fmt(labelY,1)}" text-anchor="middle" font-size="15" font-weight="850" fill="${t.color}">${n} mol</text>`;
-      g += `<text x="${fmt(t.cx,1)}" y="${fmt(labelY + 19,1)}" text-anchor="middle" font-size="12.5" font-weight="800" fill="${left > 0 ? 'var(--leftover)' : 'var(--ink3)'}">${left > 0 ? `余り ${left} mol` : '余りなし'}</text>`;
-    } else {
-      const got = obtainedOf.get(s);
-      g += `<text x="${fmt(t.cx,1)}" y="${fmt(labelY,1)}" text-anchor="middle" font-size="15" font-weight="850" fill="${t.color}">${got} mol</text>`;
-      g += `<text x="${fmt(t.cx,1)}" y="${fmt(labelY + 19,1)}" text-anchor="middle" font-size="12.5" font-weight="800" fill="var(--ink3)">${sig3(got * s.M)} g</text>`;
-    }
+    const start = s.side < 0 ? (s === st.a ? st.nA : st.nB) : 0;
+    const now = s.side < 0 ? start - st.step * s.c : st.step * s.c;
+    g += `<text x="${fmt(t.cx,1)}" y="${fmt(labelY,1)}" text-anchor="middle" font-size="15.5" font-weight="850" fill="${t.color}">${now} mol</text>`;
+    const note = s.side < 0
+      ? (done && now > 0 ? `余った（はじめ ${start}）` : `はじめ ${start} mol`)
+      : `${sig3(now * s.M)} g`;
+    g += `<text x="${fmt(t.cx,1)}" y="${fmt(labelY + 19,1)}" text-anchor="middle" font-size="12.5" font-weight="800" fill="${s.side < 0 && done && now > 0 ? 'var(--leftover)' : 'var(--ink3)'}">${note}</text>`;
   });
 
   const legend = st.sets === 0
-    ? '組がそろわないので反応は起こらない'
-    : `青い行が ${st.sets} 組${st.limiting ? `　／　${st.limiting.f} が先に足りなくなる` : '　／　どちらも余らない'}${st.got < st.theo ? `　／　薄い分子＝得られなかった分（収率 ${fmt(st.yieldPct, 0)} ％）` : ''}`;
-  g += `<text x="380" y="${fmt(legendY,0)}" text-anchor="middle" font-size="13.5" font-weight="850" fill="var(--ink2)">${legend}</text>`;
+    ? 'どちらかが足りず、1組もつくれない'
+    : done
+      ? (st.limiting ? `${st.limiting.f} を使い切ったので反応は止まる（${st.limiting.f} が限定反応物）` : 'ちょうど過不足なく反応した。どちらも余らない')
+      : `${st.step} / ${st.sets} 組が反応した`;
+  g += `<text x="380" y="${fmt(legendY,0)}" text-anchor="middle" font-size="14" font-weight="850" fill="${done && st.limiting ? 'var(--limit)' : 'var(--ink2)'}">${legend}</text>`;
 
   $('chart-limit').innerHTML = g;
+  $('t2-step').disabled = done || st.sets === 0;
+  $('t2-all').disabled = done || st.sets === 0;
+  $('t2-back').disabled = st.step === 0;
 
-  const theo = st.theo, got = st.got;
-  const info = [
-    [`${st.a.f} ÷ 係数`, `${sig3(st.setsA)} 組`, !st.tie && st.limiting === st.a],
-    [`${st.b.f} ÷ 係数`, `${sig3(st.setsB)} 組`, !st.tie && st.limiting === st.b],
-    ['できる組の数', `${st.sets} 組`],
-    ['限定反応物', st.tie ? 'なし（過不足なし）' : st.limiting.f, true],
-    [`残る ${st.a.f}`, `${st.leftA} mol`],
-    [`残る ${st.b.f}`, `${st.leftB} mol`],
-    ['理論収量', `${theo} mol・${sig3(theo * st.main.M)} g`, true],
-    ['実際の収量', `${sig3(got)} mol・${sig3(got * st.main.M)} g`],
-    ['収率', `${fmt(st.yieldPct, 0)} ％`, true],
-  ];
-  setReadout($('t2-readout'), info);
-
-  const vd = $('t2-verdict');
-  if (st.sets === 0) {
-    vd.className = 'verdict warn';
-    vd.textContent = '片方が足りないので組がつくれない。両方を入れると反応が始まる。';
-  } else if (st.tie) {
-    vd.className = 'verdict ok';
-    vd.textContent = 'ちょうど過不足なく反応する量。どちらも余らない。';
-  } else {
-    const other = st.limiting === st.a ? st.b : st.a;
-    const left = st.limiting === st.a ? st.leftB : st.leftA;
-    vd.className = 'verdict';
-    vd.textContent = `${st.limiting.f} は ${st.sets} 組分しかないので、そこで反応が止まる。${other.f} は ${left} mol 余る。`;
-  }
 }
 
-$('t2-rx').addEventListener('change', () => { syncLimitSliders(true); drawLimit(); });
-['t2-a', 't2-b'].forEach(id => $(id).addEventListener('input', drawLimit));
-$('t2-y').addEventListener('input', () => {
-  const st = limitState();
-  lim.gotFrac = st.theo > 0 ? clamp(+$('t2-y').value / st.theo, 0, 1) : 1;
-  drawLimit();
-});
-$('t2-reset').addEventListener('click', () => { $('t2-rx').value = 0; syncLimitSliders(false); lim.gotFrac = 1; drawLimit(); });
+// 仕込み量を変えたら、反応は最初からやり直す
+function limitReset() { lim.step = 0; drawLimit(); }
+const limitStep = d => { lim.step = Math.max(0, lim.step + d); drawLimit(); };
+
+$('t2-rx').addEventListener('change', () => { syncLimitSliders(true); limitReset(); });
+['t2-a', 't2-b'].forEach(id => $(id).addEventListener('input', limitReset));
+$('t2-step').addEventListener('click', () => limitStep(1));
+$('t2-all').addEventListener('click', () => { lim.step = limitState().sets; drawLimit(); });
+$('t2-back').addEventListener('click', () => { lim.step = 0; drawLimit(); });
+$('chart-limit').addEventListener('click', () => limitStep(1));
+$('t2-reset').addEventListener('click', () => { $('t2-rx').value = 0; syncLimitSliders(false); limitReset(); });
 
 /* ============================================================
    タブ切り替え・全画面
