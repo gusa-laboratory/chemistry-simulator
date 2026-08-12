@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>化学インタラクティブ教材｜Interactive Lab</title>
-<meta name="description" content="原子・イオン半径、分子の形、結晶格子、反応の量的関係、気体の法則、希薄溶液、コロイド、錯体・有機化合物の立体構造、機器分析を動かして学ぶ授業投影用インタラクティブ教材。">
+<meta name="description" content="原子・イオン半径、分子の形、結晶格子、反応の量的関係、気体の法則、希薄溶液、コロイド、反応速度と化学平衡、錯体・有機化合物の立体構造、機器分析を動かして学ぶ授業投影用インタラクティブ教材。">
 <meta name="theme-color" content="#2563eb">
 <link rel="icon" href="icons/icon-192.png">
 <style>
@@ -49,7 +49,9 @@
   .sim .ico { width: 48px; display: grid; place-items: center; font-size: 35px; line-height: 1; flex: 0 0 auto; }
   .sim .ico svg { display: block; width: 46px; height: 46px; }
   .sim-body { position: relative; z-index: 1; flex: 1; min-width: 0; display: grid; grid-template-columns: minmax(190px, .7fr) minmax(280px, 1.3fr); align-items: center; gap: 18px; }
-  .sim h2 { margin: 0; font-size: 19px; font-weight: 800; color: var(--blue-deep); }
+  .sim h3 { margin: 0; font-size: 19px; font-weight: 800; color: var(--blue-deep); }
+  .sec { margin: 20px 0 1px; color: var(--ink3); font-size: 11.5px; font-weight: 800; letter-spacing: .16em; }
+  .sec:first-child { margin-top: 0; }
   .sim-desc { margin: 0; color: var(--ink2); font-size: 13px; line-height: 1.55; font-weight: 600; }
   .credit { max-width: 1080px; margin: 0 auto; padding: 8px clamp(18px, 5vw, 60px) 40px; text-align: center; color: #dbe0e8; font-size: 10.5px; font-weight: 500; letter-spacing: .05em; }
   @media (max-width: 560px) {
@@ -59,7 +61,8 @@
     .sim .ico { width: 40px; font-size: 31px; }
     .sim .ico svg { width: 40px; height: 40px; }
     .sim-body { grid-template-columns: 1fr; gap: 3px; }
-    .sim h2 { font-size: 17px; }
+    .sim h3 { font-size: 17px; }
+    .sec { margin: 16px 0 1px; font-size: 11px; }
     .sim-desc { font-size: 11.5px; line-height: 1.45; }
   }
 </style>
@@ -72,6 +75,7 @@
 </header>
 <main class="wrap">
   <div class="grid">
+    <h2 class="sec">化学基礎</h2>
     <a class="sim" href="atomic-ionic-radii.html">
       <div class="ico" aria-hidden="true">
         <svg viewBox="0 0 56 56">
@@ -91,7 +95,7 @@
         </svg>
       </div>
       <div class="sim-body">
-        <h2>原子半径・イオン半径</h2>
+        <h3>原子半径・イオン半径</h3>
         <p class="sim-desc">電子配置と核電荷を見比べ、原子・イオン半径の周期性を比較。</p>
       </div>
     </a>
@@ -106,57 +110,73 @@
         </svg>
       </div>
       <div class="sim-body">
-        <h2>分子の形</h2>
+        <h3>分子の形</h3>
         <p class="sim-desc">構造式と3Dモデルを見比べ、電子対の反発と結合角を確認。</p>
       </div>
     </a>
     <a class="sim" href="crystals.html">
       <div class="ico">💎</div>
       <div class="sim-body">
-        <h2>結晶格子</h2>
+        <h3>結晶格子</h3>
         <p class="sim-desc">単位格子を回転し、配位数・充填率・断面を立体的に理解。</p>
       </div>
     </a>
     <a class="sim" href="stoichiometry.html">
       <div class="ico" aria-hidden="true">
         <svg viewBox="0 0 56 56">
+          <!-- 2H₂ + O₂ → 2H₂O。上段に反応物を横一列、下段に生成物。
+               すべて viewBox の内側（線幅ぶんの余白を含む）に収める -->
           <g stroke="#7c93ad" stroke-width="1.1">
-            <circle cx="7" cy="15" r="4.4" fill="#dbe8f7"/><circle cx="15" cy="15" r="4.4" fill="#dbe8f7"/>
-            <circle cx="7" cy="27" r="4.4" fill="#dbe8f7"/><circle cx="15" cy="27" r="4.4" fill="#dbe8f7"/>
+            <circle cx="6" cy="14" r="3.6" fill="#dbe8f7"/><circle cx="13" cy="14" r="3.6" fill="#dbe8f7"/>
+            <circle cx="20" cy="14" r="3.6" fill="#dbe8f7"/><circle cx="27" cy="14" r="3.6" fill="#dbe8f7"/>
           </g>
-          <text x="22.5" y="25" text-anchor="middle" fill="#8290a5" font-size="11" font-weight="800">+</text>
+          <text x="33.5" y="18" text-anchor="middle" fill="#8290a5" font-size="11" font-weight="800">+</text>
           <g stroke="#b91c1c" stroke-width="1.1">
-            <circle cx="31" cy="15" r="5.4" fill="#ef4444"/><circle cx="41" cy="15" r="5.4" fill="#ef4444"/>
+            <circle cx="41" cy="14" r="4.4" fill="#ef4444"/><circle cx="50" cy="14" r="4.4" fill="#ef4444"/>
           </g>
-          <path d="M28 34 V41" fill="none" stroke="#8da3bd" stroke-width="2" stroke-linecap="round"/>
-          <polygon points="28,46 24,39 32,39" fill="#8da3bd"/>
+          <path d="M28 24 V32" fill="none" stroke="#8da3bd" stroke-width="2" stroke-linecap="round"/>
+          <polygon points="28,38 24,31 32,31" fill="#8da3bd"/>
           <g>
-            <circle cx="12" cy="50" r="5.2" fill="#ef4444" stroke="#b91c1c" stroke-width="1.1"/>
-            <circle cx="6" cy="53.5" r="3" fill="#dbe8f7" stroke="#7c93ad" stroke-width="1"/>
-            <circle cx="18" cy="53.5" r="3" fill="#dbe8f7" stroke="#7c93ad" stroke-width="1"/>
-            <circle cx="42" cy="50" r="5.2" fill="#ef4444" stroke="#b91c1c" stroke-width="1.1"/>
-            <circle cx="36" cy="53.5" r="3" fill="#dbe8f7" stroke="#7c93ad" stroke-width="1"/>
-            <circle cx="48" cy="53.5" r="3" fill="#dbe8f7" stroke="#7c93ad" stroke-width="1"/>
+            <circle cx="15" cy="46" r="5" fill="#ef4444" stroke="#b91c1c" stroke-width="1.1"/>
+            <circle cx="8" cy="50.5" r="2.9" fill="#dbe8f7" stroke="#7c93ad" stroke-width="1"/>
+            <circle cx="22" cy="50.5" r="2.9" fill="#dbe8f7" stroke="#7c93ad" stroke-width="1"/>
+            <circle cx="41" cy="46" r="5" fill="#ef4444" stroke="#b91c1c" stroke-width="1.1"/>
+            <circle cx="34" cy="50.5" r="2.9" fill="#dbe8f7" stroke="#7c93ad" stroke-width="1"/>
+            <circle cx="48" cy="50.5" r="2.9" fill="#dbe8f7" stroke="#7c93ad" stroke-width="1"/>
           </g>
         </svg>
       </div>
       <div class="sim-body">
-        <h2>化学反応の量的関係</h2>
+        <h3>化学反応の量的関係</h3>
         <p class="sim-desc">mol の大きさ、分子に含まれる原子の mol、係数＝個数比、過不足のある反応を粒子で確認。</p>
       </div>
     </a>
+    <h2 class="sec">化学</h2>
     <a class="sim" href="gas-laws.html">
       <div class="ico">🎈</div>
       <div class="sim-body">
-        <h2>気体の法則</h2>
+        <h3>気体の法則</h3>
         <p class="sim-desc">状態量を動かし、グラフと粒子モデルの変化を同時に観察。</p>
       </div>
     </a>
     <a class="sim" href="solutions.html">
       <div class="ico">🧪</div>
       <div class="sim-body">
-        <h2>希薄溶液・コロイド</h2>
+        <h3>希薄溶液・コロイド</h3>
         <p class="sim-desc">束一的性質とコロイドの挙動をグラフ・模式図で確認。</p>
+      </div>
+    </a>
+    <a class="sim" href="reaction-rate.html">
+      <div class="ico" aria-hidden="true">
+        <svg viewBox="0 0 56 56">
+          <!-- 活性化エネルギーの山と、頂上にさしかかった粒子 -->
+          <path d="M4 31 C15 31 18 13 28 13 C38 13 41 41 52 41" fill="none" stroke="#8da3bd" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="28" cy="13" r="5.5" fill="#f97316" stroke="#b45309" stroke-width="1.3"/>
+        </svg>
+      </div>
+      <div class="sim-body">
+        <h3>反応速度と化学平衡</h3>
+        <p class="sim-desc">衝突と活性化エネルギーから、平衡の移動とルシャトリエの原理まで。</p>
       </div>
     </a>
     <a class="sim" href="coordination-compounds-3d.html">
@@ -174,7 +194,7 @@
         </svg>
       </div>
       <div class="sim-body">
-        <h2>配位化合物の立体構造</h2>
+        <h3>配位化合物の立体構造</h3>
         <p class="sim-desc">配位数と異性体を2D構造式・3Dモデルで見比べ、錯体の空間配置を理解。</p>
       </div>
     </a>
@@ -198,10 +218,11 @@
         </svg>
       </div>
       <div class="sim-body">
-        <h2>有機化合物の立体構造</h2>
+        <h3>有機化合物の立体構造</h3>
         <p class="sim-desc">2D構造式と3Dモデルを回転し、結合の形・立体異性・配座を比較。</p>
       </div>
     </a>
+    <h2 class="sec">IB</h2>
     <a class="sim" href="analytical-spectroscopy.html">
       <div class="ico" aria-hidden="true">
         <svg viewBox="0 0 56 56">
@@ -214,7 +235,7 @@
         </svg>
       </div>
       <div class="sim-body">
-        <h2>機器分析（IR・MS・NMR）</h2>
+        <h3>機器分析（IR・MS・NMR）</h3>
         <p class="sim-desc">IR・質量・NMRのスペクトルを見比べ、未知試料の構造を決定。</p>
       </div>
     </a>
