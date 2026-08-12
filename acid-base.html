@@ -379,10 +379,15 @@ function layout(n, box, seed = 7) {
   return out;
 }
 
+/* 粒子。黒板投影では白文字が背景色に負けるので、文字に濃い縁取りを付ける
+   （paint-order:stroke で縁を文字の下に敷く）。 */
 const ion = (p, fill, label) =>
   `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${p.r.toFixed(1)}" fill="${fill}"/>` +
   (label
-    ? `<text x="${p.x.toFixed(1)}" y="${p.y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="${(p.r * .72).toFixed(1)}" font-weight="900">${label}</text>`
+    ? `<text x="${p.x.toFixed(1)}" y="${p.y.toFixed(1)}" text-anchor="middle" dominant-baseline="central"
+         fill="#fff" font-size="${(p.r * .68).toFixed(1)}" font-weight="900"
+         paint-order="stroke" stroke="rgba(15,23,42,.55)" stroke-width="${(p.r * .18).toFixed(1)}"
+         stroke-linejoin="round">${label}</text>`
     : '');
 
 /* ビーカーの外形 */
@@ -402,10 +407,43 @@ function drawMix() {
   const oh = Math.max(0, added - MIX_N);       // 余った OH⁻
   const w = Math.min(added, MIX_N);            // できた H₂O
 
-  const box = { x: 150, y: 92, w: 460, h: 250 };
-  let s = beaker(box.x - 22, box.y - 26, box.w + 44, box.h + 52);
+  /* ビュレットから NaOH 水溶液を1滴ずつ落としている図にする。
+     粒子は数が変わっても大きさを変えない（大きさの違いが意味を
+     持ってしまうと読み違える）。位置は固定の格子に順に詰める。 */
+  const R = 17, COLS = 9;
+  const box = { x: 176, y: 178, w: 414, h: 200 };
+  const cw = box.w / COLS, ch = 46;
 
-  // 粒子は種類ごとにまとめて置くと数の比較がしやすい
+  let s = '';
+
+  // ── ビュレット（NaOH 水溶液）
+  const bx = 368;                                   // ビュレットの中心
+  s += `<rect x="${bx - 13}" y="14" width="26" height="86" rx="4" fill="#eaf2ff" stroke="#94a3b8" stroke-width="2.5"/>`;
+  s += `<rect x="${bx - 13}" y="14" width="26" height="20" rx="4" fill="#dbeafe" stroke="none"/>`;
+  s += `<path d="M ${bx - 13} 100 L ${bx} 118 L ${bx + 13} 100 Z" fill="#eaf2ff" stroke="#94a3b8" stroke-width="2.5" stroke-linejoin="round"/>`;
+  s += `<text x="${bx + 26}" y="46" fill="#173b75" font-size="14" font-weight="850">NaOH 水溶液</text>`;
+  s += `<text x="${bx + 26}" y="64" fill="#8290a5" font-size="11" font-weight="800">1滴に OH⁻ が1個</text>`;
+
+  // ── ビーカー（塩酸）
+  const bkX = box.x - 26, bkY = box.y - 22, bkW = box.w + 52, bkH = box.h + 46;
+  s += beaker(bkX, bkY, bkW, bkH);
+  // 液を薄く塗る。塗らないと下half が「空」に見えてしまう
+  s += `<path d="M ${bkX + 2} ${bkY + 14} L ${bkX + 2} ${bkY + bkH - 12} Q ${bkX + 2} ${bkY + bkH - 2} ${bkX + 15} ${bkY + bkH - 2}
+          L ${bkX + bkW - 15} ${bkY + bkH - 2} Q ${bkX + bkW - 2} ${bkY + bkH - 2} ${bkX + bkW - 2} ${bkY + bkH - 12}
+          L ${bkX + bkW - 2} ${bkY + 14} Z" fill="#e8f1fb"/>`;
+  s += `<line x1="${bkX + 2}" y1="${bkY + 14}" x2="${bkX + bkW - 2}" y2="${bkY + 14}" stroke="#9fc0e4" stroke-width="2"/>`;
+  s += `<text x="${bkX}" y="${bkY - 10}" fill="#173b75" font-size="14" font-weight="850">塩酸</text>`;
+
+  // 落ちている途中の1滴。ビーカーの中の粒子と同じ大きさにして、
+  // 「この1個がこれから入る」と見えるようにする
+  if (added < MIX_N * 2) {
+    const dy = 138;
+    s += `<path d="M ${bx} ${dy - R - 8} q ${R} ${R + 6} ${R} ${R} a ${R} ${R} 0 0 1 ${-2 * R} 0 q 0 -6 ${R} -${R + 6} Z" fill="var(--base)"/>`;
+    s += `<text x="${bx}" y="${dy + 2}" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="${(R * .68).toFixed(1)}" font-weight="900"
+            paint-order="stroke" stroke="rgba(15,23,42,.55)" stroke-width="${(R * .18).toFixed(1)}" stroke-linejoin="round">OH⁻</text>`;
+  }
+
+  // ── 粒子。種類ごとにまとめて、格子へ順に詰める
   const groups = [
     { n: h, fill: 'var(--acid)', label: 'H⁺' },
     { n: oh, fill: 'var(--base)', label: 'OH⁻' },
@@ -414,13 +452,12 @@ function drawMix() {
     { n: added, fill: 'var(--spectator)', label: 'Na⁺' },
   ].filter(g => g.n > 0);
 
-  const total = groups.reduce((a, g) => a + g.n, 0);
-  let cursorY = box.y;
-  groups.forEach((g, gi) => {
-    const gh = box.h * (g.n / total);
-    const pts = layout(g.n, { x: box.x, y: cursorY, w: box.w, h: gh }, 11 + gi * 31);
-    pts.forEach(p => { s += ion({ ...p, r: Math.min(p.r, 19) }, g.fill, g.label); });
-    cursorY += gh;
+  let i = 0;
+  groups.forEach(g => {
+    for (let k = 0; k < g.n; k++, i++) {
+      const p = { x: box.x + cw * ((i % COLS) + .5), y: box.y + ch * (Math.floor(i / COLS) + .5), r: R };
+      s += ion(p, g.fill, g.label);
+    }
   });
 
   $('chart-mix').innerHTML = s;
