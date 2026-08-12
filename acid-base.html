@@ -36,6 +36,11 @@
   .ctrl{margin-bottom:9px}
   .eqline{color:var(--deep);font-size:16px;font-weight:850;letter-spacing:.02em}
 
+  /* ①は粒子モデルと pH のグラフを別のカードに分ける */
+  .mix-split{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:14px;align-items:start}
+  .mix-split .ph-card{border-top-color:var(--blue)}
+  body.is-fullscreen .mix-split{height:100%;align-items:stretch}
+
   /* pH の大きな表示（後ろの席から読める） */
   .ph-big{display:block;margin-top:2px;font-size:30px;font-weight:850;font-variant-numeric:tabular-nums;line-height:1.1}
   .ph-big.acid{color:var(--acid)}
@@ -65,11 +70,21 @@
   .curve.ghost{stroke:var(--t-mute);stroke-width:1.8;stroke-dasharray:5 5}
   .eqmark{stroke:var(--accent);stroke-width:1.5;stroke-dasharray:5 4}
 
+  /* 全画面（授業投影）では図を縦いっぱいに使う。
+     .layout を伸ばさないとカードが内容の高さのままで、
+     画面の下半分が空いてしまう。 */
+  body.is-fullscreen .layout{flex:1;min-height:0;align-items:stretch;grid-template-columns:minmax(0,1.75fr) minmax(300px,.8fr)}
+  body.is-fullscreen .mix-split{min-height:0}
+  body.is-fullscreen .mix-split .chart-card{min-height:0}
   body.is-fullscreen .ph-big{font-size:34px}
   body.is-fullscreen .tally .t-v{font-size:27px}
 
   @media(max-width:1000px){
     .layout{grid-template-columns:1fr}
+    .mix-split{grid-template-columns:1fr}
+    /* 1カラムに畳むと ① の図（ほぼ正方形）が画面いっぱいに
+       引き伸ばされるので、高さに上限を付ける */
+    .mix-split svg{max-height:54vh}
     body.is-fullscreen{height:auto;overflow:auto;display:block}
     body.is-fullscreen .layout{grid-template-columns:1fr}
   }
@@ -104,8 +119,13 @@
       <button class="btn" id="mix-reset" type="button">最初から</button>
     </div>
     <div class="layout">
-      <div class="chart-card" data-label="PARTICLE MODEL AND pH">
-        <svg id="chart-mix" viewBox="0 0 760 430" role="img" aria-label="左は、ビュレットから水酸化ナトリウム水溶液を1滴ずつ落とし、塩酸の中の水素イオンが1組ずつ水に変わっていく粒子モデル。右は、加えた水酸化物イオンの個数に対する pH の変化を示すグラフ"></svg>
+      <div class="mix-split">
+        <div class="chart-card" data-label="PARTICLE MODEL">
+          <svg id="chart-mix" viewBox="0 0 420 430" role="img" aria-label="ビュレットから水酸化ナトリウム水溶液を1滴ずつ落とし、塩酸の中の水素イオンが1組ずつ水に変わっていく粒子モデル"></svg>
+        </div>
+        <div class="chart-card ph-card" data-label="pH">
+          <svg id="chart-mix-ph" viewBox="0 0 380 430" role="img" aria-label="加えた水酸化物イオンの個数に対する pH の変化を示すグラフ"></svg>
+        </div>
       </div>
       <div class="side">
         <div class="card law">
@@ -416,23 +436,22 @@ function drawMix() {
   const oh = Math.max(0, added - MIX_N);       // 余った OH⁻
   const w = Math.min(added, MIX_N);            // できた H₂O
 
-  /* 左に滴定の図、右に pH のグラフを並べる。横軸を「加えた OH⁻ の
-     個数」にして、左の絵と右のグラフが同じものを指すようにする。
-     粒子は数が変わっても大きさを変えない（大きさの違いが意味を
-     持ってしまうと読み違える）。位置は固定の格子に順に詰める。 */
+  /* 粒子モデル（viewBox 420×430）。粒子は数が変わっても大きさを
+     変えない（大きさの違いが意味を持ってしまうと読み違える）。
+     位置は固定の格子に順に詰める。 */
   const R = 17, COLS = 6;
-  const box = { x: 62, y: 174, w: 246, h: 200 };
+  const box = { x: 60, y: 186, w: 300, h: 200 };
   const cw = box.w / COLS, ch = 40;
 
   let s = '';
 
   // ── ビュレット（NaOH 水溶液）
-  const bx = 170;                                   // ビュレットの中心
-  s += `<rect x="${bx - 13}" y="10" width="26" height="78" rx="4" fill="#eaf2ff" stroke="#94a3b8" stroke-width="2.5"/>`;
-  s += `<rect x="${bx - 13}" y="10" width="26" height="18" rx="4" fill="#dbeafe" stroke="none"/>`;
-  s += `<path d="M ${bx - 13} 88 L ${bx} 104 L ${bx + 13} 88 Z" fill="#eaf2ff" stroke="#94a3b8" stroke-width="2.5" stroke-linejoin="round"/>`;
-  s += `<text x="${bx + 24}" y="40" fill="#173b75" font-size="13.5" font-weight="850">NaOH 水溶液</text>`;
-  s += `<text x="${bx + 24}" y="57" fill="#8290a5" font-size="10.5" font-weight="800">1滴に OH⁻ が1個</text>`;
+  const bx = 210;                                   // ビュレットの中心（ビーカーの真上）
+  s += `<rect x="${bx - 13}" y="16" width="26" height="74" rx="4" fill="#eaf2ff" stroke="#94a3b8" stroke-width="2.5"/>`;
+  s += `<rect x="${bx - 13}" y="16" width="26" height="17" rx="4" fill="#dbeafe" stroke="none"/>`;
+  s += `<path d="M ${bx - 13} 90 L ${bx} 106 L ${bx + 13} 90 Z" fill="#eaf2ff" stroke="#94a3b8" stroke-width="2.5" stroke-linejoin="round"/>`;
+  s += `<text x="${bx + 24}" y="44" fill="#173b75" font-size="13.5" font-weight="850">NaOH 水溶液</text>`;
+  s += `<text x="${bx + 24}" y="61" fill="#8290a5" font-size="10.5" font-weight="800">1滴に OH⁻ が1個</text>`;
 
   // ── ビーカー（塩酸）
   const bkX = box.x - 26, bkY = box.y - 22, bkW = box.w + 52, bkH = box.h + 46;
@@ -447,7 +466,7 @@ function drawMix() {
   // 落ちている途中の1滴。ビーカーの中の粒子と同じ大きさにして、
   // 「この1個がこれから入る」と見えるようにする
   if (added < MIX_N * 2) {
-    const dy = 128;
+    const dy = 132;
     s += `<path d="M ${bx} ${dy - R - 8} q ${R} ${R + 6} ${R} ${R} a ${R} ${R} 0 0 1 ${-2 * R} 0 q 0 -6 ${R} -${R + 6} Z" fill="var(--base)"/>`;
     s += `<text x="${bx}" y="${dy + 2}" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="${(R * .68).toFixed(1)}" font-weight="900"
             paint-order="stroke" stroke="rgba(15,23,42,.55)" stroke-width="${(R * .18).toFixed(1)}" stroke-linejoin="round">OH⁻</text>`;
@@ -470,8 +489,13 @@ function drawMix() {
     }
   });
 
-  /* ── 右: pH のグラフ。横軸は左の絵と同じ「加えた OH⁻ の個数」 */
-  const gx0 = 432, gy0 = 372, gx1 = 742, gy1 = 44;
+  $('chart-mix').innerHTML = s;
+
+  /* ── pH のグラフ（別カード・viewBox 380×430）。
+     横軸は粒子モデルと同じ「加えた OH⁻ の個数」にして、
+     絵とグラフが同じものを指すようにする。 */
+  s = '';
+  const gx0 = 62, gy0 = 372, gx1 = 356, gy1 = 44;
   const GX = n => gx0 + (n / (MIX_N * 2)) * (gx1 - gx0);
   const GY = p => gy0 + (p / 14) * (gy1 - gy0);
 
@@ -505,10 +529,10 @@ function drawMix() {
   }
 
   const ph = mixPh(added);
-  s += `<text x="${gx1}" y="${gy1 - 12}" text-anchor="end" font-size="26" font-weight="850"
+  s += `<text x="${gx1}" y="${gy1 - 14}" text-anchor="end" font-size="27" font-weight="850"
           fill="${ph < 6.5 ? 'var(--acid)' : ph > 7.5 ? 'var(--base)' : 'var(--neutral)'}">pH ${ph.toFixed(2)}</text>`;
 
-  $('chart-mix').innerHTML = s;
+  $('chart-mix-ph').innerHTML = s;
   $('mix-h').textContent = h;
   $('mix-oh').textContent = oh;
   $('mix-w').textContent = w;
