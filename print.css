@@ -1,0 +1,133 @@
+/* ============================================================
+   print.css — 授業プリント（ワークシート）として印刷するための指定
+
+       <link rel="stylesheet" href="print.css" media="print">
+
+   画面用の指定は一切変えない（@media print の中だけで完結する）。
+
+   考え方:
+     ・操作するもの（タブ・ボタン・スライダー）は紙では意味がないので消す
+     ・図と数値は残す。SVG は色を落とさず、罫線だけ紙向けに締める
+     ・カードは影を消して枠線にする。画面の立体感は紙では汚れになる
+     ・class="no-print" を付けた要素は印刷しない
+     ・class="print-only" を付けた要素は印刷のときだけ出る
+       （設問文や記入欄など、紙にだけ要るものをページ側で足せる）
+   ============================================================ */
+
+@media print {
+
+  /* ---- 用紙 -------------------------------------------- */
+  @page {
+    size: A4;
+    margin: 14mm 12mm;
+  }
+
+  html, body {
+    background: #fff !important;
+    color: #000;
+  }
+
+  body {
+    /* 画面用の背景グラデーションはインクの無駄なので消す */
+    background-image: none !important;
+  }
+
+  /* ---- 印刷しないもの ----------------------------------- */
+  .tabs,
+  .panel-tools,
+  .toolbar,
+  .switch,
+  .view-switch,
+  .back-link,
+  .outline-btn,
+  .site-fullscreen-btn,
+  .btn,
+  .row,
+  .stepper,
+  .reset-view,
+  .canvas-help,
+  .tooltip,
+  footer,
+  .no-print {
+    display: none !important;
+  }
+
+  /* 画面では hidden 属性で隠しておき、紙にだけ出す。
+     hidden の display:none を打ち消すため !important が要る。 */
+  .print-only { display: block !important; }
+
+  /* ---- 全パネルを順に印刷する ---------------------------- */
+  /* 画面では選択中のタブしか出ないが、紙では全部あったほうが
+     プリントとして使える。1テーマ＝1ページに切る。 */
+  .panel { display: block !important; }
+  .panel + .panel { break-before: page; }
+
+  /* ---- レイアウト --------------------------------------- */
+  header {
+    position: static !important;
+    padding: 0 0 6mm !important;
+    background: none !important;
+    border-bottom: 1px solid #000 !important;
+    box-shadow: none !important;
+  }
+
+  h1 { font-size: 16pt; }
+
+  main {
+    max-width: none !important;
+    padding: 0 !important;
+  }
+
+  /* 紙は横に狭いので1カラムに落とす */
+  .layout,
+  .molecule-display,
+  .molecules {
+    display: block !important;
+  }
+
+  .side { display: block !important; }
+
+  /* ---- カード ------------------------------------------ */
+  .card,
+  .chart-card,
+  .molecule-card,
+  .stage {
+    margin-bottom: 5mm;
+    border: 1px solid #666 !important;
+    border-radius: 3mm !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+
+  /* 画面ではカード上端の色帯で単元を示しているが、紙では細く */
+  .chart-card, .molecule-card, .law { border-top-width: 2px !important; }
+
+  /* ---- 図 ---------------------------------------------- */
+  svg { break-inside: avoid; }
+
+  /* ---- 数値の読み取り欄 ---------------------------------- */
+  .readout, .tally, .verdict {
+    break-inside: avoid;
+    background: #fff !important;
+  }
+
+  /* ---- 記入欄（ページ側で <div class="write-line"> を置く）-- */
+  .write-line {
+    display: block;
+    height: 8mm;
+    margin: 2mm 0;
+    border-bottom: 1px solid #999;
+  }
+
+  .write-box {
+    display: block;
+    min-height: 24mm;
+    margin: 2mm 0;
+    border: 1px solid #999;
+    border-radius: 2mm;
+  }
+
+  /* ---- リンクの URL は出さない（授業プリントには不要）------ */
+  a[href]::after { content: none !important; }
+}

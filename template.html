@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- ▼ 新しい単元を作るときは、まずこの4行を書き換える -->
+<title>【単元名】</title>
+<meta name="description" content="【この教材で何を確かめられるかを1〜2文で】">
+<meta name="theme-color" content="#2563eb">
+<link rel="icon" href="icons/icon-192.png">
+
+<!-- 読み込み順は変えないこと。
+     tokens.css（色の一次情報源）→ ui.css（共通UI）→ ページ固有の <style>
+     → site-shell.css（最後に効かせる調整）。
+     print.css は media="print" なので画面表示には影響しない。 -->
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="ui.css">
+<link rel="stylesheet" href="print.css" media="print">
+<style>
+  /* ここには「この教材にしかない見た目」だけを書く。
+     ヘッダー・タブ・カード・スライダー・全画面表示は ui.css が持っている。
+     色は直接書かず tokens.css の --t-* を使う。 */
+  :root{
+    --blue:var(--t-blue); --deep:var(--t-blue-deep); --ink:var(--t-ink); --ink2:var(--t-ink2);
+    --ink3:var(--t-ink3); --bg:var(--t-bg); --card:var(--t-card); --line:var(--t-line);
+    --accent:var(--t-accent); --grid:var(--t-grid); --axis:var(--t-axis);
+    --shadow:var(--t-shadow); --shadow-sm:var(--t-shadow-sm);
+
+    /* この教材固有の役割色があればここに足す
+    --reactant:var(--t-cyan); --product:var(--t-orange);
+    */
+  }
+
+  /* 2カラムの比率は教材によって変える */
+  .layout{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(292px,.92fr);gap:14px;align-items:start}
+  .chart-card{position:relative;min-width:0;padding:10px 14px 14px;overflow:hidden;border-top:4px solid var(--t-cyan)}
+  .card h2{margin:0 0 9px;color:var(--deep);font-size:13px;font-weight:850;letter-spacing:.01em}
+  .btn{padding:7px 12px;border:1px solid var(--t-line-strong);border-radius:10px;background:var(--card);color:var(--ink2);font-size:11.5px;font-weight:850;cursor:pointer}
+  .btn:hover{color:var(--blue);border-color:var(--t-blue-hover)}
+  .btn.primary{border-color:var(--t-blue-hover);background:var(--t-blue-tint);color:var(--blue)}
+  .ctrl{margin-bottom:9px}
+
+  /* グラフの軸まわり（SVGを使う教材なら） */
+  .axis{stroke:var(--axis);stroke-width:1.2}
+  .grid-line{stroke:var(--grid);stroke-width:1}
+  .tick{fill:var(--ink3);font-size:11px}
+  .curve{fill:none;stroke:var(--blue);stroke-width:2.5;stroke-linecap:round}
+
+  /* ※ @media(max-width:1000px) の折り返しは ui.css ではなくここに書く。
+     ui.css はこの <style> より先に読まれるため、.layout を打ち消せない。 */
+  @media(max-width:1000px){
+    .layout{grid-template-columns:1fr}
+    body.is-fullscreen{height:auto;overflow:auto;display:block}
+    body.is-fullscreen .layout{grid-template-columns:1fr}
+  }
+</style>
+<link rel="stylesheet" href="site-shell.css">
+</head>
+<body>
+<header>
+  <div class="header-row">
+    <div class="title-block">
+      <a class="back-link" href="index.html">← 一覧に戻る</a>
+      <h1>【単元名】</h1>
+    </div>
+    <button class="outline-btn site-fullscreen-btn" id="fullscreenBtn" type="button" aria-label="全画面表示"><span class="site-fullscreen-icon" aria-hidden="true">⛶</span><span class="btn-text">全画面表示</span></button>
+  </div>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="学習テーマ">
+    <button type="button" role="tab" aria-selected="true"  data-tab="one">① 【テーマ1】</button>
+    <button type="button" role="tab" aria-selected="false" data-tab="two">② 【テーマ2】</button>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ① テーマ1 ------------------------------------------------ -->
+  <section class="panel active" id="panel-one">
+    <div class="panel-tools">
+      <button class="btn primary" id="one-play" type="button">▶ 動かす</button>
+      <button class="btn" id="one-reset" type="button">最初から</button>
+    </div>
+    <div class="layout">
+      <div class="chart-card" data-label="GRAPH">
+        <svg id="chart-one" viewBox="0 0 760 420" role="img" aria-label="【図が何を表しているかを書く。読み上げ用】"></svg>
+      </div>
+      <div class="side">
+
+        <div class="card law">
+          <h2>法則</h2>
+          <div class="eqline">【式】</div>
+        </div>
+
+        <div class="card">
+          <h2>条件</h2>
+          <div class="ctrl">
+            <label>温度 <span class="val" data-for="one-temp"></span></label>
+            <input type="range" id="one-temp" min="200" max="600" value="300" step="10" data-unit="K">
+          </div>
+          <div class="readout">
+            <span class="k">求めた値</span><span class="v" id="one-out">—</span>
+          </div>
+          <p class="verdict" id="one-verdict"></p>
+        </div>
+
+        <!-- 紙にだけ出る設問。画面には出ない -->
+        <div class="card print-only" hidden>
+          <h2>考えてみよう</h2>
+          <p>【設問】</p>
+          <span class="write-line"></span>
+          <span class="write-line"></span>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ② テーマ2 ------------------------------------------------ -->
+  <section class="panel" id="panel-two">
+    <div class="layout">
+      <div class="chart-card" data-label="MODEL">
+        <svg id="chart-two" viewBox="0 0 760 420" role="img" aria-label="【図の説明】"></svg>
+      </div>
+      <div class="side">
+        <div class="card">
+          <h2>【見出し】</h2>
+          <p class="note">【説明】</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>大阪女学院中学校・高等学校　Yuto Yamaguchi</footer>
+
+<script src="ui.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+
+/* ---- 各タブの描き直し ------------------------------------
+   タブを切り替えたとき・全画面にしたときにここが呼ばれる。
+   表示されていない要素は幅が0になるので、SVGは「見えてから」
+   描く必要がある。だからこの形にしてある。            */
+const DRAW = {
+  one() {
+    const T = +$('one-temp').value;
+    const svg = $('chart-one');
+    // 【ここに描画処理】
+    svg.innerHTML = `<text x="380" y="210" text-anchor="middle" fill="#8290a5" font-size="14">グラフをここに描く（T = ${T} K）</text>`;
+    $('one-out').textContent = T.toFixed(0);
+    $('one-verdict').textContent = T > 400 ? '【条件を満たしたときの説明】' : '';
+  },
+  two() {
+    $('chart-two').innerHTML = `<text x="380" y="210" text-anchor="middle" fill="#8290a5" font-size="14">モデルをここに描く</text>`;
+  },
+};
+
+const redrawAll = () => Object.values(DRAW).forEach(fn => fn());
+
+/* ---- 定型の配線（ui.js が担当）--------------------------- */
+ChemUI.tabs({ onChange: key => DRAW[key]() });
+ChemUI.fullscreen({ onChange: redrawAll });
+ChemUI.bindRange('one-temp', { onInput: () => DRAW.one() });
+
+/* ---- 操作 ------------------------------------------------ */
+/* スライダーを戻すときは ChemUI.setRange を使う。
+   $('one-temp').value = 300 だと数値表示が古いまま残る。 */
+$('one-reset').addEventListener('click', () => ChemUI.setRange('one-temp', 300));
+
+/* ---- 初期描画 -------------------------------------------- */
+redrawAll();
+</script>
+<script src="site-shell.js"></script>
+</body>
+</html>
