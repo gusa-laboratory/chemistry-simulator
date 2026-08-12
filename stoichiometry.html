@@ -7,29 +7,33 @@
 <meta name="description" content="mol がどれだけ大きな数かをはかりの表示で実感し、分子に含まれる原子の物質量、反応式の係数＝粒子の個数の比、過不足のある反応が1組ずつ進んで止まる様子を分子モデルで確認する授業用教材。">
 <meta name="theme-color" content="#2563eb">
 <link rel="icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="tokens.css">
 <style>
+  /* ページ側の :root は tokens.css への別名だけを持つ。
+     色そのものをここで決めない（値の一次情報源は tokens.css）。 */
   :root{
-    --blue:#2563eb; --deep:#173b75; --ink:#172033; --ink2:#526078; --ink3:#8290a5;
-    --bg:#eef3f9; --card:#fff; --line:#d8e1ed; --accent:#f97316;
-    --grid:#e8eef6; --axis:#9aa8bb;
-    --react:#0891b2; --prod:#ea580c; --limit:#dc2626; --leftover:#94a3b8;
-    --shadow:0 18px 45px rgba(31,55,89,.1); --shadow-sm:0 7px 22px rgba(31,55,89,.075);
+    --blue:var(--t-blue); --deep:var(--t-blue-deep); --ink:var(--t-ink); --ink2:var(--t-ink2); --ink3:var(--t-ink3);
+    --bg:var(--t-bg); --card:var(--t-card); --line:var(--t-line); --accent:var(--t-accent);
+    --grid:var(--t-grid); --axis:var(--t-axis);
+    /* 量的関係の役割色。この教材固有の意味づけなのでトークンには上げない */
+    --react:var(--t-cyan); --prod:var(--t-orange); --limit:var(--t-red); --leftover:var(--t-mute);
+    --shadow:var(--t-shadow); --shadow-sm:var(--t-shadow-sm);
   }
   *{box-sizing:border-box}
   html{min-width:320px;background:var(--bg)}
-  body{margin:0;min-height:100vh;color:var(--ink);font-family:Inter,'Yu Gothic UI','Yu Gothic',Meiryo,sans-serif;-webkit-font-smoothing:antialiased;
+  body{margin:0;min-height:100vh;color:var(--ink);font-family:var(--t-font);-webkit-font-smoothing:antialiased;
     background:radial-gradient(circle at 5% -4%,rgba(37,99,235,.13),transparent 27rem),radial-gradient(circle at 97% 2%,rgba(14,165,233,.09),transparent 25rem),linear-gradient(180deg,#f6f9fd 0,var(--bg) 30rem)}
   button,input,select{font:inherit}
-  button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid rgba(37,99,235,.34);outline-offset:3px}
+  button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--t-focus);outline-offset:3px}
 
   header{padding:20px clamp(16px,4vw,54px) 0;background:rgba(250,252,255,.94);border-bottom:1px solid rgba(203,215,230,.92);box-shadow:0 4px 18px rgba(31,55,89,.05);position:sticky;top:0;z-index:20}
   .header-row{display:flex;max-width:1560px;margin:0 auto 14px;gap:22px;align-items:flex-start;justify-content:space-between}
   .title-block{display:flex;flex-direction:column;align-items:flex-start;gap:8px}
   .back-link{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 14px;border:1px solid #cdd9ea;border-radius:10px;background:#fff;color:#3a4d6b;text-decoration:none;font-size:13.5px;font-weight:800;box-shadow:0 2px 8px rgba(31,55,89,.06)}
-  .back-link:hover{color:var(--blue);border-color:#8fb0df}
+  .back-link:hover{color:var(--blue);border-color:var(--t-blue-hover)}
   h1{margin:0;color:var(--deep);font-size:clamp(22px,2.5vw,32px);line-height:1.25;font-weight:850;letter-spacing:-.035em}
   .outline-btn{display:inline-flex;align-items:center;gap:7px;padding:9px 13px;border:1px solid #bfd0e7;border-radius:12px;background:#fff;color:var(--deep);box-shadow:var(--shadow-sm);font-size:13px;font-weight:800;cursor:pointer}
-  .outline-btn:hover{color:var(--blue);border-color:#8fb0df}
+  .outline-btn:hover{color:var(--blue);border-color:var(--t-blue-hover)}
   .tabs{display:flex;gap:6px;max-width:1560px;margin:0 auto;overflow-x:auto;scrollbar-width:thin}
   .tabs button{appearance:none;flex:0 0 auto;border:1px solid transparent;border-bottom:0;border-radius:11px 11px 0 0;background:transparent;cursor:pointer;padding:10px 15px 12px;font-size:13px;font-weight:800;color:#59677c}
   .tabs button:hover{color:var(--blue);background:rgba(237,244,255,.82)}
@@ -70,18 +74,18 @@
   .stepper .btn{width:44px;height:38px;padding:0;font-size:18px;line-height:1}
   .stepper .btn:disabled{opacity:.35;cursor:default;color:var(--ink3);border-color:#e2e8f0}
   .stepper-val{flex:1;text-align:center;color:var(--deep);font-size:21px;font-weight:850;font-variant-numeric:tabular-nums}
-  .btn{padding:7px 12px;border:1px solid #cdd9e8;border-radius:10px;background:#fff;color:var(--ink2);font-size:11.5px;font-weight:850;cursor:pointer}
-  .btn:hover{color:var(--blue);border-color:#8fb0df}
-  select{flex:1 1 auto;min-width:0;padding:6px 9px;border:1px solid #cdd9e8;border-radius:9px;background:#fff;color:var(--ink2);font-size:11.5px;font-weight:800}
+  .btn{padding:7px 12px;border:1px solid var(--t-line-strong);border-radius:10px;background:#fff;color:var(--ink2);font-size:11.5px;font-weight:850;cursor:pointer}
+  .btn:hover{color:var(--blue);border-color:var(--t-blue-hover)}
+  select{flex:1 1 auto;min-width:0;padding:6px 9px;border:1px solid var(--t-line-strong);border-radius:9px;background:#fff;color:var(--ink2);font-size:11.5px;font-weight:800}
   .readout{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:11.5px}
   .readout .k{color:var(--ink3);font-weight:800}
   .readout .v{color:var(--deep);font-weight:850;font-variant-numeric:tabular-nums;text-align:right}
   .readout .v.dep{color:var(--accent)}
   .note{margin:9px 0 0;color:var(--ink2);font-size:11px;font-weight:700;line-height:1.6}
-  .verdict{margin-top:9px;padding:8px 11px;border-left:4px solid var(--blue);border-radius:9px;background:#eef4ff;color:#31445f;font-size:12px;font-weight:800;line-height:1.6}
+  .verdict{margin-top:9px;padding:8px 11px;border-left:4px solid var(--blue);border-radius:9px;background:var(--t-blue-wash);color:#31445f;font-size:12px;font-weight:800;line-height:1.6}
   .verdict.warn{border-left-color:var(--limit);background:#fef2f2;color:#7f1d1d}
-  .verdict.ok{border-left-color:#16a34a;background:#f0fdf4;color:#14532d}
-  footer{padding:0 20px 26px;text-align:center;color:#a3adbc;font-size:10px;font-weight:600;letter-spacing:.04em}
+  .verdict.ok{border-left-color:var(--t-green);background:#f0fdf4;color:#14532d}
+  footer{padding:0 20px 26px;text-align:center;color:var(--t-ink4);font-size:10px;font-weight:600;letter-spacing:.04em}
 
   body.is-fullscreen{height:100vh;overflow:hidden;display:flex;flex-direction:column}
   body.is-fullscreen header{position:static;padding:8px clamp(12px,2vw,30px) 0;flex:0 0 auto}
