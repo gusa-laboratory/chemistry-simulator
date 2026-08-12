@@ -7,8 +7,20 @@
 <meta name="description" content="電子式とVSEPRモデルを対応させて、電子対の反発と分子の形を確認できる授業用教材。">
 <meta name="theme-color" content="#2563eb">
 <link rel="icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="tokens.css">
 <style>
-  :root{--blue:#2563eb;--blue-deep:#173b75;--ink:#162033;--ink2:#526079;--ink3:#8290a5;--bg:#eef3f9;--card:#fff;--line:#d8e1ed;--purple:#7c3aed;--cyan:#0891b2;--orange:#ea580c;--shadow:0 18px 45px rgba(31,55,89,.1);--shadow-sm:0 7px 22px rgba(31,55,89,.075)}
+  /* ページ側の :root は tokens.css への別名を持つ。
+     `統一候補:` が付いた値は他ページとズレているもの。移行段階では
+     見た目を変えないため literal のまま残してある。 */
+  :root{
+    --blue:var(--t-blue); --blue-deep:var(--t-blue-deep); --ink3:var(--t-ink3);
+    --bg:var(--t-bg); --card:var(--t-card); --line:var(--t-line);
+    --purple:var(--t-violet); --cyan:var(--t-cyan); --orange:var(--t-orange);
+    --shadow:var(--t-shadow); --shadow-sm:var(--t-shadow-sm);
+
+    --ink:#162033;   /* 統一候補: var(--t-ink) #172033 */
+    --ink2:#526079;  /* 統一候補: var(--t-ink2) #526078 */
+  }
   *{box-sizing:border-box}
   html{min-width:320px;background:var(--bg)}
   body{margin:0;min-height:100vh;color:var(--ink);font-family:Inter,'Yu Gothic UI','Yu Gothic',Meiryo,sans-serif;-webkit-font-smoothing:antialiased;background:radial-gradient(circle at 5% -4%,rgba(37,99,235,.13),transparent 27rem),radial-gradient(circle at 97% 2%,rgba(14,165,233,.09),transparent 25rem),linear-gradient(180deg,#f6f9fd 0,var(--bg) 30rem)}

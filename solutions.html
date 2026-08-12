@@ -7,26 +7,33 @@
 <meta name="description" content="沸点上昇・凝固点降下・浸透圧の束一的性質と、DLVO・電気泳動・塩析・保護コロイドを粒子モデルで学ぶ授業用シミュレーター。">
 <meta name="theme-color" content="#2563eb">
 <link rel="icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="tokens.css">
 <style>
+  /* ページ側の :root は tokens.css への別名を持つ。
+     `統一候補:` が付いた値は他ページとズレているもの。移行段階では
+     見た目を変えないため literal のまま残してある。 */
   :root {
-    --curve: #2563eb;
-    --solution: #7c3aed;
-    --accent: #f97316;
-    --supercool: #ef4444;
-    --solid: #0ea5e9;
-    --extrap: #94a3b8;
-    --grid: #e8eef7;
-    --axis: #64748b;
-    --ink: #172033;
-    --ink2: #526078;
-    --ink3: #8995a9;
-    --bg: #f3f6fb;
-    --card: #fff;
-    --border: #dce4f0;
-    --blue-soft: #edf4ff;
-    --blue-deep: #173b75;
-    --shadow: 0 12px 32px rgba(28, 50, 87, .08);
-    --shadow-sm: 0 4px 14px rgba(28, 50, 87, .06);
+    --curve: var(--t-blue);
+    --accent: var(--t-accent);
+    --extrap: var(--t-mute);
+    --ink: var(--t-ink);
+    --ink2: var(--t-ink2);
+    --card: var(--t-card);
+    --blue-soft: var(--t-blue-tint);
+    --blue-deep: var(--t-blue-deep);
+
+    /* この教材固有の役割色 */
+    --solution: var(--t-violet);    /* 溶液 */
+    --supercool: #ef4444;           /* 過冷却 */
+    --solid: #0ea5e9;               /* 固体 */
+
+    --grid: #e8eef7;                /* 統一候補: var(--t-grid) #e8eef6 */
+    --axis: #64748b;                /* 統一候補: var(--t-axis) #9aa8bb */
+    --ink3: #8995a9;                /* 統一候補: var(--t-ink3) #8290a5 */
+    --bg: #f3f6fb;                  /* 統一候補: var(--t-bg) #eef3f9 */
+    --border: #dce4f0;              /* 統一候補: var(--t-line) #d8e1ed */
+    --shadow: 0 12px 32px rgba(28, 50, 87, .08);    /* 統一候補: var(--t-shadow) */
+    --shadow-sm: 0 4px 14px rgba(28, 50, 87, .06);  /* 統一候補: var(--t-shadow-sm) */
   }
   * { box-sizing: border-box; }
   html { min-width: 320px; background: var(--bg); }

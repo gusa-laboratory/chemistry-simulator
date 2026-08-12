@@ -7,26 +7,8 @@
 <meta name="description" content="ボイル・シャルル・ゲイリュサック・理想気体・蒸気圧・圧縮係数を粒子モデルと連動して学ぶ授業用シミュレーター。">
 <meta name="theme-color" content="#2563eb">
 <link rel="icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="tokens.css">
 <style>
-  :root {
-    --curve: #2563eb;
-    --accent: #f97316;
-    --family1: #93c5fd;
-    --family2: #dbeafe;
-    --extrap: #94a3b8;
-    --grid: #e8eef7;
-    --axis: #64748b;
-    --ink: #172033;
-    --ink2: #526078;
-    --ink3: #8995a9;
-    --bg: #f3f6fb;
-    --card: #ffffff;
-    --border: #dce4f0;
-    --blue-soft: #edf4ff;
-    --blue-deep: #173b75;
-    --shadow: 0 12px 32px rgba(28, 50, 87, .08);
-    --shadow-sm: 0 4px 14px rgba(28, 50, 87, .06);
-  }
   * { box-sizing: border-box; }
   html { min-width: 320px; background: var(--bg); }
   body {
@@ -220,20 +202,6 @@
   }
 
   /* ---------- Classroom UI refinement ---------- */
-  :root {
-    --curve: #2563eb;
-    --accent: #ea580c;
-    --ink: #162033;
-    --ink2: #526079;
-    --ink3: #8794a8;
-    --bg: #eef3f9;
-    --card: #ffffff;
-    --border: #d8e1ed;
-    --blue-soft: #eaf2ff;
-    --blue-deep: #173b75;
-    --shadow: 0 18px 45px rgba(31, 55, 89, .10);
-    --shadow-sm: 0 7px 22px rgba(31, 55, 89, .075);
-  }
   body {
     background:
       radial-gradient(circle at 5% -4%, rgba(37, 99, 235, .13), transparent 27rem),
@@ -591,25 +559,34 @@
     .diagram-block { padding-inline: 10px; }
   }
 
-  /* ---------- Original color palette ---------- */
+  /* ページ側の :root は tokens.css への別名を持つ。
+     `統一候補:` が付いた値は他ページとズレているもの。移行段階では
+     見た目を変えないため literal のまま残してある。
+
+     以前はこのファイルに :root が3つ積み重なっており、先頭2つは
+     すべて後勝ちで打ち消されていた（＝効いていなかった）。
+     実効値だけをここに1つにまとめた。 */
   :root {
-    --curve: #2563eb;
-    --accent: #f97316;
+    --curve: var(--t-blue);
+    --accent: var(--t-accent);
+    --extrap: var(--t-mute);
+    --ink: var(--t-ink);
+    --ink2: var(--t-ink2);
+    --card: var(--t-card);
+    --blue-soft: var(--t-blue-tint);
+    --blue-deep: var(--t-blue-deep);
+
+    /* この教材固有（等温線の族分け）*/
     --family1: #93c5fd;
     --family2: #dbeafe;
-    --extrap: #94a3b8;
-    --grid: #e8eef7;
-    --axis: #64748b;
-    --ink: #172033;
-    --ink2: #526078;
-    --ink3: #8995a9;
-    --bg: #f3f6fb;
-    --card: #ffffff;
-    --border: #dce4f0;
-    --blue-soft: #edf4ff;
-    --blue-deep: #173b75;
-    --shadow: 0 12px 32px rgba(28, 50, 87, .08);
-    --shadow-sm: 0 4px 14px rgba(28, 50, 87, .06);
+
+    --grid: #e8eef7;                /* 統一候補: var(--t-grid) #e8eef6 */
+    --axis: #64748b;                /* 統一候補: var(--t-axis) #9aa8bb */
+    --ink3: #8995a9;                /* 統一候補: var(--t-ink3) #8290a5 */
+    --bg: #f3f6fb;                  /* 統一候補: var(--t-bg) #eef3f9 */
+    --border: #dce4f0;              /* 統一候補: var(--t-line) #d8e1ed */
+    --shadow: 0 12px 32px rgba(28, 50, 87, .08);    /* 統一候補: var(--t-shadow) */
+    --shadow-sm: 0 4px 14px rgba(28, 50, 87, .06);  /* 統一候補: var(--t-shadow-sm) */
   }
   body {
     background:

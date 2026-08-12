@@ -6,7 +6,8 @@
 <title>錯イオン・錯塩の立体構造｜Interactive Lab</title>
 <meta name="description" content="錯イオン・錯塩の2D構造式と3D立体構造を並べて比較できる、授業用インタラクティブ教材。">
 <meta name="theme-color" content="#2563eb">
-<style>html,body{margin:0;min-width:320px;background:#eef3f9}</style>
+<link rel="stylesheet" href="tokens.css">
+<style>html,body{margin:0;min-width:320px;background:var(--t-bg)}</style>
 <link rel="stylesheet" href="site-shell.css">
 </head>
 <body data-view="both" data-tab="cn2">
@@ -34,12 +35,20 @@
   </main>
   <footer>大阪女学院中学校・高等学校　Yuto Yamaguchi</footer>
 <style>
+/* 注意: このページだけ変数を :root ではなく body に定義している。
+   末尾の @media(prefers-contrast:more) は :root を書き換えているため、
+   body の定義に勝てず効いていない（既存の不具合。挙動を変えないため
+   ここでは直さない）。 */
 body{
-  --blue:#2563eb;--blue-deep:#173b75;--blue-soft:#eaf2ff;--teal:#0f766e;--orange:#ea580c;
-  --ink:#162033;--ink2:#526079;--ink3:#8290a5;--bg:#eef3f9;--card:#fff;--line:#d8e1ed;
-  --shadow:0 18px 45px rgba(31,55,89,.10);--shadow-sm:0 7px 22px rgba(31,55,89,.075);
+  --blue:var(--t-blue);--blue-deep:var(--t-blue-deep);--blue-soft:var(--t-blue-soft);
+  --orange:var(--t-orange);--ink3:var(--t-ink3);--bg:var(--t-bg);--card:var(--t-card);--line:var(--t-line);
+  --shadow:var(--t-shadow);--shadow-sm:var(--t-shadow-sm);
+  --teal:#0f766e;  /* この教材固有 */
+  --ink:#162033;   /* 統一候補: var(--t-ink) #172033 */
+  --ink2:#526079;  /* 統一候補: var(--t-ink2) #526078 */
+  /* 配位子の色（この教材固有）*/
   --metal:#60a5fa;--nh3:#f5b84b;--cl:#4ade80;--cn:#22d3ee;--oxygen:#ef4444;--water:#818cf8;
-  min-width:320px;min-height:100vh;color:var(--ink);font-family:Inter,'Yu Gothic UI','Yu Gothic',Meiryo,sans-serif;-webkit-font-smoothing:antialiased;background:radial-gradient(circle at 5% -4%,rgba(37,99,235,.13),transparent 27rem),radial-gradient(circle at 97% 2%,rgba(14,165,233,.09),transparent 25rem),linear-gradient(180deg,#f6f9fd 0,var(--bg) 30rem)
+  min-width:320px;min-height:100vh;color:var(--ink);font-family:var(--t-font);-webkit-font-smoothing:antialiased;background:radial-gradient(circle at 5% -4%,rgba(37,99,235,.13),transparent 27rem),radial-gradient(circle at 97% 2%,rgba(14,165,233,.09),transparent 25rem),linear-gradient(180deg,#f6f9fd 0,var(--bg) 30rem)
 }
 *{box-sizing:border-box}
 button{font:inherit}

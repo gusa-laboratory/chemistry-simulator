@@ -7,11 +7,19 @@
 <meta name="description" content="原子・イオン半径、分子の形、結晶格子、反応の量的関係、気体の法則、希薄溶液、コロイド、反応速度と化学平衡、錯体・有機化合物の立体構造、機器分析を動かして学ぶ授業投影用インタラクティブ教材。">
 <meta name="theme-color" content="#2563eb">
 <link rel="icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="tokens.css">
 <style>
+  /* ページ側の :root は tokens.css への別名を持つ。
+     `統一候補:` が付いた値は他ページとズレているもの。移行段階では
+     見た目を変えないため literal のまま残してある。 */
   :root {
-    --curve: #2563eb; --accent: #f97316; --ink: #172033; --ink2: #526078; --ink3: #8995a9;
-    --bg: #f3f6fb; --card: #fff; --border: #dce4f0; --blue-soft: #edf4ff; --blue-deep: #173b75;
-    --shadow: 0 18px 45px rgba(31,55,89,.10); --shadow-sm: 0 7px 22px rgba(31,55,89,.075);
+    --curve: var(--t-blue); --accent: var(--t-accent); --ink: var(--t-ink); --ink2: var(--t-ink2);
+    --card: var(--t-card); --blue-soft: var(--t-blue-tint); --blue-deep: var(--t-blue-deep);
+    --shadow: var(--t-shadow); --shadow-sm: var(--t-shadow-sm);
+
+    --ink3: #8995a9;      /* 統一候補: var(--t-ink3) #8290a5 */
+    --bg: #f3f6fb;        /* 統一候補: var(--t-bg) #eef3f9 */
+    --border: #dce4f0;    /* 統一候補: var(--t-line) #d8e1ed */
   }
   * { box-sizing: border-box; }
   html { min-width: 320px; }
