@@ -1,0 +1,2169 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>反応速度と化学平衡</title>
+<meta name="description" content="衝突・活性化エネルギー・エネルギー分布・濃度・触媒から、平衡定数とルシャトリエの原理まで、粒子モデルとグラフで確かめる授業用教材。">
+<meta name="theme-color" content="#2563eb">
+<link rel="icon" href="icons/icon-192.png">
+<style>
+  :root{
+    --blue:#2563eb; --deep:#173b75; --ink:#172033; --ink2:#526078; --ink3:#8290a5;
+    --bg:#eef3f9; --card:#fff; --line:#d8e1ed; --accent:#f97316;
+    --grid:#e8eef6; --axis:#9aa8bb;
+    --h2:#38bdf8; --i2:#7c3aed; --hi:#ea580c; --n2:#2563eb; --nh3:#16a34a;
+    --ok:#16a34a; --no:#94a3b8;
+    --shadow:0 18px 45px rgba(31,55,89,.1); --shadow-sm:0 7px 22px rgba(31,55,89,.075);
+  }
+  *{box-sizing:border-box}
+  html{min-width:320px;background:var(--bg)}
+  body{margin:0;min-height:100vh;color:var(--ink);font-family:Inter,'Yu Gothic UI','Yu Gothic',Meiryo,sans-serif;-webkit-font-smoothing:antialiased;
+    background:radial-gradient(circle at 5% -4%,rgba(37,99,235,.13),transparent 27rem),radial-gradient(circle at 97% 2%,rgba(14,165,233,.09),transparent 25rem),linear-gradient(180deg,#f6f9fd 0,var(--bg) 30rem)}
+  button,input,select{font:inherit}
+  button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid rgba(37,99,235,.34);outline-offset:3px}
+
+  header{padding:20px clamp(16px,4vw,54px) 0;background:rgba(250,252,255,.94);border-bottom:1px solid rgba(203,215,230,.92);box-shadow:0 4px 18px rgba(31,55,89,.05);position:sticky;top:0;z-index:20}
+  .header-row{display:flex;max-width:1560px;margin:0 auto 14px;gap:22px;align-items:flex-start;justify-content:space-between}
+  .title-block{display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+  .back-link{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 14px;border:1px solid #cdd9ea;border-radius:10px;background:#fff;color:#3a4d6b;text-decoration:none;font-size:13.5px;font-weight:800;box-shadow:0 2px 8px rgba(31,55,89,.06)}
+  .back-link:hover{color:var(--blue);border-color:#8fb0df}
+  h1{margin:0;color:var(--deep);font-size:clamp(22px,2.5vw,32px);line-height:1.25;font-weight:850;letter-spacing:-.035em}
+  .outline-btn{display:inline-flex;align-items:center;gap:7px;padding:9px 13px;border:1px solid #bfd0e7;border-radius:12px;background:#fff;color:var(--deep);box-shadow:var(--shadow-sm);font-size:13px;font-weight:800;cursor:pointer}
+  .outline-btn:hover{color:var(--blue);border-color:#8fb0df}
+  .tabs{display:flex;gap:6px;max-width:1560px;margin:0 auto;overflow-x:auto;scrollbar-width:thin}
+  .tabs button{appearance:none;flex:0 0 auto;border:1px solid transparent;border-bottom:0;border-radius:11px 11px 0 0;background:transparent;cursor:pointer;padding:10px 15px 12px;font-size:13px;font-weight:800;color:#59677c}
+  .tabs button:hover{color:var(--blue);background:rgba(237,244,255,.82)}
+  .tabs button[aria-selected="true"]{border-color:#cfd9e6;background:var(--bg);color:var(--blue);box-shadow:inset 0 3px 0 var(--blue)}
+
+  main{max-width:1560px;margin:0 auto;padding:20px clamp(14px,3.5vw,50px) 46px}
+  .panel{display:none}
+  .panel.active{display:block}
+
+  .panel-tools{display:flex;align-items:center;justify-content:center;gap:9px;margin-bottom:13px;flex-wrap:wrap}
+  .switch{display:inline-grid;grid-auto-flow:column;padding:4px;border:1px solid #cfdae8;border-radius:14px;background:#e4ebf4;box-shadow:inset 0 1px 2px rgba(31,55,89,.06)}
+  .switch button{border:0;border-radius:10px;background:transparent;color:var(--ink2);padding:8px 14px;cursor:pointer;font-size:12.5px;font-weight:800}
+  .switch button[aria-pressed="true"]{background:#fff;color:var(--deep);box-shadow:0 2px 8px rgba(31,55,89,.14)}
+
+  .layout{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(292px,.92fr);gap:14px;align-items:start}
+  .chart-card,.card{border:1px solid var(--line);border-radius:18px;background:var(--card);box-shadow:var(--shadow-sm)}
+  .chart-card{position:relative;min-width:0;padding:10px 14px 14px;overflow:hidden;border-top:4px solid #0891b2}
+  .chart-card::before{content:attr(data-label);display:block;margin:0 0 2px 3px;color:var(--ink3);font:850 9.5px/1.4 Inter,Arial,sans-serif;letter-spacing:.11em}
+  .chart-card svg{display:block;width:100%;height:auto}
+  .tooltip{position:absolute;z-index:5;display:none;padding:6px 9px;border:1px solid #d8e1ed;border-radius:9px;background:rgba(255,255,255,.97);box-shadow:var(--shadow-sm);color:var(--ink);font-size:11.5px;font-weight:700;line-height:1.5;pointer-events:none;white-space:nowrap}
+  .side{display:flex;flex-direction:column;gap:11px;min-width:0}
+  .card{padding:12px 14px 13px}
+  .card h2{margin:0 0 9px;color:var(--deep);font-size:13px;font-weight:850;letter-spacing:.01em}
+  .law{border-top:4px solid var(--blue)}
+  .eqline{color:var(--deep);font-size:16px;font-weight:850;letter-spacing:.02em}
+  .diagram-block{margin-top:9px;padding-top:9px;border-top:1px dashed #dbe4ef}
+  .diagram-label{display:block;margin-bottom:3px;color:var(--ink3);font:850 9px/1.3 Inter,Arial,sans-serif;letter-spacing:.11em}
+  .diagram-block svg{display:block;width:100%;height:auto}
+
+  .ctrl{margin-bottom:9px}
+  .ctrl:last-of-type{margin-bottom:0}
+  .ctrl label{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:3px;color:var(--ink2);font-size:11.5px;font-weight:800}
+  .ctrl .val{color:var(--deep);font-size:12px;font-weight:850;font-variant-numeric:tabular-nums}
+  input[type=range]{width:100%;accent-color:var(--blue)}
+  .row{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-top:9px}
+  .btn{padding:7px 12px;border:1px solid #cdd9e8;border-radius:10px;background:#fff;color:var(--ink2);font-size:11.5px;font-weight:850;cursor:pointer}
+  .btn:hover:not(:disabled){color:var(--blue);border-color:#8fb0df}
+  .btn.primary{border-color:#8fb0df;background:#edf4ff;color:var(--blue)}
+  .btn:disabled{opacity:.42;cursor:not-allowed}
+  .readout{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:11.5px}
+  .readout .k{color:var(--ink3);font-weight:800}
+  .readout .v{color:var(--deep);font-weight:850;font-variant-numeric:tabular-nums;text-align:right}
+  .readout .v.dep{color:var(--accent)}
+  .verdict{margin-top:9px;padding:8px 11px;border-left:4px solid var(--blue);border-radius:9px;background:#eef4ff;color:#31445f;font-size:12px;font-weight:800;line-height:1.6}
+  .verdict:empty{display:none}
+  .legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;color:var(--ink2);font-size:10.5px;font-weight:800}
+  .legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+  table.log{width:100%;border-collapse:collapse;font-size:10.5px;font-variant-numeric:tabular-nums}
+  table.log th,table.log td{padding:4px 5px;border-bottom:1px solid #e7edf5;text-align:right;font-weight:800}
+  table.log th{color:var(--ink3);font-size:9.5px;letter-spacing:.04em}
+  table.log td{color:var(--deep)}
+  table.log td.kv{color:var(--accent)}
+  table.log tr.empty td{text-align:center;color:var(--ink3);font-weight:700}
+
+  /* 大きく見せるカウンタ（授業投影で後ろの席から読める） */
+  .tally{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  .tally div{padding:8px 10px;border:1px solid var(--line);border-radius:12px;background:#f8fbff;text-align:center}
+  .tally .t-k{display:block;color:var(--ink3);font-size:10px;font-weight:850;letter-spacing:.05em}
+  .tally .t-v{display:block;margin-top:2px;color:var(--deep);font-size:23px;font-weight:850;font-variant-numeric:tabular-nums;line-height:1.15}
+  .tally .t-v.hit{color:var(--hi)}
+
+  footer{padding:0 20px 26px;text-align:center;color:#a3adbc;font-size:10px;font-weight:600;letter-spacing:.04em}
+
+  /* 授業投影モード */
+  body.is-fullscreen{height:100vh;overflow:hidden;display:flex;flex-direction:column}
+  body.is-fullscreen header{position:static;padding:8px clamp(12px,2vw,30px) 0;flex:0 0 auto}
+  body.is-fullscreen .header-row{margin-bottom:5px}
+  body.is-fullscreen h1{font-size:21px}
+  body.is-fullscreen .back-link{display:none}
+  body.is-fullscreen .tabs button{padding:6px 12px 8px;font-size:12.5px}
+  body.is-fullscreen main{padding:7px clamp(10px,2vw,26px) 8px;max-width:none;width:100%;flex:1;min-height:0;display:flex;flex-direction:column}
+  body.is-fullscreen .panel.active{flex:1;min-height:0;display:flex;flex-direction:column}
+  body.is-fullscreen .panel-tools{flex:0 0 auto;margin-bottom:6px}
+  /* align-items:start のままだと右カラムが内容の高さになり overflow:auto が効かず、
+     カードが増えたタブで画面からあふれる。全画面では行の高さに合わせる */
+  body.is-fullscreen .layout{flex:1;min-height:0;align-items:stretch;grid-template-columns:minmax(0,1.75fr) minmax(300px,.85fr)}
+  body.is-fullscreen .chart-card{min-height:0;display:flex;flex-direction:column;padding:6px 10px 8px}
+  body.is-fullscreen .chart-card svg{flex:1;min-height:0;height:100%}
+  body.is-fullscreen .side{min-height:0;overflow:auto;gap:8px}
+  body.is-fullscreen .card{padding:9px 11px 10px}
+  body.is-fullscreen .readout{font-size:12.5px}
+  body.is-fullscreen .ctrl label{font-size:12.5px}
+  body.is-fullscreen .tally .t-v{font-size:27px}
+  body.is-fullscreen footer{display:none}
+
+  @media(max-width:1000px){
+    .layout{grid-template-columns:1fr}
+    body.is-fullscreen{height:auto;overflow:auto;display:block}
+    body.is-fullscreen .layout{grid-template-columns:1fr}
+  }
+  @media(max-width:560px){
+    header{position:static;padding:14px 12px 0}
+    .btn-text{display:none}
+    main{padding:16px 11px 30px}
+    .tabs button{padding:9px 11px 11px;font-size:12px}
+    .tally .t-v{font-size:20px}
+  }
+  @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<link rel="stylesheet" href="site-shell.css">
+</head>
+<body>
+<header>
+  <div class="header-row">
+    <div class="title-block">
+      <a class="back-link" href="index.html">← 一覧に戻る</a>
+      <h1>反応速度と化学平衡</h1>
+    </div>
+    <button class="outline-btn site-fullscreen-btn" id="fullscreenBtn" type="button" aria-label="全画面表示"><span class="site-fullscreen-icon" aria-hidden="true">⛶</span><span class="btn-text">全画面表示</span></button>
+  </div>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="学習テーマ">
+    <button type="button" role="tab" aria-selected="true"  aria-controls="panel-collide" id="tab-collide" data-tab="collide">① 衝突しても反応しない</button>
+    <button type="button" role="tab" aria-selected="false" aria-controls="panel-energy"  id="tab-energy"  data-tab="energy">② 活性化エネルギー</button>
+    <button type="button" role="tab" aria-selected="false" aria-controls="panel-dist"    id="tab-dist"    data-tab="dist">③ 温度とエネルギー分布</button>
+    <button type="button" role="tab" aria-selected="false" aria-controls="panel-conc"    id="tab-conc"    data-tab="conc">④ 濃度と反応の速さ</button>
+    <button type="button" role="tab" aria-selected="false" aria-controls="panel-cat"     id="tab-cat"     data-tab="cat">⑤ 触媒</button>
+    <button type="button" role="tab" aria-selected="false" aria-controls="panel-eqrate"  id="tab-eqrate"  data-tab="eqrate">⑥ 速さがつり合うと平衡</button>
+    <button type="button" role="tab" aria-selected="false" aria-controls="panel-kconst"  id="tab-kconst"  data-tab="kconst">⑦ 平衡定数 K</button>
+    <button type="button" role="tab" aria-selected="false" aria-controls="panel-shiftc"  id="tab-shiftc"  data-tab="shiftc">⑧ 濃度による移動</button>
+    <button type="button" role="tab" aria-selected="false" aria-controls="panel-shiftv"  id="tab-shiftv"  data-tab="shiftv">⑨ 圧力・体積による移動</button>
+    <button type="button" role="tab" aria-selected="false" aria-controls="panel-shiftt"  id="tab-shiftt"  data-tab="shiftt">⑩ 温度による移動</button>
+    <button type="button" role="tab" aria-selected="false" aria-controls="panel-haber"   id="tab-haber"   data-tab="haber">⑪ ハーバー・ボッシュ法</button>
+  </nav>
+</header>
+
+<main>
+  <!-- ① 衝突しても反応しない -->
+  <section class="panel active" id="panel-collide" role="tabpanel" aria-labelledby="tab-collide">
+    <div class="layout">
+      <div class="chart-card" data-label="PARTICLE MODEL" id="chartwrap-collide">
+        <svg id="chart-collide" viewBox="0 0 760 480" role="img" aria-label="H2とI2の衝突。エネルギーが活性化エネルギーを超えた衝突だけが反応する"></svg>
+      </div>
+      <div class="side">
+        <div class="card law">
+          <div class="eqline">H₂ + I₂ → 2HI</div>
+          <div class="legend">
+            <span><i style="background:var(--h2)"></i>H₂</span>
+            <span><i style="background:var(--i2)"></i>I₂</span>
+            <span><i style="background:var(--hi)"></i>HI</span>
+          </div>
+        </div>
+        <div class="card">
+          <h2>ぶつける</h2>
+          <div class="row">
+            <button class="btn primary" id="col-1" type="button">1回</button>
+            <button class="btn" id="col-10" type="button">10回</button>
+            <button class="btn" id="col-100" type="button">100回</button>
+            <button class="btn" id="col-reset" type="button">初期値</button>
+          </div>
+        </div>
+        <div class="card">
+          <h2>数えた結果</h2>
+          <div class="tally">
+            <div><span class="t-k">ぶつかった回数</span><span class="t-v" id="col-n">0</span></div>
+            <div><span class="t-k">反応した回数</span><span class="t-v hit" id="col-r">0</span></div>
+          </div>
+          <div class="readout" id="col-readout" style="margin-top:10px"></div>
+          <div class="verdict" id="col-verdict"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ② 活性化エネルギー -->
+  <section class="panel" id="panel-energy" role="tabpanel" aria-labelledby="tab-energy">
+    <div class="layout">
+      <div class="chart-card" data-label="ENERGY DIAGRAM" id="chartwrap-energy">
+        <svg id="chart-energy" viewBox="0 0 760 480" role="img" aria-label="反応の進み方とエネルギーの関係。活性化エネルギーの山と反応熱"></svg>
+        <div class="tooltip" id="tip-energy"></div>
+      </div>
+      <div class="side">
+        <div class="card law">
+          <div class="eqline">H₂ + I₂ ⇄ 2HI</div>
+          <div class="diagram-block">
+            <span class="diagram-label">MOLECULE</span>
+            <svg id="cont-energy" viewBox="0 0 300 96" role="img" aria-label="いまの分子のエネルギーと山の高さの比較"></svg>
+          </div>
+        </div>
+        <div class="card">
+          <h2>変数（スライダーで操作）</h2>
+          <div class="ctrl">
+            <label>分子のもつエネルギー <span class="val"><span id="en-e-val">10.0</span> kJ/mol</span></label>
+            <input type="range" id="en-e" min="0" max="120" step="0.5" value="10">
+          </div>
+          <div class="ctrl">
+            <label><span>活性化エネルギー E<sub>a</sub></span> <span class="val"><span id="en-ea-val">60.0</span> kJ/mol</span></label>
+            <input type="range" id="en-ea" min="10" max="120" step="1" value="60">
+          </div>
+          <div class="ctrl">
+            <label>反応熱 ΔH <span class="val"><span id="en-dh-val">−50.0</span> kJ/mol</span></label>
+            <input type="range" id="en-dh" min="-100" max="60" step="1" value="-50">
+          </div>
+          <div class="row">
+            <button class="btn" id="en-reset" type="button">初期値</button>
+          </div>
+        </div>
+        <div class="card">
+          <h2>現在の状態</h2>
+          <div class="readout" id="en-readout"></div>
+          <div class="verdict" id="en-verdict"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ③ 温度とエネルギー分布 -->
+  <section class="panel" id="panel-dist" role="tabpanel" aria-labelledby="tab-dist">
+    <div class="layout">
+      <div class="chart-card" data-label="ENERGY DISTRIBUTION" id="chartwrap-dist">
+        <svg id="chart-dist" viewBox="0 0 760 480" role="img" aria-label="分子のエネルギー分布。活性化エネルギーより右の面積が反応できる分子"></svg>
+        <div class="tooltip" id="tip-dist"></div>
+      </div>
+      <div class="side">
+        <div class="card law">
+          <div class="diagram-block" style="margin-top:0;padding-top:0;border-top:0">
+            <span class="diagram-label">200 MOLECULES</span>
+            <svg id="cont-dist" viewBox="0 0 300 132" role="img" aria-label="200個の分子のうち、活性化エネルギーを超えているものが色つき"></svg>
+          </div>
+        </div>
+        <div class="card">
+          <h2>変数（スライダーで操作）</h2>
+          <div class="ctrl">
+            <label>温度 T <span class="val"><span id="di-t-val">500</span> K</span></label>
+            <input type="range" id="di-t" min="300" max="1200" step="10" value="500">
+          </div>
+          <div class="ctrl">
+            <label><span>活性化エネルギー E<sub>a</sub></span> <span class="val"><span id="di-ea-val">15.0</span> kJ/mol</span></label>
+            <input type="range" id="di-ea" min="5" max="60" step="1" value="15">
+          </div>
+          <div class="row">
+            <button class="btn" id="di-reset" type="button">初期値</button>
+            <button class="btn" id="di-real" type="button">実際の反応</button>
+          </div>
+        </div>
+        <div class="card">
+          <h2>現在の状態</h2>
+          <div class="readout" id="di-readout"></div>
+          <div class="verdict" id="di-verdict"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ④ 濃度と反応の速さ -->
+  <section class="panel" id="panel-conc" role="tabpanel" aria-labelledby="tab-conc">
+    <div class="layout">
+      <div class="chart-card" data-label="PARTICLE MODEL" id="chartwrap-conc">
+        <svg id="chart-conc" viewBox="0 0 760 480" role="img" aria-label="箱の中の分子の数と、出会う組み合わせの数の関係"></svg>
+      </div>
+      <div class="side">
+        <div class="card law">
+          <div class="eqline">v = k[H₂][I₂]</div>
+          <div class="diagram-block">
+            <span class="diagram-label">RATE vs CONCENTRATION</span>
+            <svg id="cont-conc" viewBox="0 0 300 150" role="img" aria-label="H2の数と反応の速さの関係。原点を通る直線"></svg>
+          </div>
+        </div>
+        <div class="card">
+          <h2>分子の数</h2>
+          <div class="row">
+            <span style="font-size:12px;font-weight:850;color:var(--ink2);min-width:34px">H₂</span>
+            <button class="btn" id="cn-a-minus" type="button">−</button>
+            <span class="val" id="cn-a-val" style="min-width:26px;text-align:center;font-weight:850;color:var(--deep)">4</span>
+            <button class="btn" id="cn-a-plus" type="button">＋</button>
+          </div>
+          <div class="row">
+            <span style="font-size:12px;font-weight:850;color:var(--ink2);min-width:34px">I₂</span>
+            <button class="btn" id="cn-b-minus" type="button">−</button>
+            <span class="val" id="cn-b-val" style="min-width:26px;text-align:center;font-weight:850;color:var(--deep)">4</span>
+            <button class="btn" id="cn-b-plus" type="button">＋</button>
+          </div>
+          <div class="row"><button class="btn" id="cn-reset" type="button">初期値</button></div>
+        </div>
+        <div class="card">
+          <h2>数えた結果</h2>
+          <div class="tally">
+            <div><span class="t-k">出会う組み合わせ</span><span class="t-v" id="cn-pairs">16</span></div>
+            <div><span class="t-k">はじめの何倍</span><span class="t-v hit" id="cn-times">1.0</span></div>
+          </div>
+          <div class="readout" id="cn-readout" style="margin-top:10px"></div>
+          <div class="verdict" id="cn-verdict"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑤ 触媒 -->
+  <section class="panel" id="panel-cat" role="tabpanel" aria-labelledby="tab-cat">
+    <div class="panel-tools">
+      <div class="switch" role="group" aria-label="触媒の有無">
+        <button type="button" data-cat="off" aria-pressed="true">触媒なし</button>
+        <button type="button" data-cat="on" aria-pressed="false">触媒あり</button>
+      </div>
+      <div class="switch" role="group" aria-label="グラフの表示内容">
+        <button type="button" data-catview="energy" aria-pressed="true">エネルギー図</button>
+        <button type="button" data-catview="conc" aria-pressed="false">平衡への到達</button>
+      </div>
+    </div>
+    <div class="layout">
+      <div class="chart-card" data-label="ENERGY DIAGRAM" id="chartwrap-cat">
+        <svg id="chart-cat" viewBox="0 0 760 480" role="img" aria-label="触媒があるときとないときのエネルギー図の比較"></svg>
+      </div>
+      <div class="side">
+        <div class="card law">
+          <div class="diagram-block" style="margin-top:0;padding-top:0;border-top:0">
+            <span class="diagram-label">ENERGY DISTRIBUTION</span>
+            <svg id="cont-cat" viewBox="0 0 300 150" role="img" aria-label="触媒によって山を越えられる分子が増えることを示す分布図"></svg>
+          </div>
+        </div>
+        <div class="card">
+          <h2>変数（スライダーで操作）</h2>
+          <div class="ctrl">
+            <label><span>触媒なしの E<sub>a</sub></span> <span class="val"><span id="ct-ea0-val">60.0</span> kJ/mol</span></label>
+            <input type="range" id="ct-ea0" min="30" max="120" step="1" value="60">
+          </div>
+          <div class="ctrl">
+            <label><span>触媒ありの E<sub>a</sub></span> <span class="val"><span id="ct-ea1-val">35.0</span> kJ/mol</span></label>
+            <input type="range" id="ct-ea1" min="10" max="119" step="1" value="35">
+          </div>
+          <div class="ctrl">
+            <label>温度 T <span class="val"><span id="ct-t-val">500</span> K</span></label>
+            <input type="range" id="ct-t" min="300" max="900" step="10" value="500">
+          </div>
+          <div class="row"><button class="btn" id="ct-reset" type="button">初期値</button></div>
+        </div>
+        <div class="card">
+          <h2>現在の状態</h2>
+          <div class="readout" id="ct-readout"></div>
+          <div class="verdict" id="ct-verdict"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑥ 速さと平衡 -->
+  <section class="panel" id="panel-eqrate" role="tabpanel" aria-labelledby="tab-eqrate">
+    <div class="layout">
+      <div class="chart-card" data-label="FORWARD vs REVERSE RATE" id="chartwrap-eqrate">
+        <svg id="chart-eqrate" viewBox="0 0 760 480" role="img" aria-label="正反応と逆反応の速さの時間変化。2本が重なったところが平衡"></svg>
+        <div class="tooltip" id="tip-eqrate"></div>
+      </div>
+      <div class="side">
+        <div class="card law">
+          <div class="eqline">H₂ + I₂ ⇄ 2HI</div>
+          <div class="diagram-block">
+            <span class="diagram-label">PARTICLE MODEL</span>
+            <svg id="cont-eqrate" viewBox="0 0 300 130" role="img" aria-label="その時刻の分子の様子"></svg>
+          </div>
+        </div>
+        <div class="card">
+          <h2>時間を進める</h2>
+          <div class="ctrl">
+            <label>時刻 t <span class="val"><span id="eq-t-val">0.0</span> s</span></label>
+            <input type="range" id="eq-t" min="0" max="12" step="0.05" value="0">
+          </div>
+          <div class="row">
+            <button class="btn play" id="eq-play" type="button">▶ 再生</button>
+            <div class="switch" role="group" aria-label="再生の速さ">
+              <button type="button" data-eqspeed="1" aria-pressed="true">等倍</button>
+              <button type="button" data-eqspeed="0.1" aria-pressed="false">0.1倍速</button>
+            </div>
+          </div>
+          <div class="row">
+            <button class="btn" id="eq-start" type="button">はじめ</button>
+            <button class="btn" id="eq-end" type="button">平衡まで</button>
+          </div>
+        </div>
+        <div class="card">
+          <h2>入れ替わり</h2>
+          <div class="row">
+            <button class="btn primary" id="eq-step" type="button">少しだけ時間を進める</button>
+          </div>
+          <div class="tally" style="margin-top:10px">
+            <div><span class="t-k">入れ替わった回数</span><span class="t-v hit" id="eq-swaps">0</span></div>
+            <div><span class="t-k">HI の数</span><span class="t-v" id="eq-nhi">0</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <h2>現在の状態</h2>
+          <div class="readout" id="eq-readout"></div>
+          <div class="verdict" id="eq-verdict"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ⑦ 平衡定数 K -->
+  <section class="panel" id="panel-kconst" role="tabpanel" aria-labelledby="tab-kconst">
+    <div class="layout">
+      <div class="chart-card" data-label="PARTICLE MODEL" id="chartwrap-kconst">
+        <svg id="chart-kconst" viewBox="0 0 760 480" role="img" aria-label="初濃度を変えても平衡定数が変わらないことを示す粒子モデルと計算"></svg>
+      </div>
+      <div class="side">
+        <div class="card law">
+          <div class="eqline">K = [HI]² ÷ ([H₂][I₂])</div>
+        </div>
+        <div class="card">
+          <h2>はじめの濃度</h2>
+          <div class="row">
+            <span style="font-size:12px;font-weight:850;color:var(--ink2);min-width:34px">H₂</span>
+            <button class="btn" id="kc-a-minus" type="button">−</button>
+            <span class="val" id="kc-a-val" style="min-width:48px;text-align:center;font-weight:850;color:var(--deep)">1.00</span>
+            <button class="btn" id="kc-a-plus" type="button">＋</button>
+          </div>
+          <div class="row">
+            <span style="font-size:12px;font-weight:850;color:var(--ink2);min-width:34px">I₂</span>
+            <button class="btn" id="kc-b-minus" type="button">−</button>
+            <span class="val" id="kc-b-val" style="min-width:48px;text-align:center;font-weight:850;color:var(--deep)">1.00</span>
+            <button class="btn" id="kc-b-plus" type="button">＋</button>
+          </div>
+          <div class="row">
+            <button class="btn primary" id="kc-record" type="button">記録する</button>
+            <button class="btn" id="kc-clear" type="button">消す</button>
+          </div>
+        </div>
+        <div class="card">
+          <h2>記録</h2>
+          <table class="log" id="kc-table"></table>
+          <div class="verdict" id="kc-verdict"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑧ 濃度による移動 -->
+  <section class="panel" id="panel-shiftc" role="tabpanel" aria-labelledby="tab-shiftc">
+    <div class="layout">
+      <div class="chart-card" data-label="PARTICLE MODEL" id="chartwrap-shiftc">
+        <svg id="chart-shiftc" viewBox="0 0 760 480" role="img" aria-label="物質を加えたときに平衡が移動する様子"></svg>
+      </div>
+      <div class="side">
+        <div class="card law">
+          <div class="eqline">H₂ + I₂ ⇄ 2HI</div>
+          <div class="diagram-block">
+            <span class="diagram-label">Q AND K</span>
+            <svg id="line-shiftc" viewBox="0 0 300 84" role="img" aria-label="QとKの大小関係を示す数直線"></svg>
+          </div>
+        </div>
+        <div class="card">
+          <h2>加える</h2>
+          <div class="row">
+            <button class="btn" id="sc-add-h2" type="button">H₂ を加える</button>
+            <button class="btn" id="sc-add-hi" type="button">HI を加える</button>
+          </div>
+          <div class="row">
+            <button class="btn primary" id="sc-step" type="button">反応を進める</button>
+            <button class="btn" id="sc-reset" type="button">はじめに戻す</button>
+          </div>
+        </div>
+        <div class="card">
+          <h2>現在の状態</h2>
+          <div class="readout" id="sc-readout"></div>
+          <div class="verdict" id="sc-verdict"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑨ 圧力・体積による移動 -->
+  <section class="panel" id="panel-shiftv" role="tabpanel" aria-labelledby="tab-shiftv">
+    <div class="layout">
+      <div class="chart-card" data-label="PARTICLE MODEL" id="chartwrap-shiftv">
+        <svg id="chart-shiftv" viewBox="0 0 760 480" role="img" aria-label="体積を変えたときの平衡の移動。分子数が減る反応と変わらない反応の比較"></svg>
+      </div>
+      <div class="side">
+        <div class="card law">
+          <div class="eqline" style="font-size:14px">N₂ + 3H₂ ⇄ 2NH₃　（4→2）</div>
+          <div class="eqline" style="font-size:14px;margin-top:4px">H₂ + I₂ ⇄ 2HI　（2→2）</div>
+        </div>
+        <div class="card">
+          <h2>変数（スライダーで操作）</h2>
+          <div class="ctrl">
+            <label>体積 V <span class="val"><span id="sv-V-val">8.0</span> L</span></label>
+            <input type="range" id="sv-V" min="1" max="20" step="0.5" value="8">
+          </div>
+          <div class="row">
+            <button class="btn" id="sv-press" type="button">圧縮する</button>
+            <button class="btn" id="sv-expand" type="button">膨張させる</button>
+            <button class="btn" id="sv-reset" type="button">初期値</button>
+          </div>
+        </div>
+        <div class="card">
+          <h2>現在の状態</h2>
+          <div class="readout" id="sv-readout"></div>
+          <div class="verdict" id="sv-verdict"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑩ 温度による移動 -->
+  <section class="panel" id="panel-shiftt" role="tabpanel" aria-labelledby="tab-shiftt">
+    <div class="panel-tools">
+      <div class="switch" role="group" aria-label="反応の種類">
+        <button type="button" data-heat="exo" aria-pressed="true">発熱反応</button>
+        <button type="button" data-heat="endo" aria-pressed="false">吸熱反応</button>
+      </div>
+    </div>
+    <div class="layout">
+      <div class="chart-card" data-label="PARTICLE MODEL" id="chartwrap-shiftt">
+        <svg id="chart-shiftt" viewBox="0 0 760 480" role="img" aria-label="温度を変えたときの平衡の移動"></svg>
+      </div>
+      <div class="side">
+        <div class="card law">
+          <div class="eqline">A + B ⇄ 2C</div>
+          <div class="diagram-block">
+            <span class="diagram-label">YIELD (%) vs TEMPERATURE</span>
+            <svg id="cont-shiftt" viewBox="0 0 300 150" role="img" aria-label="温度と生成物の割合の関係"></svg>
+          </div>
+        </div>
+        <div class="card">
+          <h2>変数（スライダーで操作）</h2>
+          <div class="ctrl">
+            <label>温度 T <span class="val"><span id="st-T-val">400</span> K</span></label>
+            <input type="range" id="st-T" min="250" max="800" step="5" value="400">
+          </div>
+          <div class="ctrl">
+            <label>反応熱の大きさ <span class="val"><span id="st-H-val">50</span> kJ/mol</span></label>
+            <input type="range" id="st-H" min="10" max="120" step="5" value="50">
+          </div>
+          <div class="row"><button class="btn" id="st-reset" type="button">初期値</button></div>
+        </div>
+        <div class="card">
+          <h2>現在の状態</h2>
+          <div class="readout" id="st-readout"></div>
+          <div class="verdict" id="st-verdict"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑪ ハーバー・ボッシュ法 -->
+  <section class="panel" id="panel-haber" role="tabpanel" aria-labelledby="tab-haber">
+    <div class="layout">
+      <div class="chart-card" data-label="AMMONIA YIELD" id="chartwrap-haber">
+        <svg id="chart-haber" viewBox="0 0 760 480" role="img" aria-label="圧力と温度によるアンモニアの収率"></svg>
+        <div class="tooltip" id="tip-haber"></div>
+      </div>
+      <div class="side">
+        <div class="card law">
+          <div class="eqline">N₂ + 3H₂ ⇄ 2NH₃</div>
+          <div class="diagram-block">
+            <span class="diagram-label">PARTICLE MODEL</span>
+            <svg id="cont-haber" viewBox="0 0 300 130" role="img" aria-label="その条件での気体の内訳"></svg>
+          </div>
+        </div>
+        <div class="card">
+          <h2>変数（スライダーで操作）</h2>
+          <div class="ctrl">
+            <label>温度 T <span class="val"><span id="hb-T-val">450</span> ℃</span></label>
+            <input type="range" id="hb-T" min="200" max="700" step="10" value="450">
+          </div>
+          <div class="ctrl">
+            <label>全圧 P <span class="val"><span id="hb-P-val">200</span> bar</span></label>
+            <input type="range" id="hb-P" min="10" max="600" step="10" value="200">
+          </div>
+          <div class="row">
+            <button class="btn" id="hb-real" type="button">実際の条件</button>
+            <button class="btn" id="hb-low" type="button">低温にしてみる</button>
+          </div>
+        </div>
+        <div class="card">
+          <h2>現在の状態</h2>
+          <div class="readout" id="hb-readout"></div>
+          <div class="verdict" id="hb-verdict"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>大阪女学院中学校・高等学校　Yuto Yamaguchi</footer>
+
+<script>
+/* ============================================================
+   共通の道具（gas-laws / equilibrium と同じ作法）
+   ============================================================ */
+const $ = id => document.getElementById(id);
+const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+const fmt = (x, d = 0) => (+x).toFixed(d);
+
+const SUP = ['⁰','¹','²','³','⁴','⁵','⁶','⁷','⁸','⁹'];
+function fmtSci(x) {
+  if (!isFinite(x)) return '—';
+  if (x === 0) return '0';
+  const sign = x < 0 ? '−' : '';
+  x = Math.abs(x);
+  if (x >= 0.01 && x < 1000) return sign + x.toPrecision(3);
+  let e = Math.floor(Math.log10(x));
+  let m = (x / Math.pow(10, e)).toPrecision(3);
+  if (+m >= 10) { m = (+m / 10).toPrecision(3); e++; }
+  const es = String(e).split('').map(c => (c === '-' ? '⁻' : SUP[+c])).join('');
+  return `${sign}${m}×10${es}`;
+}
+
+const W = 760, H = 480, ML = 78, MR = 26, MT = 26, MB = 62;
+const PW = W - ML - MR, PH = H - MT - MB;
+
+function scales(xMin, xMax, yMin, yMax) {
+  return {
+    sx: x => ML + ((x - xMin) / (xMax - xMin)) * PW,
+    sy: y => MT + PH - ((y - yMin) / (yMax - yMin)) * PH,
+  };
+}
+
+function frame(o) {
+  const xMin = o.xMin ?? 0, yMin = o.yMin ?? 0;
+  const { sx, sy } = scales(xMin, o.xMax, yMin, o.yMax);
+  let s = '';
+  for (const t of o.xTicks) {
+    if (t.v === xMin) continue;
+    s += `<line x1="${fmt(sx(t.v),1)}" y1="${MT}" x2="${fmt(sx(t.v),1)}" y2="${MT + PH}" stroke="var(--grid)" stroke-width="1"/>`;
+  }
+  for (const t of o.yTicks) {
+    if (t.v === yMin) continue;
+    s += `<line x1="${ML}" y1="${fmt(sy(t.v),1)}" x2="${ML + PW}" y2="${fmt(sy(t.v),1)}" stroke="var(--grid)" stroke-width="1"/>`;
+  }
+  s += `<line x1="${ML}" y1="${fmt(sy(yMin),1)}" x2="${ML + PW}" y2="${fmt(sy(yMin),1)}" stroke="var(--axis)" stroke-width="1.5"/>`;
+  s += `<line x1="${ML}" y1="${MT}" x2="${ML}" y2="${MT + PH}" stroke="var(--axis)" stroke-width="1.5"/>`;
+  for (const t of o.xTicks) s += `<text x="${fmt(sx(t.v),1)}" y="${MT + PH + 22}" text-anchor="middle" font-size="14" fill="var(--ink2)">${t.label}</text>`;
+  for (const t of o.yTicks) s += `<text x="${ML - 10}" y="${fmt(sy(t.v) + 5,1)}" text-anchor="end" font-size="14" fill="var(--ink2)">${t.label}</text>`;
+  s += `<text x="${ML + PW / 2}" y="${H - 14}" text-anchor="middle" font-size="16" fill="var(--ink)">${o.xLabel}</text>`;
+  s += `<text x="20" y="${MT + PH / 2}" text-anchor="middle" font-size="16" fill="var(--ink)" transform="rotate(-90 20 ${MT + PH / 2})">${o.yLabel}</text>`;
+  return { sx, sy, axesSvg: s };
+}
+
+function ticks(min, max, step, dec) {
+  const out = [];
+  for (let v = min; v <= max + step * 1e-6; v += step) out.push({ v, label: fmt(v, dec ?? 0) });
+  return out;
+}
+
+function polyline(pts, sx, sy, stroke, width, dash) {
+  if (!pts.length) return '';
+  const d = pts.map((p, i) => (i ? 'L' : 'M') + fmt(sx(p[0]), 1) + ' ' + fmt(sy(p[1]), 1)).join(' ');
+  return `<path d="${d}" fill="none" stroke="${stroke}" stroke-width="${width}"${dash ? ` stroke-dasharray="${dash}"` : ''} stroke-linejoin="round" stroke-linecap="round"/>`;
+}
+
+function setReadout(el, rows) {
+  el.innerHTML = rows.map(r => `<span class="k">${r[0]}</span><span class="v${r[2] ? ' dep' : ''}">${r[1]}</span>`).join('');
+}
+
+function chartLegend(items, x, y) {
+  let s = '', dx = 0;
+  for (const it of items) {
+    const label = String(it.label);
+    // 全角と半角で幅が倍ちがうので、文字ごとに数えないと項目が詰まって重なる
+    const w = [...label].reduce((a, ch) => a + (ch.charCodeAt(0) < 128 ? 7.4 : 13.2), 0);
+    s += `<rect x="${fmt(x + dx,1)}" y="${y - 9}" width="12" height="12" rx="3" fill="${it.color}"/>`;
+    s += `<text x="${fmt(x + dx + 17,1)}" y="${y + 1}" font-size="13" fill="var(--ink2)" font-weight="700">${label}</text>`;
+    dx += 30 + w;
+  }
+  return s;
+}
+
+function attachHover(svgId, tipId, getState) {
+  const svg = $(svgId), tip = $(tipId);
+  svg.addEventListener('pointermove', ev => {
+    const st = getState();
+    const rect = svg.getBoundingClientRect();
+    const px = (ev.clientX - rect.left) / rect.width * W;
+    const xData = st.xMin + (px - ML) / PW * (st.xMax - st.xMin);
+    if (xData < st.domain[0] || xData > st.domain[1]) { tip.style.display = 'none'; return; }
+    tip.innerHTML = st.lines(xData).join('<br>');
+    tip.style.display = 'block';
+    const wr = svg.parentElement.getBoundingClientRect();
+    let left = ev.clientX - wr.left + 14, top = ev.clientY - wr.top - 10;
+    if (left + tip.offsetWidth > wr.width - 8) left -= tip.offsetWidth + 28;
+    tip.style.left = left + 'px'; tip.style.top = top + 'px';
+  });
+  svg.addEventListener('pointerleave', () => { tip.style.display = 'none'; });
+}
+
+// 決定的疑似乱数（seed 固定）。再描画で粒子の散らばりが飛ばないようにする
+const PARTS = [];
+(() => {
+  let s = 20260812;
+  const r = () => { s = (s * 16807) % 2147483647; return (s % 1000) / 1000; };
+  for (let i = 0; i < 80; i++) PARTS.push([r(), r()]);
+})();
+
+function makeRnd(seed) { let s = seed; return () => (s = (s * 16807) % 2147483647) / 2147483647; }
+
+function shuffled(n, seed) {
+  const a = [...Array(n).keys()];
+  const rnd = makeRnd(seed);
+  for (let i = n - 1; i > 0; i--) {
+    const j = Math.floor(rnd() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// 箱を格子に切って1マス1分子。マス内の余白の範囲だけ位置をずらすので重なりは起こらない
+function gridLayout(x, y, w, h, n, wf, hf, baseR) {
+  if (n <= 0) return { slots: [], r: baseR };
+  let best = null;
+  for (let cols = 1; cols <= n; cols++) {
+    const rows = Math.ceil(n / cols);
+    const cw = w / cols, ch = h / rows;
+    const r = Math.min(cw / wf, ch / hf);
+    if (!best || r > best.r) best = { cols, rows, cw, ch, r };
+  }
+  const r = Math.min(baseR, best.r);
+  const slots = [];
+  for (let i = 0; i < n; i++) {
+    slots.push({
+      cx: x + best.cw * ((i % best.cols) + 0.5),
+      cy: y + best.ch * (Math.floor(i / best.cols) + 0.5),
+      fx: Math.max(0, best.cw - wf * r) / 2,
+      fy: Math.max(0, best.ch - hf * r) / 2,
+    });
+  }
+  return { slots, r };
+}
+
+// 箱の中に分子を重ならないように並べる。specs:[{n, draw(cx,cy,r)}]
+function drawMolecules(x, y, w, h, specs, o) {
+  const total = specs.reduce((sum, sp) => sum + sp.n, 0);
+  const { slots, r } = gridLayout(x, y, w, h, total, o.wf, o.hf, o.baseR);
+  if (!slots.length) return '';
+  const order = shuffled(total, 20260812);   // 種類が偏って並ばないように席を散らす
+  let s = '', i = 0;
+  for (const sp of specs) {
+    for (let k = 0; k < sp.n; k++, i++) {
+      const slot = slots[order[i]];
+      const j = i % PARTS.length;
+      s += sp.draw(slot.cx + (PARTS[j][0] - 0.5) * 2 * slot.fx, slot.cy + (PARTS[j][1] - 0.5) * 2 * slot.fy, r);
+    }
+  }
+  return s;
+}
+
+// 反応した分子を囲む枠。二原子分子の見かけ（横 約3.7r・縦 約2r）に合わせた角丸で、
+// 円で囲むと縦にはみ出す（狭い箱では枠外へ出てしまう）
+function highlightBox(cx, cy, r, color) {
+  const w = r * 3.9, h = r * 2.5;
+  return `<rect x="${fmt(cx - w / 2,1)}" y="${fmt(cy - h / 2,1)}" width="${fmt(w,1)}" height="${fmt(h,1)}" rx="${fmt(r * 0.7,1)}"`
+       + ` fill="none" stroke="${color}" stroke-width="2.4" stroke-dasharray="5 4"/>`;
+}
+
+function diatomic(cx, cy, c1, c2, rr) {
+  const d = rr * 0.85;
+  return `<g><circle cx="${fmt(cx - d,1)}" cy="${fmt(cy,1)}" r="${fmt(rr,1)}" fill="${c1}" stroke="rgba(23,32,51,.45)" stroke-width=".8"/>`
+       + `<circle cx="${fmt(cx + d,1)}" cy="${fmt(cy,1)}" r="${fmt(rr,1)}" fill="${c2}" stroke="rgba(23,32,51,.45)" stroke-width=".8"/></g>`;
+}
+
+/* ============================================================
+   物理モデル（node で単体検証済み）
+   ============================================================ */
+const R = 8.31e-3;   // kJ/(mol·K)
+
+// マクスウェル・ボルツマン分布（エネルギー表示、E は kJ/mol）
+function maxwell(E, T) {
+  if (E <= 0) return 0;
+  const rt = R * T;
+  return 2 * Math.sqrt(E / Math.PI) * Math.pow(rt, -1.5) * Math.exp(-E / rt);
+}
+
+// Ea 以上のエネルギーをもつ分子の割合。
+// E=u² と置換して √E の特異点を消す（そのまま台形則にかけると E→0 付近で 4×10⁻⁵ ずれる）
+function fractionAbove(Ea, T) {
+  const rt = R * T;
+  const lo = Math.sqrt(Math.max(0, Ea)), hi = Math.sqrt(Math.max(0, Ea) + 60 * rt);
+  const n = 2000, h = (hi - lo) / n;
+  const k = 4 / Math.sqrt(Math.PI) * Math.pow(rt, -1.5);
+  let s = 0;
+  for (let i = 0; i <= n; i++) {
+    const u = lo + i * h;
+    s += ((i === 0 || i === n) ? 0.5 : 1) * u * u * Math.exp(-u * u / rt);
+  }
+  return s * h * k;
+}
+
+// 自由度3のカイ二乗×RT/2 ＝ マクスウェルのエネルギー分布そのもの。
+// ①の衝突エネルギーはこれで引くので、③の面積と食い違わない
+function makeGauss(rnd) {
+  return () => {
+    const u = Math.max(rnd(), 1e-12), v = rnd();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+  };
+}
+function sampleEnergy(g, T) {
+  const a = g(), b = g(), c = g();
+  return R * T / 2 * (a * a + b * b + c * c);
+}
+
+/* ============================================================
+   ① 衝突しても反応しない
+   ============================================================ */
+// 席は 24 個に固定し、中身だけ入れ替える（H₂+I₂→2HI は分子の総数が変わらない）
+const COL_N = 24, COL_T = 500, COL_EA = 15, COL_EMAX = 45;
+const col = {
+  ids: [],            // 0=H₂ 1=I₂ 2=HI
+  hits: 0, tries: 0,
+  lastE: null, lastOk: false, lastSeats: [],
+  gauss: null, pick: null,
+  layout: null,
+};
+
+function colReset() {
+  col.ids = Array.from({ length: COL_N }, (_, i) => (i % 2 === 0 ? 0 : 1));
+  col.hits = 0; col.tries = 0;
+  col.lastE = null; col.lastOk = false; col.lastSeats = [];
+  col.gauss = makeGauss(makeRnd(20260812));
+  col.pick = makeRnd(98765);
+}
+
+const colCount = () => col.ids.reduce((c, v) => (c[v]++, c), [0, 0, 0]);
+
+function colSeatOf(kind) {
+  const seats = [];
+  for (let i = 0; i < COL_N; i++) if (col.ids[i] === kind) seats.push(i);
+  if (!seats.length) return -1;
+  return seats[Math.floor(col.pick() * seats.length) % seats.length];
+}
+
+// 1回ぶつける。エネルギーが Ea を超えたときだけ反応する
+function colCollide() {
+  const a = colSeatOf(0), b = colSeatOf(1);
+  if (a < 0 || b < 0) return false;
+  const E = sampleEnergy(col.gauss, COL_T);
+  col.tries++;
+  col.lastE = E;
+  col.lastSeats = [a, b];
+  col.lastOk = E >= COL_EA;
+  if (col.lastOk) { col.hits++; col.ids[a] = 2; col.ids[b] = 2; }
+  return true;
+}
+
+function colRun(n) {
+  for (let i = 0; i < n; i++) if (!colCollide()) break;
+  drawCollide();
+}
+
+function drawCollide() {
+  const BX = 44, BY = 34, BW = W - 88, BH = 268;
+  if (!col.layout) col.layout = gridLayout(BX + 10, BY + 10, BW - 20, BH - 20, COL_N, 3.5, 2.6, 27);
+  const { slots, r } = col.layout;
+
+  let s = `<rect x="${BX}" y="${BY}" width="${BW}" height="${BH}" rx="16" fill="#f7fafe" stroke="var(--line)" stroke-width="1.5"/>`;
+
+  const flash = new Set(col.lastSeats);
+  for (let i = 0; i < COL_N; i++) {
+    const slot = slots[i], j = i % PARTS.length;
+    const cx = slot.cx + (PARTS[j][0] - 0.5) * 2 * slot.fx;
+    const cy = slot.cy + (PARTS[j][1] - 0.5) * 2 * slot.fy;
+    if (flash.has(i)) s += highlightBox(cx, cy, r, col.lastOk ? 'var(--hi)' : 'var(--no)');
+    const id = col.ids[i];
+    s += id === 0 ? diatomic(cx, cy, 'var(--h2)', 'var(--h2)', r)
+       : id === 1 ? diatomic(cx, cy, 'var(--i2)', 'var(--i2)', r)
+       :            diatomic(cx, cy, 'var(--h2)', 'var(--hi)', r);
+  }
+
+  // 下段：このぶつかり方のエネルギーと山の高さ
+  const GX0 = 96, GX1 = W - 56, GY = 396;
+  const gx = e => GX0 + clamp(e / COL_EMAX, 0, 1) * (GX1 - GX0);
+  s += `<text x="${BX}" y="${GY - 34}" font-size="13" font-weight="800" fill="var(--ink3)">ぶつかったときのエネルギー</text>`;
+  s += `<line x1="${GX0}" y1="${GY + 26}" x2="${GX1}" y2="${GY + 26}" stroke="var(--axis)" stroke-width="1.5"/>`;
+  for (let e = 0; e <= COL_EMAX; e += 15) {
+    s += `<line x1="${fmt(gx(e),1)}" y1="${GY + 26}" x2="${fmt(gx(e),1)}" y2="${GY + 31}" stroke="var(--axis)" stroke-width="1.2"/>`;
+    s += `<text x="${fmt(gx(e),1)}" y="${GY + 46}" text-anchor="middle" font-size="12" fill="var(--ink2)">${e}</text>`;
+  }
+  s += `<text x="${GX1}" y="${GY + 62}" text-anchor="end" font-size="12" fill="var(--ink3)">kJ/mol</text>`;
+
+  if (col.lastE !== null) {
+    const c = col.lastOk ? 'var(--hi)' : 'var(--no)';
+    s += `<rect x="${GX0}" y="${GY + 4}" width="${fmt(gx(col.lastE) - GX0,1)}" height="22" rx="5" fill="${c}" opacity=".85"/>`;
+    s += `<text x="${fmt(Math.min(gx(col.lastE) + 8, GX1 - 4),1)}" y="${GY + 21}" text-anchor="${gx(col.lastE) > GX1 - 90 ? 'end' : 'start'}" font-size="13" font-weight="850" fill="${c}">${fmt(col.lastE, 1)}</text>`;
+  } else {
+    s += `<text x="${GX0}" y="${GY + 21}" font-size="13" font-weight="700" fill="var(--ink3)">ボタンを押すと1回ぶつかります</text>`;
+  }
+  // 活性化エネルギーの線（越えられるかどうかの境目）
+  s += `<line x1="${fmt(gx(COL_EA),1)}" y1="${GY - 16}" x2="${fmt(gx(COL_EA),1)}" y2="${GY + 34}" stroke="var(--blue)" stroke-width="2.4"/>`;
+  s += `<text x="${fmt(gx(COL_EA),1)}" y="${GY - 22}" text-anchor="middle" font-size="13" font-weight="850" fill="var(--blue)">Eₐ = ${fmt(COL_EA, 0)}</text>`;
+
+  $('chart-collide').innerHTML = s;
+
+  // 数えた結果
+  const c = colCount();
+  $('col-n').textContent = col.tries;
+  $('col-r').textContent = col.hits;
+  const rate = col.tries ? col.hits / col.tries : 0;
+  setReadout($('col-readout'), [
+    ['反応した割合', col.tries ? fmt(rate * 100, 1) + ' ％' : '—', true],
+    ['計算での割合', fmt(fractionAbove(COL_EA, COL_T) * 100, 1) + ' ％'],
+    ['残った H₂ / I₂', `${c[0]} / ${c[1]}`],
+    ['できた HI', String(c[2])],
+  ]);
+
+  const stopped = c[0] === 0 || c[1] === 0;
+  $('col-verdict').textContent = stopped
+    ? 'H₂ と I₂ がなくなったので、これ以上は反応しない。'
+    : (col.lastE === null ? '' : (col.lastOk ? '山を越えた。反応した。' : '山を越えられず、はねかえった。'));
+  for (const id of ['col-1', 'col-10', 'col-100']) $(id).disabled = stopped;
+}
+
+/* ============================================================
+   ② 活性化エネルギー
+   ============================================================ */
+// 反応の進み方 x∈[0,1] に沿ったエネルギー。
+// 前半は反応物の高さ(0)から山(Ea)へ、後半は山から生成物(ΔH)へ。
+// なめらかな階段関数 s(t)=t²(3−2t) を使うので、つなぎ目の傾きが 0 になり
+// 山の頂上はちょうど Ea、両端はちょうど 0 と ΔH になる
+// ラベルのおおよその外接矩形。文字数から幅を見積もる（実測との差は余白で吸収する）
+function labelRect(x, y, text, anchor, fs) {
+  const w = [...text].reduce((s, ch) => s + (ch.charCodeAt(0) < 128 ? fs * 0.58 : fs * 1.02), 0);
+  const x0 = anchor === 'end' ? x - w : anchor === 'middle' ? x - w / 2 : x;
+  return { x0, x1: x0 + w, y0: y - fs, y1: y + fs * 0.3 };
+}
+const rectsOverlap = (a, b) => a.x0 < b.x1 - 1 && b.x0 < a.x1 - 1 && a.y0 < b.y1 - 1 && b.y0 < a.y1 - 1;
+// 候補の置き場所を順に試し、すでに置いた文字と重ならない最初の場所を返す
+function placeLabel(cands, text, fs, taken) {
+  for (const c of cands) {
+    const r = labelRect(c.x, c.y, text, c.anchor, fs);
+    if (!taken.some(t => rectsOverlap(r, t))) return { ...c, rect: r };
+  }
+  return { ...cands[0], rect: labelRect(cands[0].x, cands[0].y, text, cands[0].anchor, fs) };
+}
+
+const smooth = t => t * t * (3 - 2 * t);
+function energyAt(x, Ea, dH) {
+  return x <= 0.5 ? Ea * smooth(x / 0.5) : Ea + (dH - Ea) * smooth((x - 0.5) / 0.5);
+}
+// 前半の斜面で高さ e に達する位置（二分法）
+function climbX(e, Ea) {
+  if (e <= 0) return 0;
+  if (e >= Ea) return 0.5;
+  let lo = 0, hi = 0.5;
+  for (let i = 0; i < 60; i++) {
+    const mid = (lo + hi) / 2;
+    if (energyAt(mid, Ea, 0) < e) lo = mid; else hi = mid;
+  }
+  return (lo + hi) / 2;
+}
+
+function enParams() {
+  const dH = +$('en-dh').value;
+  // 吸熱のときは山が生成物より低くなりえないので、Ea の下限を持ち上げる
+  const eaMin = Math.max(10, dH + 10);
+  const ea = $('en-ea');
+  ea.min = eaMin;
+  if (+ea.value < eaMin) ea.value = eaMin;
+  return { E: +$('en-e').value, Ea: +ea.value, dH };
+}
+
+function drawEnergy() {
+  const p = enParams();
+  $('en-e-val').textContent = fmt(p.E, 1);
+  $('en-ea-val').textContent = fmt(p.Ea, 1);
+  $('en-dh-val').textContent = (p.dH < 0 ? '−' : p.dH > 0 ? '+' : '') + fmt(Math.abs(p.dH), 1);
+
+  // 分子のエネルギーが山より高いとき、その高さの線が枠の外へ出てしまうので
+  // 縦軸の上限は山と分子のエネルギーの大きい方に合わせる
+  const yMin = Math.min(0, p.dH) - 20, yMax = Math.max(p.Ea, p.E) + 30;
+  const f = frame({
+    xMin: 0, xMax: 1, yMin, yMax,
+    xTicks: [], yTicks: ticks(Math.ceil(yMin / 20) * 20, yMax, 20, 0),
+    xLabel: '反応の進み方', yLabel: 'エネルギー（kJ/mol）',
+  });
+  const { sx, sy } = f;
+  let s = f.axesSvg;
+
+  // エネルギー曲線
+  const pts = [];
+  for (let i = 0; i <= 300; i++) { const x = i / 300; pts.push([x, energyAt(x, p.Ea, p.dH)]); }
+  s += polyline(pts, sx, sy, 'var(--blue)', 3.4);
+
+  // 反応物・生成物の高さの目安線
+  s += `<line x1="${ML}" y1="${fmt(sy(0),1)}" x2="${fmt(sx(0.5),1)}" y2="${fmt(sy(0),1)}" stroke="var(--axis)" stroke-width="1" stroke-dasharray="4 4"/>`;
+  s += `<line x1="${fmt(sx(0.5),1)}" y1="${fmt(sy(p.dH),1)}" x2="${ML + PW}" y2="${fmt(sy(p.dH),1)}" stroke="var(--axis)" stroke-width="1" stroke-dasharray="4 4"/>`;
+  const taken = [];
+  const put = (x, y, text, anchor, fs, fill, weight) => {
+    taken.push(labelRect(x, y, text, anchor, fs));
+    return `<text x="${fmt(x,1)}" y="${fmt(y,1)}"${anchor !== 'start' ? ` text-anchor="${anchor}"` : ''} font-size="${fs}" font-weight="${weight || 800}" fill="${fill}">${text}</text>`;
+  };
+  s += put(sx(0.02), sy(0) - 9, 'H₂ + I₂', 'start', 14, 'var(--ink2)');
+  s += put(sx(0.98), sy(p.dH) - 9, '2HI', 'end', 14, 'var(--ink2)');
+
+  // 活性化エネルギーの矢印（反応物の高さ → 山の頂上）
+  const ax = sx(0.5) - 66;
+  s += `<line x1="${fmt(ax,1)}" y1="${fmt(sy(0),1)}" x2="${fmt(ax,1)}" y2="${fmt(sy(p.Ea),1)}" stroke="var(--blue)" stroke-width="2"/>`;
+  s += `<path d="M${fmt(ax,1)} ${fmt(sy(p.Ea),1)} l-4.5 9 h9 z" fill="var(--blue)"/>`;
+  s += `<path d="M${fmt(ax,1)} ${fmt(sy(0),1)} l-4.5 -9 h9 z" fill="var(--blue)"/>`;
+  s += put(ax - 8, (sy(0) + sy(p.Ea)) / 2 + 5, `Eₐ ${fmt(p.Ea, 0)}`, 'end', 14, 'var(--blue)', 850);
+
+  // 反応熱の矢印（反応物 → 生成物）
+  if (Math.abs(p.dH) > 0.5) {
+    const hx = sx(0.88);
+    const col2 = p.dH < 0 ? 'var(--ok)' : 'var(--accent)';
+    s += `<line x1="${fmt(hx,1)}" y1="${fmt(sy(0),1)}" x2="${fmt(hx,1)}" y2="${fmt(sy(p.dH),1)}" stroke="${col2}" stroke-width="2"/>`;
+    s += `<path d="M${fmt(hx,1)} ${fmt(sy(p.dH),1)} l-4.5 ${p.dH < 0 ? -9 : 9} h9 z" fill="${col2}"/>`;
+    // 縦軸が縮むと矢印の中点が「2HI」と重なるので、こちらも空き場所を探す
+    const hLabel = `ΔH ${p.dH < 0 ? '−' : '+'}${fmt(Math.abs(p.dH), 0)}`;
+    const hmid = (sy(0) + sy(p.dH)) / 2 + 5;
+    const hspot = placeLabel([
+      { x: hx + 9, y: hmid, anchor: 'start' },
+      { x: hx - 9, y: hmid, anchor: 'end' },
+      { x: hx + 9, y: hmid - 17, anchor: 'start' },
+      { x: hx + 9, y: hmid + 17, anchor: 'start' },
+    ], hLabel, 14, taken);
+    s += put(hspot.x, hspot.y, hLabel, hspot.anchor, 14, col2, 850);
+  }
+
+  // いまの分子のエネルギーの高さと、そこまでしか登れないこと
+  const ok = p.E >= p.Ea;
+  const bx = ok ? 1 : climbX(p.E, p.Ea);
+  const by = ok ? p.dH : p.E;
+  s += `<line x1="${ML}" y1="${fmt(sy(p.E),1)}" x2="${ML + PW}" y2="${fmt(sy(p.E),1)}" stroke="var(--accent)" stroke-width="1.6" stroke-dasharray="6 5"/>`;
+  // 反応物・生成物の高さと重なりやすいので、空いている置き場所を探して置く
+  const eLabel = `分子のエネルギー ${fmt(p.E, 1)}`;
+  const spot = placeLabel([
+    { x: ML + PW - 6, y: sy(p.E) - 8, anchor: 'end' },
+    { x: ML + 6, y: sy(p.E) - 8, anchor: 'start' },
+    { x: ML + PW - 6, y: sy(p.E) + 20, anchor: 'end' },
+    { x: ML + 6, y: sy(p.E) + 20, anchor: 'start' },
+    { x: sx(0.5), y: sy(p.E) - 8, anchor: 'middle' },
+    { x: sx(0.5), y: sy(p.E) + 20, anchor: 'middle' },
+  ], eLabel, 13, taken);
+  s += put(spot.x, spot.y, eLabel, spot.anchor, 13, 'var(--accent)', 850);
+  s += `<circle cx="${fmt(sx(bx),1)}" cy="${fmt(sy(by),1)}" r="11" fill="${ok ? 'var(--ok)' : 'var(--no)'}" stroke="#fff" stroke-width="2.8"/>`;
+  s += chartLegend([{ color: 'var(--blue)', label: '山＝活性化エネルギー' }], ML + 8, MT + 18);
+
+  $('chart-energy').innerHTML = s;
+
+  // 右カラムの小さい模式図：山とエネルギーの高さ比べ
+  const mh = 96, mw = 300;
+  const top = 20, bot = mh - 16;   // top は棒の上に出すラベルの高さぶん空ける
+  const hy = v => bot - clamp(v / Math.max(p.Ea, p.E, 1), 0, 1) * (bot - top);
+  let m = `<rect x="0" y="0" width="${mw}" height="${mh}" fill="none"/>`;
+  m += `<rect x="34" y="${fmt(hy(p.Ea),1)}" width="104" height="${fmt(bot - hy(p.Ea),1)}" rx="4" fill="#dbeafe" stroke="var(--blue)" stroke-width="1.6"/>`;
+  m += `<text x="86" y="${fmt(hy(p.Ea) - 5,1)}" text-anchor="middle" font-size="11" font-weight="850" fill="var(--blue)">山 ${fmt(p.Ea, 0)}</text>`;
+  m += `<rect x="162" y="${fmt(hy(p.E),1)}" width="104" height="${fmt(bot - hy(p.E),1)}" rx="4" fill="${ok ? '#dcfce7' : '#eef2f7'}" stroke="${ok ? 'var(--ok)' : 'var(--no)'}" stroke-width="1.6"/>`;
+  m += `<text x="214" y="${fmt(hy(p.E) - 5,1)}" text-anchor="middle" font-size="11" font-weight="850" fill="${ok ? 'var(--ok)' : 'var(--no)'}">分子 ${fmt(p.E, 0)}</text>`;
+  m += `<line x1="10" y1="${bot}" x2="${mw - 10}" y2="${bot}" stroke="var(--axis)" stroke-width="1.4"/>`;
+  $('cont-energy').innerHTML = m;
+
+  setReadout($('en-readout'), [
+    ['活性化エネルギー（正）', fmt(p.Ea, 1) + ' kJ/mol'],
+    ['活性化エネルギー（逆）', fmt(p.Ea - p.dH, 1) + ' kJ/mol'],
+    ['反応熱 ΔH', (p.dH < 0 ? '−' : '+') + fmt(Math.abs(p.dH), 1) + ' kJ/mol'],
+    ['山まであと', ok ? '0（越えた）' : fmt(p.Ea - p.E, 1) + ' kJ/mol', !ok],
+  ]);
+  $('en-verdict').textContent = ok ? '山を越えられる。反応が起こる。' : '山の途中で戻ってしまう。反応は起こらない。';
+}
+
+/* ============================================================
+   ③ 温度とエネルギー分布
+   ============================================================ */
+const DIST_REF_T = 300;      // 重ねて描く基準の温度
+const DIST_DOTS = 200;
+const distOrder = shuffled(DIST_DOTS, 24680);
+
+function drawDist() {
+  const T = +$('di-t').value, Ea = +$('di-ea').value;
+  $('di-t-val').textContent = fmt(T, 0);
+  $('di-ea-val').textContent = fmt(Ea, 1);
+
+  const xMax = Math.max(45, Ea + 8);
+  const curve = t => {
+    const pts = [];
+    for (let i = 0; i <= 400; i++) { const E = i / 400 * xMax; pts.push([E, maxwell(E, t)]); }
+    return pts;
+  };
+  const cur = curve(T), ref = curve(DIST_REF_T);
+  const yMax = Math.max(...cur.map(p => p[1]), ...ref.map(p => p[1])) * 1.1;
+
+  const f = frame({
+    xMin: 0, xMax, yMin: 0, yMax,
+    xTicks: ticks(0, xMax, 10, 0), yTicks: [],
+    xLabel: '分子のもつエネルギー（kJ/mol）', yLabel: '分子の数',
+  });
+  const { sx, sy } = f;
+  let s = f.axesSvg;
+
+  // Ea より右側の面積（＝反応できる分子）を塗る
+  const tail = cur.filter(p => p[0] >= Ea);
+  if (tail.length) {
+    const d = `M${fmt(sx(Ea),1)} ${fmt(sy(0),1)} `
+      + tail.map(p => `L${fmt(sx(p[0]),1)} ${fmt(sy(p[1]),1)}`).join(' ')
+      + ` L${fmt(sx(xMax),1)} ${fmt(sy(0),1)} Z`;
+    s += `<path d="${d}" fill="var(--accent)" opacity=".34"/>`;
+  }
+  const refTail = ref.filter(p => p[0] >= Ea);
+  if (refTail.length && T !== DIST_REF_T) {
+    const d = `M${fmt(sx(Ea),1)} ${fmt(sy(0),1)} `
+      + refTail.map(p => `L${fmt(sx(p[0]),1)} ${fmt(sy(p[1]),1)}`).join(' ')
+      + ` L${fmt(sx(xMax),1)} ${fmt(sy(0),1)} Z`;
+    s += `<path d="${d}" fill="var(--no)" opacity=".3"/>`;
+  }
+
+  if (T !== DIST_REF_T) s += polyline(ref, sx, sy, 'var(--no)', 2.2, '7 5');
+  s += polyline(cur, sx, sy, 'var(--blue)', 3.4);
+
+  // 活性化エネルギーの線
+  s += `<line x1="${fmt(sx(Ea),1)}" y1="${MT}" x2="${fmt(sx(Ea),1)}" y2="${fmt(sy(0),1)}" stroke="var(--accent)" stroke-width="2.6"/>`;
+  // 凡例と同じ高さに置くと文字が重なるので、1段下げる
+  s += `<text x="${fmt(sx(Ea) + 7,1)}" y="${MT + 44}" font-size="14" font-weight="850" fill="var(--accent)">Eₐ = ${fmt(Ea, 0)}</text>`;
+
+  s += chartLegend([
+    { color: 'var(--blue)', label: `${fmt(T, 0)} K` },
+    { color: 'var(--no)', label: `${DIST_REF_T} K（基準）` },
+    { color: 'var(--accent)', label: 'Eₐ を超えた分子' },
+  ], ML + 8, MT + 18);
+
+  $('chart-dist').innerHTML = s;
+
+  // 200個の分子のうち何個が超えているか
+  const frac = fractionAbove(Ea, T);
+  const n = Math.round(frac * DIST_DOTS);
+  const hot = new Set(distOrder.slice(0, n));
+  let m = '';
+  const cols = 20, rows = DIST_DOTS / cols, cw = 300 / cols, ch = 132 / rows;
+  for (let i = 0; i < DIST_DOTS; i++) {
+    const cx = cw * ((i % cols) + 0.5), cy = ch * (Math.floor(i / cols) + 0.5);
+    const on = hot.has(i);
+    m += `<circle cx="${fmt(cx,1)}" cy="${fmt(cy,1)}" r="${on ? 5 : 3.6}" fill="${on ? 'var(--accent)' : '#dbe3ee'}" stroke="${on ? 'rgba(23,32,51,.35)' : 'none'}" stroke-width=".8"/>`;
+  }
+  $('cont-dist').innerHTML = m;
+
+  const ratio10 = fractionAbove(Ea, T + 10) / frac;
+  setReadout($('di-readout'), [
+    ['Eₐ を超えた分子の割合', fmtSci(frac * 100) + ' ％', true],
+    ['200個のうち', `${n} 個`],
+    ['温度を10 K上げると', fmt(ratio10, 2) + ' 倍'],
+    ['平均のエネルギー', fmt(1.5 * R * T, 1) + ' kJ/mol'],
+  ]);
+  $('di-verdict').textContent = n === 0
+    ? '超えている分子は200個の中には現れない。それでも温度を上げれば急に増える。'
+    : `200個のうち ${n} 個だけが山を越えられる。`;
+}
+
+/* ============================================================
+   ④ 濃度と反応の速さ
+   ============================================================ */
+const CN_MIN = 1, CN_MAX = 12, CN_BASE = 4 * 4;
+const conc = { a: 4, b: 4 };
+
+function drawConc() {
+  const { a, b } = conc;
+  $('cn-a-val').textContent = a;
+  $('cn-b-val').textContent = b;
+  $('cn-a-minus').disabled = a <= CN_MIN; $('cn-a-plus').disabled = a >= CN_MAX;
+  $('cn-b-minus').disabled = b <= CN_MIN; $('cn-b-plus').disabled = b >= CN_MAX;
+
+  const BX = 44, BY = 34, BW = W - 88, BH = 268;
+  let s = `<rect x="${BX}" y="${BY}" width="${BW}" height="${BH}" rx="16" fill="#f7fafe" stroke="var(--line)" stroke-width="1.5"/>`;
+  s += drawMolecules(BX + 12, BY + 12, BW - 24, BH - 24, [
+    { n: a, draw: (cx, cy, r) => diatomic(cx, cy, 'var(--h2)', 'var(--h2)', r) },
+    { n: b, draw: (cx, cy, r) => diatomic(cx, cy, 'var(--i2)', 'var(--i2)', r) },
+  ], { wf: 3.5, hf: 2.6, baseR: 27 });
+
+  // 出会う組み合わせの数を棒で見せる（はじめの 4×4 を基準にした比）
+  const pairs = a * b, times = pairs / CN_BASE;
+  const GX0 = 96, GX1 = W - 56, GY = 392;
+  const gx = v => GX0 + clamp(v / (CN_MAX * CN_MAX), 0, 1) * (GX1 - GX0);
+  s += `<text x="${BX}" y="${GY - 12}" font-size="13" font-weight="800" fill="var(--ink3)">出会う組み合わせの数（＝反応の速さ）</text>`;
+  s += `<rect x="${GX0}" y="${GY + 4}" width="${fmt(gx(pairs) - GX0,1)}" height="26" rx="6" fill="var(--accent)" opacity=".85"/>`;
+  s += `<line x1="${fmt(gx(CN_BASE),1)}" y1="${GY - 4}" x2="${fmt(gx(CN_BASE),1)}" y2="${GY + 38}" stroke="var(--blue)" stroke-width="2.2"/>`;
+  s += `<text x="${fmt(gx(CN_BASE),1)}" y="${GY + 54}" text-anchor="middle" font-size="12" font-weight="800" fill="var(--blue)">はじめ (4×4)</text>`;
+  s += `<text x="${fmt(Math.min(gx(pairs) + 9, GX1),1)}" y="${GY + 23}" text-anchor="${gx(pairs) > GX1 - 110 ? 'end' : 'start'}" font-size="15" font-weight="850" fill="var(--accent)">${a} × ${b} = ${pairs}</text>`;
+  $('chart-conc').innerHTML = s;
+
+  // 右カラム：[H₂] と速さが比例することを直線で
+  const mw = 300, mh = 150, mL = 34, mR = 10, mT = 12, mB = 26;
+  const px = v => mL + v / CN_MAX * (mw - mL - mR);
+  const py = v => mh - mB - v / (CN_MAX * CN_MAX) * (mh - mB - mT);
+  let m = `<line x1="${mL}" y1="${mh - mB}" x2="${mw - mR}" y2="${mh - mB}" stroke="var(--axis)" stroke-width="1.3"/>`;
+  m += `<line x1="${mL}" y1="${mT}" x2="${mL}" y2="${mh - mB}" stroke="var(--axis)" stroke-width="1.3"/>`;
+  m += `<path d="M${fmt(px(0),1)} ${fmt(py(0),1)} L${fmt(px(CN_MAX),1)} ${fmt(py(CN_MAX * b),1)}" fill="none" stroke="var(--blue)" stroke-width="2.4"/>`;
+  m += `<circle cx="${fmt(px(a),1)}" cy="${fmt(py(pairs),1)}" r="6" fill="var(--accent)" stroke="#fff" stroke-width="2.2"/>`;
+  m += `<text x="${mw - mR}" y="${mh - 8}" text-anchor="end" font-size="11" font-weight="800" fill="var(--ink3)">H₂ の数</text>`;
+  m += `<text x="4" y="${mT + 8}" font-size="11" font-weight="800" fill="var(--ink3)">速さ</text>`;
+  $('cont-conc').innerHTML = m;
+
+  $('cn-pairs').textContent = pairs;
+  $('cn-times').textContent = fmt(times, times < 10 ? 1 : 0);
+  setReadout($('cn-readout'), [
+    ['H₂ の数', String(a)],
+    ['I₂ の数', String(b)],
+    ['v = k[H₂][I₂]', `k × ${a} × ${b}`, true],
+  ]);
+  $('cn-verdict').textContent = `H₂ が ${a} 個、I₂ が ${b} 個なら、出会い方は ${a}×${b} = ${pairs} 通り。`;
+}
+
+/* ============================================================
+   ⑤ 触媒
+   ============================================================ */
+const cat = { on: false, view: 'energy' };
+
+// 触媒は正反応・逆反応の速度定数を「同じ倍率」で上げる。
+// 倍率 λ をかけることは時間を λ 倍に早送りすることと数学的に同じなので、
+// 触媒ありの濃度変化は触媒なしの曲線を時間軸方向に縮めたものになる。
+// K = k正/k逆 は λ が約分されて変わらない ＝ 平衡が動かないことが式から出る。
+function catFactor() {
+  const ea0 = +$('ct-ea0').value, ea1 = +$('ct-ea1').value, T = +$('ct-t').value;
+  return fractionAbove(ea1, T) / fractionAbove(ea0, T);
+}
+
+// 平衡に達するまでの時間（[HI] が最終値の99%に届く時刻）
+function timeTo99() {
+  const fin = eqAt(EQ_TMAX)[2];
+  for (let i = 0; i < EQ_SERIES.length; i++) if (EQ_SERIES[i][3] >= 0.99 * fin) return EQ_SERIES[i][0];
+  return EQ_TMAX;
+}
+
+// 触媒あり／なしの [HI] の時間変化。到達の速さは違うが、行き着く高さは同じ
+function catConcSvg(factor) {
+  const t99 = timeTo99(), xMax = t99 * 1.3, hiEq = eqAt(EQ_TMAX)[2];
+  const f = frame({
+    xMin: 0, xMax, yMin: 0, yMax: hiEq * 1.25,
+    xTicks: ticks(0, xMax, xMax / 4, 1), yTicks: ticks(0, hiEq * 1.25, 0.25, 2),
+    xLabel: '時間 t（s）', yLabel: '[HI]（mol/L）',
+  });
+  const { sx, sy } = f;
+  let s = f.axesSvg;
+
+  const mk = lam => {
+    const p = [];
+    for (let i = 0; i <= 400; i++) { const t = i / 400 * xMax; p.push([t, eqAt(Math.min(t * lam, EQ_TMAX))[2]]); }
+    return p;
+  };
+  // 行き着く高さ（どちらも同じ）
+  s += `<line x1="${ML}" y1="${fmt(sy(hiEq),1)}" x2="${ML + PW}" y2="${fmt(sy(hiEq),1)}" stroke="var(--ink3)" stroke-width="1.4" stroke-dasharray="6 5"/>`;
+  s += polyline(mk(1), sx, sy, 'var(--blue)', 3.4);
+  if (cat.on) s += polyline(mk(factor), sx, sy, 'var(--ok)', 3.4);
+
+  const taken = [];
+  const put = (x, y, text, anchor, fs, fill, weight) => {
+    taken.push(labelRect(x, y, text, anchor, fs));
+    return `<text x="${fmt(x,1)}" y="${fmt(y,1)}"${anchor !== 'start' ? ` text-anchor="${anchor}"` : ''} font-size="${fs}" font-weight="${weight || 800}" fill="${fill}">${text}</text>`;
+  };
+  s += put(ML + PW - 6, sy(hiEq) - 10, `どちらも同じ高さで止まる（[HI] = ${fmt(hiEq, 2)}）`, 'end', 13, 'var(--ink2)', 850);
+
+  // 到達した時刻に印
+  s += `<circle cx="${fmt(sx(t99),1)}" cy="${fmt(sy(hiEq * 0.99),1)}" r="7" fill="var(--blue)" stroke="#fff" stroke-width="2.4"/>`;
+  const l0 = `触媒なし ${fmt(t99, 1)} s`;
+  const p0 = placeLabel([
+    { x: sx(t99) + 12, y: sy(hiEq * 0.99) + 22, anchor: 'start' },
+    { x: sx(t99) - 12, y: sy(hiEq * 0.99) + 22, anchor: 'end' },
+  ], l0, 13, taken);
+  s += put(p0.x, p0.y, l0, p0.anchor, 13, 'var(--blue)', 850);
+  if (cat.on) {
+    const tc = t99 / factor;
+    s += `<circle cx="${fmt(sx(tc),1)}" cy="${fmt(sy(hiEq * 0.99),1)}" r="7" fill="var(--ok)" stroke="#fff" stroke-width="2.4"/>`;
+    const l1 = `触媒あり ${fmtSci(tc)} s`;
+    const p1 = placeLabel([
+      { x: sx(tc) + 12, y: sy(hiEq * 0.99) - 14, anchor: 'start' },
+      { x: sx(tc) + 12, y: sy(hiEq * 0.99) - 34, anchor: 'start' },
+      { x: sx(tc) + 12, y: sy(hiEq * 0.99) + 22, anchor: 'start' },
+    ], l1, 13, taken);
+    s += put(p1.x, p1.y, l1, p1.anchor, 13, 'var(--ok)', 850);
+  }
+  return s;
+}
+
+function drawCat() {
+  const ea0 = +$('ct-ea0').value, T = +$('ct-t').value;
+  const ea1$ = $('ct-ea1');
+  ea1$.max = ea0 - 1;                       // 触媒ありの山は必ず低い
+  if (+ea1$.value > ea0 - 1) ea1$.value = ea0 - 1;
+  const ea1 = +ea1$.value;
+  $('ct-ea0-val').textContent = fmt(ea0, 1);
+  $('ct-ea1-val').textContent = fmt(ea1, 1);
+  $('ct-t-val').textContent = fmt(T, 0);
+  const dH = -50;                            // 反応そのものは同じなので反応熱は固定
+
+  const yMin = dH - 20, yMax = ea0 + 30;
+  const f = frame({
+    xMin: 0, xMax: 1, yMin, yMax,
+    xTicks: [], yTicks: ticks(Math.ceil(yMin / 20) * 20, yMax, 20, 0),
+    xLabel: '反応の進み方', yLabel: 'エネルギー（kJ/mol）',
+  });
+  const { sx, sy } = f;
+  let s = f.axesSvg;
+
+  const mk = ea => { const p = []; for (let i = 0; i <= 300; i++) { const x = i / 300; p.push([x, energyAt(x, ea, dH)]); } return p; };
+  s += polyline(mk(ea0), sx, sy, cat.on ? '#c3d3e8' : 'var(--blue)', cat.on ? 2.4 : 3.6);
+  if (cat.on) s += polyline(mk(ea1), sx, sy, 'var(--ok)', 3.6);
+
+  s += `<line x1="${ML}" y1="${fmt(sy(0),1)}" x2="${ML + PW}" y2="${fmt(sy(0),1)}" stroke="var(--axis)" stroke-width="1" stroke-dasharray="4 4"/>`;
+  s += `<line x1="${ML}" y1="${fmt(sy(dH),1)}" x2="${ML + PW}" y2="${fmt(sy(dH),1)}" stroke="var(--axis)" stroke-width="1" stroke-dasharray="4 4"/>`;
+
+  const taken = [];
+  const put = (x, y, text, anchor, fs, fill, weight) => {
+    taken.push(labelRect(x, y, text, anchor, fs));
+    return `<text x="${fmt(x,1)}" y="${fmt(y,1)}"${anchor !== 'start' ? ` text-anchor="${anchor}"` : ''} font-size="${fs}" font-weight="${weight || 800}" fill="${fill}">${text}</text>`;
+  };
+  s += put(sx(0.02), sy(0) - 9, 'H₂ + I₂', 'start', 14, 'var(--ink2)');
+  s += put(sx(0.98), sy(dH) - 9, '2HI', 'end', 14, 'var(--ink2)');
+  s += put(sx(0.5), sy(ea0) - 12, `触媒なし ${fmt(ea0, 0)}`, 'middle', 14, cat.on ? '#8ba3c2' : 'var(--blue)', 850);
+  if (cat.on) {
+    const spot = placeLabel([
+      { x: sx(0.5), y: sy(ea1) - 12, anchor: 'middle' },
+      { x: sx(0.5), y: sy(ea1) + 22, anchor: 'middle' },
+      { x: sx(0.28), y: sy(ea1) - 12, anchor: 'middle' },
+    ], `触媒あり ${fmt(ea1, 0)}`, 14, taken);
+    s += put(spot.x, spot.y, `触媒あり ${fmt(ea1, 0)}`, spot.anchor, 14, 'var(--ok)', 850);
+  }
+  // 反応熱は触媒があってもなくても同じ
+  const hx = sx(0.9);
+  s += `<line x1="${fmt(hx,1)}" y1="${fmt(sy(0),1)}" x2="${fmt(hx,1)}" y2="${fmt(sy(dH),1)}" stroke="var(--ink3)" stroke-width="2"/>`;
+  s += `<path d="M${fmt(hx,1)} ${fmt(sy(dH),1)} l-4.5 -9 h9 z" fill="var(--ink3)"/>`;
+  const hLabel = `ΔH −${fmt(Math.abs(dH), 0)}（変わらない）`;
+  const hspot = placeLabel([
+    { x: hx - 9, y: (sy(0) + sy(dH)) / 2 + 5, anchor: 'end' },
+    { x: hx - 9, y: (sy(0) + sy(dH)) / 2 - 14, anchor: 'end' },
+  ], hLabel, 13, taken);
+  s += put(hspot.x, hspot.y, hLabel, hspot.anchor, 13, 'var(--ink3)', 850);
+
+  const factor = catFactor();
+  $('chartwrap-cat').dataset.label = cat.view === 'energy' ? 'ENERGY DIAGRAM' : 'CONCENTRATION vs TIME';
+  $('chart-cat').innerHTML = cat.view === 'energy' ? s : catConcSvg(factor);
+
+  // 右カラム：越えられる分子がどれだけ増えるか。
+  // 実際の Ea だと分布の裾はどちらも極小で、全体を描くと差が見えない。
+  // 山の近くだけを拡大し、縦は左端の高さに合わせて、面積の差が目で分かるようにする
+  const f0 = fractionAbove(ea0, T), f1 = fractionAbove(ea1, T);
+  const mw = 300, mh = 150, mL = 12, mR = 8, mT = 22, mB = 22;
+  const xLo = Math.min(ea0, ea1) * 0.8, xHi = ea0 + 8 * R * T;
+  const cur = [];
+  for (let i = 0; i <= 240; i++) { const E = xLo + i / 240 * (xHi - xLo); cur.push([E, maxwell(E, T)]); }
+  const yTop = maxwell(xLo, T) * 1.08;
+  const px = v => mL + (v - xLo) / (xHi - xLo) * (mw - mL - mR);
+  const py = v => mh - mB - clamp(v / yTop, 0, 1) * (mh - mB - mT);
+  const area = (from, color, op) => {
+    const seg = cur.filter(p => p[0] >= from);
+    if (!seg.length) return '';
+    return `<path d="M${fmt(px(from),1)} ${fmt(py(0),1)} ${seg.map(p => `L${fmt(px(p[0]),1)} ${fmt(py(p[1]),1)}`).join(' ')} L${fmt(px(xHi),1)} ${fmt(py(0),1)} Z" fill="${color}" opacity="${op}"/>`;
+  };
+  let m = '';
+  if (cat.on) m += area(ea1, 'var(--ok)', .38);
+  m += area(ea0, 'var(--accent)', .5);
+  m += `<path d="${cur.map((p, i) => (i ? 'L' : 'M') + fmt(px(p[0]),1) + ' ' + fmt(py(p[1]),1)).join(' ')}" fill="none" stroke="var(--blue)" stroke-width="2.2"/>`;
+  m += `<line x1="${fmt(px(ea0),1)}" y1="${mT}" x2="${fmt(px(ea0),1)}" y2="${fmt(py(0),1)}" stroke="var(--accent)" stroke-width="1.8"/>`;
+  if (cat.on) m += `<line x1="${fmt(px(ea1),1)}" y1="${mT}" x2="${fmt(px(ea1),1)}" y2="${fmt(py(0),1)}" stroke="var(--ok)" stroke-width="1.8"/>`;
+  m += `<line x1="${mL}" y1="${fmt(py(0),1)}" x2="${mw - mR}" y2="${fmt(py(0),1)}" stroke="var(--axis)" stroke-width="1.3"/>`;
+  m += `<text x="${mL}" y="${mT - 8}" font-size="10.5" font-weight="800" fill="var(--ink3)">山の近くを拡大</text>`;
+  m += `<text x="${mw - mR}" y="${mh - 6}" text-anchor="end" font-size="10.5" font-weight="800" fill="var(--ink3)">エネルギー</text>`;
+  $('cont-cat').innerHTML = m;
+
+  const eaNow = cat.on ? ea1 : ea0, fNow = cat.on ? f1 : f0;
+  const times = fmt(factor, factor < 100 ? 1 : 0);
+  const t99 = timeTo99(), hiEq = eqAt(EQ_TMAX)[2];
+  setReadout($('ct-readout'), [
+    ['いまの山の高さ', fmt(eaNow, 1) + ' kJ/mol'],
+    ['越えられる割合', fmtSci(fNow * 100) + ' ％', true],
+    ['触媒なしの何倍', cat.on ? times + ' 倍' : '1 倍'],
+    ['平衡までの時間', cat.on ? `${fmtSci(t99 / factor)} s` : `${fmt(t99, 1)} s`, cat.on],
+    ['平衡での [HI]', fmt(hiEq, 2) + ' mol/L'],
+    ['平衡定数 K', fmt(EQ_KF / EQ_KR, 1)],
+    ['反応熱 ΔH', '−50.0 kJ/mol'],
+  ]);
+  $('ct-verdict').textContent = cat.on
+    ? `越えられる分子が ${times} 倍に増え、平衡に達するのが ${times} 倍速くなった。K も [HI] も ΔH も変わらない。`
+    : '触媒ありに切り替えると、山だけが低くなる。';
+}
+
+/* ============================================================
+   ⑥ 速さと平衡
+   ============================================================ */
+const EQ_TMAX = 12, EQ_KF = 1, EQ_KR = 0.2, EQ_A0 = 1, EQ_B0 = 1;
+// 速度式 d[HI]/dt = 2(kf[H₂][I₂] − kr[HI]²) を RK4 で積分（equilibrium.html と同じ方法）
+function simulateHI(a0, b0, c0, kf, kr, tMax, steps) {
+  const der = s => { const v = kf * s[0] * s[1] - kr * s[2] * s[2]; return [-v, -v, 2 * v]; };
+  const add = (s, d, h) => [s[0] + d[0] * h, s[1] + d[1] * h, s[2] + d[2] * h];
+  const dt = tMax / steps;
+  let s = [a0, b0, c0];
+  const out = [[0, s[0], s[1], s[2]]];
+  for (let i = 0; i < steps; i++) {
+    const k1 = der(s), k2 = der(add(s, k1, dt / 2)), k3 = der(add(s, k2, dt / 2)), k4 = der(add(s, k3, dt));
+    s = [0, 1, 2].map(j => s[j] + dt / 6 * (k1[j] + 2 * k2[j] + 2 * k3[j] + k4[j])).map(v => Math.max(0, v));
+    out.push([(i + 1) * dt, s[0], s[1], s[2]]);
+  }
+  return out;
+}
+const EQ_SERIES = simulateHI(EQ_A0, EQ_B0, 0, EQ_KF, EQ_KR, EQ_TMAX, 2400);
+function eqAt(t) {
+  const i = clamp(Math.floor(t / EQ_TMAX * 2400), 0, 2399);
+  const a = EQ_SERIES[i], b = EQ_SERIES[i + 1];
+  const u = (t - a[0]) / (b[0] - a[0] || 1);
+  return [1, 2, 3].map(j => a[j] + (b[j] - a[j]) * u);
+}
+const vF = c => EQ_KF * c[0] * c[1];
+const vR = c => EQ_KR * c[2] * c[2];
+
+const EQ_N = 24;
+const eqOrder = shuffled(EQ_N, 31415);
+
+/* --- 動的平衡のしくみ -----------------------------------------------------
+   席を24個に固定し、中身だけを入れ替える。席の状態は「時刻 t の関数」にしてある。
+   各コマで2つのことを起こす。
+     (1) 正味の変化：ODE から出した目標の個数に合わせる（＝濃度が動く分）
+     (2) 入れ替え  ：正反応1回と逆反応1回を必ず対で起こす（＝差し引きゼロ）
+   平衡に達すると (1) は起こらなくなるが (2) は止まらない。
+   だから時間を進めるだけで「個数は変わらないのに分子は入れ替わり続ける」が見える。
+   全コマを最初に作り置きするので、再描画しても同じ絵になり、
+   requestAnimationFrame を使わずに済む（＝プレビューでも検証できる）。 */
+const EQ_STEP = 0.05;                    // スライダーの刻みと同じ
+const EQ_NFRAME = Math.round(EQ_TMAX / EQ_STEP);
+const EQ_CHURN = 90;                     // 速さを「1秒あたり何回の入れ替え」に見せるかの倍率
+const EQ_CHURN_MAX = 2;                  // 1コマで起こす入れ替えの上限（多すぎると目で追えない）
+
+const EQ_FRAMES = (() => {
+  const unit = (EQ_A0 + EQ_B0) / EQ_N;   // 席1つぶんの濃度
+  const rnd = makeRnd(13579);
+  let ids = Array.from({ length: EQ_N }, (_, i) => (i < EQ_N / 2 ? 0 : 1));
+  const count = () => ids.reduce((a, v) => (a[v]++, a), [0, 0, 0]);
+  const pickSeats = (kind, n, changed) => {
+    const seats = [];
+    for (let i = 0; i < EQ_N; i++) if (ids[i] === kind && !changed.has(i)) seats.push(i);
+    if (seats.length < n) return null;
+    const out = [];
+    for (let k = 0; k < n; k++) out.push(seats.splice(Math.floor(rnd() * seats.length) % seats.length, 1)[0]);
+    return out;
+  };
+  // 正反応1回：H₂ 1つと I₂ 1つを HI 2つに
+  const forward = changed => {
+    const a = pickSeats(0, 1, changed), b = pickSeats(1, 1, changed);
+    if (!a || !b) return false;
+    ids[a[0]] = 2; ids[b[0]] = 2; changed.add(a[0]); changed.add(b[0]);
+    return true;
+  };
+  // 逆反応1回：HI 2つを H₂ 1つと I₂ 1つに
+  const reverse = changed => {
+    const s = pickSeats(2, 2, changed);
+    if (!s) return false;
+    ids[s[0]] = 0; ids[s[1]] = 1; changed.add(s[0]); changed.add(s[1]);
+    return true;
+  };
+
+  const frames = [{ ids: ids.slice(), flash: [], churn: 0 }];
+  let acc = 0, churnTotal = 0;
+  for (let k = 1; k <= EQ_NFRAME; k++) {
+    const t = k * EQ_STEP, c = eqAt(t), changed = new Set();
+    // (1) 正味の変化：目標の個数に近づける
+    const nHI = clamp(2 * Math.round(c[2] / (2 * unit)), 0, EQ_N);
+    let guard = 0;
+    while (count()[2] < nHI && guard++ < EQ_N) { if (!forward(changed)) break; }
+    while (count()[2] > nHI && guard++ < EQ_N) { if (!reverse(changed)) break; }
+    // (2) 入れ替え：正反応と逆反応を対で
+    acc += EQ_CHURN * vF(c) * EQ_STEP;
+    const pairs = Math.min(Math.floor(acc), EQ_CHURN_MAX);
+    acc -= Math.floor(acc);
+    for (let p = 0; p < pairs; p++) {
+      const snapshot = ids.slice();
+      if (forward(changed) && reverse(changed)) churnTotal++;
+      else { ids = snapshot; break; }   // 片方しか起こせないときは個数が狂うので戻す
+    }
+    frames.push({ ids: ids.slice(), flash: [...changed], churn: churnTotal });
+  }
+  return frames;
+})();
+
+const eqFrameAt = t => EQ_FRAMES[clamp(Math.round(t / EQ_STEP), 0, EQ_NFRAME)];
+
+function drawEqBox(t) {
+  const fr = eqFrameAt(t);
+  const flash = new Set(fr.flash);
+  const lay = gridLayout(6, 6, 288, 118, EQ_N, 3.5, 2.6, 20);
+  let m = '';
+  for (let i = 0; i < EQ_N; i++) {
+    const slot = lay.slots[eqOrder[i]], j = i % PARTS.length;
+    const cx = slot.cx + (PARTS[j][0] - 0.5) * 2 * slot.fx;
+    const cy = slot.cy + (PARTS[j][1] - 0.5) * 2 * slot.fy;
+    if (flash.has(i)) m += highlightBox(cx, cy, lay.r, 'var(--accent)');
+    const id = fr.ids[i];
+    m += id === 0 ? diatomic(cx, cy, 'var(--h2)', 'var(--h2)', lay.r)
+       : id === 1 ? diatomic(cx, cy, 'var(--i2)', 'var(--i2)', lay.r)
+       :            diatomic(cx, cy, 'var(--h2)', 'var(--hi)', lay.r);
+  }
+  $('cont-eqrate').innerHTML = m;
+  const c = fr.ids.reduce((a, v) => (a[v]++, a), [0, 0, 0]);
+  $('eq-swaps').textContent = fr.churn;
+  $('eq-nhi').textContent = c[2];
+  return c;
+}
+
+/* 再生のしくみ。
+   時刻は eq.t（JS変数）で持ち、スライダーは表示専用にしてある。
+   range の value は step（0.05）に丸められるので、1フレーム分の細かい増分
+   （等倍・60fps なら 0.017 秒）を足しても消えてしまい、再生が1ミリも進まない。 */
+const eq = { t: 0, playing: false, speed: 1, timer: 0 };
+
+// 1コマぶん進める。タイマーから切り離してあるので単体で検証できる
+function eqAdvance(dt) {
+  eq.t = clamp(eq.t + dt, 0, EQ_TMAX);
+  drawEqrate();
+  if (eq.t >= EQ_TMAX) eqStop();
+}
+/* 再生はコマの間隔でタイマーを打つ。
+   コマは 0.05 秒刻みで決まっているので requestAnimationFrame で 60fps 回す必要がなく、
+   間隔＝EQ_STEP/速さ のタイマーにすると等倍でちょうど実時間どおりになる。 */
+function eqStop() {
+  eq.playing = false;
+  if (eq.timer) clearInterval(eq.timer);
+  eq.timer = 0;
+  $('eq-play').textContent = '▶ 再生';
+  $('eq-play').classList.remove('primary');
+}
+function eqStart() {
+  // 終端で押したら頭から。描き直さないとスライダーとコマ送りボタンが古いままになる
+  if (eq.t >= EQ_TMAX) { eq.t = 0; drawEqrate(); }
+  eqStop();
+  eq.playing = true;
+  $('eq-play').textContent = '■ 停止';
+  $('eq-play').classList.add('primary');
+  eq.timer = setInterval(() => eqAdvance(EQ_STEP), EQ_STEP * 1000 / eq.speed);
+}
+
+function drawEqrate() {
+  const t = eq.t;
+  $('eq-t').value = t;                  // スライダーは表示だけ（丸められてよい）
+  $('eq-t-val').textContent = fmt(t, 1);
+  const c = eqAt(t);
+
+  const yMax = vF(eqAt(0)) * 1.12;
+  const f = frame({
+    xMin: 0, xMax: EQ_TMAX, yMin: 0, yMax,
+    xTicks: ticks(0, EQ_TMAX, 2, 0), yTicks: ticks(0, yMax, 0.2, 1),
+    xLabel: '時間 t（s）', yLabel: '反応の速さ',
+  });
+  const { sx, sy } = f;
+  let s = f.axesSvg;
+
+  const fwd = [], rev = [];
+  for (let i = 0; i <= 300; i++) {
+    const tt = i / 300 * EQ_TMAX, cc = eqAt(tt);
+    fwd.push([tt, vF(cc)]); rev.push([tt, vR(cc)]);
+  }
+  s += polyline(fwd, sx, sy, 'var(--blue)', 3.4);
+  s += polyline(rev, sx, sy, 'var(--hi)', 3.4);
+
+  s += `<line x1="${fmt(sx(t),1)}" y1="${MT}" x2="${fmt(sx(t),1)}" y2="${fmt(sy(0),1)}" stroke="var(--ink3)" stroke-width="1.2" stroke-dasharray="4 4"/>`;
+  s += `<circle cx="${fmt(sx(t),1)}" cy="${fmt(sy(vF(c)),1)}" r="7" fill="var(--blue)" stroke="#fff" stroke-width="2.4"/>`;
+  s += `<circle cx="${fmt(sx(t),1)}" cy="${fmt(sy(vR(c)),1)}" r="7" fill="var(--hi)" stroke="#fff" stroke-width="2.4"/>`;
+  s += chartLegend([
+    { color: 'var(--blue)', label: '正反応 v = k正[H₂][I₂]' },
+    { color: 'var(--hi)', label: '逆反応 v = k逆[HI]²' },
+  ], ML + 8, MT + 18);
+  $('chart-eqrate').innerHTML = s;
+
+  drawEqBox(t);
+  $('eq-step').disabled = t >= EQ_TMAX;
+
+  const vf = vF(c), vr = vR(c);
+  const gap = vf > 0 ? Math.abs(vf - vr) / vf : 0;
+  setReadout($('eq-readout'), [
+    ['正反応の速さ', fmt(vf, 3)],
+    ['逆反応の速さ', fmt(vr, 3)],
+    ['差', fmt(Math.abs(vf - vr), 3), gap > 0.01],
+    ['[H₂] / [HI]', `${fmt(c[0], 2)} / ${fmt(c[2], 2)}`],
+  ]);
+  $('eq-verdict').textContent = gap < 0.01
+    ? `時間が進んでも HI の数は変わらないが、分子は入れ替わり続けている（ここまでに ${eqFrameAt(t).churn} 回）。`
+    : '正反応のほうが速い。HI が増えていく。';
+}
+
+/* ============================================================
+   ⑦〜⑪ で使う平衡のモデル（equilibrium.html から移植）
+   ============================================================ */
+const R_GAS = 8.314;   // J/(K·mol)
+
+// H₂ + I₂ ⇄ 2HI の平衡。(c0+2x)² = K(a0−x)(b0−x) を二分法で解く。
+// 左辺は x について増加、右辺は減少なので解は一意
+function solveHI(a0, b0, c0, K) {
+  let lo = -c0 / 2, hi = Math.min(a0, b0);
+  const f = x => Math.pow(c0 + 2 * x, 2) - K * (a0 - x) * (b0 - x);
+  if (f(lo) > 0) return lo;
+  if (f(hi) < 0) return hi;
+  for (let i = 0; i < 80; i++) { const m = (lo + hi) / 2; if (f(m) < 0) lo = m; else hi = m; }
+  return (lo + hi) / 2;
+}
+// N₂ + 3H₂ ⇄ 2NH₃ の平衡。Kc は濃度で定義するので体積 V が効く
+function solveNH3(n1, n2, K, V) {
+  const f = x => {
+    const cN = (n1 - x) / V, cH = (n2 - 3 * x) / V, cA = (2 * x) / V;
+    return cA * cA - K * cN * cH * cH * cH;
+  };
+  let lo = 0, hi = Math.min(n1, n2 / 3) * (1 - 1e-12);
+  if (f(lo) > 0) return lo;
+  if (f(hi) < 0) return hi;
+  for (let i = 0; i < 100; i++) { const m = (lo + hi) / 2; if (f(m) < 0) lo = m; else hi = m; }
+  return (lo + hi) / 2;
+}
+// ファントホッフの式 ln(K2/K1) = −ΔH/R (1/T2 − 1/T1)
+const vantHoff = (K1, T1, T2, dH) => K1 * Math.exp(-dH / R_GAS * (1 / T2 - 1 / T1));
+
+// 単原子・多原子の絵
+function ammoniaGlyph(cx, cy, rr) {
+  let s = `<circle cx="${fmt(cx,1)}" cy="${fmt(cy,1)}" r="${fmt(rr,1)}" fill="var(--nh3)" stroke="rgba(23,32,51,.45)" stroke-width=".8"/>`;
+  [[-1, .7], [1, .7], [0, -1]].forEach(d => {
+    s += `<circle cx="${fmt(cx + d[0] * rr * 1.25,1)}" cy="${fmt(cy + d[1] * rr * 1.25,1)}" r="${fmt(rr * .52,1)}" fill="#dbeafe" stroke="rgba(23,32,51,.35)" stroke-width=".7"/>`;
+  });
+  return `<g>${s}</g>`;
+}
+const glyphH2 = (cx, cy, r) => diatomic(cx, cy, 'var(--h2)', 'var(--h2)', r);
+const glyphI2 = (cx, cy, r) => diatomic(cx, cy, 'var(--i2)', 'var(--i2)', r);
+const glyphHI = (cx, cy, r) => diatomic(cx, cy, 'var(--h2)', 'var(--hi)', r);
+const glyphN2 = (cx, cy, r) => diatomic(cx, cy, 'var(--n2)', 'var(--n2)', r);
+
+// 2色の間を補間する（温度で箱の色を変えるのに使う）
+function lerpColor(a, b, t) {
+  t = clamp(t, 0, 1);
+  const c = i => Math.round(a[i] + (b[i] - a[i]) * t);
+  return `rgb(${c(0)},${c(1)},${c(2)})`;
+}
+
+// 割合を横帯で見せる。specs:[{v,color,label}]
+function stackBar(x, y, w, h, specs) {
+  const total = specs.reduce((s, p) => s + p.v, 0) || 1;
+  let dx = 0, s = '';
+  for (const p of specs) {
+    const bw = p.v / total * w;
+    if (bw > 0.5) {
+      s += `<rect x="${fmt(x + dx,1)}" y="${y}" width="${fmt(bw,1)}" height="${h}" fill="${p.color}" opacity=".9"/>`;
+      if (bw > 44) s += `<text x="${fmt(x + dx + bw / 2,1)}" y="${fmt(y + h / 2 + 5,1)}" text-anchor="middle" font-size="13" font-weight="850" fill="#fff">${p.label}</text>`;
+    }
+    dx += bw;
+  }
+  return s + `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="5" fill="none" stroke="var(--line)" stroke-width="1.2"/>`;
+}
+
+/* ============================================================
+   ⑦ 平衡定数 K
+   ============================================================ */
+const KC_K = 5.0, KC_MIN = 0.4, KC_MAX = 2.0, KC_STEP = 0.2;
+const kc = { a: 1.0, b: 1.0, log: [] };
+
+function kcEq() {
+  const x = solveHI(kc.a, kc.b, 0, KC_K);
+  return [kc.a - x, kc.b - x, 2 * x];
+}
+
+function drawKconst() {
+  const e = kcEq();
+  $('kc-a-val').textContent = fmt(kc.a, 2);
+  $('kc-b-val').textContent = fmt(kc.b, 2);
+  $('kc-a-minus').disabled = kc.a <= KC_MIN + 1e-9; $('kc-a-plus').disabled = kc.a >= KC_MAX - 1e-9;
+  $('kc-b-minus').disabled = kc.b <= KC_MIN + 1e-9; $('kc-b-plus').disabled = kc.b >= KC_MAX - 1e-9;
+
+  // 平衡での粒子（1席 = 0.1 mol/L）
+  const unit = 0.1;
+  const n = e.map(v => Math.max(0, Math.round(v / unit)));
+  const BX = 44, BY = 34, BW = W - 88, BH = 238;
+  let s = `<rect x="${BX}" y="${BY}" width="${BW}" height="${BH}" rx="16" fill="#f7fafe" stroke="var(--line)" stroke-width="1.5"/>`;
+  s += drawMolecules(BX + 12, BY + 12, BW - 24, BH - 24, [
+    { n: n[0], draw: glyphH2 }, { n: n[1], draw: glyphI2 }, { n: n[2], draw: glyphHI },
+  ], { wf: 3.5, hf: 2.6, baseR: 22 });
+
+  // 計算を数字のまま見せる
+  const K = e[2] * e[2] / (e[0] * e[1]);
+  const cy = 350;
+  s += `<text x="${W / 2}" y="${cy}" text-anchor="middle" font-size="26" font-weight="850" fill="var(--deep)">`
+     + `${fmt(e[2], 2)}² ÷ ( ${fmt(e[0], 2)} × ${fmt(e[1], 2)} ) = <tspan fill="var(--accent)">${fmt(K, 2)}</tspan></text>`;
+  s += `<text x="${W / 2}" y="${cy + 30}" text-anchor="middle" font-size="14" font-weight="800" fill="var(--ink3)">[HI]²　　　[H₂]　　[I₂]</text>`;
+  s += stackBar(140, cy + 56, W - 280, 30, [
+    { v: e[0], color: 'var(--h2)', label: 'H₂' },
+    { v: e[1], color: 'var(--i2)', label: 'I₂' },
+    { v: e[2], color: 'var(--hi)', label: 'HI' },
+  ]);
+  $('chart-kconst').innerHTML = s;
+
+  const rows = kc.log.map(r =>
+    `<tr><td>${fmt(r.a, 2)}</td><td>${fmt(r.b, 2)}</td><td>${fmt(r.e[0], 2)}</td><td>${fmt(r.e[2], 2)}</td><td class="kv">${fmt(r.K, 2)}</td></tr>`).join('');
+  $('kc-table').innerHTML = '<tr><th>[H₂]₀</th><th>[I₂]₀</th><th>[H₂]</th><th>[HI]</th><th>K</th></tr>'
+    + (rows || '<tr class="empty"><td colspan="5">「記録する」で表に追加されます</td></tr>');
+  $('kc-verdict').textContent = kc.log.length >= 2
+    ? 'はじめの濃度を変えても、K の列だけは同じ値が並ぶ。'
+    : '';
+}
+
+/* ============================================================
+   ⑧ 濃度による移動
+   ============================================================ */
+const SC_K = 5.0, SC_A0 = 1.0, SC_B0 = 1.0;
+const sc = { c: null, added: null };
+
+function scReset() {
+  const x = solveHI(SC_A0, SC_B0, 0, SC_K);
+  sc.c = [SC_A0 - x, SC_B0 - x, 2 * x];
+  sc.added = null;
+}
+// いまの濃度から新しい平衡まで、1回で1/6ずつ近づける
+function scStep() {
+  const x = solveHI(sc.c[0], sc.c[1], sc.c[2], SC_K);
+  if (Math.abs(x) < 1e-6) return false;
+  const d = x / 6;
+  sc.c = [sc.c[0] - d, sc.c[1] - d, sc.c[2] + 2 * d];
+  return true;
+}
+
+function drawShiftc() {
+  const [a, b, c] = sc.c;
+  const Q = a > 0 && b > 0 ? c * c / (a * b) : Infinity;
+  const dir = Q < SC_K * 0.995 ? 'right' : Q > SC_K * 1.005 ? 'left' : 'none';
+
+  const unit = 0.1;
+  const n = [a, b, c].map(v => Math.max(0, Math.round(v / unit)));
+  const BX = 44, BY = 34, BW = W - 88, BH = 268;
+  let s = `<rect x="${BX}" y="${BY}" width="${BW}" height="${BH}" rx="16" fill="#f7fafe" stroke="var(--line)" stroke-width="1.5"/>`;
+  s += drawMolecules(BX + 12, BY + 12, BW - 24, BH - 24, [
+    { n: n[0], draw: glyphH2 }, { n: n[1], draw: glyphI2 }, { n: n[2], draw: glyphHI },
+  ], { wf: 3.5, hf: 2.6, baseR: 21 });
+  s += stackBar(140, 350, W - 280, 32, [
+    { v: a, color: 'var(--h2)', label: 'H₂' },
+    { v: b, color: 'var(--i2)', label: 'I₂' },
+    { v: c, color: 'var(--hi)', label: 'HI' },
+  ]);
+  // どちらへ動くかを矢印で
+  const ay = 424;
+  if (dir !== 'none') {
+    const right = dir === 'right';
+    const x0 = right ? W / 2 - 90 : W / 2 + 90, x1 = right ? W / 2 + 90 : W / 2 - 90;
+    s += `<line x1="${x0}" y1="${ay}" x2="${x1}" y2="${ay}" stroke="var(--accent)" stroke-width="4"/>`;
+    s += `<path d="M${x1} ${ay} l${right ? -14 : 14} -8 v16 z" fill="var(--accent)"/>`;
+    s += `<text x="${W / 2}" y="${ay - 16}" text-anchor="middle" font-size="15" font-weight="850" fill="var(--accent)">${right ? '右へ進む（HI が増える）' : '左へ戻る（HI が減る）'}</text>`;
+  } else {
+    s += `<text x="${W / 2}" y="${ay + 5}" text-anchor="middle" font-size="15" font-weight="850" fill="var(--ok)">Q = K　平衡</text>`;
+  }
+  $('chart-shiftc').innerHTML = s;
+
+  // Q と K の数直線
+  const mw = 300, mh = 84, mL = 16, mR = 16, base = 54;
+  const lo = 0, hi = Math.max(SC_K * 2, Q * 1.15, 1);
+  const px = v => mL + clamp(v / hi, 0, 1) * (mw - mL - mR);
+  let m = `<line x1="${mL}" y1="${base}" x2="${mw - mR}" y2="${base}" stroke="var(--axis)" stroke-width="1.5"/>`;
+  m += `<line x1="${fmt(px(SC_K),1)}" y1="${base - 20}" x2="${fmt(px(SC_K),1)}" y2="${base + 8}" stroke="var(--blue)" stroke-width="2.4"/>`;
+  m += `<text x="${fmt(px(SC_K),1)}" y="${base + 24}" text-anchor="middle" font-size="11.5" font-weight="850" fill="var(--blue)">K ${fmt(SC_K, 1)}</text>`;
+  if (isFinite(Q)) {
+    m += `<circle cx="${fmt(px(Q),1)}" cy="${base}" r="6.5" fill="var(--accent)" stroke="#fff" stroke-width="2"/>`;
+    m += `<text x="${fmt(px(Q),1)}" y="${base - 26}" text-anchor="middle" font-size="11.5" font-weight="850" fill="var(--accent)">Q ${fmt(Q, 2)}</text>`;
+  }
+  $('line-shiftc').innerHTML = m;
+
+  setReadout($('sc-readout'), [
+    ['[H₂]', fmt(a, 2) + ' mol/L'],
+    ['[I₂]', fmt(b, 2) + ' mol/L'],
+    ['[HI]', fmt(c, 2) + ' mol/L'],
+    ['Q', fmt(Q, 2), dir !== 'none'],
+    ['K', fmt(SC_K, 2)],
+  ]);
+  $('sc-verdict').textContent =
+    dir === 'none' ? (sc.added ? `${sc.added} を加えた分を打ち消して、また Q = K に戻った。` : 'Q = K。平衡状態。')
+    : dir === 'right' ? 'Q が K より小さい。HI が増える向きに進む。'
+    : 'Q が K より大きい。HI が減る向きに進む。';
+  $('sc-step').disabled = dir === 'none';
+}
+
+/* ============================================================
+   ⑨ 圧力・体積による移動
+   ============================================================ */
+const SV_N1 = 1.0, SV_N2 = 3.0, SV_K = 0.6;     // N₂ 1 mol, H₂ 3 mol
+const SV_HI_A = 1.0, SV_HI_B = 1.0, SV_K_HI = 5.0;
+
+function nh3At(V) {
+  const x = solveNH3(SV_N1, SV_N2, SV_K, V);
+  const amounts = [SV_N1 - x, SV_N2 - 3 * x, 2 * x];
+  const total = amounts[0] + amounts[1] + amounts[2];
+  return { amounts, total, pct: total > 0 ? amounts[2] / total * 100 : 0 };
+}
+function hiAt() {
+  const x = solveHI(SV_HI_A, SV_HI_B, 0, SV_K_HI);
+  const amounts = [SV_HI_A - x, SV_HI_B - x, 2 * x];
+  const total = amounts[0] + amounts[1] + amounts[2];
+  return { amounts, total, pct: amounts[2] / total * 100 };
+}
+
+function drawShiftv() {
+  const V = +$('sv-V').value;
+  $('sv-V-val').textContent = fmt(V, 1);
+  const A = nh3At(V), B = hiAt();
+
+  // 高さは固定して幅だけを体積に比例させる（gas-laws のピストンと同じ作法）。
+  // 面積を体積に比例させると、体積が小さいとき箱ごと縮んで分子が読めなくなる
+  const BH = 250, BTOP = 78, MAXW = 288, MINW = 46;
+  const bw = MINW + (MAXW - MINW) * (V / 20);
+  const unit = 0.2;                        // 1席あたりの物質量（mol）
+  const box = (cx, label, specs, pct, note) => {
+    const x = cx - bw / 2;
+    let t = `<text x="${cx}" y="${BTOP - 16}" text-anchor="middle" font-size="15" font-weight="850" fill="var(--deep)">${label}</text>`;
+    t += `<rect x="${fmt(x,1)}" y="${BTOP}" width="${fmt(bw,1)}" height="${BH}" rx="10" fill="#f7fafe" stroke="var(--line)" stroke-width="1.5"/>`;
+    t += drawMolecules(x + 6, BTOP + 6, bw - 12, BH - 12, specs, { wf: 3.4, hf: 2.6, baseR: 20 });
+    // ピストン（体積を動かしている側の面）
+    t += `<rect x="${fmt(x + bw - 3,1)}" y="${BTOP - 6}" width="7" height="${BH + 12}" rx="3" fill="#c9d8ea" stroke="#9fb3cc" stroke-width="1"/>`;
+    t += `<text x="${cx}" y="${BTOP + BH + 40}" text-anchor="middle" font-size="24" font-weight="850" fill="var(--accent)">${fmt(pct, 1)} ％</text>`;
+    t += `<text x="${cx}" y="${BTOP + BH + 62}" text-anchor="middle" font-size="12.5" font-weight="800" fill="var(--ink3)">${note}</text>`;
+    return t;
+  };
+  const nA = A.amounts.map(v => Math.max(0, Math.round(v / unit)));
+  const nB = B.amounts.map(v => Math.max(0, Math.round(v / unit)));
+  let s = box(196, 'N₂ + 3H₂ ⇄ 2NH₃',
+    [{ n: nA[0], draw: glyphN2 }, { n: nA[1], draw: glyphH2 }, { n: nA[2], draw: (cx, cy, r) => ammoniaGlyph(cx, cy, r * .8) }],
+    A.pct, '分子の数が減る反応');
+  s += box(564, 'H₂ + I₂ ⇄ 2HI',
+    [{ n: nB[0], draw: glyphH2 }, { n: nB[1], draw: glyphI2 }, { n: nB[2], draw: glyphHI }],
+    B.pct, '分子の数が変わらない反応');
+  $('chart-shiftv').innerHTML = s;
+
+  const A8 = nh3At(8);
+  setReadout($('sv-readout'), [
+    ['体積 V', fmt(V, 1) + ' L'],
+    ['NH₃ の割合', fmt(A.pct, 1) + ' ％', true],
+    ['HI の割合', fmt(B.pct, 1) + ' ％'],
+    ['V = 8 L のとき', fmt(A8.pct, 1) + ' ％'],
+  ]);
+  $('sv-verdict').textContent = V < 8 - 1e-9
+    ? '体積を小さくすると、分子の数が減る向き（NH₃ 側）へ移動する。HI の側は動かない。'
+    : V > 8 + 1e-9
+      ? '体積を大きくすると、分子の数が増える向きへ移動する。HI の側は動かない。'
+      : '体積を変えると、左だけが動く。';
+  $('sv-press').disabled = V <= 1; $('sv-expand').disabled = V >= 20;
+}
+
+/* ============================================================
+   ⑩ 温度による移動
+   ============================================================ */
+const ST_TREF = 400, ST_K0 = 5.0;
+const st = { heat: 'exo' };
+
+function stK(T) {
+  const dH = (st.heat === 'exo' ? -1 : 1) * (+$('st-H').value) * 1000;   // J/mol
+  return vantHoff(ST_K0, ST_TREF, T, dH);
+}
+function stYield(T) {
+  const K = stK(T);
+  const x = solveHI(1, 1, 0, K);
+  return { K, eq: [1 - x, 1 - x, 2 * x], pct: 2 * x / 2 * 100 };
+}
+
+function drawShiftt() {
+  const T = +$('st-T').value;
+  $('st-T-val').textContent = fmt(T, 0);
+  $('st-H-val').textContent = fmt(+$('st-H').value, 0);
+  const cur = stYield(T), ref = stYield(ST_TREF);
+
+  const unit = 0.1;
+  const n = cur.eq.map(v => Math.max(0, Math.round(v / unit)));
+  const BX = 44, BY = 34, BW = W - 88, BH = 250;
+  // 温度で箱の色を変える（寒色↔暖色）
+  const warm = clamp((T - 250) / 550, 0, 1);
+  const bg = lerpColor([234, 243, 252], [254, 235, 219], warm);
+  let s = `<rect x="${BX}" y="${BY}" width="${BW}" height="${BH}" rx="16" fill="${bg}" stroke="var(--line)" stroke-width="1.5"/>`;
+  s += drawMolecules(BX + 12, BY + 12, BW - 24, BH - 24, [
+    { n: n[0], draw: glyphH2 }, { n: n[1], draw: glyphI2 }, { n: n[2], draw: glyphHI },
+  ], { wf: 3.5, hf: 2.6, baseR: 21 });
+  s += stackBar(140, 316, W - 280, 32, [
+    { v: cur.eq[0], color: 'var(--h2)', label: 'A' },
+    { v: cur.eq[1], color: 'var(--i2)', label: 'B' },
+    { v: cur.eq[2], color: 'var(--hi)', label: 'C' },
+  ]);
+  s += `<text x="${W / 2}" y="${390}" text-anchor="middle" font-size="24" font-weight="850" fill="var(--deep)">生成物 C　<tspan fill="var(--accent)">${fmt(cur.pct, 1)} ％</tspan></text>`;
+  s += `<text x="${W / 2}" y="${418}" text-anchor="middle" font-size="14" font-weight="800" fill="var(--ink3)">基準 400 K では ${fmt(ref.pct, 1)} ％　　K = ${fmtSci(cur.K)}</text>`;
+  $('chart-shiftt').innerHTML = s;
+
+  // 右カラム：生成物の割合の温度変化。
+  // K そのものを線形軸で描くと、発熱反応の低温側で K が4万を超えて他が潰れる。
+  // 割合は 0〜100 に収まるので、どちらへ動いたかが常に読める（K は読み出しに数値で出す）
+  const mw = 300, mh = 150, mL = 34, mR = 10, mT = 12, mB = 24;
+  const pts = [];
+  for (let t = 250; t <= 800.001; t += 10) pts.push([t, stYield(t).pct]);
+  const px = v => mL + (v - 250) / 550 * (mw - mL - mR);
+  const py = v => mh - mB - clamp(v / 100, 0, 1) * (mh - mB - mT);
+  let m = `<line x1="${mL}" y1="${mh - mB}" x2="${mw - mR}" y2="${mh - mB}" stroke="var(--axis)" stroke-width="1.3"/>`;
+  m += `<line x1="${mL}" y1="${mT}" x2="${mL}" y2="${mh - mB}" stroke="var(--axis)" stroke-width="1.3"/>`;
+  for (const v of [50, 100]) {
+    m += `<line x1="${mL}" y1="${fmt(py(v),1)}" x2="${mw - mR}" y2="${fmt(py(v),1)}" stroke="var(--grid)" stroke-width="1"/>`;
+    m += `<text x="${mL - 4}" y="${fmt(py(v) + 4,1)}" text-anchor="end" font-size="9.5" font-weight="800" fill="var(--ink3)">${v}</text>`;
+  }
+  m += `<path d="${pts.map((p, i) => (i ? 'L' : 'M') + fmt(px(p[0]),1) + ' ' + fmt(py(p[1]),1)).join(' ')}" fill="none" stroke="var(--blue)" stroke-width="2.4"/>`;
+  m += `<line x1="${fmt(px(ST_TREF),1)}" y1="${mT}" x2="${fmt(px(ST_TREF),1)}" y2="${fmt(py(0),1)}" stroke="#c9d8ea" stroke-width="1.2" stroke-dasharray="4 4"/>`;
+  m += `<circle cx="${fmt(px(T),1)}" cy="${fmt(py(cur.pct),1)}" r="6" fill="var(--accent)" stroke="#fff" stroke-width="2.2"/>`;
+  // 縦軸の単位は見出し（YIELD (%)）に持たせる。ここに置くと目盛の「100」と重なる
+  m += `<text x="${mw - mR}" y="${mh - 6}" text-anchor="end" font-size="10.5" font-weight="800" fill="var(--ink3)">温度 T（K）</text>`;
+  $('cont-shiftt').innerHTML = m;
+
+  setReadout($('st-readout'), [
+    ['温度 T', fmt(T, 0) + ' K'],
+    ['平衡定数 K', fmtSci(cur.K), true],
+    ['生成物 C の割合', fmt(cur.pct, 1) + ' ％'],
+    ['400 K との差', (cur.pct >= ref.pct ? '+' : '−') + fmt(Math.abs(cur.pct - ref.pct), 1) + ' ポイント'],
+  ]);
+  const up = T > ST_TREF, exo = st.heat === 'exo';
+  $('st-verdict').textContent = Math.abs(T - ST_TREF) < 1e-9
+    ? '温度を動かすと、K そのものが変わる。'
+    : `温度を${up ? '上げる' : '下げる'}と、${exo === up ? '吸熱' : '発熱'}の向き（${exo === up ? '左' : '右'}）へ移動する。`;
+}
+
+/* ============================================================
+   ⑪ ハーバー・ボッシュ法
+   ============================================================ */
+const KP_298 = 5.8e5, DH_NH3 = -92.2e3, EA_NH3 = 100e3;
+
+function haberYield(Tc, P) {
+  const T = Tc + 273;
+  const Kp = vantHoff(KP_298, 298, T, DH_NH3);
+  // 量論比 1:3 で出発。x = NH₃ のモル分率
+  const target = Kp * P * P;
+  const g = x => {
+    if (x <= 0) return -target;
+    if (x >= 1) return Infinity;
+    const xn = (1 - x) / 4, xh = 3 * (1 - x) / 4;
+    return x * x / (xn * xh * xh * xh) - target;
+  };
+  let lo = 1e-9, hi = 1 - 1e-9;
+  for (let i = 0; i < 120; i++) { const m = (lo + hi) / 2; if (g(m) < 0) lo = m; else hi = m; }
+  return { Kp, pct: (lo + hi) / 2 * 100 };
+}
+// 450 ℃ を 1 とした相対的な反応の速さ（アレニウス）
+const relRate = Tc => Math.exp(-EA_NH3 / R_GAS * (1 / (Tc + 273) - 1 / (450 + 273)));
+
+function drawHaber() {
+  const Tc = +$('hb-T').value, P = +$('hb-P').value;
+  $('hb-T-val').textContent = fmt(Tc, 0);
+  $('hb-P-val').textContent = fmt(P, 0);
+  const cur = haberYield(Tc, P);
+
+  const f = frame({
+    xMin: 0, xMax: 600, yMin: 0, yMax: 100,
+    xTicks: ticks(0, 600, 100, 0), yTicks: ticks(0, 100, 20, 0),
+    xLabel: '全圧 P（bar）', yLabel: 'NH₃ の割合（％）',
+  });
+  const { sx, sy } = f;
+  let s = f.axesSvg;
+  // 参考の等温線
+  for (const t of [300, 450, 600]) {
+    const pts = [];
+    for (let p = 10; p <= 600.001; p += 10) pts.push([p, haberYield(t, p).pct]);
+    s += polyline(pts, sx, sy, '#c3d3e8', 2);
+    s += `<text x="${fmt(sx(600) - 4,1)}" y="${fmt(sy(haberYield(t, 600).pct) - 7,1)}" text-anchor="end" font-size="12" font-weight="800" fill="#8ba3c2">${t} ℃</text>`;
+  }
+  const now = [];
+  for (let p = 10; p <= 600.001; p += 10) now.push([p, haberYield(Tc, p).pct]);
+  s += polyline(now, sx, sy, 'var(--blue)', 3.4);
+  s += `<line x1="${fmt(sx(P),1)}" y1="${fmt(sy(cur.pct),1)}" x2="${fmt(sx(P),1)}" y2="${fmt(sy(0),1)}" stroke="var(--accent)" stroke-width="1" stroke-dasharray="4 4"/>`;
+  s += `<line x1="${ML}" y1="${fmt(sy(cur.pct),1)}" x2="${fmt(sx(P),1)}" y2="${fmt(sy(cur.pct),1)}" stroke="var(--accent)" stroke-width="1" stroke-dasharray="4 4"/>`;
+  s += `<circle cx="${fmt(sx(P),1)}" cy="${fmt(sy(cur.pct),1)}" r="7.5" fill="var(--accent)" stroke="#fff" stroke-width="2.4"/>`;
+  s += chartLegend([{ color: 'var(--blue)', label: `${fmt(Tc, 0)} ℃` }], ML + 8, MT + 18);
+  $('chart-haber').innerHTML = s;
+
+  // 気体の内訳
+  const x = cur.pct / 100, xn = (1 - x) / 4, xh = 3 * (1 - x) / 4;
+  const N = 24;
+  const nA = Math.round(x * N), nN = Math.round(xn * N), nH = N - nA - nN;
+  let m = drawMolecules(6, 6, 288, 118, [
+    { n: Math.max(0, nN), draw: glyphN2 },
+    { n: Math.max(0, nH), draw: glyphH2 },
+    { n: Math.max(0, nA), draw: (cx, cy, r) => ammoniaGlyph(cx, cy, r * .8) },
+  ], { wf: 3.5, hf: 2.6, baseR: 20 });
+  $('cont-haber').innerHTML = m;
+
+  const rate = relRate(Tc);
+  setReadout($('hb-readout'), [
+    ['NH₃ の割合', fmt(cur.pct, 1) + ' ％', true],
+    ['平衡定数 Kp', fmtSci(cur.Kp) + ' bar⁻²'],
+    ['反応の速さ', '約 ' + fmtSci(rate) + ' 倍'],
+    ['（450 ℃ を1とした比）', ''],
+  ]);
+  $('hb-verdict').textContent = Tc <= 300
+    ? `収率は ${fmt(cur.pct, 1)} ％まで上がるが、速さは 450 ℃ の ${fmtSci(rate)} 倍。待っていても届かない。`
+    : `収率 ${fmt(cur.pct, 1)} ％。低温ほど収率は上がるが、遅くなりすぎて実際には使えない。`;
+}
+
+attachHover('chart-haber', 'tip-haber', () => ({
+  xMin: 0, xMax: 600, domain: [10, 600],
+  lines: p => [`${fmt(p, 0)} bar`, `NH₃ ${fmt(haberYield(+$('hb-T').value, p).pct, 1)} ％`],
+}));
+
+attachHover('chart-eqrate', 'tip-eqrate', () => ({
+  xMin: 0, xMax: EQ_TMAX, domain: [0, EQ_TMAX],
+  lines: t => {
+    const c = eqAt(clamp(t, 0, EQ_TMAX));
+    return [`t = ${fmt(t, 1)} s`, `正反応 ${fmt(vF(c), 3)}`, `逆反応 ${fmt(vR(c), 3)}`];
+  },
+}));
+
+attachHover('chart-dist', 'tip-dist', () => {
+  const T = +$('di-t').value, Ea = +$('di-ea').value;
+  const xMax = Math.max(45, Ea + 8);
+  return {
+    xMin: 0, xMax, domain: [0, xMax],
+    lines: E => [`${fmt(E, 1)} kJ/mol`, `ここより右の割合 ${fmtSci(fractionAbove(E, T) * 100)} ％`],
+  };
+});
+attachHover('chart-energy', 'tip-energy', () => {
+  const p = { Ea: +$('en-ea').value, dH: +$('en-dh').value };
+  return {
+    xMin: 0, xMax: 1, domain: [0, 1],
+    lines: x => [`エネルギー ${fmt(energyAt(x, p.Ea, p.dH), 1)} kJ/mol`],
+  };
+});
+
+/* ============================================================
+   タブ・全画面・イベント
+   ============================================================ */
+const DRAW = {
+  collide: drawCollide, energy: drawEnergy, dist: drawDist, conc: drawConc, cat: drawCat, eqrate: drawEqrate,
+  kconst: drawKconst, shiftc: drawShiftc, shiftv: drawShiftv, shiftt: drawShiftt, haber: drawHaber,
+};
+const tabButtons = [...document.querySelectorAll('#tabs [role="tab"]')];
+tabButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const key = btn.dataset.tab;
+    eqStop();                       // 見えていないタブで再生が回り続けないように
+    tabButtons.forEach(b => {
+      const on = b === btn;
+      b.setAttribute('aria-selected', on);
+      $('panel-' + b.dataset.tab).classList.toggle('active', on);
+    });
+    DRAW[key]();
+  });
+});
+
+$('col-1').addEventListener('click', () => colRun(1));
+$('col-10').addEventListener('click', () => colRun(10));
+$('col-100').addEventListener('click', () => colRun(100));
+$('col-reset').addEventListener('click', () => { colReset(); drawCollide(); });
+
+['en-e', 'en-ea', 'en-dh'].forEach(id => $(id).addEventListener('input', drawEnergy));
+$('en-reset').addEventListener('click', () => {
+  // min を戻してから値を入れる。吸熱側で上がったままの min に初期値がクランプされるため
+  $('en-ea').min = 10;
+  $('en-e').value = 10; $('en-dh').value = -50; $('en-ea').value = 60; drawEnergy();
+});
+
+['di-t', 'di-ea'].forEach(id => $(id).addEventListener('input', drawDist));
+$('di-reset').addEventListener('click', () => { $('di-t').value = 500; $('di-ea').value = 15; drawDist(); });
+$('di-real').addEventListener('click', () => { $('di-t').value = 300; $('di-ea').value = 50; drawDist(); });
+
+const cnStep = (key, d) => { conc[key] = clamp(conc[key] + d, CN_MIN, CN_MAX); drawConc(); };
+$('cn-a-minus').addEventListener('click', () => cnStep('a', -1));
+$('cn-a-plus').addEventListener('click', () => cnStep('a', 1));
+$('cn-b-minus').addEventListener('click', () => cnStep('b', -1));
+$('cn-b-plus').addEventListener('click', () => cnStep('b', 1));
+$('cn-reset').addEventListener('click', () => { conc.a = 4; conc.b = 4; drawConc(); });
+
+document.querySelectorAll('[data-cat]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    cat.on = btn.dataset.cat === 'on';
+    document.querySelectorAll('[data-cat]').forEach(b => b.setAttribute('aria-pressed', b === btn));
+    drawCat();
+  });
+});
+document.querySelectorAll('[data-catview]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    cat.view = btn.dataset.catview;
+    document.querySelectorAll('[data-catview]').forEach(b => b.setAttribute('aria-pressed', b === btn));
+    drawCat();
+  });
+});
+['ct-ea0', 'ct-ea1', 'ct-t'].forEach(id => $(id).addEventListener('input', drawCat));
+$('ct-reset').addEventListener('click', () => {
+  // max を戻してから値を入れる（触媒ありの Ea が前の状態にクランプされるため）
+  $('ct-ea1').max = 119;
+  $('ct-ea0').value = 60; $('ct-ea1').value = 35; $('ct-t').value = 500; drawCat();
+});
+
+$('eq-t').addEventListener('input', () => { eqStop(); eq.t = +$('eq-t').value; drawEqrate(); });
+$('eq-start').addEventListener('click', () => { eqStop(); eq.t = 0; drawEqrate(); });
+$('eq-end').addEventListener('click', () => { eqStop(); eq.t = EQ_TMAX; drawEqrate(); });
+// 席の状態は t の関数なので、時刻を1コマ進めれば入れ替えも1コマ分だけ進む
+$('eq-step').addEventListener('click', () => { eqStop(); eqAdvance(EQ_STEP); });
+$('eq-play').addEventListener('click', () => { eq.playing ? eqStop() : eqStart(); });
+document.querySelectorAll('[data-eqspeed]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    eq.speed = +btn.dataset.eqspeed;
+    document.querySelectorAll('[data-eqspeed]').forEach(b => b.setAttribute('aria-pressed', b === btn));
+    if (eq.playing) eqStart();          // 再生中に切り替えたらタイマーを打ち直す
+  });
+});
+
+// ⑦ 平衡定数 K
+const kcStep = (key, d) => {
+  kc[key] = Math.round(clamp(kc[key] + d, KC_MIN, KC_MAX) * 100) / 100;
+  drawKconst();
+};
+$('kc-a-minus').addEventListener('click', () => kcStep('a', -KC_STEP));
+$('kc-a-plus').addEventListener('click', () => kcStep('a', KC_STEP));
+$('kc-b-minus').addEventListener('click', () => kcStep('b', -KC_STEP));
+$('kc-b-plus').addEventListener('click', () => kcStep('b', KC_STEP));
+$('kc-record').addEventListener('click', () => {
+  const e = kcEq();
+  kc.log.unshift({ a: kc.a, b: kc.b, e, K: e[2] * e[2] / (e[0] * e[1]) });
+  if (kc.log.length > 7) kc.log.pop();
+  drawKconst();
+});
+$('kc-clear').addEventListener('click', () => { kc.log.length = 0; drawKconst(); });
+
+// ⑧ 濃度による移動
+$('sc-add-h2').addEventListener('click', () => { sc.c[0] += 0.5; sc.added = 'H₂'; drawShiftc(); });
+$('sc-add-hi').addEventListener('click', () => { sc.c[2] += 0.5; sc.added = 'HI'; drawShiftc(); });
+$('sc-step').addEventListener('click', () => { if (scStep()) drawShiftc(); });
+$('sc-reset').addEventListener('click', () => { scReset(); drawShiftc(); });
+
+// ⑨ 圧力・体積による移動
+$('sv-V').addEventListener('input', drawShiftv);
+$('sv-press').addEventListener('click', () => { $('sv-V').value = Math.max(1, +$('sv-V').value - 2); drawShiftv(); });
+$('sv-expand').addEventListener('click', () => { $('sv-V').value = Math.min(20, +$('sv-V').value + 2); drawShiftv(); });
+$('sv-reset').addEventListener('click', () => { $('sv-V').value = 8; drawShiftv(); });
+
+// ⑩ 温度による移動
+document.querySelectorAll('[data-heat]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    st.heat = btn.dataset.heat;
+    document.querySelectorAll('[data-heat]').forEach(b => b.setAttribute('aria-pressed', b === btn));
+    drawShiftt();
+  });
+});
+['st-T', 'st-H'].forEach(id => $(id).addEventListener('input', drawShiftt));
+$('st-reset').addEventListener('click', () => { $('st-T').value = 400; $('st-H').value = 50; drawShiftt(); });
+
+// ⑪ ハーバー・ボッシュ法
+['hb-T', 'hb-P'].forEach(id => $(id).addEventListener('input', drawHaber));
+$('hb-real').addEventListener('click', () => { $('hb-T').value = 450; $('hb-P').value = 200; drawHaber(); });
+$('hb-low').addEventListener('click', () => { $('hb-T').value = 250; $('hb-P').value = 200; drawHaber(); });
+
+const fsBtn = $('fullscreenBtn');
+fsBtn.addEventListener('click', async () => {
+  try {
+    if (!document.fullscreenElement) await document.documentElement.requestFullscreen();
+    else await document.exitFullscreen();
+  } catch (e) { /* 全画面が使えない環境では何もしない */ }
+});
+document.addEventListener('fullscreenchange', () => {
+  const on = !!document.fullscreenElement;
+  document.body.classList.toggle('is-fullscreen', on);
+  fsBtn.querySelector('.btn-text').textContent = on ? '全画面を終了' : '全画面表示';
+  Object.values(DRAW).forEach(fn => fn());
+});
+
+// 初期描画
+colReset();
+scReset();
+Object.values(DRAW).forEach(fn => fn());
+</script>
+<script src="site-shell.js"></script>
+</body>
+</html>
