@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>酸・塩基と中和滴定</title>
-<meta name="description" content="H⁺とOH⁻が1組ずつ結びつく中和から、強酸・弱酸の滴定曲線、指示薬の変色域の選び方、緩衝液まで、粒子モデルとグラフで確かめる授業用教材。">
+<meta name="description" content="H⁺とOH⁻が1組ずつ結びつく中和から、強酸・弱酸の滴定曲線、指示薬の変色域の選び方まで、粒子モデルとグラフで確かめる授業用教材。">
 <meta name="theme-color" content="#2563eb">
 <link rel="icon" href="icons/icon-192.png">
 <link rel="stylesheet" href="tokens.css">
@@ -134,7 +134,6 @@
     <button type="button" role="tab" aria-selected="false" data-tab="strong">② 強酸を滴定する</button>
     <button type="button" role="tab" aria-selected="false" data-tab="weak">③ 弱酸を滴定する</button>
     <button type="button" role="tab" aria-selected="false" data-tab="indicator">④ 指示薬の選び方</button>
-    <button type="button" role="tab" aria-selected="false" data-tab="buffer">⑤ 緩衝液</button>
   </nav>
 </header>
 
@@ -210,15 +209,7 @@
           <div class="eqline">HCl ＋ NaOH → NaCl ＋ H₂O</div>
           <p class="note">0.100 mol/L 塩酸 10.0 mL に、0.100 mol/L 水酸化ナトリウム水溶液を加えていく。</p>
         </div>
-        <div class="card">
-          <h2>いま</h2>
-          <div class="readout">
-            <span class="k">加えた量</span><span class="v" id="st-vol">0.0 mL</span>
-            <span class="k">滴数</span><span class="v" id="st-n">0</span>
-          </div>
-          <span class="ph-big acid" id="st-ph">1.00</span>
-          <p class="verdict" id="st-verdict"></p>
-        </div>
+        <p class="verdict" id="st-verdict"></p>
         <div class="card print-only" hidden>
           <h2>考えてみよう</h2>
           <p>9.9 mL から 10.1 mL までのわずか 0.2 mL で、pH はいくつからいくつまで変化したか。</p>
@@ -246,15 +237,7 @@
           <div class="eqline">CH₃COOH ＋ NaOH → CH₃COONa ＋ H₂O</div>
           <p class="note">0.100 mol/L 酢酸 10.0 mL に、0.100 mol/L 水酸化ナトリウム水溶液を加えていく。</p>
         </div>
-        <div class="card">
-          <h2>いま</h2>
-          <div class="readout">
-            <span class="k">加えた量</span><span class="v" id="wk-vol">0.0 mL</span>
-            <span class="k">滴数</span><span class="v" id="wk-n">0</span>
-          </div>
-          <span class="ph-big acid" id="wk-ph">2.88</span>
-          <p class="verdict" id="wk-verdict"></p>
-        </div>
+        <p class="verdict" id="wk-verdict"></p>
         <div class="card">
           <h2>比べる</h2>
           <div class="pick">
@@ -294,42 +277,6 @@
         <div class="card print-only" hidden>
           <h2>考えてみよう</h2>
           <p>酢酸の滴定にメチルオレンジが使えないのはなぜか。上の図をもとに説明しなさい。</p>
-          <span class="write-line"></span>
-          <span class="write-line"></span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ⑤ 緩衝液 --------------------------------------------------- -->
-  <section class="panel" id="panel-buffer">
-    <div class="panel-tools">
-      <button class="btn primary" id="bf-acid" type="button">▼ 酸を1滴 加える</button>
-      <button class="btn primary" id="bf-base" type="button">▼ 塩基を1滴 加える</button>
-      <button class="btn" id="bf-reset" type="button">最初から</button>
-    </div>
-    <div class="layout">
-      <div class="chart-card" data-label="BUFFER VS WATER">
-        <svg id="chart-buffer" viewBox="0 0 760 430" role="img" aria-label="緩衝液と純水に同じ量の酸や塩基を加えたときの pH の変化を並べて比べる図"></svg>
-      </div>
-      <div class="side">
-        <div class="card law">
-          <h2>緩衝液</h2>
-          <div class="eqline">CH₃COOH ＋ CH₃COO⁻</div>
-          <p class="note">酢酸 0.100 mol/L と酢酸ナトリウム 0.100 mol/L の混合液。同じ量の酸・塩基を純水にも加えて比べる。</p>
-        </div>
-        <div class="card">
-          <h2>いま</h2>
-          <div class="readout">
-            <span class="k">加えた量</span><span class="v" id="bf-added">0</span>
-            <span class="k">緩衝液</span><span class="v" id="bf-ph">4.74</span>
-            <span class="k">純水</span><span class="v" id="bf-wph">7.00</span>
-          </div>
-          <p class="verdict" id="bf-verdict"></p>
-        </div>
-        <div class="card print-only" hidden>
-          <h2>考えてみよう</h2>
-          <p>同じ量の酸を加えたのに、緩衝液の pH がほとんど動かないのはなぜか。</p>
           <span class="write-line"></span>
           <span class="write-line"></span>
         </div>
@@ -585,13 +532,58 @@ function drawMix() {
 /* ============================================================
    ② 強酸の滴定 / ③ 弱酸の滴定（同じ仕組み）
    ============================================================ */
-function makeTitration({ key, Ka, phId, volId, nId, verdictId, chartId, withParticles }) {
+
+/* グラフの右下（曲線が通らない場所）に置くビーカーの模式図。
+   ①と見せ方を揃える：粒子の大きさは一定、文字には縁取り。
+   もとの酸を12個で表し、滴下につれて中身が入れ替わる。
+   ② H⁺ と OH⁻ …… 中和点では両方0個になる（どちらも残っていない）
+   ③ CH₃COOH と CH₃COO⁻ …… 合計は常に12個（分子のまま残る量が見える）*/
+function beakerInset(vb, Ka) {
+  const N = 12, R = 13, COLS = 6;
+  const PX = 432, PY = 196, PW = 298, PH = 172;
+  const BX = PX + 10, BY = PY + 26, BW = PW - 20, BH = 108;   // ビーカー
+  const GX = BX + 6, GY = BY + 16, CW = (BW - 12) / COLS, CH = 38;
+
+  let groups, caption;
+  if (Ka === KA_ACETIC) {
+    const V = VA + vb, Ca = C0 * VA / V;
+    const h = solveH(Ca, Ka, C0 * vb / V);
+    const nHA = Math.round(N * h / (Ka + h));          // 電離していない分子
+    const nA = N - nHA;
+    groups = [{ n: nHA, fill: 'var(--weak)' }, { n: nA, fill: 'var(--base)' }];
+    caption = `<tspan fill="#b45309">■</tspan> CH₃COOH ${nHA}　<tspan fill="#2563eb">■</tspan> CH₃COO⁻ ${nA}`;
+  } else {
+    const nH = Math.max(0, Math.round(N * (1 - vb / VEQ)));
+    const nOH = Math.max(0, Math.round(N * (vb - VEQ) / VEQ));
+    groups = [{ n: nH, fill: 'var(--acid)', label: 'H⁺' }, { n: Math.min(nOH, N), fill: 'var(--base)', label: 'OH⁻' }];
+    caption = nH === 0 && nOH === 0
+      ? '<tspan fill="#16a34a">H⁺ も OH⁻ も残っていない</tspan>'
+      : `<tspan fill="#dc2626">■</tspan> H⁺ ${nH}　<tspan fill="#2563eb">■</tspan> OH⁻ ${Math.min(nOH, N)}`;
+  }
+
+  let s = `<rect x="${PX}" y="${PY}" width="${PW}" height="${PH}" rx="12" fill="#fff" fill-opacity=".94" stroke="#dbe4ef"/>`;
+  s += `<text x="${BX}" y="${PY + 18}" fill="#8290a5" font-size="10" font-weight="850" letter-spacing=".08em">IN THE BEAKER</text>`;
+  // ①と同じビーカーの外形と液
+  s += beaker(BX, BY, BW, BH);
+  s += `<path d="M ${BX + 2} ${BY + 10} L ${BX + 2} ${BY + BH - 12} Q ${BX + 2} ${BY + BH - 2} ${BX + 14} ${BY + BH - 2}
+          L ${BX + BW - 14} ${BY + BH - 2} Q ${BX + BW - 2} ${BY + BH - 2} ${BX + BW - 2} ${BY + BH - 12}
+          L ${BX + BW - 2} ${BY + 10} Z" fill="#e8f1fb"/>`;
+  s += `<line x1="${BX + 2}" y1="${BY + 10}" x2="${BX + BW - 2}" y2="${BY + 10}" stroke="#9fc0e4" stroke-width="2"/>`;
+
+  let i = 0;
+  groups.forEach(g => {
+    for (let k = 0; k < g.n; k++, i++) {
+      const p = { x: GX + CW * ((i % COLS) + .5), y: GY + CH * (Math.floor(i / COLS) + .5), r: R };
+      s += ion(p, g.fill, g.label || '');
+    }
+  });
+
+  s += `<text x="${BX}" y="${PY + PH - 14}" fill="#526078" font-size="11.5" font-weight="800">${caption}</text>`;
+  return s;
+}
+function makeTitration({ key, Ka, verdictId, chartId }) {
   let drops = 0;
   const maxDrops = Math.round(20 / DROP);          // 20 mL まで
-
-  const setPhClass = (el, p) => {
-    el.className = 'ph-big ' + (p < 6.5 ? 'acid' : p > 7.5 ? 'base' : 'neutral');
-  };
 
   const draw = () => {
     const vb = drops * DROP;
@@ -621,31 +613,18 @@ function makeTitration({ key, Ka, phId, volId, nId, verdictId, chartId, withPart
     if (pts) s += `<polyline class="curve" points="${pts}"/>`;
     s += `<circle cx="${f.X(vb)}" cy="${f.Y(p)}" r="6" fill="var(--blue)" stroke="#fff" stroke-width="2"/>`;
 
-    // ③ は「電離していない酢酸分子がまだ残っている」ことを粒子で示す
-    if (withParticles) {
-      const V = VA + vb;
-      const Ca = C0 * VA / V, hcon = solveH(Ca, Ka, C0 * vb / V);
-      const undissoc = Ca * hcon / (Ka + hcon);            // CH₃COOH のまま
-      const frac = Ca > 0 ? undissoc / (C0 * VA / V) : 0;
-      const N = 12, nMol = Math.round(N * frac), nIon = N - nMol;
-      /* 箱は右下に置く。曲線は体積が大きいところで上へ抜けるので、
-         右上に置くと曲線が箱の裏に隠れる（実測で163点が隠れた）。 */
-      const box = { x: 470, y: 225, w: 240, h: 105 };
-      s += `<rect x="${box.x - 12}" y="${box.y - 26}" width="${box.w + 24}" height="${box.h + 40}" rx="12" fill="#fff" fill-opacity=".92" stroke="#dbe4ef"/>`;
-      s += `<text x="${box.x}" y="${box.y - 10}" fill="#8290a5" font-size="10" font-weight="850" letter-spacing=".08em">ACID IN THE BEAKER</text>`;
-      const gm = layout(nMol, { x: box.x, y: box.y, w: box.w, h: box.h * (nMol / N || 0.001) }, 5);
-      gm.forEach(q => s += ion({ ...q, r: Math.min(q.r, 15) }, 'var(--weak)', ''));
-      const gi = layout(nIon, { x: box.x, y: box.y + box.h * (nMol / N), w: box.w, h: box.h * (nIon / N || 0.001) }, 23);
-      gi.forEach(q => s += ion({ ...q, r: Math.min(q.r, 15) }, 'var(--base)', ''));
-      s += `<text x="${box.x}" y="${box.y + box.h + 12}" fill="#526078" font-size="10.5" font-weight="800">`
-        + `<tspan fill="#b45309">■</tspan> CH₃COOH ${nMol}　<tspan fill="#2563eb">■</tspan> CH₃COO⁻ ${nIon}</text>`;
-    }
+    /* ビーカーの中の粒子。①と同じ見せ方（大きさ一定・文字に縁取り）で
+       右下に置く。曲線は体積が大きいところで上へ抜けるので、
+       右上に置くと曲線が箱の裏に隠れる（実測で163点が隠れた）。 */
+    s += beakerInset(vb, Ka);
+
+    // pH と加えた量はグラフの中に出す（左上は曲線が通らない）
+    s += `<text x="${f.x0 + 14}" y="${f.y1 + 34}" font-size="30" font-weight="850"
+            fill="${p < 6.5 ? 'var(--acid)' : p > 7.5 ? 'var(--base)' : 'var(--neutral)'}">pH ${p.toFixed(2)}</text>`;
+    s += `<text x="${f.x0 + 14}" y="${f.y1 + 56}" font-size="12.5" font-weight="800" fill="var(--ink2)">`
+      + `加えた量 ${vb.toFixed(1)} mL（${drops} 滴）</text>`;
 
     $(chartId).innerHTML = s;
-    $(volId).textContent = vb.toFixed(1) + ' mL';
-    $(nId).textContent = drops;
-    $(phId).textContent = p.toFixed(2);
-    setPhClass($(phId), p);
 
     const v = $(verdictId);
     const eqPh = titrate(VEQ, Ka);
@@ -672,8 +651,8 @@ function makeTitration({ key, Ka, phId, volId, nId, verdictId, chartId, withPart
 }
 
 let ghostOn = false;
-const ST = makeTitration({ key: 'strong', Ka: KA_STRONG, phId: 'st-ph', volId: 'st-vol', nId: 'st-n', verdictId: 'st-verdict', chartId: 'chart-strong' });
-const WK = makeTitration({ key: 'weak', Ka: KA_ACETIC, phId: 'wk-ph', volId: 'wk-vol', nId: 'wk-n', verdictId: 'wk-verdict', chartId: 'chart-weak', withParticles: true });
+const ST = makeTitration({ key: 'strong', Ka: KA_STRONG, verdictId: 'st-verdict', chartId: 'chart-strong' });
+const WK = makeTitration({ key: 'weak', Ka: KA_ACETIC, verdictId: 'wk-verdict', chartId: 'chart-weak' });
 
 /* ============================================================
    ④ 指示薬の選び方
@@ -722,68 +701,6 @@ function drawIndicator() {
 }
 
 /* ============================================================
-   ⑤ 緩衝液
-   ============================================================ */
-const BF_STEP = 0.005;        // 1滴あたり mol/L
-let bfNet = 0;                // 正味の塩基（＋）／酸（−）
-
-const bufferPh = net => pHof(0.2, KA_ACETIC, 0.1 + net);
-const waterPh = net => net === 0 ? 7 : (net > 0 ? pHof(0, KA_STRONG, net) : pHof(-net, KA_STRONG, 0));
-
-function drawBuffer() {
-  const pb = bufferPh(bfNet), pw = waterPh(bfNet);
-  const pb0 = bufferPh(0), pw0 = 7;
-
-  let s = '';
-  const bars = [
-    { x: 150, label: '緩衝液', ph: pb, base: pb0, sub: '酢酸 ＋ 酢酸ナトリウム' },
-    { x: 450, label: '純水', ph: pw, base: pw0, sub: '比較のため' },
-  ];
-
-  const y0 = 356, y1 = 60, H = y0 - y1;
-  const Y = p => y0 - (p / 14) * H;
-
-  // pH の目盛
-  for (let p = 0; p <= 14; p += 2) {
-    s += `<line class="grid-line" x1="110" y1="${Y(p)}" x2="700" y2="${Y(p)}"/>`;
-    s += `<text class="tick" x="102" y="${Y(p) + 4}" text-anchor="end">${p}</text>`;
-  }
-  s += `<text class="axis-label" x="66" y="${(y0 + y1) / 2}" text-anchor="middle" transform="rotate(-90 66 ${(y0 + y1) / 2})">pH</text>`;
-  s += `<line class="grid-line" x1="110" y1="${Y(7)}" x2="700" y2="${Y(7)}" stroke="#16a34a" stroke-dasharray="5 4"/>`;
-  s += `<text class="tick" x="704" y="${Y(7) + 4}" fill="#16a34a" font-weight="800">中性</text>`;
-
-  bars.forEach(b => {
-    const w = 160;
-    const color = b.ph < 6.5 ? 'var(--acid)' : b.ph > 7.5 ? 'var(--base)' : 'var(--neutral)';
-    // 最初の位置を細い線で残しておくと、動いた量が見える
-    s += `<line x1="${b.x - 6}" y1="${Y(b.base)}" x2="${b.x + w + 6}" y2="${Y(b.base)}" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4 4"/>`;
-    s += `<text x="${b.x + w + 12}" y="${Y(b.base) + 4}" fill="#8290a5" font-size="10.5" font-weight="800">最初 ${b.base.toFixed(2)}</text>`;
-    s += `<rect x="${b.x}" y="${Math.min(Y(b.ph), y0)}" width="${w}" height="${Math.abs(y0 - Y(b.ph))}" rx="6" fill="${color}" fill-opacity=".18" stroke="${color}" stroke-width="2"/>`;
-    s += `<text x="${b.x + w / 2}" y="${Y(b.ph) - 12}" text-anchor="middle" fill="${color}" font-size="26" font-weight="850">${b.ph.toFixed(2)}</text>`;
-    s += `<text x="${b.x + w / 2}" y="${y0 + 22}" text-anchor="middle" fill="#173b75" font-size="14" font-weight="850">${esc(b.label)}</text>`;
-    s += `<text x="${b.x + w / 2}" y="${y0 + 39}" text-anchor="middle" fill="#8290a5" font-size="10.5" font-weight="800">${esc(b.sub)}</text>`;
-    const d = b.ph - b.base;
-    if (Math.abs(d) > 1e-9) {
-      s += `<text x="${b.x + w / 2}" y="${y0 + 58}" text-anchor="middle" fill="${color}" font-size="12.5" font-weight="850">${d > 0 ? '＋' : '−'}${Math.abs(d).toFixed(2)}</text>`;
-    }
-  });
-
-  $('chart-buffer').innerHTML = s;
-
-  const n = Math.round(Math.abs(bfNet) / BF_STEP);
-  $('bf-added').textContent = bfNet === 0 ? 'なし' : `${bfNet > 0 ? '塩基' : '酸'} ${n} 滴`;
-  $('bf-ph').textContent = pb.toFixed(2);
-  $('bf-wph').textContent = pw.toFixed(2);
-
-  const v = $('bf-verdict');
-  if (bfNet === 0) v.textContent = '';
-  else {
-    const db = Math.abs(pb - pb0), dw = Math.abs(pw - pw0);
-    v.textContent = `同じ量を加えたのに、緩衝液は ${db.toFixed(2)} しか動かない。純水は ${dw.toFixed(2)} 動いた。`;
-  }
-}
-
-/* ============================================================
    配線
    ============================================================ */
 const DRAW = {
@@ -791,7 +708,6 @@ const DRAW = {
   strong: () => ST.draw(),
   weak: () => WK.draw(),
   indicator: drawIndicator,
-  buffer: drawBuffer,
 };
 const redrawAll = () => Object.values(DRAW).forEach(fn => fn());
 
@@ -833,10 +749,6 @@ $('in-pick').addEventListener('click', e => {
 });
 $('in-acid-strong').addEventListener('click', () => { inAcid = KA_STRONG; drawIndicator(); });
 $('in-acid-weak').addEventListener('click', () => { inAcid = KA_ACETIC; drawIndicator(); });
-
-$('bf-acid').addEventListener('click', () => { bfNet -= BF_STEP; drawBuffer(); });
-$('bf-base').addEventListener('click', () => { bfNet += BF_STEP; drawBuffer(); });
-$('bf-reset').addEventListener('click', () => { bfNet = 0; drawBuffer(); });
 
 redrawAll();
 </script>
