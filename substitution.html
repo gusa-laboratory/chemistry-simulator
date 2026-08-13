@@ -59,9 +59,21 @@
     color:var(--deep);font-size:14px;font-weight:850}
   .rate small{display:block;margin-top:4px;color:var(--ink2);font-size:11px;font-weight:800}
 
+  /* ③④ は図を主役にする。説明カードは下に横並びで置き、
+     図の高さを画面いっぱいまで使えるようにする。 */
+  .stack{display:flex;flex-direction:column;gap:14px;min-width:0}
+  .below{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+  .below.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .stack .chart-card{min-width:0}
+
   /* ③ 3つ並べる */
   .three-up{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
-  .three-up .stage{height:clamp(230px,30vh,330px)}
+  .three-up{align-items:stretch}
+  .three-up > div{display:flex;flex-direction:column;min-width:0}
+  /* 通常表示では height で決める。flex:1 を付けると flex-basis:0 が
+     効いて height が無視され、親の余りが0なので潰れる。
+     伸ばすのは全画面のときだけ。 */
+  .three-up .stage{height:clamp(300px,42vh,520px)}
   .three-up h3{margin:0 0 6px;color:var(--deep);font-size:13px;font-weight:850;text-align:center}
   .three-up .cap{margin-top:7px;color:var(--ink2);font-size:11px;font-weight:800;line-height:1.55;text-align:center}
 
@@ -79,11 +91,32 @@
   body.is-fullscreen .stage{height:100%;min-height:0}
   body.is-fullscreen .chart-card{min-height:0}
   body.is-fullscreen .three-up{height:100%}
+  body.is-fullscreen .stack{flex:1;min-height:0}
+  body.is-fullscreen .stack .chart-card{flex:1;min-height:0;display:flex;flex-direction:column}
+  body.is-fullscreen .stack .chart-card > .three-up{flex:1;min-height:0}
+  body.is-fullscreen .three-up .stage{flex:1;min-height:0;height:auto}
+  body.is-fullscreen .stack .chart-card > svg{flex:1;min-height:0;height:100%}
+  body.is-fullscreen .below{flex:0 0 auto}
+  body.is-fullscreen .below .card{padding:8px 11px 9px}
+  body.is-fullscreen .below .note{font-size:11px;line-height:1.5}
+  body.is-fullscreen .below h2{margin-bottom:4px;font-size:12px}
+  body.is-fullscreen .below .rate{padding:7px 10px;font-size:12.5px}
+  body.is-fullscreen .below .rate small{margin-top:2px;font-size:10.5px}
+  /* 投影面積を図へ回す。全画面ではヘッダー・タブ・操作列を詰める */
+  body.is-fullscreen header{padding-top:6px}
+  body.is-fullscreen .head-row{margin-bottom:4px}
+  body.is-fullscreen h1{font-size:20px}
+  body.is-fullscreen .site-fullscreen-btn{min-height:32px;padding:5px 10px}
+  body.is-fullscreen .tabs button{padding-top:5px;padding-bottom:7px;font-size:12.5px}
+  body.is-fullscreen .panel-tools{margin-bottom:6px}
+  body.is-fullscreen .stage-bar{margin-bottom:7px}
+  body.is-fullscreen .stage-bar div{padding:5px 4px;font-size:10.5px}
   body.is-fullscreen .now{font-size:17px}
 
   @media(max-width:1000px){
     .layout{grid-template-columns:1fr}
     .three-up{grid-template-columns:1fr}
+    .below,.below.three{grid-template-columns:1fr}
     .reso{grid-template-columns:1fr}
     body.is-fullscreen{height:auto;overflow:auto;display:block}
     body.is-fullscreen .layout{grid-template-columns:1fr}
@@ -206,11 +239,11 @@
         <button type="button" id="w-cation" aria-pressed="false">カルボカチオンの安定性</button>
       </div>
     </div>
-    <div class="layout">
+    <div class="stack">
       <div class="chart-card" data-label="PRIMARY / SECONDARY / TERTIARY">
         <div class="three-up" id="w-grid"></div>
       </div>
-      <div class="side">
+      <div class="below">
         <div class="card law">
           <h2>見どころ</h2>
           <p class="note" id="w-lead"></p>
@@ -237,11 +270,11 @@
         <button type="button" id="e-sn1" aria-pressed="false">S<sub>N</sub>1 だけ</button>
       </div>
     </div>
-    <div class="layout">
+    <div class="stack">
       <div class="chart-card" data-label="ENERGY PROFILE">
-        <svg id="chart-energy" viewBox="0 0 760 430" role="img" aria-label="SN2とSN1のエネルギー図。SN2は山が1つ、SN1は山が2つでその間にカルボカチオンの中間体がある"></svg>
+        <svg id="chart-energy" viewBox="0 0 1000 430" preserveAspectRatio="xMidYMid meet" role="img" aria-label="SN2とSN1のエネルギー図。SN2は山が1つ、SN1は山が2つでその間にカルボカチオンの中間体がある"></svg>
       </div>
-      <div class="side">
+      <div class="below three">
         <div class="card law">
           <h2>読み方</h2>
           <p class="note">山の数＝段階の数。いちばん高い山を越えるところが<b>律速段階</b>で、そこに関わる分子が速さの式に出てくる。</p>
@@ -458,6 +491,31 @@ class Mol3D {
         ctx.font = `900 ${fs}px Inter,Arial`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
         ctx.fillText(label, q.x, q.y + .5);
       }
+      if (a.chip) {
+        /* 電荷のチップ。球の右上に色付きの角丸で出す。
+           結合の上に文字を置く方式は、球が大きいと埋もれるのでやめた。
+           文字幅に合わせて幅を決めるので δ＋ のような2文字も入る。 */
+        const fs = Math.max(11, r * .52);
+        ctx.font = `900 ${fs.toFixed(1)}px Inter,Arial`;
+        const tw = ctx.measureText(a.chip).width;
+        const pw = tw + fs * .8, ph = fs * 1.5;
+        const cx2 = q.x + r * .70, cy2 = q.y - r * .70;
+        const x0 = cx2 - pw / 2, y0 = cy2 - ph / 2, rr = ph / 2;
+        ctx.beginPath();
+        ctx.moveTo(x0 + rr, y0); ctx.lineTo(x0 + pw - rr, y0);
+        ctx.quadraticCurveTo(x0 + pw, y0, x0 + pw, y0 + rr);
+        ctx.lineTo(x0 + pw, y0 + ph - rr);
+        ctx.quadraticCurveTo(x0 + pw, y0 + ph, x0 + pw - rr, y0 + ph);
+        ctx.lineTo(x0 + rr, y0 + ph);
+        ctx.quadraticCurveTo(x0, y0 + ph, x0, y0 + ph - rr);
+        ctx.lineTo(x0, y0 + rr);
+        ctx.quadraticCurveTo(x0, y0, x0 + rr, y0);
+        ctx.closePath();
+        ctx.fillStyle = a.chipColor || '#16a34a'; ctx.fill();
+        ctx.strokeStyle = '#fff'; ctx.lineWidth = 2.4; ctx.stroke();
+        ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(a.chip, cx2, cy2 + .5);
+      }
       if (a.badge) {   // δ− や ＋ などの札
         ctx.font = `900 ${Math.max(11, r * .62)}px Inter,Arial`;
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
@@ -468,6 +526,7 @@ class Mol3D {
       }
       ctx.globalAlpha = 1;
     });
+
   }
 }
 
@@ -499,9 +558,12 @@ function sn2Model(t) {
   const near = Math.min(1, Math.max(0, (t - .15) / .35));      // 部分結合の濃さ
   const gone = Math.min(1, Math.max(0, (t - .5) / .35));
   const atoms = [
-    atom('C', 0, 0, 0),
-    atom('Br', dBr, 0, 0, { label: t > .85 ? 'Br⁻' : 'Br', badge: (t >= .2 && t <= .85) ? 'δ−' : '', badgeColor: '#b45309' }),
-    atom('O', -dO, 0, 0, { label: t < .15 ? 'O⁻' : 'O', badge: (t >= .15 && t <= .85) ? 'δ−' : '', badgeColor: '#16a34a' }),
+    /* C–Br は電気陰性度の差で電子が Br 側に偏っている。だから炭素は
+       いくらか正で、そこが求核剤に狙われる。反応の出発点なので
+       最初から出しておく。結合が切れたら Br は完全な負イオンになる。 */
+    atom('C', 0, 0, 0, { chip: t < .85 ? 'δ＋' : '', chipColor: '#dc2626' }),
+    atom('Br', dBr, 0, 0, { chip: t > .85 ? '−' : 'δ−', chipColor: '#b45309' }),
+    atom('O', -dO, 0, 0, { chip: t < .15 ? '−' : (t < .85 ? 'δ−' : ''), chipColor: '#16a34a' }),
     atom('H', -dO - .58, -.80, 0, { rad: .38 }),                // OH の H。O の δ− の札とぶつからないよう下側に置く
   ];
   for (let k = 0; k < 3; k++) {
@@ -553,33 +615,58 @@ let s1t = 0, s1face = 1;
 const R_LABELS = ['CH₃', 'C₂H₅', 'C₃H₇'];
 const R_FILLS = ['#0891b2', '#7c3aed', '#0f766e'];
 
+/* 置換基は1球にまとめず、CH₂ / CH₃ のかたまりを1球ずつ鎖にして描く。
+   まとめてしまうと、第三級のまわりがどれだけ混んでいるか（立体障害）が
+   伝わらないため。鎖は結合方向から交互に折れるジグザグにする。 */
+const CHAIN = [['CH₃'], ['CH₂', 'CH₃'], ['CH₂', 'CH₂', 'CH₃']];
+
 function sn1Model(t, face) {
   let px, dBr, dO;
-  if (t < .5) { const u = t / .5; px = -1 / 3 * (1 - u); dBr = 1.95 + (5.4 - 1.95) * u * u; dO = 6.2; }
-  else { const u = (t - .5) / .5; px = (1 / 3) * u * (-face); dBr = 5.4; dO = 1.43 + (6.2 - 1.43) * (1 - u) * (1 - u); }
+  if (t < .5) { const u = t / .5; px = -1 / 3 * (1 - u); dBr = 1.95 + (5.4 - 1.95) * u * u; dO = 6.4; }
+  else { const u = (t - .5) / .5; px = (1 / 3) * u * (-face); dBr = 5.4; dO = 1.43 + (6.4 - 1.43) * (1 - u) * (1 - u); }
   const r = Math.sqrt(Math.max(0, 1 - px * px)), L = 1.52;
-  const atoms = [atom('C', 0, 0, 0, { label: (t > .42 && t < .62) ? 'C⁺' : 'C', fill: (t > .42 && t < .62) ? '#dc2626' : undefined })];
+  const cation = t > .42 && t < .62;
+  const atoms = [atom('C', 0, 0, 0, {
+    label: cation ? 'C' : 'C', chip: cation ? '＋' : '', chipColor: '#dc2626',
+    fill: cation ? '#dc2626' : undefined,
+  })];
+  const bonds = [];
+  const push = a => (atoms.push(a), atoms.length - 1);
+
   for (let k = 0; k < 3; k++) {
     const a = 2 * Math.PI * k / 3 + Math.PI / 2;
-    atoms.push(atom('R', L * px, L * r * Math.cos(a), L * r * Math.sin(a),
-      { label: R_LABELS[k], fill: R_FILLS[k], rad: .78 }));
+    // 中心から置換基へ向かう単位ベクトルと、それに直交する向き（ジグザグ用）
+    const d = [px, r * Math.cos(a), r * Math.sin(a)];
+    const p = [Math.sqrt(1 - px * px), -px * Math.cos(a), -px * Math.sin(a)];
+    const pn = Math.hypot(...p) || 1;
+    const pu = p.map(v => v / pn);
+    let prev = 0, pos = [0, 0, 0];
+    CHAIN[k].forEach((lab, n) => {
+      const zig = n === 0 ? 0 : (n % 2 ? 1 : -1) * .57;
+      const dir = n === 0 ? d : d.map((v, i) => v * .82 + pu[i] * zig);
+      const dn = Math.hypot(...dir) || 1;
+      pos = pos.map((v, i) => v + dir[i] / dn * L);
+      const idx = push(atom('R', pos[0], pos[1], pos[2],
+        { label: lab, fill: R_FILLS[k], rad: lab === 'CH₃' ? .72 : .66 }));
+      bonds.push(bond(prev, idx, { width: 6 }));
+      prev = idx;
+    });
   }
-  atoms.push(atom('Br', dBr, 0, 0, { label: t > .35 ? 'Br⁻' : 'Br', alpha: t > .5 ? .6 : 1 }));
-  atoms.push(atom('O', -dO * face, 0, 0, { label: t < .9 ? 'O⁻' : 'O' }));
-  atoms.push(atom('H', -(dO + .58) * face, -.80, 0, { rad: .38 }));
+
+  const iBr = push(atom('Br', dBr, 0, 0, { chip: t > .35 ? '−' : '', chipColor: '#b45309', alpha: t > .5 ? .6 : 1 }));
+  const iO = push(atom('O', -dO * face, 0, 0, { chip: t < .9 ? '−' : '', chipColor: '#16a34a' }));
+  const iH = push(atom('H', -(dO + .58) * face, -.80, 0, { rad: .38 }));
   const gone = Math.min(1, Math.max(0, (t - .2) / .3));
   const near = Math.min(1, Math.max(0, (t - .62) / .3));
-  const bonds = [
-    bond(0, 1), bond(0, 2), bond(0, 3),
-    bond(0, 4, { style: t < .1 ? 'solid' : 'dash', width: lerp(7, 2, gone), color: `rgba(180,83,9,${lerp(.95, .18, gone)})` }),
-    bond(0, 5, { style: t > .92 ? 'solid' : 'dash', width: lerp(2, 7, near), color: `rgba(22,163,74,${lerp(.18, .95, near)})` }),
-    bond(5, 6, { width: 5 }),
-  ];
-  const planes = (t > .42 && t < .62) ? [{
-    pts: [[0, 2.1, 2.1], [0, 2.1, -2.1], [0, -2.1, -2.1], [0, -2.1, 2.1]],
+  bonds.push(bond(0, iBr, { style: t < .1 ? 'solid' : 'dash', width: lerp(7, 2, gone), color: `rgba(180,83,9,${lerp(.95, .18, gone)})` }));
+  bonds.push(bond(0, iO, { style: t > .92 ? 'solid' : 'dash', width: lerp(2, 7, near), color: `rgba(22,163,74,${lerp(.18, .95, near)})` }));
+  bonds.push(bond(iO, iH, { width: 5 }));
+
+  const planes = cation ? [{
+    pts: [[0, 2.6, 2.6], [0, 2.6, -2.6], [0, -2.6, -2.6], [0, -2.6, 2.6]],
     fill: 'rgba(220,38,38,.09)', stroke: 'rgba(220,38,38,.6)',
   }] : [];
-  return { atoms, bonds, planes, span: 5.6 };
+  return { atoms, bonds, planes, span: 7.2 };
 }
 
 const S1_STAGES = [{ t: '出発物' }, { t: 'C–Br が切れる' }, { t: 'カルボカチオン', ts: 1 }, { t: 'OH⁻ が攻撃' }, { t: '生成物' }];
@@ -672,7 +759,11 @@ function drawWhich() {
    ============================================================ */
 let eShow = 'both';
 function drawEnergy() {
-  const x0 = 88, y0 = 372, x1 = 726, y1 = 44;
+  /* viewBox は 1000×430。カードを下へ移して横幅が使えるようになったので
+     横長にした。ただし比を広げすぎると、入れ物の高さが余っているのに
+     幅で頭打ちになって縦が縮む。1000×430 が入れ物（およそ 1362×597）に
+     いちばん近い比になる。 */
+  const x0 = 92, y0 = 372, x1 = 966, y1 = 44;
   const X = u => x0 + u * (x1 - x0);
   const Y = e => y0 - e * (y0 - y1);      // e は 0〜1 の相対エネルギー
   let s = '';
