@@ -50,11 +50,17 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 .readout .v.dep{color:var(--accent)}
 .verdict{margin-top:9px;padding:8px 11px;border-left:4px solid var(--blue);border-radius:9px;background:var(--t-blue-wash);color:#31445f;font-size:12px;font-weight:800;line-height:1.6}
 footer{padding:0 20px 26px;text-align:center;color:var(--t-ink4);font-size:10px;font-weight:600;letter-spacing:.04em}
+/* 全画面（授業投影）の土台。これが無いと body が通常の block のままで、
+   下の flex:1 / min-height:0 の指定が全部効かず、図が画面いっぱいに
+   ならない（内容の高さのまま縦に伸びてあふれる）。 */
+body.is-fullscreen{height:100vh;overflow:hidden;display:flex;flex-direction:column}
 body.is-fullscreen header{position:static;padding:8px clamp(12px,2vw,30px) 0;flex:0 0 auto}
 body.is-fullscreen .header-row{margin-bottom:5px}
 body.is-fullscreen h1{font-size:21px}
 body.is-fullscreen .back-link{display:none}
 body.is-fullscreen .tabs button{padding:6px 12px 8px;font-size:12.5px}
+/* 全画面ボタンも小さくする。詰めた分がそのまま図の高さになる */
+body.is-fullscreen .site-fullscreen-btn{min-height:32px;padding:5px 10px}
 body.is-fullscreen main{padding:7px clamp(10px,2vw,26px) 8px;max-width:none;width:100%;flex:1;min-height:0;display:flex;flex-direction:column}
 body.is-fullscreen .panel.active{flex:1;min-height:0;display:flex;flex-direction:column}
 body.is-fullscreen .panel-tools{flex:0 0 auto;margin-bottom:6px}

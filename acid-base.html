@@ -41,7 +41,10 @@
      右の「中和」「数」を消して、図2枚に幅をすべて渡す。 */
   .mix-main{min-width:0;display:flex;flex-direction:column;gap:11px}
   .mix-split{display:grid;grid-template-columns:1fr;gap:14px;align-items:start}
-  .mix-split .ph-card{display:none;border-top-color:var(--blue)}
+  /* 隠す指定は #panel-mix を付けて詳細度を上げる。ui.css の
+     body.is-fullscreen .chart-card{display:flex} に負けると、
+     全画面のときだけ隠したカードが復活してグリッドに行ができる。 */
+  #panel-mix .mix-split .ph-card{display:none;border-top-color:var(--blue)}
   .mix-verdict-line{margin:0}
   .mix-verdict-line:empty{display:none}
 
@@ -52,6 +55,8 @@
 
   #panel-mix.show-ph .mix-split{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr)}
   #panel-mix.show-ph .mix-split .ph-card{display:block}
+  /* 全画面では ui.css がカードを flex にして中の svg を伸ばすので、それに合わせる */
+  body.is-fullscreen #panel-mix.show-ph .mix-split .ph-card{display:flex}
   #panel-mix.show-ph .layout{grid-template-columns:1fr}
   #panel-mix.show-ph .side{display:none}
 
@@ -62,7 +67,7 @@
     #panel-mix .mix-split{grid-template-columns:1fr}
   }
 
-  body.is-fullscreen .mix-split{height:100%;align-items:stretch}
+  body.is-fullscreen .mix-split{align-items:stretch}
 
   /* pH の大きな表示（後ろの席から読める） */
   .ph-big{display:block;margin-top:2px;font-size:30px;font-weight:850;font-variant-numeric:tabular-nums;line-height:1.1}
@@ -97,7 +102,11 @@
      .layout を伸ばさないとカードが内容の高さのままで、
      画面の下半分が空いてしまう。 */
   body.is-fullscreen .layout{flex:1;min-height:0;align-items:stretch;grid-template-columns:minmax(0,1.75fr) minmax(300px,.8fr)}
-  body.is-fullscreen .mix-split{min-height:0}
+  /* .mix-main → .mix-split → .chart-card → svg と縦に伸ばす鎖をつなぐ。
+     どこか1つでも min-height:0 と flex:1 が欠けると、そこで高さが
+     内容基準に戻って図が伸びない（または画面からあふれる）。 */
+  body.is-fullscreen .mix-main{min-height:0}
+  body.is-fullscreen .mix-split{flex:1;min-height:0}
   body.is-fullscreen .mix-split .chart-card{min-height:0}
   body.is-fullscreen .ph-big{font-size:34px}
   body.is-fullscreen .tally .t-v{font-size:27px}

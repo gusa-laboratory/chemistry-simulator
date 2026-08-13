@@ -44,8 +44,9 @@
   .verdict.warn{border-left-color:var(--limit);background:#fef2f2;color:#7f1d1d}
   .verdict.ok{border-left-color:var(--t-green);background:#f0fdf4;color:#14532d}
 
-  body.is-fullscreen{height:100vh;overflow:hidden;display:flex;flex-direction:column}
-  body.is-fullscreen .layout{flex:1;min-height:0;grid-template-columns:minmax(0,1.85fr) minmax(292px,.8fr)}
+  /* align-items:stretch と行の指定が無いと、カードが内容の高さのままで
+     図が伸びない（.layout の base が align-items:start のため）。 */
+  body.is-fullscreen .layout{flex:1;min-height:0;align-items:stretch;grid-template-rows:minmax(0,1fr);grid-template-columns:minmax(0,1.85fr) minmax(292px,.8fr)}
   body.is-fullscreen .panel.wide .layout{grid-template-columns:minmax(0,3fr) minmax(258px,.65fr)}
   body.is-fullscreen .law-copy{font-size:13.5px}
 

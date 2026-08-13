@@ -726,12 +726,50 @@
   }
 
   /* 全画面授業モード：ヘッダーを消し、投影面積を図とグラフへ集中する */
+  /* body → main → panel → layout → card → svg を縦に伸ばす鎖。
+     どこか1つでも欠けると、そこから下は内容の高さに戻り、
+     画面の下側が余る。 */
+  body.is-fullscreen {
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
   body.is-fullscreen header { display: none; }
   body.is-fullscreen main {
     width: 100%;
     max-width: none;
     margin: 0;
     padding: 6px 10px 10px;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  body.is-fullscreen .panel.active {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  body.is-fullscreen .chart-card {
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  /* グラフは .chart-card > .visual-slot.chart-stage > svg の入れ子。
+     間の入れ物も伸ばさないと svg が内容の高さのままになる。 */
+  body.is-fullscreen .chart-card > .visual-slot {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  body.is-fullscreen .chart-card > .visual-slot > svg,
+  body.is-fullscreen .chart-card > svg {
+    flex: 1;
+    min-height: 0;
+    height: 100%;
   }
   body.is-fullscreen .panel-tools {
     min-height: 30px;
@@ -740,6 +778,10 @@
   body.is-fullscreen .layout,
   body.is-fullscreen .layout.view-swapped {
     grid-template-columns: minmax(0, 1fr) minmax(320px, 390px);
+    grid-template-rows: minmax(0, 1fr);
+    align-items: stretch;
+    flex: 1;
+    min-height: 0;
     gap: 10px;
   }
   body.is-fullscreen .chart-card { padding: 6px 8px 8px; }

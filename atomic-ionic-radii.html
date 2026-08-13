@@ -107,6 +107,19 @@
   body.is-fullscreen .species-grid{flex:1;min-height:0}
   body.is-fullscreen .atom-svg{height:100%;min-height:0}
   body.is-fullscreen .takeaway{margin-top:6px;padding-top:6px;padding-bottom:6px}
+  /* 原子の図を大きくするため、図の上下に付く文字（元素名・半径・電子配置）と
+     ヘッダーまわりを詰める。詰めた分がそのまま .atom-svg の高さになる。 */
+  body.is-fullscreen h1{font-size:20px}
+  body.is-fullscreen header{padding-top:6px}
+  body.is-fullscreen .head-row{margin-bottom:3px}
+  body.is-fullscreen .site-fullscreen-btn{min-height:32px;padding:5px 10px}
+  body.is-fullscreen .tabs button{padding-top:5px;padding-bottom:7px}
+  body.is-fullscreen .scale-note{margin-bottom:4px}
+  body.is-fullscreen .species-head{min-height:0;margin-bottom:2px}
+  body.is-fullscreen .species-name{min-height:0}
+  body.is-fullscreen .species-jp{font-size:10px}
+  body.is-fullscreen .radius-value{min-height:0;padding-top:2px;padding-bottom:2px}
+  body.is-fullscreen .config{margin-top:2px;font-size:9.5px}
   body.is-fullscreen footer{display:none}
   @media(max-width:900px){.species-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.species-grid.free-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.atom-svg{height:330px}}
   @media(max-width:620px){body{overflow-x:hidden}header{position:static;padding:14px 12px 0}.head-row{gap:10px}.subtitle{font-size:11px}.btn-text{display:none}.outline-btn{width:38px;padding:0}.tabs{max-width:100%}.tabs button{padding:8px 11px 10px;font-size:12px}main{width:100%;min-width:0;padding:14px 10px 30px;overflow:hidden}.toolbar{gap:6px}.toggle{min-width:0;padding:0 9px;font-size:11.5px}.stage{width:100%;min-width:0}.species-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.atom-svg{height:285px}.species-jp{display:none}.takeaway{font-size:11.5px}}

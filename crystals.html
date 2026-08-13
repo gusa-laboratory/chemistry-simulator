@@ -92,12 +92,22 @@
     .stage{aspect-ratio:auto;height:62vh;max-height:none;touch-action:none;}
     .stage-hint{font-size:11px;}
   }
+  /* body → main → panel → layout → chart-card → stage を縦に伸ばす鎖。
+     以前は body が block のままで、高さを calc(100vh - 68px) のような
+     固定値で合わせていたため、実際のヘッダー高さとずれて画面から
+     39px あふれていた。flex で実測に任せる。 */
+  body.is-fullscreen{height:100vh;overflow:hidden;display:flex;flex-direction:column;}
   body.is-fullscreen header{display:none;}
-  body.is-fullscreen main{max-width:none;margin:0;padding:6px 12px 12px;}
-  body.is-fullscreen .layout{grid-template-columns:minmax(0,1fr) minmax(320px,380px);gap:12px;}
-  body.is-fullscreen .stage{max-height:calc(100vh - 120px);}
+  body.is-fullscreen main{max-width:none;margin:0;padding:6px 12px 10px;flex:1;min-height:0;display:flex;flex-direction:column;}
+  body.is-fullscreen .panel.active{flex:1;min-height:0;display:flex;flex-direction:column;}
+  body.is-fullscreen .panel-tools{flex:0 0 auto;min-height:0;margin-bottom:6px;}
+  body.is-fullscreen .layout{grid-template-columns:minmax(0,1fr) minmax(320px,380px);gap:12px;flex:1;min-height:0;align-items:stretch;grid-template-rows:minmax(0,1fr);}
+  body.is-fullscreen .chart-card{display:flex;flex-direction:column;min-height:0;}
+  body.is-fullscreen .stage{flex:1 1 auto;min-height:0;height:auto;max-height:none;aspect-ratio:auto;}
   /* 全画面＋断面図ON：左＝3D／右＝断面図＋操作スライダー を1画面にきっちり収める */
-  body.is-fullscreen .panel.section-on .layout{grid-template-columns:minmax(0,1.15fr) minmax(360px,1fr);gap:16px;height:calc(100vh - 68px);align-items:stretch;}
+  /* 断面図を出したときは左右の比だけ変える。高さは上の flex に任せる
+     （calc の固定値だとヘッダー高さの実測とずれてあふれる）。 */
+  body.is-fullscreen .panel.section-on .layout{grid-template-columns:minmax(0,1.15fr) minmax(360px,1fr);gap:16px;align-items:stretch;}
   body.is-fullscreen .panel.section-on .chart-card{display:flex;flex-direction:column;min-height:0;}
   body.is-fullscreen .panel.section-on .stage{flex:1 1 auto;min-height:0;max-height:none;aspect-ratio:auto;}
   body.is-fullscreen .panel.section-on .side{height:100%;min-height:0;gap:10px;}

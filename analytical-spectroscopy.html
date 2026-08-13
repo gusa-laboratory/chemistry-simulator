@@ -45,6 +45,23 @@ main{max-width:1500px;margin:0 auto;padding:20px clamp(14px,3.5vw,50px) 46px}.pa
 .nmr-detailed-structure{display:block;width:100%;height:220px;border:1px solid #dce5f0;border-radius:14px;background:#f8fbff}.nmr-detail-bond{stroke:#1f2937;stroke-width:4;stroke-linecap:round}.nmr-detail-atom{fill:#172033;font-size:24px;font-weight:900;text-anchor:middle;dominant-baseline:middle}.nmr-detail-atom.selected{fill:#1d4ed8}.nmr-detail-halo.selected{fill:#dbeafe;stroke:#3b82f6;stroke-width:2}.nmr-detail-halo.neighbor{fill:#ffedd5;stroke:#f97316;stroke-width:2}.nmr-detail-h.selected{fill:#1d4ed8}.nmr-detail-h.neighbor{fill:#c2410c}.nmr-carbon-index{fill:#1d4ed8;font-size:10px;font-weight:900;text-anchor:middle;paint-order:stroke;stroke:#fff;stroke-width:3px}.nmr-h-legend{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;color:var(--ink2);font-size:10px;font-weight:800}.nmr-h-legend span::before{content:'';display:inline-block;width:11px;height:11px;margin-right:5px;border-radius:50%;vertical-align:-2px}.nmr-h-legend .assigned::before{background:#dbeafe;border:2px solid #3b82f6}.nmr-h-legend .coupling::before{background:#ffedd5;border:2px solid #f97316}.nmr-coupling-note{padding:9px 11px;border-radius:9px;background:#f8fbff;color:var(--deep);font-size:11px;font-weight:800;line-height:1.55}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}footer{padding:0 20px 25px;text-align:center;color:#a3adbc;font-size:10px;font-weight:600}
 body.is-fullscreen{height:100vh;overflow:hidden;display:flex;flex-direction:column}body.is-fullscreen header{position:static;padding-top:9px;flex:0 0 auto}body.is-fullscreen .head-row{margin-bottom:7px}body.is-fullscreen h1{font-size:24px}body.is-fullscreen main{max-width:none;width:100%;padding:9px 22px 10px;flex:1;min-height:0;display:flex}body.is-fullscreen .panel.active{width:100%;min-height:0;display:flex;flex-direction:column}body.is-fullscreen .layout,body.is-fullscreen .beer-layout,body.is-fullscreen .quiz-layout{flex:1;min-height:0}body.is-fullscreen .card{min-height:0}body.is-fullscreen .chart{height:100%;min-height:350px}body.is-fullscreen .beer-controls{overflow:auto}body.is-fullscreen .ir-reference{max-height:45vh;overflow:auto;flex:0 0 auto}body.is-fullscreen footer{display:none}
+/* 投影面積をスペクトルへ回す。ヘッダー・タブ・単元見出し・ツールバーを詰め、
+   詰めた分をグラフの高さにする。 */
+body.is-fullscreen header{padding-top:6px}
+body.is-fullscreen .head-row{margin-bottom:6px}
+body.is-fullscreen h1{font-size:20px}
+body.is-fullscreen .site-fullscreen-btn{min-height:32px;padding:5px 10px}
+body.is-fullscreen .tabs button{padding-top:5px;padding-bottom:7px;font-size:12.5px}
+body.is-fullscreen .lesson-title{margin-bottom:5px;font-size:19px}
+body.is-fullscreen .toolbar{margin-bottom:6px}
+body.is-fullscreen .card{padding:9px 11px}
+/* ⑤未知試料は証拠カードと解答ボタンの min-height が積み上がって
+   全画面の高さを 46px 超え、下が切れていた。全画面では下限を外し、
+   収まらない分はカードの中でスクロールさせる。 */
+body.is-fullscreen .quiz-layout > .card{min-height:0;overflow:auto}
+body.is-fullscreen .evidence{min-height:0}
+body.is-fullscreen .locked{min-height:110px}
+body.is-fullscreen .answer-grid button{min-height:88px}
 @media(max-width:900px){header{position:static}.layout,.beer-layout,.quiz-layout{grid-template-columns:1fr}.chart{height:430px}.side-card{display:grid;grid-template-columns:minmax(250px,.7fr) minmax(0,1fr)}.side-card .eyebrow,.side-card .peak-buttons,.side-card .fragment-options{grid-column:1/-1}.vibration,.fragment-box{min-height:210px}.beer-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.beer-controls .equation,.beer-controls .cuvette-stage{grid-column:1/-1}}
 @media(max-width:560px){header{padding:14px 12px 0}.head-row{gap:10px}h1{font-size:21px}.tabs button{padding:8px 11px 10px;font-size:12px}main{padding:14px 10px 30px}.layout,.beer-layout,.quiz-layout{gap:11px}.card{padding:10px}.chart{height:350px;min-height:350px}.side-card{display:flex}.lesson-title{font-size:20px}.beer-controls{display:flex}.signal-info{grid-template-columns:1fr 1fr}.answer-grid{grid-template-columns:1fr}.structure{font-size:21px}.evidence-grid{grid-template-columns:1fr}.field input[type="range"]{width:95px}}
 @media(prefers-reduced-motion:reduce){*{transition-duration:.01ms!important}.solution{transition:none}}

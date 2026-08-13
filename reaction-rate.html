@@ -54,7 +54,6 @@
   .tally .t-v.hit{color:var(--hi)}
 
   /* 授業投影モード */
-  body.is-fullscreen{height:100vh;overflow:hidden;display:flex;flex-direction:column}
   /* align-items:start のままだと右カラムが内容の高さになり overflow:auto が効かず、
      カードが増えたタブで画面からあふれる。全画面では行の高さに合わせる */
   body.is-fullscreen .layout{flex:1;min-height:0;align-items:stretch;grid-template-columns:minmax(0,1.75fr) minmax(300px,.85fr)}

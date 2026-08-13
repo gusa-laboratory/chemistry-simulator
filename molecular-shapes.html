@@ -96,6 +96,20 @@
   body.is-fullscreen .tabs button{padding-top:7px;padding-bottom:9px}
   body.is-fullscreen main{padding:8px clamp(12px,2vw,30px) 10px;max-width:none;width:100%;flex:1;min-height:0;display:flex;flex-direction:column}
   body.is-fullscreen footer{display:none}body.is-fullscreen .toolbar{flex:0 0 auto;margin-bottom:8px}body.is-fullscreen .lesson-head{flex:0 0 auto;margin-bottom:7px}
+  /* 投影面積を図へ回す。全画面ではヘッダー・タブ・見出し・バッジを詰める。
+     ここで詰めた分がそのまま分子モデルの高さになる。 */
+  body.is-fullscreen header{padding-top:6px}
+  body.is-fullscreen .head-row{margin-bottom:4px}
+  body.is-fullscreen h1{font-size:20px}
+  body.is-fullscreen .tabs button{padding-top:5px;padding-bottom:7px;font-size:12.5px}
+  body.is-fullscreen .toolbar{margin-bottom:5px}
+  body.is-fullscreen .view-switch button,
+  body.is-fullscreen .toolbar .outline-btn{padding-top:6px;padding-bottom:6px}
+  body.is-fullscreen .lesson-head{margin-bottom:4px}
+  body.is-fullscreen .lesson-head h2{font-size:20px}
+  body.is-fullscreen .facts{gap:5px}
+  body.is-fullscreen .fact{padding:2px 7px;font-size:10px}
+  body.is-fullscreen .site-fullscreen-btn{min-height:32px;padding:5px 10px}
   body.is-fullscreen .molecule-card{flex:1;min-height:0;display:flex;padding:10px}body.is-fullscreen .molecule-display{flex:1;width:100%;min-height:0}
   body.is-fullscreen .view-block,body.is-fullscreen .formula-host,body.is-fullscreen .formula-host svg,body.is-fullscreen .three-d,body.is-fullscreen .mol-canvas{height:100%;min-height:0}
   body.is-fullscreen.comparison-mode .lesson-head,body.is-fullscreen.comparison-mode .molecule-card{display:none}body.is-fullscreen.comparison-mode .comparison-panel{display:flex;flex:1;min-height:0;flex-direction:column}body.is-fullscreen.comparison-mode .compare-grid{flex:1;height:auto}body.is-fullscreen.comparison-mode .compare-card{min-height:0}body.is-fullscreen.comparison-mode .compare-canvas-wrap,body.is-fullscreen.comparison-mode .compare-canvas{height:100%;min-height:0}
