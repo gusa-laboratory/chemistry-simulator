@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>化学インタラクティブ教材｜Interactive Lab</title>
-<meta name="description" content="原子・イオン半径、分子の形、結晶格子、反応の量的関係、気体の法則、希薄溶液、コロイド、反応速度と化学平衡、錯体・有機化合物の立体構造、機器分析を動かして学ぶ授業投影用インタラクティブ教材。">
+<meta name="description" content="原子・イオン半径、分子の形、結晶格子、反応の量的関係、酸・塩基と中和滴定、気体の法則、希薄溶液、コロイド、反応速度と化学平衡、錯体・有機化合物の立体構造、機器分析を動かして学ぶ授業投影用インタラクティブ教材。">
 <meta name="theme-color" content="#2563eb">
 <link rel="icon" href="icons/icon-192.png">
 <link rel="stylesheet" href="tokens.css">
@@ -159,7 +159,25 @@
         <p class="sim-desc">mol の大きさ、分子に含まれる原子の mol、係数＝個数比、過不足のある反応を粒子で確認。</p>
       </div>
     </a>
-        <h2 class="sec">化学</h2>
+        <a class="sim" href="acid-base.html">
+      <div class="ico" aria-hidden="true">
+        <svg viewBox="0 0 56 56">
+          <!-- ビュレットから1滴落ちる中和滴定。フラスコの液は
+               フェノールフタレインの赤。すべて viewBox の内側に収める -->
+          <rect x="25" y="3" width="6" height="16" rx="1.5" fill="#dbe8f7" stroke="#7c93ad" stroke-width="1.1"/>
+          <path d="M25 19 L28 23 L31 19 Z" fill="#dbe8f7" stroke="#7c93ad" stroke-width="1.1" stroke-linejoin="round"/>
+          <circle cx="28" cy="27.5" r="2.2" fill="#60a5fa"/>
+          <rect x="25.5" y="31" width="5" height="4" fill="#f8fbff" stroke="#7c93ad" stroke-width="1.1"/>
+          <path d="M25.5 35 L14 51 H42 L30.5 35 Z" fill="#fdf2f8" stroke="#7c93ad" stroke-width="1.2" stroke-linejoin="round"/>
+          <path d="M21.8 43 H34.2 L42 51 H14 Z" fill="#f9a8d4" stroke="#ec4899" stroke-width="1" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="sim-body">
+        <h3>酸・塩基と中和滴定</h3>
+        <p class="sim-desc">中和の粒子モデルから、滴定曲線、指示薬の選び方、濃度を求める計算まで。</p>
+      </div>
+    </a>
+    <h2 class="sec">化学</h2>
     <a class="sim" href="gas-laws.html">
       <div class="ico">🎈</div>
       <div class="sim-body">
