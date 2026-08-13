@@ -247,9 +247,10 @@
           <p class="note" id="beaker-weak-note"></p>
         </div>
         <div class="card">
-          <h2>比べる</h2>
+          <h2>表示</h2>
           <div class="pick">
             <button type="button" id="wk-ghost" aria-pressed="false">塩酸の曲線を重ねる</button>
+            <button type="button" id="wk-pka" aria-pressed="true">半分入れた点の目印</button>
           </div>
         </div>
       </div>
@@ -637,8 +638,8 @@ function makeTitration({ key, Ka, chartId, beakerId }) {
       s += `<text class="tick" x="${f.X(VEQ) + 6}" y="${f.y1 + 14}" fill="#ea580c" font-weight="800">中和点 10.0 mL</text>`;
     }
 
-    // 弱酸では半当量点（pH = pKa）を通過後に示す
-    if (Ka === KA_ACETIC && vb >= VEQ / 2) {
+    // 弱酸では半当量点（pH = pKa）を通過後に示す。ボタンで出し入れできる
+    if (Ka === KA_ACETIC && pkaOn && vb >= VEQ / 2) {
       s += `<line class="grid-line" x1="${f.X(VEQ / 2)}" y1="${f.Y(pKa)}" x2="${f.x0}" y2="${f.Y(pKa)}" stroke="#b45309" stroke-dasharray="4 4"/>`;
       s += `<circle cx="${f.X(VEQ / 2)}" cy="${f.Y(pKa)}" r="4.5" fill="#b45309"/>`;
       s += `<text class="tick" x="${f.X(VEQ / 2) + 8}" y="${f.Y(pKa) + 15}" fill="#b45309" font-weight="800">半分入れた点  pH = pKa = ${pKa.toFixed(2)}</text>`;
@@ -677,6 +678,7 @@ function makeTitration({ key, Ka, chartId, beakerId }) {
 }
 
 let ghostOn = false;
+let pkaOn = true;      // 半分入れた点（pH = pKa）の目印。ボタンで消せる
 const ST = makeTitration({ key: 'strong', Ka: KA_STRONG, chartId: 'chart-strong', beakerId: 'beaker-strong' });
 const WK = makeTitration({ key: 'weak', Ka: KA_ACETIC, chartId: 'chart-weak', beakerId: 'beaker-weak' });
 
@@ -764,6 +766,11 @@ $('wk-reset').addEventListener('click', () => WK.reset());
 $('wk-ghost').addEventListener('click', e => {
   ghostOn = !ghostOn;
   e.currentTarget.setAttribute('aria-pressed', String(ghostOn));
+  WK.draw();
+});
+$('wk-pka').addEventListener('click', e => {
+  pkaOn = !pkaOn;
+  e.currentTarget.setAttribute('aria-pressed', String(pkaOn));
   WK.draw();
 });
 
