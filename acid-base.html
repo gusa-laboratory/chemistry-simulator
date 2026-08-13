@@ -209,6 +209,11 @@
           <div class="eqline">HCl ＋ NaOH → NaCl ＋ H₂O</div>
           <p class="note">0.100 mol/L 塩酸 10.0 mL に、0.100 mol/L 水酸化ナトリウム水溶液を加えていく。</p>
         </div>
+        <div class="card beaker-card">
+          <h2>ビーカーの中</h2>
+          <svg id="beaker-strong" viewBox="0 0 320 300" role="img" aria-label="ビーカーの中の水素イオン・水酸化物イオン・できた水の数を表した模式図"></svg>
+          <p class="note" id="beaker-strong-note"></p>
+        </div>
         <p class="verdict" id="st-verdict"></p>
         <div class="card print-only" hidden>
           <h2>考えてみよう</h2>
@@ -228,14 +233,19 @@
       <button class="btn" id="wk-reset" type="button">最初から</button>
     </div>
     <div class="layout">
-      <div class="chart-card" data-label="TITRATION CURVE AND PARTICLES">
-        <svg id="chart-weak" viewBox="0 0 760 430" role="img" aria-label="酢酸の滴定曲線と、電離していない酢酸分子が残っている様子を示す粒子モデル"></svg>
+      <div class="chart-card" data-label="TITRATION CURVE">
+        <svg id="chart-weak" viewBox="0 0 760 430" role="img" aria-label="0.100 mol/L 酢酸 10 mL に 0.100 mol/L 水酸化ナトリウム水溶液を加えたときの滴定曲線"></svg>
       </div>
       <div class="side">
         <div class="card law">
           <h2>滴定している溶液</h2>
           <div class="eqline">CH₃COOH ＋ NaOH → CH₃COONa ＋ H₂O</div>
           <p class="note">0.100 mol/L 酢酸 10.0 mL に、0.100 mol/L 水酸化ナトリウム水溶液を加えていく。</p>
+        </div>
+        <div class="card beaker-card">
+          <h2>ビーカーの中</h2>
+          <svg id="beaker-weak" viewBox="0 0 320 300" role="img" aria-label="ビーカーの中の酢酸分子・電離して出た水素イオン・できた水の数を表した模式図"></svg>
+          <p class="note" id="beaker-weak-note"></p>
         </div>
         <p class="verdict" id="wk-verdict"></p>
         <div class="card">
@@ -382,14 +392,21 @@ function layout(n, box, seed = 7) {
 
 /* 粒子。黒板投影では白文字が背景色に負けるので、文字に濃い縁取りを付ける
    （paint-order:stroke で縁を文字の下に敷く）。 */
-const ion = (p, fill, label) =>
-  `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${p.r.toFixed(1)}" fill="${fill}"/>` +
-  (label
-    ? `<text x="${p.x.toFixed(1)}" y="${p.y.toFixed(1)}" text-anchor="middle" dominant-baseline="central"
-         fill="#fff" font-size="${(p.r * .68).toFixed(1)}" font-weight="900"
-         paint-order="stroke" stroke="rgba(15,23,42,.55)" stroke-width="${(p.r * .18).toFixed(1)}"
-         stroke-linejoin="round">${label}</text>`
-    : '');
+const ion = (p, fill, label) => {
+  let s = `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${p.r.toFixed(1)}" fill="${fill}"/>`;
+  if (!label) return s;
+  // 長い化学式は円に入りきらないので2行に折る
+  const lines = String(label).split('\n');
+  const fs = p.r * (lines.length > 1 ? .42 : .68);
+  const y0 = p.y - (lines.length - 1) * fs * .6;
+  lines.forEach((t, i) => {
+    s += `<text x="${p.x.toFixed(1)}" y="${(y0 + i * fs * 1.2).toFixed(1)}" text-anchor="middle" dominant-baseline="central"
+       fill="#fff" font-size="${fs.toFixed(1)}" font-weight="900"
+       paint-order="stroke" stroke="rgba(15,23,42,.55)" stroke-width="${(p.r * .16).toFixed(1)}"
+       stroke-linejoin="round">${t}</text>`;
+  });
+  return s;
+};
 
 /* ビーカーの外形 */
 const beaker = (x, y, w, h) =>
@@ -533,55 +550,74 @@ function drawMix() {
    ② 強酸の滴定 / ③ 弱酸の滴定（同じ仕組み）
    ============================================================ */
 
-/* グラフの右下（曲線が通らない場所）に置くビーカーの模式図。
-   ①と見せ方を揃える：粒子の大きさは一定、文字には縁取り。
-   もとの酸を12個で表し、滴下につれて中身が入れ替わる。
-   ② H⁺ と OH⁻ …… 中和点では両方0個になる（どちらも残っていない）
-   ③ CH₃COOH と CH₃COO⁻ …… 合計は常に12個（分子のまま残る量が見える）*/
-function beakerInset(vb, Ka) {
-  const N = 12, R = 13, COLS = 6;
-  const PX = 432, PY = 196, PW = 298, PH = 172;
-  const BX = PX + 10, BY = PY + 26, BW = PW - 20, BH = 108;   // ビーカー
-  const GX = BX + 6, GY = BY + 16, CW = (BW - 12) / COLS, CH = 38;
+/* ②③の右下に置く独立カード「ビーカーの中」。①と見せ方を揃える：
+   粒子の大きさは一定、文字には縁取り、液を薄く塗る。
+   もとの酸を12個ぶんとして数える。反応でできた H₂O は消さずに残す。
 
-  let groups, caption;
+   ② H⁺ が減り、H₂O が増える。中和点を過ぎると OH⁻ が余りはじめる。
+   ③ 弱酸は「分子のまま」で存在し、H⁺ は少しずつしか出てこない。
+      OH⁻ に H⁺ を取られるたびに次の分子が電離する（＝徐々に電離）。
+      そこを見せたいので、CH₃COO⁻ ではなく H⁺ を主役に描く。 */
+function drawBeakerCard(svgId, vb, Ka) {
+  const N = 12, R = 17, COLS = 6;
+  const W = 320, BX = 10, BY = 26, BW = 300, BH = 250;
+  const GX = BX + 8, GY = BY + 18, CW = (BW - 16) / COLS, CH = 56;
+
+  let groups, note;
+  const V = VA + vb, Ca = C0 * VA / V, h = solveH(Ca, Ka, C0 * vb / V);
+  const nW = Math.min(N, Math.round(N * vb / VEQ));                 // できた H₂O
+  const nOH = Math.max(0, Math.round(N * (vb - VEQ) / VEQ));        // 余った OH⁻
+
   if (Ka === KA_ACETIC) {
-    const V = VA + vb, Ca = C0 * VA / V;
-    const h = solveH(Ca, Ka, C0 * vb / V);
-    const nHA = Math.round(N * h / (Ka + h));          // 電離していない分子
-    const nA = N - nHA;
-    groups = [{ n: nHA, fill: 'var(--weak)' }, { n: nA, fill: 'var(--base)' }];
-    caption = `<tspan fill="#b45309">■</tspan> CH₃COOH ${nHA}　<tspan fill="#2563eb">■</tspan> CH₃COO⁻ ${nA}`;
+    /* 弱酸は実際には 0.1〜1% しか電離していないので、12個ぶんで
+       数えると四捨五入して0個になり、絵に出てこない。
+       そこで「いま電離している1個」を赤で描き、残りは分子のままとする。
+       実際の電離の割合は下の注記に数値で出して、絵と食い違わせない。 */
+    const remaining = Math.max(0, N - nW);        // まだ中和されていない酸
+    const nFreeH = remaining > 0 ? 1 : 0;         // いま電離している分
+    const nHA = remaining - nFreeH;               // 分子のまま
+    const pct = (h / (C0 * VA / (VA + vb)) * 100);
+    groups = [
+      { n: nHA, fill: 'var(--weak)', label: 'CH₃\nCOOH' },
+      { n: nFreeH, fill: 'var(--acid)', label: 'H⁺' },
+      { n: nW, fill: 'var(--water)', label: 'H₂O' },
+      { n: Math.min(nOH, N), fill: 'var(--base)', label: 'OH⁻' },
+    ];
+    note = `CH₃COOH（分子のまま）${nHA} ／ いま電離している H⁺ ${nFreeH} ／ できた H₂O ${nW}`
+      + (nOH > 0 ? ` ／ 余った OH⁻ ${Math.min(nOH, N)}` : '')
+      + (remaining > 0
+        ? `。1個ずつ電離しては OH⁻ に取られ、また次が電離する。実際に電離しているのは酸全体の ${pct < 0.01 ? '0.01%未満' : (pct < 0.1 ? pct.toFixed(2) + '%' : pct.toFixed(1) + '%')}（図では1個で表している）。`
+        : '');
   } else {
-    const nH = Math.max(0, Math.round(N * (1 - vb / VEQ)));
-    const nOH = Math.max(0, Math.round(N * (vb - VEQ) / VEQ));
-    groups = [{ n: nH, fill: 'var(--acid)', label: 'H⁺' }, { n: Math.min(nOH, N), fill: 'var(--base)', label: 'OH⁻' }];
-    caption = nH === 0 && nOH === 0
-      ? '<tspan fill="#16a34a">H⁺ も OH⁻ も残っていない</tspan>'
-      : `<tspan fill="#dc2626">■</tspan> H⁺ ${nH}　<tspan fill="#2563eb">■</tspan> OH⁻ ${Math.min(nOH, N)}`;
+    const nH = Math.max(0, N - nW);                                  // 残った H⁺
+    groups = [
+      { n: nH, fill: 'var(--acid)', label: 'H⁺' },
+      { n: nW, fill: 'var(--water)', label: 'H₂O' },
+      { n: Math.min(nOH, N), fill: 'var(--base)', label: 'OH⁻' },
+    ];
+    note = `H⁺ ${nH} ／ できた H₂O ${nW}` + (nOH > 0 ? ` ／ 余った OH⁻ ${Math.min(nOH, N)}` : '')
+      + (nH === 0 && nOH === 0 ? '。H⁺ をちょうど使いきった。' : '');
   }
 
-  let s = `<rect x="${PX}" y="${PY}" width="${PW}" height="${PH}" rx="12" fill="#fff" fill-opacity=".94" stroke="#dbe4ef"/>`;
-  s += `<text x="${BX}" y="${PY + 18}" fill="#8290a5" font-size="10" font-weight="850" letter-spacing=".08em">IN THE BEAKER</text>`;
-  // ①と同じビーカーの外形と液
+  let s = `<text x="${BX}" y="16" fill="#8290a5" font-size="10" font-weight="850" letter-spacing=".08em">IN THE BEAKER</text>`;
   s += beaker(BX, BY, BW, BH);
-  s += `<path d="M ${BX + 2} ${BY + 10} L ${BX + 2} ${BY + BH - 12} Q ${BX + 2} ${BY + BH - 2} ${BX + 14} ${BY + BH - 2}
+  s += `<path d="M ${BX + 2} ${BY + 12} L ${BX + 2} ${BY + BH - 12} Q ${BX + 2} ${BY + BH - 2} ${BX + 14} ${BY + BH - 2}
           L ${BX + BW - 14} ${BY + BH - 2} Q ${BX + BW - 2} ${BY + BH - 2} ${BX + BW - 2} ${BY + BH - 12}
-          L ${BX + BW - 2} ${BY + 10} Z" fill="#e8f1fb"/>`;
-  s += `<line x1="${BX + 2}" y1="${BY + 10}" x2="${BX + BW - 2}" y2="${BY + 10}" stroke="#9fc0e4" stroke-width="2"/>`;
+          L ${BX + BW - 2} ${BY + 12} Z" fill="#e8f1fb"/>`;
+  s += `<line x1="${BX + 2}" y1="${BY + 12}" x2="${BX + BW - 2}" y2="${BY + 12}" stroke="#9fc0e4" stroke-width="2"/>`;
 
   let i = 0;
   groups.forEach(g => {
     for (let k = 0; k < g.n; k++, i++) {
       const p = { x: GX + CW * ((i % COLS) + .5), y: GY + CH * (Math.floor(i / COLS) + .5), r: R };
-      s += ion(p, g.fill, g.label || '');
+      s += ion(p, g.fill, g.label);
     }
   });
 
-  s += `<text x="${BX}" y="${PY + PH - 14}" fill="#526078" font-size="11.5" font-weight="800">${caption}</text>`;
-  return s;
+  $(svgId).innerHTML = s;
+  $(svgId + '-note').textContent = note;
 }
-function makeTitration({ key, Ka, verdictId, chartId }) {
+function makeTitration({ key, Ka, verdictId, chartId, beakerId }) {
   let drops = 0;
   const maxDrops = Math.round(20 / DROP);          // 20 mL まで
 
@@ -613,10 +649,8 @@ function makeTitration({ key, Ka, verdictId, chartId }) {
     if (pts) s += `<polyline class="curve" points="${pts}"/>`;
     s += `<circle cx="${f.X(vb)}" cy="${f.Y(p)}" r="6" fill="var(--blue)" stroke="#fff" stroke-width="2"/>`;
 
-    /* ビーカーの中の粒子。①と同じ見せ方（大きさ一定・文字に縁取り）で
-       右下に置く。曲線は体積が大きいところで上へ抜けるので、
-       右上に置くと曲線が箱の裏に隠れる（実測で163点が隠れた）。 */
-    s += beakerInset(vb, Ka);
+    // ビーカーの中身は右下の独立カードへ描く
+    drawBeakerCard(beakerId, vb, Ka);
 
     // pH と加えた量はグラフの中に出す（左上は曲線が通らない）
     s += `<text x="${f.x0 + 14}" y="${f.y1 + 34}" font-size="30" font-weight="850"
@@ -651,8 +685,8 @@ function makeTitration({ key, Ka, verdictId, chartId }) {
 }
 
 let ghostOn = false;
-const ST = makeTitration({ key: 'strong', Ka: KA_STRONG, verdictId: 'st-verdict', chartId: 'chart-strong' });
-const WK = makeTitration({ key: 'weak', Ka: KA_ACETIC, verdictId: 'wk-verdict', chartId: 'chart-weak' });
+const ST = makeTitration({ key: 'strong', Ka: KA_STRONG, verdictId: 'st-verdict', chartId: 'chart-strong', beakerId: 'beaker-strong' });
+const WK = makeTitration({ key: 'weak', Ka: KA_ACETIC, verdictId: 'wk-verdict', chartId: 'chart-weak', beakerId: 'beaker-weak' });
 
 /* ============================================================
    ④ 指示薬の選び方
