@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>化学インタラクティブ教材｜Interactive Lab</title>
-<meta name="description" content="原子・イオン半径、分子の形、結晶格子、反応の量的関係、酸・塩基と中和滴定、気体の法則、希薄溶液、コロイド、反応速度と化学平衡、錯体・有機化合物の立体構造、機器分析を動かして学ぶ授業投影用インタラクティブ教材。">
+<meta name="description" content="原子・イオン半径、分子の形、結晶格子、反応の量的関係、酸・塩基と中和滴定、気体の法則、希薄溶液、コロイド、反応速度と化学平衡、錯体・有機化合物の立体構造、機器分析、求核置換と求電子置換を動かして学ぶ授業投影用インタラクティブ教材。">
 <meta name="theme-color" content="#2563eb">
 <link rel="icon" href="icons/icon-192.png">
 <link rel="stylesheet" href="tokens.css">
@@ -263,6 +263,29 @@
       <div class="sim-body">
         <h3>機器分析（IR・MS・NMR）</h3>
         <p class="sim-desc">IR・質量・NMRのスペクトルを見比べ、未知試料の構造を決定。</p>
+      </div>
+    </a>
+    <a class="sim" href="substitution.html">
+      <div class="ico" aria-hidden="true">
+        <svg viewBox="0 0 56 56">
+          <!-- SN2 の背面攻撃。左から求核剤が入り、右へ脱離基が抜ける。
+               中央の炭素と3本の結合。すべて viewBox の内側に収める -->
+          <circle cx="28" cy="28" r="6.5" fill="#59667a"/>
+          <circle cx="8" cy="28" r="5" fill="#16a34a"/>
+          <circle cx="48" cy="28" r="6" fill="#b45309"/>
+          <path d="M14 28 H21" stroke="#16a34a" stroke-width="2" stroke-dasharray="3 2.5" stroke-linecap="round"/>
+          <path d="M35 28 H42" stroke="#b45309" stroke-width="2" stroke-dasharray="3 2.5" stroke-linecap="round"/>
+          <g stroke="#8da3bd" stroke-width="2" stroke-linecap="round">
+            <path d="M28 28 L24 15"/><path d="M28 28 L22 39"/><path d="M28 28 L34 40"/>
+          </g>
+          <circle cx="23" cy="13" r="3.4" fill="#eef3f9" stroke="#9fb0c5" stroke-width="1.1"/>
+          <circle cx="21" cy="41" r="3.4" fill="#eef3f9" stroke="#9fb0c5" stroke-width="1.1"/>
+          <circle cx="35" cy="42" r="3.4" fill="#eef3f9" stroke="#9fb0c5" stroke-width="1.1"/>
+        </svg>
+      </div>
+      <div class="sim-body">
+        <h3>求核置換と求電子置換</h3>
+        <p class="sim-desc">S<sub>N</sub>2 の立体反転、S<sub>N</sub>1 のカルボカチオン、ベンゼンの求電子置換を3Dで追う。</p>
       </div>
     </a>
 </div>

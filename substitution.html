@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>求核置換と求電子置換</title>
+<meta name="description" content="SN2の背面攻撃と立体反転、SN1のカルボカチオンとラセミ化、どちらで進むかの立体障害、エネルギー図、ベンゼンの求電子置換を3Dモデルで確かめるIB化学の授業用教材。">
+<meta name="theme-color" content="#2563eb">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="ui.css">
+<link rel="stylesheet" href="print.css" media="print">
+<style>
+  :root{
+    --blue:var(--t-blue); --deep:var(--t-blue-deep); --ink:var(--t-ink); --ink2:var(--t-ink2);
+    --ink3:var(--t-ink3); --bg:var(--t-bg); --card:var(--t-card); --line:var(--t-line);
+    --accent:var(--t-accent); --grid:var(--t-grid); --axis:var(--t-axis);
+    --shadow:var(--t-shadow); --shadow-sm:var(--t-shadow-sm);
+
+    /* この教材固有の役割色 */
+    --nu:#16a34a;        /* 求核剤 */
+    --lg:#b45309;        /* 脱離基 */
+    --elec:#dc2626;      /* 求電子剤・正電荷 */
+    --ts:#f97316;        /* 遷移状態 */
+  }
+
+  .layout{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(300px,.92fr);gap:14px;align-items:start}
+  .chart-card{position:relative;min-width:0;padding:10px 14px 14px;overflow:hidden;border-top:4px solid var(--t-cyan)}
+  .card h2{margin:0 0 9px;color:var(--deep);font-size:13px;font-weight:850;letter-spacing:.01em}
+  .btn{padding:7px 12px;border:1px solid var(--t-line-strong);border-radius:10px;background:var(--card);color:var(--ink2);font-size:11.5px;font-weight:850;cursor:pointer}
+  .btn:hover:not(:disabled){color:var(--blue);border-color:var(--t-blue-hover)}
+  .btn.primary{border-color:var(--t-blue-hover);background:var(--t-blue-tint);color:var(--blue)}
+  .btn:disabled{opacity:.42;cursor:not-allowed}
+  .eqline{color:var(--deep);font-size:15px;font-weight:850;letter-spacing:.01em;line-height:1.5}
+  .note{margin:9px 0 0;color:var(--ink2);font-size:11.5px;font-weight:700;line-height:1.65}
+  .pick{display:flex;gap:6px;flex-wrap:wrap}
+  .pick button{padding:6px 10px;border:1px solid var(--t-line-strong);border-radius:999px;background:var(--card);color:var(--ink2);font-size:11px;font-weight:850;cursor:pointer}
+  .pick button[aria-pressed="true"]{border-color:var(--blue);background:var(--blue);color:#fff}
+
+  /* 3D の入れ物。canvas は自前の球棒レンダラで描く（three.js は使わない） */
+  .stage{position:relative;width:100%;height:clamp(330px,52vh,560px);border-radius:14px;overflow:hidden;
+    background:radial-gradient(circle at 50% 38%,#fff,#eaf1f8);touch-action:none;cursor:grab}
+  .stage:active{cursor:grabbing}
+  .stage canvas{display:block;width:100%;height:100%}
+  .stage-hint{position:absolute;left:50%;bottom:7px;transform:translateX(-50%);color:var(--ink3);
+    font-size:10.5px;font-weight:800;background:rgba(255,255,255,.86);border-radius:7px;padding:3px 8px;pointer-events:none}
+  .reset-view{position:absolute;right:8px;top:8px;width:30px;height:30px;border:1px solid var(--line);
+    border-radius:9px;background:rgba(255,255,255,.92);color:var(--deep);font-size:15px;font-weight:900;cursor:pointer}
+
+  /* 反応の段階を示す帯 */
+  .stage-bar{display:flex;gap:6px;margin-bottom:10px}
+  .stage-bar div{flex:1;padding:7px 4px;border:1px solid var(--line);border-radius:10px;background:var(--card);
+    color:var(--ink3);font-size:11px;font-weight:850;text-align:center}
+  .stage-bar div.on{border-color:var(--blue);background:var(--t-blue-tint);color:var(--blue)}
+  .stage-bar div.ts.on{border-color:var(--ts);background:#fff7ed;color:#c2410c}
+
+  .now{display:block;margin-top:2px;color:var(--deep);font-size:19px;font-weight:850;line-height:1.35}
+  .rate{padding:10px 12px;border-left:4px solid var(--blue);border-radius:9px;background:var(--t-blue-wash);
+    color:var(--deep);font-size:14px;font-weight:850}
+  .rate small{display:block;margin-top:4px;color:var(--ink2);font-size:11px;font-weight:800}
+
+  /* ③ 3つ並べる */
+  .three-up{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+  .three-up .stage{height:clamp(230px,30vh,330px)}
+  .three-up h3{margin:0 0 6px;color:var(--deep);font-size:13px;font-weight:850;text-align:center}
+  .three-up .cap{margin-top:7px;color:var(--ink2);font-size:11px;font-weight:800;line-height:1.55;text-align:center}
+
+  /* ⑤ 共鳴構造 */
+  .reso{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+  .reso svg{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:12px;background:var(--t-panel)}
+
+  /* グラフの部品 */
+  .axis{stroke:var(--axis);stroke-width:1.3}
+  .grid-line{stroke:var(--grid);stroke-width:1}
+  .tick{fill:var(--ink3);font-size:11px}
+  .axis-label{fill:#35465e;font-size:12px;font-weight:800}
+
+  body.is-fullscreen .layout{flex:1;min-height:0;align-items:stretch;grid-template-columns:minmax(0,1.75fr) minmax(300px,.8fr)}
+  body.is-fullscreen .stage{height:100%;min-height:0}
+  body.is-fullscreen .chart-card{min-height:0}
+  body.is-fullscreen .three-up{height:100%}
+  body.is-fullscreen .now{font-size:17px}
+
+  @media(max-width:1000px){
+    .layout{grid-template-columns:1fr}
+    .three-up{grid-template-columns:1fr}
+    .reso{grid-template-columns:1fr}
+    body.is-fullscreen{height:auto;overflow:auto;display:block}
+    body.is-fullscreen .layout{grid-template-columns:1fr}
+    body.is-fullscreen .stage{height:clamp(330px,52vh,560px)}
+  }
+</style>
+<link rel="stylesheet" href="site-shell.css">
+</head>
+<body>
+<header>
+  <div class="header-row">
+    <div class="title-block">
+      <a class="back-link" href="index.html">← 一覧に戻る</a>
+      <h1>求核置換と求電子置換</h1>
+    </div>
+    <button class="outline-btn site-fullscreen-btn" id="fullscreenBtn" type="button" aria-label="全画面表示"><span class="site-fullscreen-icon" aria-hidden="true">⛶</span><span class="btn-text">全画面表示</span></button>
+  </div>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="学習テーマ">
+    <button type="button" role="tab" aria-selected="true"  data-tab="sn2">① S<sub>N</sub>2：背面から攻める</button>
+    <button type="button" role="tab" aria-selected="false" data-tab="sn1">② S<sub>N</sub>1：いったん切れる</button>
+    <button type="button" role="tab" aria-selected="false" data-tab="which">③ どちらで進むか</button>
+    <button type="button" role="tab" aria-selected="false" data-tab="energy">④ エネルギー図</button>
+    <button type="button" role="tab" aria-selected="false" data-tab="eas">⑤ ベンゼンの求電子置換</button>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ① SN2 ----------------------------------------------------- -->
+  <section class="panel active" id="panel-sn2">
+    <div class="panel-tools">
+      <button class="btn" id="s2-back" type="button">◀ 戻す</button>
+      <button class="btn primary" id="s2-fwd" type="button">▶ 進める</button>
+      <button class="btn" id="s2-reset" type="button">最初から</button>
+      <button class="btn" id="s2-end" type="button">最後まで</button>
+    </div>
+    <div class="layout">
+      <div class="chart-card" data-label="3D BALL AND STICK">
+        <div class="stage-bar" id="s2-bar"></div>
+        <div class="stage">
+          <canvas id="cv-sn2" tabindex="0" aria-label="臭化メチルに水酸化物イオンが背面から近づき、五配位の遷移状態を経て、水素3個の傘が反転する3Dモデル。ドラッグで回転"></canvas>
+          <button class="reset-view" type="button" data-reset="cv-sn2" aria-label="視点をリセット">↺</button>
+          <span class="stage-hint">ドラッグ：回転　ホイール：拡大</span>
+        </div>
+      </div>
+      <div class="side">
+        <div class="card law">
+          <h2>反応</h2>
+          <div class="eqline">CH₃Br ＋ OH⁻ → CH₃OH ＋ Br⁻</div>
+        </div>
+        <div class="card">
+          <h2>いま起きていること</h2>
+          <span class="now" id="s2-now"></span>
+          <p class="note" id="s2-note"></p>
+        </div>
+        <div class="card">
+          <h2>速さの式</h2>
+          <div class="rate">速さ ＝ k［CH₃Br］［OH⁻］
+            <small>1段階で進むので、遷移状態には2分子が関わる（二分子反応）。どちらの濃度を変えても速さが変わる。</small></div>
+        </div>
+        <div class="card print-only" hidden>
+          <h2>考えてみよう</h2>
+          <p>生成物の立体配置が、出発物と逆になるのはなぜか。図をもとに説明しなさい。</p>
+          <span class="write-line"></span><span class="write-line"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ② SN1 ----------------------------------------------------- -->
+  <section class="panel" id="panel-sn1">
+    <div class="panel-tools">
+      <button class="btn" id="s1-back" type="button">◀ 戻す</button>
+      <button class="btn primary" id="s1-fwd" type="button">▶ 進める</button>
+      <button class="btn" id="s1-reset" type="button">最初から</button>
+      <button class="btn" id="s1-end" type="button">最後まで</button>
+    </div>
+    <div class="layout">
+      <div class="chart-card" data-label="3D BALL AND STICK">
+        <div class="stage-bar" id="s1-bar"></div>
+        <div class="stage">
+          <canvas id="cv-sn1" tabindex="0" aria-label="第三級ハロゲン化アルキルから臭化物イオンが外れて平面のカルボカチオンができ、水酸化物イオンが上下どちらの面からも攻撃できる様子の3Dモデル。ドラッグで回転"></canvas>
+          <button class="reset-view" type="button" data-reset="cv-sn1" aria-label="視点をリセット">↺</button>
+          <span class="stage-hint">ドラッグ：回転　ホイール：拡大</span>
+        </div>
+      </div>
+      <div class="side">
+        <div class="card law">
+          <h2>反応</h2>
+          <div class="eqline">R₃C–Br ＋ OH⁻ → R₃C–OH ＋ Br⁻</div>
+          <p class="note">中心の炭素には3つとも違う基（CH₃・C₂H₅・C₃H₇）が付いている＝不斉炭素。</p>
+        </div>
+        <div class="card">
+          <h2>いま起きていること</h2>
+          <span class="now" id="s1-now"></span>
+          <p class="note" id="s1-note"></p>
+        </div>
+        <div class="card">
+          <h2>どちらの面から攻めるか</h2>
+          <div class="pick">
+            <button type="button" id="s1-face-a" aria-pressed="true">上から</button>
+            <button type="button" id="s1-face-b" aria-pressed="false">下から</button>
+          </div>
+          <p class="note">カルボカチオンは平面なので、どちらの面からも同じ確率で攻撃できる。できる2つは<b>鏡像の関係</b>＝ラセミ体。</p>
+        </div>
+        <div class="card">
+          <h2>速さの式</h2>
+          <div class="rate">速さ ＝ k［R₃C–Br］
+            <small>遅いのは第1段階（C–Br が切れるところ）。ここに OH⁻ は関わらないので、OH⁻ の濃度を変えても速さは変わらない（一分子反応）。</small></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ③ どちらで進むか ------------------------------------------- -->
+  <section class="panel" id="panel-which">
+    <div class="panel-tools">
+      <div class="switch" role="group" aria-label="見るもの">
+        <button type="button" id="w-steric" aria-pressed="true">背面の空き具合</button>
+        <button type="button" id="w-cation" aria-pressed="false">カルボカチオンの安定性</button>
+      </div>
+    </div>
+    <div class="layout">
+      <div class="chart-card" data-label="PRIMARY / SECONDARY / TERTIARY">
+        <div class="three-up" id="w-grid"></div>
+      </div>
+      <div class="side">
+        <div class="card law">
+          <h2>見どころ</h2>
+          <p class="note" id="w-lead"></p>
+        </div>
+        <div class="card">
+          <h2>まとめ</h2>
+          <div class="rate" id="w-sum"></div>
+        </div>
+        <div class="card print-only" hidden>
+          <h2>考えてみよう</h2>
+          <p>第三級ハロゲン化アルキルが S<sub>N</sub>2 で反応しにくく、S<sub>N</sub>1 で反応しやすいのはなぜか。2つの理由を書きなさい。</p>
+          <span class="write-line"></span><span class="write-line"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ④ エネルギー図 --------------------------------------------- -->
+  <section class="panel" id="panel-energy">
+    <div class="panel-tools">
+      <div class="switch" role="group" aria-label="表示する経路">
+        <button type="button" id="e-both" aria-pressed="true">両方</button>
+        <button type="button" id="e-sn2" aria-pressed="false">S<sub>N</sub>2 だけ</button>
+        <button type="button" id="e-sn1" aria-pressed="false">S<sub>N</sub>1 だけ</button>
+      </div>
+    </div>
+    <div class="layout">
+      <div class="chart-card" data-label="ENERGY PROFILE">
+        <svg id="chart-energy" viewBox="0 0 760 430" role="img" aria-label="SN2とSN1のエネルギー図。SN2は山が1つ、SN1は山が2つでその間にカルボカチオンの中間体がある"></svg>
+      </div>
+      <div class="side">
+        <div class="card law">
+          <h2>読み方</h2>
+          <p class="note">山の数＝段階の数。いちばん高い山を越えるところが<b>律速段階</b>で、そこに関わる分子が速さの式に出てくる。</p>
+        </div>
+        <div class="card">
+          <h2>S<sub>N</sub>2</h2>
+          <p class="note">山は1つ。頂上が遷移状態で、炭素に5つの基が付いた形。ここに R–Br と OH⁻ の<b>両方</b>が関わるので、速さ ＝ k［R–Br］［OH⁻］。</p>
+        </div>
+        <div class="card">
+          <h2>S<sub>N</sub>1</h2>
+          <p class="note">山は2つ。谷にあたるのが<b>カルボカチオン中間体</b>。高いのは1つ目の山（C–Br が切れる）なので、そこが律速。OH⁻ は2つ目の山にしか関わらないから、速さ ＝ k［R–Br］。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑤ ベンゼンの求電子置換 -------------------------------------- -->
+  <section class="panel" id="panel-eas">
+    <div class="panel-tools">
+      <button class="btn" id="ea-back" type="button">◀ 戻す</button>
+      <button class="btn primary" id="ea-fwd" type="button">▶ 進める</button>
+      <button class="btn" id="ea-reset" type="button">最初から</button>
+      <button class="btn" id="ea-end" type="button">最後まで</button>
+      <div class="switch" role="group" aria-label="求電子剤">
+        <button type="button" data-e="no2" aria-pressed="true">ニトロ化 NO₂⁺</button>
+        <button type="button" data-e="br" aria-pressed="false">臭素化 Br⁺</button>
+        <button type="button" data-e="me" aria-pressed="false">アルキル化 CH₃⁺</button>
+      </div>
+    </div>
+    <div class="layout">
+      <div class="chart-card" data-label="3D BALL AND STICK">
+        <div class="stage-bar" id="ea-bar"></div>
+        <div class="stage">
+          <canvas id="cv-eas" tabindex="0" aria-label="ベンゼンに求電子剤が面の上から近づいて結合し、その炭素がsp3になって面から浮き、水素が外れて芳香族性が戻る3Dモデル。ドラッグで回転"></canvas>
+          <button class="reset-view" type="button" data-reset="cv-eas" aria-label="視点をリセット">↺</button>
+          <span class="stage-hint">ドラッグ：回転　ホイール：拡大</span>
+        </div>
+      </div>
+      <div class="side">
+        <div class="card law">
+          <h2>反応</h2>
+          <div class="eqline" id="ea-eq"></div>
+          <p class="note" id="ea-make"></p>
+        </div>
+        <div class="card">
+          <h2>いま起きていること</h2>
+          <span class="now" id="ea-now"></span>
+          <p class="note" id="ea-note"></p>
+        </div>
+        <div class="card">
+          <h2>中間体の共鳴</h2>
+          <div class="reso" id="ea-reso"></div>
+          <p class="note">正電荷は3つの炭素に散らばっている。ただし<b>環の6個そろった非局在化は切れている</b>ので、芳香族性は失われている。</p>
+        </div>
+        <div class="card print-only" hidden>
+          <h2>考えてみよう</h2>
+          <p>ベンゼンが「付加」ではなく「置換」で反応するのはなぜか。エネルギーの面から説明しなさい。</p>
+          <span class="write-line"></span><span class="write-line"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>大阪女学院中学校・高等学校　Yuto Yamaguchi</footer>
+
+<script src="ui.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+
+/* ============================================================
+   3D の球棒モデル（canvas に自前で描く）
+
+   このリポジトリの3Dは2系統ある。crystals.html だけが three.js を
+   インライン（665KB）で持っていて、分子系のページ（分子の形・配位
+   化合物・有機立体）は canvas に自前で描いている（42〜77KB）。
+   ここは後者に倣う。原子と結合の座標を渡すだけの薄いレンダラ。
+
+   反応の進行は「原子座標を反応座標 t の関数にする」方式で表す。
+   requestAnimationFrame は使わない（ブラウザプレビューでは
+   document.hidden 扱いで発火しないため動作確認ができない。
+   reaction-rate.html で確立した作法）。t は整数の段数で持つので、
+   何度描き直しても同じ絵になる。
+   ============================================================ */
+const ELEM = {
+  C:  { r: .62, fill: '#59667a', ring: '#394454', text: '#fff' },
+  H:  { r: .40, fill: '#eef3f9', ring: '#9fb0c5', text: '#475569' },
+  O:  { r: .58, fill: '#dc2626', ring: '#8b1027', text: '#fff' },
+  N:  { r: .58, fill: '#2563eb', ring: '#173b75', text: '#fff' },
+  Br: { r: .82, fill: '#b45309', ring: '#7c3d06', text: '#fff' },
+  R:  { r: .76, fill: '#0891b2', ring: '#075e73', text: '#fff' },
+};
+const atom = (e, x, y, z, o = {}) => ({ e, x, y, z, ...o });
+const bond = (a, b, o = {}) => ({ a, b, order: o.order || 1, style: o.style || 'solid', ...o });
+
+class Mol3D {
+  constructor(canvas, home = {}) {
+    this.c = canvas; this.ctx = canvas.getContext('2d');
+    this.home = { yaw: home.yaw ?? -0.55, pitch: home.pitch ?? 0.26, zoom: home.zoom ?? 1 };
+    this.yaw = this.home.yaw; this.pitch = this.home.pitch; this.zoom = this.home.zoom;
+    this.model = { atoms: [], bonds: [] };
+    let drag = false, px = 0, py = 0;
+    canvas.addEventListener('pointerdown', e => { drag = true; px = e.clientX; py = e.clientY; canvas.setPointerCapture(e.pointerId); });
+    canvas.addEventListener('pointermove', e => {
+      if (!drag) return;
+      this.yaw += (e.clientX - px) * .011;
+      this.pitch = Math.max(-1.45, Math.min(1.45, this.pitch + (e.clientY - py) * .011));
+      px = e.clientX; py = e.clientY; this.draw();
+    });
+    const stop = () => { drag = false; };
+    canvas.addEventListener('pointerup', stop); canvas.addEventListener('pointercancel', stop);
+    canvas.addEventListener('wheel', e => {
+      e.preventDefault();
+      this.zoom = Math.max(.55, Math.min(2.4, this.zoom * (e.deltaY < 0 ? 1.09 : .917)));
+      this.draw();
+    }, { passive: false });
+    canvas.addEventListener('keydown', e => {
+      const k = e.key;
+      if (k === 'ArrowLeft') this.yaw -= .13; else if (k === 'ArrowRight') this.yaw += .13;
+      else if (k === 'ArrowUp') this.pitch -= .11; else if (k === 'ArrowDown') this.pitch += .11;
+      else return;
+      e.preventDefault(); this.draw();
+    });
+    if (window.ResizeObserver) new ResizeObserver(() => this.resize()).observe(canvas);
+  }
+  reset() { this.yaw = this.home.yaw; this.pitch = this.home.pitch; this.zoom = this.home.zoom; this.draw(); }
+  set(model) { this.model = model; this.draw(); }
+  resize() {
+    const r = this.c.getBoundingClientRect(), d = Math.min(devicePixelRatio || 1, 2);
+    if (r.width < 2 || r.height < 2) return;
+    this.c.width = Math.round(r.width * d); this.c.height = Math.round(r.height * d);
+    this.ctx.setTransform(d, 0, 0, d, 0, 0);
+    this.w = r.width; this.h = r.height; this.draw();
+  }
+  /* 3D座標 → 画面座標。yaw(Y軸) → pitch(X軸) の順に回し、
+     奥行きでわずかに拡縮して遠近感を出す */
+  point(p) {
+    const cy = Math.cos(this.yaw), sy = Math.sin(this.yaw);
+    const x1 = p.x * cy + p.z * sy, z1 = -p.x * sy + p.z * cy;
+    const cp = Math.cos(this.pitch), sp = Math.sin(this.pitch);
+    const y2 = p.y * cp - z1 * sp, z2 = p.y * sp + z1 * cp;
+    const span = this.model.span || 4.2;
+    const base = Math.min(this.w, this.h) / (2 * span) * .92 * this.zoom;
+    const s = base * (1 + z2 * .045);
+    return { x: this.w / 2 + x1 * s, y: this.h / 2 - y2 * s, z: z2, s };
+  }
+  draw() {
+    if (!this.w) return;
+    const ctx = this.ctx, m = this.model;
+    const g = ctx.createRadialGradient(this.w * .5, this.h * .36, 6, this.w * .5, this.h * .45, Math.max(this.w, this.h) * .68);
+    g.addColorStop(0, '#ffffff'); g.addColorStop(1, '#e9f0f8');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, this.w, this.h);
+    const P = m.atoms.map(a => this.point(a));
+
+    // 面（sp² の平面や環の面）を先に敷く
+    (m.planes || []).forEach(pl => {
+      const pts = pl.pts.map(v => this.point({ x: v[0], y: v[1], z: v[2] }));
+      ctx.beginPath(); pts.forEach((q, i) => i ? ctx.lineTo(q.x, q.y) : ctx.moveTo(q.x, q.y)); ctx.closePath();
+      ctx.fillStyle = pl.fill || 'rgba(14,165,233,.10)'; ctx.fill();
+      ctx.strokeStyle = pl.stroke || 'rgba(14,165,233,.55)'; ctx.lineWidth = 1.6;
+      ctx.setLineDash(pl.dash || [6, 5]); ctx.stroke(); ctx.setLineDash([]);
+    });
+
+    // 結合（奥のものから）
+    [...m.bonds].sort((u, v) => (P[u.a].z + P[u.b].z) - (P[v.a].z + P[v.b].z)).forEach(b => {
+      const a = P[b.a], z = P[b.b];
+      if (a.hidden || z.hidden) return;
+      const dx = z.x - a.x, dy = z.y - a.y, len = Math.hypot(dx, dy) || 1, nx = -dy / len, ny = dx / len;
+      const depth = (a.z + z.z) / 2;
+      for (let k = 0; k < b.order; k++) {
+        const off = (k - (b.order - 1) / 2) * 6 * this.zoom;
+        ctx.beginPath();
+        ctx.moveTo(a.x + nx * off, a.y + ny * off); ctx.lineTo(z.x + nx * off, z.y + ny * off);
+        ctx.strokeStyle = b.color || `rgba(101,118,140,${Math.max(.45, Math.min(.95, .75 + depth * .09))})`;
+        ctx.lineWidth = (b.width || 7) * this.zoom * (1 + depth * .04);
+        ctx.lineCap = 'round';
+        ctx.setLineDash(b.style === 'dash' ? [7 * this.zoom, 6 * this.zoom] : []);
+        ctx.stroke(); ctx.setLineDash([]);
+      }
+    });
+
+    // 矢印（求核剤の攻撃など）
+    (m.arrows || []).forEach(ar => {
+      const a = this.point({ x: ar.from[0], y: ar.from[1], z: ar.from[2] });
+      const b = this.point({ x: ar.to[0], y: ar.to[1], z: ar.to[2] });
+      const dx = b.x - a.x, dy = b.y - a.y, L = Math.hypot(dx, dy) || 1, ux = dx / L, uy = dy / L;
+      ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x - ux * 13, b.y - uy * 13);
+      ctx.strokeStyle = ar.color || '#16a34a'; ctx.lineWidth = 3.4 * this.zoom;
+      ctx.setLineDash([8, 6]); ctx.lineCap = 'round'; ctx.stroke(); ctx.setLineDash([]);
+      ctx.beginPath();
+      ctx.moveTo(b.x, b.y);
+      ctx.lineTo(b.x - ux * 15 - uy * 7, b.y - uy * 15 + ux * 7);
+      ctx.lineTo(b.x - ux * 15 + uy * 7, b.y - uy * 15 - ux * 7);
+      ctx.closePath(); ctx.fillStyle = ar.color || '#16a34a'; ctx.fill();
+    });
+
+    // 原子（奥のものから）
+    m.atoms.map((a, i) => ({ a, q: P[i] })).sort((u, v) => u.q.z - v.q.z).forEach(({ a, q }) => {
+      if (a.hidden) return;
+      const st = ELEM[a.e] || ELEM.C;
+      const r = (a.rad || st.r) * q.s * .92;
+      const gr = ctx.createRadialGradient(q.x - r * .34, q.y - r * .36, r * .12, q.x, q.y, r);
+      const fill = a.fill || st.fill;
+      gr.addColorStop(0, '#ffffff'); gr.addColorStop(.28, fill); gr.addColorStop(1, fill);
+      ctx.globalAlpha = a.alpha ?? 1;
+      ctx.beginPath(); ctx.arc(q.x, q.y, r, 0, Math.PI * 2);
+      ctx.fillStyle = gr; ctx.fill();
+      ctx.strokeStyle = a.ring || st.ring; ctx.lineWidth = Math.max(1, 1.4 * this.zoom); ctx.stroke();
+      const label = a.label ?? a.e;
+      if (label) {
+        const fs = Math.max(9, r * (label.length > 2 ? .52 : .78));
+        ctx.fillStyle = a.text || st.text;
+        ctx.font = `900 ${fs}px Inter,Arial`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(label, q.x, q.y + .5);
+      }
+      if (a.badge) {   // δ− や ＋ などの札
+        ctx.font = `900 ${Math.max(11, r * .62)}px Inter,Arial`;
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.strokeStyle = 'rgba(255,255,255,.95)'; ctx.lineWidth = 4; ctx.lineJoin = 'round';
+        ctx.strokeText(a.badge, q.x, q.y - r - 11 * this.zoom);
+        ctx.fillStyle = a.badgeColor || '#c2410c';
+        ctx.fillText(a.badge, q.x, q.y - r - 11 * this.zoom);
+      }
+      ctx.globalAlpha = 1;
+    });
+  }
+}
+
+/* 段階の帯 */
+function stageBar(el, names, on) {
+  el.innerHTML = names.map((n, i) =>
+    `<div class="${i === on ? 'on' : ''}${n.ts ? ' ts' : ''}">${n.t || n}</div>`).join('');
+}
+
+const STEPS = 16;                       // 反応座標の段数（0〜16）
+const lerp = (a, b, u) => a + (b - a) * u;
+const CH = 1.09;
+
+/* ============================================================
+   ① SN2：背面攻撃と立体反転
+   C を原点、脱離基 Br を +x、求核剤 OH を −x に置く。
+   3つの H の x成分を −0.333 → +0.333 と動かすと、C–H の長さを
+   変えないまま傘が裏返る（node で確認：∠H-C-H は 109.5° → 120°
+   → 109.5°、∠O-C-Br は常に 180°）。
+   ============================================================ */
+const SN2 = new Mol3D($('cv-sn2'), { yaw: -0.95, pitch: 0.30 });
+let s2t = 0;
+
+function sn2Model(t) {
+  const hx = lerp(-1 / 3, 1 / 3, t);
+  const r = Math.sqrt(Math.max(0, 1 - hx * hx));
+  const dBr = 1.95 + (3.9 - 1.95) * t * t;
+  const dO = 1.43 + (3.9 - 1.43) * (1 - t) * (1 - t);
+  const near = Math.min(1, Math.max(0, (t - .15) / .35));      // 部分結合の濃さ
+  const gone = Math.min(1, Math.max(0, (t - .5) / .35));
+  const atoms = [
+    atom('C', 0, 0, 0),
+    atom('Br', dBr, 0, 0, { label: t > .85 ? 'Br⁻' : 'Br', badge: (t >= .2 && t <= .85) ? 'δ−' : '', badgeColor: '#b45309' }),
+    atom('O', -dO, 0, 0, { label: t < .15 ? 'O⁻' : 'O', badge: (t >= .15 && t <= .85) ? 'δ−' : '', badgeColor: '#16a34a' }),
+    atom('H', -dO - .58, -.80, 0, { rad: .38 }),                // OH の H。O の δ− の札とぶつからないよう下側に置く
+  ];
+  for (let k = 0; k < 3; k++) {
+    const a = 2 * Math.PI * k / 3;
+    atoms.push(atom('H', CH * hx, CH * r * Math.cos(a + Math.PI / 2), CH * r * Math.sin(a + Math.PI / 2), { rad: .43 }));
+  }
+  const bonds = [
+    bond(0, 1, { style: t < .12 ? 'solid' : (t > .8 ? 'dash' : 'dash'), width: lerp(7, 3, gone), color: `rgba(180,83,9,${lerp(.95, .3, gone)})` }),
+    bond(0, 2, { style: t > .88 ? 'solid' : 'dash', width: lerp(3, 7, near), color: `rgba(22,163,74,${lerp(.35, .95, near)})` }),
+    bond(2, 3, { width: 5 }),
+    bond(0, 4), bond(0, 5), bond(0, 6),
+  ];
+  const planes = (t > .38 && t < .62) ? [{
+    pts: [[0, 1.6, 1.6], [0, 1.6, -1.6], [0, -1.6, -1.6], [0, -1.6, 1.6]],
+    fill: 'rgba(249,115,22,.10)', stroke: 'rgba(234,88,12,.6)',
+  }] : [];
+  const arrows = t < .35 ? [{ from: [-dO - 2.05, 0, 0], to: [-dO - .95, 0, 0], color: '#16a34a' }] : [];
+  return { atoms, bonds, planes, arrows, span: 4.3 };
+}
+
+const S2_STAGES = [{ t: '出発物' }, { t: '近づく' }, { t: '遷移状態', ts: 1 }, { t: '離れる' }, { t: '生成物' }];
+function s2Stage(t) { return t < .05 ? 0 : t < .38 ? 1 : t < .62 ? 2 : t < .95 ? 3 : 4; }
+
+function drawSN2() {
+  const t = s2t / STEPS;
+  SN2.set(sn2Model(t));
+  const st = s2Stage(t);
+  stageBar($('s2-bar'), S2_STAGES, st);
+  const texts = [
+    ['OH⁻ が近づく前', 'C–Br は極性のある結合。炭素はいくらか正に帯電していて、そこが狙われる。'],
+    ['背面から近づく', 'OH⁻ は Br のちょうど反対側から近づく。Br のいる側は電子で混んでいて近づけない。'],
+    ['遷移状態（山の頂上）', '炭素に5つの基が付いた形。C–O はまだ弱く、C–Br はまだ切れていない。H 3個はちょうど平面に並ぶ。'],
+    ['Br⁻ が離れる', '傘が裏返り、H 3個が Br のあった側へ倒れていく。'],
+    ['生成物（立体が反転）', '出発物と鏡像の立体配置になった。これがワルデン反転。'],
+  ];
+  $('s2-now').textContent = texts[st][0];
+  $('s2-note').textContent = texts[st][1];
+  $('s2-back').disabled = s2t === 0;
+  $('s2-fwd').disabled = s2t === STEPS;
+}
+
+/* ============================================================
+   ② SN1：カルボカチオン経由。前半で C–Br が切れて平面になり、
+   後半はどちらの面から OH⁻ が来るかで鏡像の生成物ができる。
+   置換基は3つとも違うもの（CH₃・C₂H₅・C₃H₇）にしてある。
+   ============================================================ */
+const SN1 = new Mol3D($('cv-sn1'), { yaw: -0.95, pitch: 0.30 });
+let s1t = 0, s1face = 1;
+const R_LABELS = ['CH₃', 'C₂H₅', 'C₃H₇'];
+const R_FILLS = ['#0891b2', '#7c3aed', '#0f766e'];
+
+function sn1Model(t, face) {
+  let px, dBr, dO;
+  if (t < .5) { const u = t / .5; px = -1 / 3 * (1 - u); dBr = 1.95 + (5.4 - 1.95) * u * u; dO = 6.2; }
+  else { const u = (t - .5) / .5; px = (1 / 3) * u * (-face); dBr = 5.4; dO = 1.43 + (6.2 - 1.43) * (1 - u) * (1 - u); }
+  const r = Math.sqrt(Math.max(0, 1 - px * px)), L = 1.52;
+  const atoms = [atom('C', 0, 0, 0, { label: (t > .42 && t < .62) ? 'C⁺' : 'C', fill: (t > .42 && t < .62) ? '#dc2626' : undefined })];
+  for (let k = 0; k < 3; k++) {
+    const a = 2 * Math.PI * k / 3 + Math.PI / 2;
+    atoms.push(atom('R', L * px, L * r * Math.cos(a), L * r * Math.sin(a),
+      { label: R_LABELS[k], fill: R_FILLS[k], rad: .78 }));
+  }
+  atoms.push(atom('Br', dBr, 0, 0, { label: t > .35 ? 'Br⁻' : 'Br', alpha: t > .5 ? .6 : 1 }));
+  atoms.push(atom('O', -dO * face, 0, 0, { label: t < .9 ? 'O⁻' : 'O' }));
+  atoms.push(atom('H', -(dO + .58) * face, -.80, 0, { rad: .38 }));
+  const gone = Math.min(1, Math.max(0, (t - .2) / .3));
+  const near = Math.min(1, Math.max(0, (t - .62) / .3));
+  const bonds = [
+    bond(0, 1), bond(0, 2), bond(0, 3),
+    bond(0, 4, { style: t < .1 ? 'solid' : 'dash', width: lerp(7, 2, gone), color: `rgba(180,83,9,${lerp(.95, .18, gone)})` }),
+    bond(0, 5, { style: t > .92 ? 'solid' : 'dash', width: lerp(2, 7, near), color: `rgba(22,163,74,${lerp(.18, .95, near)})` }),
+    bond(5, 6, { width: 5 }),
+  ];
+  const planes = (t > .42 && t < .62) ? [{
+    pts: [[0, 2.1, 2.1], [0, 2.1, -2.1], [0, -2.1, -2.1], [0, -2.1, 2.1]],
+    fill: 'rgba(220,38,38,.09)', stroke: 'rgba(220,38,38,.6)',
+  }] : [];
+  return { atoms, bonds, planes, span: 5.6 };
+}
+
+const S1_STAGES = [{ t: '出発物' }, { t: 'C–Br が切れる' }, { t: 'カルボカチオン', ts: 1 }, { t: 'OH⁻ が攻撃' }, { t: '生成物' }];
+function s1Stage(t) { return t < .05 ? 0 : t < .42 ? 1 : t < .62 ? 2 : t < .95 ? 3 : 4; }
+
+function drawSN1() {
+  const t = s1t / STEPS;
+  SN1.set(sn1Model(t, s1face));
+  const st = s1Stage(t);
+  stageBar($('s1-bar'), S1_STAGES, st);
+  const texts = [
+    ['出発物', '中心の炭素は四面体。3つの置換基は全部違うので、この炭素は不斉炭素。'],
+    ['C–Br が切れていく（遅い）', 'OH⁻ とは無関係に、C–Br だけが切れていく。ここが律速段階。'],
+    ['カルボカチオン（平面）', '炭素は sp² になり、3つの置換基とともに完全な平面。正電荷をもつ。上下は空いている。'],
+    ['OH⁻ が攻撃（速い）', `${s1face > 0 ? '上' : '下'}の面から OH⁻ が入る。平面なのでどちらからでも同じように入れる。`],
+    ['生成物', `${s1face > 0 ? '上' : '下'}から入った場合の生成物。逆の面から入るともう一方の鏡像ができる。半分ずつできるのでラセミ体になる。`],
+  ];
+  $('s1-now').textContent = texts[st][0];
+  $('s1-note').textContent = texts[st][1];
+  $('s1-back').disabled = s1t === 0;
+  $('s1-fwd').disabled = s1t === STEPS;
+  $('s1-face-a').setAttribute('aria-pressed', String(s1face > 0));
+  $('s1-face-b').setAttribute('aria-pressed', String(s1face < 0));
+}
+
+/* ============================================================
+   ③ どちらで進むか（第一級・第二級・第三級）
+   ============================================================ */
+const WHICH = [
+  { key: 'p', name: '第一級　CH₃CH₂Br', me: 1 },
+  { key: 's', name: '第二級　(CH₃)₂CHBr', me: 2 },
+  { key: 't', name: '第三級　(CH₃)₃CBr', me: 3 },
+];
+let wMode = 'steric';
+const wViews = {};
+
+function whichModel(nMe, mode) {
+  const atoms = [atom('C', 0, 0, 0, { label: mode === 'cation' ? 'C⁺' : 'C', fill: mode === 'cation' ? '#dc2626' : undefined })];
+  const px = mode === 'cation' ? 0 : -1 / 3;                    // カチオンは平面
+  const r = Math.sqrt(Math.max(0, 1 - px * px));
+  for (let k = 0; k < 3; k++) {
+    const a = 2 * Math.PI * k / 3 + Math.PI / 2;
+    const isMe = k < nMe;
+    atoms.push(atom(isMe ? 'R' : 'H', (isMe ? 1.52 : CH) * px, (isMe ? 1.52 : CH) * r * Math.cos(a), (isMe ? 1.52 : CH) * r * Math.sin(a),
+      { label: isMe ? 'CH₃' : 'H', fill: isMe ? '#0891b2' : undefined, rad: isMe ? .78 : .40 }));
+  }
+  const bonds = [bond(0, 1), bond(0, 2), bond(0, 3)];
+  let planes = [], arrows = [];
+  if (mode === 'steric') {
+    atoms.push(atom('Br', 1.95, 0, 0));
+    bonds.push(bond(0, 4, { color: 'rgba(180,83,9,.95)' }));
+    // 背面（Br の反対側）から近づく道すじ
+    arrows.push({ from: [-4.4, 0, 0], to: [-2.35, 0, 0], color: nMe >= 3 ? '#dc2626' : '#16a34a' });
+  } else {
+    planes.push({ pts: [[0, 2.1, 2.1], [0, 2.1, -2.1], [0, -2.1, -2.1], [0, -2.1, 2.1]], fill: 'rgba(220,38,38,.09)', stroke: 'rgba(220,38,38,.55)' });
+  }
+  return { atoms, bonds, planes, arrows, span: 3.9 };
+}
+
+function buildWhich() {
+  $('w-grid').innerHTML = WHICH.map(w => `<div>
+      <h3>${w.name}</h3>
+      <div class="stage"><canvas id="cv-w-${w.key}" tabindex="0" aria-label="${w.name}の3Dモデル"></canvas>
+      <button class="reset-view" type="button" data-reset="cv-w-${w.key}" aria-label="視点をリセット">↺</button></div>
+      <p class="cap" id="cap-${w.key}"></p>
+    </div>`).join('');
+  WHICH.forEach(w => { wViews[w.key] = new Mol3D($('cv-w-' + w.key), { yaw: -0.95, pitch: 0.30 }); });
+}
+
+function drawWhich() {
+  WHICH.forEach(w => {
+    wViews[w.key].set(whichModel(w.me, wMode));
+    wViews[w.key].resize();
+    $('cap-' + w.key).textContent = wMode === 'steric'
+      ? ['背面はほぼ空いている。OH⁻ が入りやすい。', 'CH₃ が2つ。少し窮屈。', 'CH₃ が3つで背面をふさぐ。OH⁻ が入れない。'][w.me - 1]
+      : ['隣の CH₃ は1つ。正電荷を支えきれない。', '隣の CH₃ は2つ。まだ不安定。', '隣の CH₃ が3つ。正電荷が分散して安定。'][w.me - 1];
+  });
+  $('w-steric').setAttribute('aria-pressed', String(wMode === 'steric'));
+  $('w-cation').setAttribute('aria-pressed', String(wMode === 'cation'));
+  $('w-lead').textContent = wMode === 'steric'
+    ? 'Sₙ2 は背面から入るので、中心の炭素のまわりが混んでいると進めない。3つを回して、Br の反対側がどれだけ空いているか見比べる。'
+    : 'Sₙ1 はカルボカチオンを経由する。隣のアルキル基が多いほど正電荷が分散して安定になり、できやすくなる。';
+  $('w-sum').innerHTML = wMode === 'steric'
+    ? 'S<sub>N</sub>2 は <b>第一級 ＞ 第二級 ＞ 第三級</b><small>背面が空いているほど速い。第三級ではほぼ進まない。</small>'
+    : 'S<sub>N</sub>1 は <b>第三級 ＞ 第二級 ＞ 第一級</b><small>カルボカチオンが安定なほど速い。第一級ではほぼ進まない。</small>';
+}
+
+/* ============================================================
+   ④ エネルギー図
+   ============================================================ */
+let eShow = 'both';
+function drawEnergy() {
+  const x0 = 88, y0 = 372, x1 = 726, y1 = 44;
+  const X = u => x0 + u * (x1 - x0);
+  const Y = e => y0 - e * (y0 - y1);      // e は 0〜1 の相対エネルギー
+  let s = '';
+  for (let k = 0; k <= 4; k++) {
+    s += `<line class="grid-line" x1="${x0}" y1="${Y(k / 4)}" x2="${x1}" y2="${Y(k / 4)}"/>`;
+  }
+  s += `<line class="axis" x1="${x0}" y1="${y0}" x2="${x1}" y2="${y0}"/>`;
+  s += `<line class="axis" x1="${x0}" y1="${y0}" x2="${x0}" y2="${y1}"/>`;
+  s += `<text class="axis-label" x="${(x0 + x1) / 2}" y="${y0 + 36}" text-anchor="middle">反応の進み方</text>`;
+  s += `<text class="axis-label" x="${x0 - 42}" y="${(y0 + y1) / 2}" text-anchor="middle" transform="rotate(-90 ${x0 - 42} ${(y0 + y1) / 2})">エネルギー</text>`;
+
+  /* 山を作る。points は [u, e] の並び。間を余弦でなめらかにつなぐ */
+  const path = pts => {
+    const out = [];
+    for (let i = 0; i < pts.length - 1; i++) {
+      const [ua, ea] = pts[i], [ub, eb] = pts[i + 1];
+      for (let k = 0; k <= 24; k++) {
+        const u = k / 24, w = (1 - Math.cos(Math.PI * u)) / 2;
+        out.push(`${X(lerp(ua, ub, u)).toFixed(1)},${Y(lerp(ea, eb, w)).toFixed(1)}`);
+      }
+    }
+    return out.join(' ');
+  };
+  const SN2P = [[0, .30], [.5, .88], [1, .12]];
+  const SN1P = [[0, .30], [.26, .97], [.5, .70], [.74, .80], [1, .12]];
+
+  if (eShow !== 'sn1') {
+    s += `<polyline points="${path(SN2P)}" fill="none" stroke="var(--blue)" stroke-width="3.2" stroke-linejoin="round"/>`;
+    s += `<circle cx="${X(.5)}" cy="${Y(.88)}" r="5.5" fill="var(--ts)"/>`;
+    s += `<text x="${X(.5)}" y="${Y(.88) - 14}" text-anchor="middle" fill="#c2410c" font-size="12.5" font-weight="850">遷移状態（5つの基）</text>`;
+  }
+  if (eShow !== 'sn2') {
+    s += `<polyline points="${path(SN1P)}" fill="none" stroke="var(--elec)" stroke-width="3.2" stroke-linejoin="round" stroke-dasharray="${eShow === 'both' ? '8 5' : '0'}"/>`;
+    s += `<circle cx="${X(.5)}" cy="${Y(.70)}" r="5.5" fill="var(--elec)"/>`;
+    s += `<text x="${X(.5)}" y="${Y(.70) + 22}" text-anchor="middle" fill="#b91c1c" font-size="12.5" font-weight="850">カルボカチオン中間体</text>`;
+    s += `<circle cx="${X(.26)}" cy="${Y(.97)}" r="5" fill="var(--ts)"/>`;
+    s += `<text x="${X(.26)}" y="${Y(.97) - 13}" text-anchor="middle" fill="#c2410c" font-size="12" font-weight="850">いちばん高い山＝律速</text>`;
+  }
+  // 凡例（曲線に文字を重ねないよう、右上の空いているところに置く）
+  const lx = X(.72), ly = y1 + 6;
+  if (eShow !== 'sn1') {
+    s += `<line x1="${lx}" y1="${ly}" x2="${lx + 26}" y2="${ly}" stroke="var(--blue)" stroke-width="3.2"/>`;
+    s += `<text x="${lx + 32}" y="${ly + 4}" fill="var(--blue)" font-size="12.5" font-weight="850">Sₙ2（1段階）</text>`;
+  }
+  if (eShow !== 'sn2') {
+    const y = ly + (eShow === 'both' ? 20 : 0);
+    s += `<line x1="${lx}" y1="${y}" x2="${lx + 26}" y2="${y}" stroke="var(--elec)" stroke-width="3.2" stroke-dasharray="8 5"/>`;
+    s += `<text x="${lx + 32}" y="${y + 4}" fill="var(--elec)" font-size="12.5" font-weight="850">Sₙ1（2段階）</text>`;
+  }
+  s += `<text x="${X(.0)}" y="${Y(.30) + 20}" fill="var(--ink2)" font-size="11.5" font-weight="800">出発物</text>`;
+  s += `<text x="${X(.93)}" y="${Y(.12) + 20}" fill="var(--ink2)" font-size="11.5" font-weight="800">生成物</text>`;
+  $('chart-energy').innerHTML = s;
+  $('e-both').setAttribute('aria-pressed', String(eShow === 'both'));
+  $('e-sn2').setAttribute('aria-pressed', String(eShow === 'sn2'));
+  $('e-sn1').setAttribute('aria-pressed', String(eShow === 'sn1'));
+}
+
+/* ============================================================
+   ⑤ ベンゼンの求電子置換
+   環は xy 平面に置き、求電子剤は +z（面の上）から近づく。
+   結合した炭素は sp³ になって面から浮き、その H は下へ倒れる。
+   最後に H⁺ が外れて sp² に戻り、芳香族性が復活する。
+   ============================================================ */
+/* 既定は環をほぼ真横から見る向きにする。「求電子剤が面の上、H が面の下」
+   という上下の関係がこの教材の要点で、真上から見ると見えないため。 */
+const EAS = new Mol3D($('cv-eas'), { yaw: -0.30, pitch: -1.12 });
+let eat = 0, eKind = 'no2';
+const E_KINDS = {
+  no2: { label: 'NO₂', e: 'N', eq: 'C₆H₆ ＋ HNO₃ → C₆H₅NO₂ ＋ H₂O', make: '濃硝酸と濃硫酸から NO₂⁺（ニトロニウムイオン）ができる。これが求電子剤。', name: 'ニトロ化' },
+  br:  { label: 'Br', e: 'Br', eq: 'C₆H₆ ＋ Br₂ → C₆H₅Br ＋ HBr', make: 'Br₂ と触媒（FeBr₃）から Br⁺ ができる。これが求電子剤。', name: '臭素化' },
+  me:  { label: 'CH₃', e: 'R', eq: 'C₆H₆ ＋ CH₃Cl → C₆H₅CH₃ ＋ HCl', make: 'CH₃Cl と触媒（AlCl₃）から CH₃⁺ ができる。これが求電子剤（フリーデル・クラフツ反応）。', name: 'アルキル化' },
+};
+const RING = 1.40, CHR = 1.09;
+
+function easModel(t) {
+  const K = E_KINDS[eKind];
+  const u1 = Math.min(1, t / .5), u2 = Math.max(0, (t - .5) / .5);
+  const sp3 = t < .5 ? u1 : 1 - u2;                    // C1 が sp³ になっている度合い
+  const atoms = [], bonds = [];
+  for (let k = 0; k < 6; k++) {
+    const a = Math.PI / 3 * k;
+    const cz = k === 0 ? .18 * sp3 : 0;
+    atoms.push(atom('C', RING * Math.cos(a), RING * Math.sin(a), cz));
+  }
+  for (let k = 0; k < 6; k++) {
+    const a = Math.PI / 3 * k;
+    const R = RING + CHR;
+    if (k === 0) {
+      // 攻撃を受けた炭素の H。sp³ になるにつれ面の下へ倒れ、後半で外れていく
+      const drop = -.92 * sp3 - 2.6 * u2 * u2;
+      const out = R + .55 * u2;
+      atoms.push(atom('H', out * Math.cos(a), out * Math.sin(a), drop, { rad: .42, alpha: 1 - .5 * u2 * u2, label: u2 > .6 ? 'H⁺' : 'H' }));
+    } else {
+      atoms.push(atom('H', R * Math.cos(a), R * Math.sin(a), 0, { rad: .40 }));
+    }
+  }
+  for (let k = 0; k < 6; k++) { bonds.push(bond(k, (k + 1) % 6, { width: 7 })); bonds.push(bond(k, 6 + k, { width: 5 })); }
+  // 求電子剤。面の上から来て、最後は環の平面に入る
+  const ez = t < .5 ? lerp(4.4, 1.55, u1 * u1) : lerp(1.55, .1, u2 * u2);
+  const ex = t < .5 ? RING : lerp(RING, RING + 1.45, u2 * u2);
+  atoms.push(atom(K.e, ex, 0, ez, { label: t < .3 ? K.label + '⁺' : K.label, rad: K.e === 'R' ? .80 : (K.e === 'Br' ? .82 : .62) }));
+  const eIdx = atoms.length - 1;
+  const near = Math.min(1, Math.max(0, (t - .2) / .3));
+  bonds.push(bond(0, eIdx, { style: t > .55 ? 'solid' : 'dash', width: lerp(2, 7, near), color: `rgba(220,38,38,${lerp(.2, .95, near)})` }));
+  if (u2 > .5) bonds[1].style = 'dash';                // 外れかけの C–H
+
+  // 芳香環の非局在化。中間体のあいだは切れている
+  const planes = [];
+  const arom = 1 - sp3;
+  if (arom > .25) {
+    const ring = [];
+    for (let k = 0; k < 24; k++) { const a = 2 * Math.PI * k / 24; ring.push([RING * .62 * Math.cos(a), RING * .62 * Math.sin(a), 0]); }
+    planes.push({ pts: ring, fill: `rgba(37,99,235,${.16 * arom})`, stroke: `rgba(37,99,235,${.75 * arom})`, dash: [] });
+  }
+  // 中間体では正電荷が3つの炭素（オルト2つとパラ）に散る
+  if (sp3 > .5) [1, 3, 5].forEach(k => { atoms[k].badge = '＋'; atoms[k].badgeColor = '#dc2626'; });
+  const arrows = t < .3 ? [{ from: [RING, 0, ez + 1.5], to: [RING, 0, ez - .55], color: '#dc2626' }] : [];
+  return { atoms, bonds, planes, arrows, span: 5.6 };
+}
+
+const EA_STAGES = [{ t: '芳香族' }, { t: 'E⁺ が近づく' }, { t: '中間体（芳香族性が消える）', ts: 1 }, { t: 'H⁺ が外れる' }, { t: '芳香族が戻る' }];
+function eaStage(t) { return t < .05 ? 0 : t < .42 ? 1 : t < .62 ? 2 : t < .95 ? 3 : 4; }
+
+function benzeneSvg(plusAt) {
+  const cx = 60, cy = 58, R = 34;
+  const pt = k => [cx + R * Math.cos(Math.PI / 3 * k - Math.PI / 2), cy + R * Math.sin(Math.PI / 3 * k - Math.PI / 2)];
+  let s = '';
+  for (let k = 0; k < 6; k++) {
+    const [x1, y1] = pt(k), [x2, y2] = pt((k + 1) % 6);
+    s += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#59667a" stroke-width="2.2" stroke-linecap="round"/>`;
+  }
+  // sp³ になった炭素（上の頂点）に E と H
+  const [tx, ty] = pt(0);
+  s += `<line x1="${tx}" y1="${ty}" x2="${tx + 17}" y2="${ty - 13}" stroke="#dc2626" stroke-width="2.2"/>`;
+  s += `<text x="${tx + 22}" y="${ty - 13}" fill="#dc2626" font-size="11" font-weight="850">E</text>`;
+  s += `<line x1="${tx}" y1="${ty}" x2="${tx - 17}" y2="${ty - 13}" stroke="#59667a" stroke-width="2.2"/>`;
+  s += `<text x="${tx - 25}" y="${ty - 13}" fill="#526078" font-size="11" font-weight="850">H</text>`;
+  // 残り5つのうち2本の二重結合
+  const dbl = plusAt === 1 ? [[2, 3], [4, 5]] : plusAt === 3 ? [[1, 2], [4, 5]] : [[1, 2], [3, 4]];
+  dbl.forEach(([a, b]) => {
+    const [x1, y1] = pt(a), [x2, y2] = pt(b);
+    const dx = x2 - x1, dy = y2 - y1, L = Math.hypot(dx, dy), nx = -dy / L * 4.5, ny = dx / L * 4.5;
+    s += `<line x1="${x1 + nx}" y1="${y1 + ny}" x2="${x2 + nx}" y2="${y2 + ny}" stroke="#59667a" stroke-width="2"/>`;
+  });
+  const [px, py] = pt(plusAt);
+  s += `<circle cx="${px}" cy="${py}" r="9" fill="#fee2e2" stroke="#dc2626" stroke-width="1.6"/>`;
+  s += `<text x="${px}" y="${py + 1}" text-anchor="middle" dominant-baseline="middle" fill="#dc2626" font-size="12" font-weight="900">＋</text>`;
+  return `<svg viewBox="0 0 120 118" role="img" aria-label="アレニウムイオンの共鳴構造">${s}</svg>`;
+}
+
+function drawEAS() {
+  const t = eat / STEPS, K = E_KINDS[eKind];
+  EAS.set(easModel(t));
+  const st = eaStage(t);
+  stageBar($('ea-bar'), EA_STAGES, st);
+  const texts = [
+    ['ベンゼン', '6個の電子が環全体に広がっていて、とても安定（芳香族性）。青い円がその非局在化を表す。'],
+    [`${K.label}⁺ が近づく`, '電子が豊富な環の上面へ、正電荷をもつ求電子剤が引き寄せられる。'],
+    ['アレニウムイオン（中間体）', 'この炭素だけ sp³ になり、H が面の下へ倒れる。環の非局在化が切れて芳香族性が失われる。ここがいちばん高い山。'],
+    ['H⁺ が外れる', 'sp³ の炭素から H⁺ が抜ける。付加ではなく置換になるのはこのため。'],
+    ['芳香族が戻る', `${K.label} が付いた形で、環の非局在化が復活した。安定な芳香族に戻っている。`],
+  ];
+  $('ea-now').textContent = texts[st][0];
+  $('ea-note').textContent = texts[st][1];
+  $('ea-eq').textContent = K.eq;
+  $('ea-make').textContent = K.make;
+  $('ea-reso').innerHTML = [1, 3, 5].map(k => benzeneSvg(k)).join('');
+  $('ea-back').disabled = eat === 0;
+  $('ea-fwd').disabled = eat === STEPS;
+  document.querySelectorAll('[data-e]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.e === eKind)));
+}
+
+/* ============================================================
+   配線
+   ============================================================ */
+const DRAW = {
+  sn2: () => { SN2.resize(); drawSN2(); },
+  sn1: () => { SN1.resize(); drawSN1(); },
+  which: () => drawWhich(),
+  energy: () => drawEnergy(),
+  eas: () => { EAS.resize(); drawEAS(); },
+};
+const redrawAll = () => Object.values(DRAW).forEach(fn => fn());
+
+buildWhich();
+ChemUI.tabs({ onChange: key => DRAW[key]() });
+ChemUI.fullscreen({ onChange: redrawAll });
+
+$('s2-fwd').addEventListener('click', () => { s2t = Math.min(STEPS, s2t + 1); drawSN2(); });
+$('s2-back').addEventListener('click', () => { s2t = Math.max(0, s2t - 1); drawSN2(); });
+$('s2-reset').addEventListener('click', () => { s2t = 0; drawSN2(); });
+$('s2-end').addEventListener('click', () => { s2t = STEPS; drawSN2(); });
+
+$('s1-fwd').addEventListener('click', () => { s1t = Math.min(STEPS, s1t + 1); drawSN1(); });
+$('s1-back').addEventListener('click', () => { s1t = Math.max(0, s1t - 1); drawSN1(); });
+$('s1-reset').addEventListener('click', () => { s1t = 0; drawSN1(); });
+$('s1-end').addEventListener('click', () => { s1t = STEPS; drawSN1(); });
+$('s1-face-a').addEventListener('click', () => { s1face = 1; drawSN1(); });
+$('s1-face-b').addEventListener('click', () => { s1face = -1; drawSN1(); });
+
+$('w-steric').addEventListener('click', () => { wMode = 'steric'; drawWhich(); });
+$('w-cation').addEventListener('click', () => { wMode = 'cation'; drawWhich(); });
+
+$('e-both').addEventListener('click', () => { eShow = 'both'; drawEnergy(); });
+$('e-sn2').addEventListener('click', () => { eShow = 'sn2'; drawEnergy(); });
+$('e-sn1').addEventListener('click', () => { eShow = 'sn1'; drawEnergy(); });
+
+$('ea-fwd').addEventListener('click', () => { eat = Math.min(STEPS, eat + 1); drawEAS(); });
+$('ea-back').addEventListener('click', () => { eat = Math.max(0, eat - 1); drawEAS(); });
+$('ea-reset').addEventListener('click', () => { eat = 0; drawEAS(); });
+$('ea-end').addEventListener('click', () => { eat = STEPS; drawEAS(); });
+document.querySelectorAll('[data-e]').forEach(b => b.addEventListener('click', () => { eKind = b.dataset.e; drawEAS(); }));
+
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-reset]');
+  if (!b) return;
+  const id = b.dataset.reset;
+  ({ 'cv-sn2': SN2, 'cv-sn1': SN1, 'cv-eas': EAS, 'cv-w-p': wViews.p, 'cv-w-s': wViews.s, 'cv-w-t': wViews.t })[id]?.reset();
+});
+
+addEventListener('resize', () => redrawAll());
+redrawAll();
+</script>
+<script src="site-shell.js"></script>
+</body>
+</html>
