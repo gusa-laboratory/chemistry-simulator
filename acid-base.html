@@ -36,9 +36,32 @@
   .ctrl{margin-bottom:9px}
   .eqline{color:var(--deep);font-size:16px;font-weight:850;letter-spacing:.02em}
 
-  /* ①は粒子モデルと pH のグラフを別のカードに分ける */
-  .mix-split{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:14px;align-items:start}
-  .mix-split .ph-card{border-top-color:var(--blue)}
+  /* ①は粒子モデルと pH のグラフを別のカードに分ける。
+     pH のグラフは既定で隠しておき、ボタンで出す。出したときは
+     右の「中和」「数」を消して、図2枚に幅をすべて渡す。 */
+  .mix-main{min-width:0;display:flex;flex-direction:column;gap:11px}
+  .mix-split{display:grid;grid-template-columns:1fr;gap:14px;align-items:start}
+  .mix-split .ph-card{display:none;border-top-color:var(--blue)}
+  .mix-verdict-line{margin:0}
+  .mix-verdict-line:empty{display:none}
+
+  /* ①の図はほぼ正方形なので、列の幅に合わせて伸ばすと縦に巨大化する
+     （特に pH を隠して1枚だけになったとき）。高さに上限を付ける。
+     全画面では ui.css が高さを持たせるので対象外にする。 */
+  body:not(.is-fullscreen) .mix-split svg{max-height:58vh}
+
+  #panel-mix.show-ph .mix-split{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr)}
+  #panel-mix.show-ph .mix-split .ph-card{display:block}
+  #panel-mix.show-ph .layout{grid-template-columns:1fr}
+  #panel-mix.show-ph .side{display:none}
+
+  /* 紙に刷るときは画面の切り替え状態に関わらず両方出す
+     （.side は print.css が !important で出す） */
+  @media print{
+    #panel-mix .mix-split .ph-card{display:block}
+    #panel-mix .mix-split{grid-template-columns:1fr}
+  }
+
   body.is-fullscreen .mix-split{height:100%;align-items:stretch}
 
   /* pH の大きな表示（後ろの席から読める） */
@@ -81,10 +104,7 @@
 
   @media(max-width:1000px){
     .layout{grid-template-columns:1fr}
-    .mix-split{grid-template-columns:1fr}
-    /* 1カラムに畳むと ① の図（ほぼ正方形）が画面いっぱいに
-       引き伸ばされるので、高さに上限を付ける */
-    .mix-split svg{max-height:54vh}
+    #panel-mix.show-ph .mix-split{grid-template-columns:1fr}
     body.is-fullscreen{height:auto;overflow:auto;display:block}
     body.is-fullscreen .layout{grid-template-columns:1fr}
   }
@@ -117,8 +137,10 @@
       <button class="btn primary" id="mix-drop" type="button">▼ OH⁻ を1個加える</button>
       <button class="btn" id="mix-all" type="button">中和点まで</button>
       <button class="btn" id="mix-reset" type="button">最初から</button>
+      <button class="btn" id="mix-ph-toggle" type="button" aria-pressed="false">pH の変化を出す</button>
     </div>
     <div class="layout">
+      <div class="mix-main">
       <div class="mix-split">
         <div class="chart-card" data-label="PARTICLE MODEL">
           <svg id="chart-mix" viewBox="0 0 420 430" role="img" aria-label="ビュレットから水酸化ナトリウム水溶液を1滴ずつ落とし、塩酸の中の水素イオンが1組ずつ水に変わっていく粒子モデル"></svg>
@@ -126,6 +148,10 @@
         <div class="chart-card ph-card" data-label="pH">
           <svg id="chart-mix-ph" viewBox="0 0 380 430" role="img" aria-label="加えた水酸化物イオンの個数に対する pH の変化を示すグラフ"></svg>
         </div>
+      </div>
+      <!-- 判定文は「数」カードの外に置く。pH のグラフを出すと
+           「数」カードごと消えるが、結論の一文は残したいため -->
+      <p class="verdict mix-verdict-line" id="mix-verdict"></p>
       </div>
       <div class="side">
         <div class="card law">
@@ -140,7 +166,6 @@
             <div><span class="t-k">できた H₂O</span><span class="t-v" id="mix-w">0</span></div>
             <div><span class="t-k">加えた OH⁻</span><span class="t-v" id="mix-added">0</span></div>
           </div>
-          <p class="verdict" id="mix-verdict"></p>
           <div class="legend">
             <span><i style="background:#dc2626"></i>H⁺</span>
             <span><i style="background:#2563eb"></i>OH⁻</span>
@@ -763,6 +788,14 @@ const redrawAll = () => Object.values(DRAW).forEach(fn => fn());
 
 ChemUI.tabs({ onChange: key => DRAW[key]() });
 ChemUI.fullscreen({ onChange: redrawAll });
+
+$('mix-ph-toggle').addEventListener('click', e => {
+  const on = !$('panel-mix').classList.contains('show-ph');
+  $('panel-mix').classList.toggle('show-ph', on);
+  e.currentTarget.setAttribute('aria-pressed', String(on));
+  e.currentTarget.textContent = on ? 'pH の変化を隠す' : 'pH の変化を出す';
+  drawMix();                       // 幅が変わるので描き直す
+});
 
 $('mix-drop').addEventListener('click', () => { mixAdded = Math.min(MIX_N * 2, mixAdded + 1); drawMix(); });
 $('mix-all').addEventListener('click', () => { mixAdded = MIX_N; drawMix(); });
