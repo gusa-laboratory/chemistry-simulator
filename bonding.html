@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>化学結合と分子間力</title>
+<meta name="description" content="イオン結合・共有結合・金属結合のちがい、電気陰性度と結合の極性、分子全体の極性、分散力・双極子間力・水素結合、そして沸点のちがいを粒子モデルで確かめる授業用教材。">
+<meta name="theme-color" content="#2563eb">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="ui.css">
+<link rel="stylesheet" href="print.css" media="print">
+<style>
+  :root{
+    --blue:var(--t-blue); --deep:var(--t-blue-deep); --ink:var(--t-ink); --ink2:var(--t-ink2);
+    --ink3:var(--t-ink3); --bg:var(--t-bg); --card:var(--t-card); --line:var(--t-line);
+    --accent:var(--t-accent); --grid:var(--t-grid); --axis:var(--t-axis);
+    --shadow:var(--t-shadow); --shadow-sm:var(--t-shadow-sm);
+    /* この教材の役割色：δ＋＝赤、δ−＝青、電子＝黄、水素結合＝紫 */
+    --pos:var(--t-red); --neg:#1d4ed8; --elec:#eab308; --hb:#7c3aed;
+  }
+  .layout{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(290px,.9fr);gap:14px;align-items:start}
+  .chart-card{position:relative;min-width:0;padding:10px 14px 14px;overflow:hidden;border-top:4px solid var(--t-cyan)}
+  .chart-card svg{display:block;width:100%;height:auto}
+  .card h2{margin:0 0 9px;color:var(--deep);font-size:13px;font-weight:850;letter-spacing:.01em}
+  .btn{padding:7px 12px;border:1px solid var(--t-line-strong);border-radius:10px;background:var(--card);color:var(--ink2);font-size:11.5px;font-weight:850;cursor:pointer}
+  .btn:hover{color:var(--blue);border-color:var(--t-blue-hover)}
+  .btn.primary{border-color:var(--t-blue-hover);background:var(--t-blue-tint);color:var(--blue)}
+  .btn:disabled{opacity:.45;cursor:default;color:var(--ink3);border-color:var(--line)}
+  .ctrl{margin-bottom:9px}
+  .eqline{font-size:13px;font-weight:850;color:var(--deep);line-height:1.85}
+  .eqline .p{color:var(--pos)} .eqline .n{color:var(--neg)} .eqline .h{color:var(--hb)}
+  .eqline small{font-size:11px;font-weight:800;color:var(--ink3);margin-left:6px}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chips button{padding:6px 10px;border:1px solid var(--t-line-strong);border-radius:9px;background:var(--card);color:var(--ink2);font-size:11.5px;font-weight:850;cursor:pointer}
+  .chips button[aria-pressed="true"]{border-color:var(--t-blue-hover);background:var(--t-blue-tint);color:var(--blue)}
+  .note{margin:9px 0 0;color:var(--ink3);font-size:11.5px;line-height:1.65}
+  @media(max-width:1000px){
+    .layout{grid-template-columns:1fr}
+    body.is-fullscreen{height:auto;overflow:auto;display:block}
+    body.is-fullscreen .layout{grid-template-columns:1fr}
+  }
+</style>
+<link rel="stylesheet" href="site-shell.css">
+</head>
+<body>
+<header>
+  <div class="header-row">
+    <div class="title-block">
+      <a class="back-link" href="index.html">← 一覧に戻る</a>
+      <h1>化学結合と分子間力</h1>
+    </div>
+    <button class="outline-btn site-fullscreen-btn" id="fullscreenBtn" type="button" aria-label="全画面表示"><span class="site-fullscreen-icon" aria-hidden="true">⛶</span><span class="btn-text">全画面表示</span></button>
+  </div>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="学習テーマ">
+    <button type="button" role="tab" aria-selected="true"  data-tab="kinds">① 結合の3種類</button>
+    <button type="button" role="tab" aria-selected="false" data-tab="polar">② 結合の極性</button>
+    <button type="button" role="tab" aria-selected="false" data-tab="mol">③ 分子全体の極性</button>
+    <button type="button" role="tab" aria-selected="false" data-tab="imf">④ 分子間力</button>
+    <button type="button" role="tab" aria-selected="false" data-tab="bp">⑤ 沸点を比べる</button>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ① 結合の3種類 -->
+  <section class="panel active" id="panel-kinds">
+    <div class="panel-tools">
+      <div class="chips" id="kd-chips"></div>
+    </div>
+    <div class="layout">
+      <div class="chart-card" data-label="BONDING MODEL">
+        <svg id="chart-kinds" viewBox="0 0 760 420" role="img" aria-label="イオン結合・共有結合・金属結合で電子がどうなっているか"></svg>
+      </div>
+      <div class="side">
+        <div class="card law">
+          <h2 id="kd-name">—</h2>
+          <div class="eqline" id="kd-eq"></div>
+        </div>
+        <div class="card">
+          <h2>電気陰性度の差</h2>
+          <div class="readout">
+            <span class="k">2つの原子</span><span class="v" id="kd-atoms">—</span>
+            <span class="k">電気陰性度</span><span class="v" id="kd-en">—</span>
+            <span class="k">差 Δχ</span><span class="v" id="kd-dx">—</span>
+          </div>
+          <p class="verdict" id="kd-verdict"></p>
+          <p class="note">結合はこの3つにきっぱり分かれるのではなく、Δχ が大きくなるほど「電子のかたより」が強くなって、共有結合からイオン結合へ連続的に移り変わる。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ② 結合の極性 -->
+  <section class="panel" id="panel-polar">
+    <div class="panel-tools">
+      <div class="chips" id="pl-chips"></div>
+    </div>
+    <div class="layout">
+      <div class="chart-card" data-label="BOND POLARITY">
+        <svg id="chart-polar" viewBox="0 0 760 420" role="img" aria-label="電気陰性度の差によって電子のかたよりが変わるようす"></svg>
+      </div>
+      <div class="side">
+        <div class="card law">
+          <h2>結合の極性</h2>
+          <div class="eqline">
+            電気陰性度が<b>大きい原子</b>のほうへ<br>
+            共有電子対が引きよせられる<br>
+            <span class="n">δ−</span> ← 電子が多い ／ <span class="p">δ＋</span> ← 電子が少ない
+          </div>
+        </div>
+        <div class="card">
+          <h2>数値</h2>
+          <div class="readout">
+            <span class="k">結合</span><span class="v" id="pl-bond">—</span>
+            <span class="k">電気陰性度</span><span class="v" id="pl-en">—</span>
+            <span class="k">差 Δχ</span><span class="v" id="pl-dx">—</span>
+            <span class="k">極性</span><span class="v" id="pl-kind">—</span>
+          </div>
+          <p class="verdict" id="pl-verdict"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ③ 分子全体の極性 -->
+  <section class="panel" id="panel-mol">
+    <div class="panel-tools">
+      <div class="chips" id="ml-chips"></div>
+      <button class="btn" id="ml-sum" type="button">合計の矢印：表示</button>
+    </div>
+    <div class="layout">
+      <div class="chart-card" data-label="MOLECULAR POLARITY">
+        <svg id="chart-mol" viewBox="0 0 760 420" role="img" aria-label="結合の極性を合計して分子全体の極性を求める"></svg>
+      </div>
+      <div class="side">
+        <div class="card law">
+          <h2>分子の極性＝矢印の合計</h2>
+          <div class="eqline">
+            結合に極性があっても<br>
+            <b>形</b>によって打ち消し合えば<br>
+            分子全体では<b>無極性</b>になる
+          </div>
+        </div>
+        <div class="card">
+          <h2>この分子</h2>
+          <div class="readout">
+            <span class="k">形</span><span class="v" id="ml-shape">—</span>
+            <span class="k">結合の極性</span><span class="v" id="ml-bond">—</span>
+            <span class="k">分子全体</span><span class="v" id="ml-total">—</span>
+          </div>
+          <p class="verdict" id="ml-verdict"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ④ 分子間力 -->
+  <section class="panel" id="panel-imf">
+    <div class="panel-tools">
+      <div class="chips" id="if-chips"></div>
+    </div>
+    <div class="layout">
+      <div class="chart-card" data-label="INTERMOLECULAR FORCE">
+        <svg id="chart-imf" viewBox="0 0 760 420" role="img" aria-label="2つの分子のあいだにはたらく力のようす"></svg>
+      </div>
+      <div class="side">
+        <div class="card law">
+          <h2>3つの分子間力</h2>
+          <div class="eqline" style="font-size:12.5px">
+            <b>分散力</b><small>すべての分子。大きいほど強い</small><br>
+            <b>双極子間力</b><small>極性分子どうし</small><br>
+            <span class="h"><b>水素結合</b></span><small>N・O・F につく H</small>
+          </div>
+        </div>
+        <div class="card">
+          <h2>この分子にはたらく力</h2>
+          <div class="readout">
+            <span class="k">分子量</span><span class="v" id="if-m">—</span>
+            <span class="k">極性</span><span class="v" id="if-pol">—</span>
+            <span class="k">水素結合</span><span class="v" id="if-hb">—</span>
+            <span class="k">沸点</span><span class="v" id="if-bp">—</span>
+          </div>
+          <p class="verdict" id="if-verdict"></p>
+          <p class="note">分子間力は結合そのものよりずっと弱い。だから融点・沸点は、共有結合を切る温度ではなく<b>分子どうしを引きはがす温度</b>で決まる。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑤ 沸点を比べる -->
+  <section class="panel" id="panel-bp">
+    <div class="panel-tools">
+      <div class="switch" id="bp-kind" role="group" aria-label="比べるもの">
+        <button type="button" data-kind="hydride" aria-pressed="true">水素化物</button>
+        <button type="button" data-kind="organic" aria-pressed="false">有機化合物</button>
+      </div>
+      <button class="btn" id="bp-mark" type="button">水素結合の印：表示</button>
+    </div>
+    <div class="layout">
+      <div class="chart-card" data-label="BOILING POINT">
+        <svg id="chart-bp" viewBox="0 0 760 420" role="img" aria-label="分子量と沸点の関係を族ごとに比べたグラフ"></svg>
+      </div>
+      <div class="side">
+        <div class="card law">
+          <h2 id="bp-title">水素化物の沸点</h2>
+          <div class="eqline" id="bp-eq" style="font-size:12.5px"></div>
+        </div>
+        <div class="card">
+          <h2>読み取り</h2>
+          <p class="verdict" id="bp-verdict"></p>
+          <p class="note" id="bp-note"></p>
+        </div>
+        <div class="card print-only" hidden>
+          <h2>考えてみよう</h2>
+          <p>ジメチルエーテルとエタノールは分子式が同じ C₂H₆O なのに、沸点が 100 ℃ 以上ちがう。理由を書きなさい。</p>
+          <span class="write-line"></span><span class="write-line"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>大阪女学院中学校・高等学校　Yuto Yamaguchi</footer>
+
+<script src="ui.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const fmt = (x, d) => x.toFixed(d);
+const INK = '#172033', INK2 = '#526078', INK3 = '#8290a5', LINE = '#d8e1ed';
+const POS = '#dc2626', NEG = '#1d4ed8', ELC = '#eab308', HBC = '#7c3aed';
+
+/* 電気陰性度（ポーリング） */
+const EN = { H:2.20, Li:0.98, Be:1.57, B:2.04, C:2.55, N:3.04, O:3.44, F:3.98,
+             Na:0.93, Mg:1.31, Al:1.61, Si:1.90, P:2.19, S:2.58, Cl:3.16, K:0.82, Br:2.96, I:2.66 };
+
+function halo(t, x, y, o = {}) {
+  return `<text x="${x}" y="${y}" text-anchor="${o.anchor || 'middle'}" font-size="${o.size || 13}"
+    font-weight="${o.weight || 850}" fill="${o.fill || INK}" stroke="#fff" stroke-width="${o.sw ?? 3.5}"
+    paint-order="stroke fill">${t}</text>`;
+}
+function ball(x, y, r, fill, stroke, label, o = {}) {
+  let g = `<circle cx="${x}" cy="${y}" r="${r}" fill="${fill}" stroke="${stroke}" stroke-width="${o.sw || 1.8}"/>`;
+  if (label) g += `<text x="${x}" y="${y + (o.dy ?? r * 0.34)}" text-anchor="middle" font-size="${o.size || r * 0.8}"
+    font-weight="850" fill="${o.color || '#fff'}">${label}</text>`;
+  return g;
+}
+function electron(x, y, s = 1) {
+  return ball(x, y, 7 * s, '#fde047', '#a16207', '−', { size: 10 * s, color: '#713f12', dy: 3.3 * s, sw: 1.3 });
+}
+function arrow(x1, y1, x2, y2, color, w = 2.6) {
+  const dx = x2 - x1, dy = y2 - y1, L = Math.hypot(dx, dy) || 1, ux = dx / L, uy = dy / L;
+  const hx = x2 - ux * 9, hy = y2 - uy * 9, nx = -uy, ny = ux;
+  return `<line x1="${x1}" y1="${y1}" x2="${hx}" y2="${hy}" stroke="${color}" stroke-width="${w}" stroke-linecap="round"/>
+    <polygon points="${x2},${y2} ${hx + nx * 5},${hy + ny * 5} ${hx - nx * 5},${hy - ny * 5}" fill="${color}"/>`;
+}
+// 極性を示す矢印（＋から−へ。根元に十字）
+function dipole(x1, y1, x2, y2, color = '#0f766e', w = 3) {
+  const dx = x2 - x1, dy = y2 - y1, L = Math.hypot(dx, dy) || 1, nx = -dy / L, ny = dx / L;
+  return arrow(x1, y1, x2, y2, color, w) +
+    `<line x1="${x1 + nx * 6}" y1="${y1 + ny * 6}" x2="${x1 - nx * 6}" y2="${y1 - ny * 6}" stroke="${color}" stroke-width="${w}" stroke-linecap="round"/>`;
+}
+
+/* ===== ① 結合の3種類 ===== */
+const KINDS = [
+  { id: 'nacl', name: 'イオン結合', sub: '塩化ナトリウム NaCl', a: 'Na', b: 'Cl', type: 'ion',
+    eq: '電子が<b>完全に移る</b><br><span class="p">Na⁺</span> と <span class="n">Cl⁻</span> が静電気で引き合う',
+    v: 'Δχ が大きいので、電子は Cl に取られてしまう。できた陽イオンと陰イオンが引き合うのがイオン結合。' },
+  { id: 'hcl', name: '極性のある共有結合', sub: '塩化水素 HCl', a: 'H', b: 'Cl', type: 'polar',
+    eq: '電子対を<b>共有するがかたよる</b><br><span class="p">δ＋</span>H — Cl<span class="n">δ−</span>',
+    v: '共有しているが Cl 側に引きよせられている。完全に渡してはいないので共有結合、しかし極性がある。' },
+  { id: 'cl2', name: '極性のない共有結合', sub: '塩素 Cl₂', a: 'Cl', b: 'Cl', type: 'nonpolar',
+    eq: '電子対を<b>まん中で共有</b><br>かたよりなし',
+    v: '同じ原子どうしなので引く力が等しく、電子対はまん中にある。極性は生じない。' },
+  { id: 'na', name: '金属結合', sub: 'ナトリウム Na', a: 'Na', b: 'Na', type: 'metal',
+    eq: '価電子が<b>自由電子</b>になり<br>金属全体を動きまわる',
+    v: '電子が特定の原子に固定されず全体を動く。だから金属は電気をよく通し、たたくと広がる（展性）。' },
+];
+let kdSel = 0;
+
+function drawKinds() {
+  const k = KINDS[kdSel], dx = Math.abs(EN[k.a] - EN[k.b]);
+  let g = halo(k.sub, 380, 42, { size: 17, fill: '#173b75' });
+  if (k.type === 'metal') {
+    // 金属：陽イオンの格子 ＋ 自由電子の海
+    g += `<rect x="180" y="90" width="400" height="250" rx="14" fill="#eef4fb" stroke="#c8d6e6" stroke-width="2"/>`;
+    for (let r = 0; r < 3; r++) for (let c = 0; c < 4; c++)
+      g += ball(240 + c * 100, 140 + r * 90, 26, '#cbd5e1', '#64748b', 'Na⁺', { size: 13, color: '#334155' });
+    const seed = [[205,120],[300,110],[400,175],[500,120],[560,200],[210,235],[330,215],[470,255],[560,300],[260,310],[380,300],[520,180],[290,175],[430,120]];
+    seed.forEach(([x, y]) => { g += electron(x, y, .9); });
+    g += halo('自由電子が全体を動きまわる', 380, 372, { size: 14, fill: '#a16207' });
+  } else {
+    const L = 285, R = 475, y = 215;
+    const rA = k.a === 'H' ? 30 : 44, rB = k.b === 'H' ? 30 : 44;
+    if (k.type === 'ion') {
+      // 電子が完全に移動：陽イオンは小さく、陰イオンは大きく
+      g += ball(L, y, 30, '#fee2e2', '#dc2626', 'Na⁺', { size: 17, color: '#b91c1c' });
+      g += ball(R, y, 52, '#dbeafe', '#1d4ed8', 'Cl⁻', { size: 19, color: '#1e3a8a' });
+      g += arrow(L + 42, 150, R - 60, 150, ELC, 2.6);
+      g += electron(380, 150, 1);
+      g += halo('電子が完全に移る', 380, 126, { size: 13, fill: '#a16207' });
+      g += halo('静電気の引力', 380, 300, { size: 13, fill: INK2 });
+      g += `<path d="M${L + 32} ${y + 44} Q380 ${y + 78} ${R - 54} ${y + 44}" fill="none" stroke="${INK3}" stroke-width="2" stroke-dasharray="6 5"/>`;
+    } else {
+      // 共有：電子対を2個、共有位置を Δχ でずらす
+      const shift = k.type === 'polar' ? 34 : 0, mid = (L + R) / 2 + shift;
+      g += ball(L, y, rA, k.a === 'H' ? '#f8fafc' : '#dcfce7', k.a === 'H' ? '#94a3b8' : '#16a34a', k.a,
+        { size: 20, color: k.a === 'H' ? '#334155' : '#14532d' });
+      g += ball(R, y, rB, '#dcfce7', '#16a34a', k.b, { size: 20, color: '#14532d' });
+      g += `<line x1="${L + rA}" y1="${y}" x2="${R - rB}" y2="${y}" stroke="#94a3b8" stroke-width="4"/>`;
+      g += electron(mid, y - 13, 1.05); g += electron(mid, y + 13, 1.05);
+      g += halo('共有電子対', mid, y - 42, { size: 13, fill: '#a16207' });
+      if (k.type === 'polar') {
+        g += halo('δ＋', L, y - rA - 16, { size: 16, fill: POS });
+        g += halo('δ−', R, y - rB - 16, { size: 16, fill: NEG });
+        g += dipole(L, y + rA + 34, R, y + rB + 34, '#0f766e', 3);
+        g += halo('電子は Cl 側にかたよる', 380, y + 92, { size: 13, fill: '#0f766e' });
+      } else {
+        g += halo('まん中で共有＝かたよりなし', 380, y + rA + 52, { size: 13, fill: INK2 });
+      }
+    }
+  }
+  $('chart-kinds').innerHTML = g;
+  $('kd-name').textContent = k.name;
+  $('kd-eq').innerHTML = k.eq;
+  $('kd-atoms').textContent = k.type === 'metal' ? 'Na どうし' : `${k.a} と ${k.b}`;
+  $('kd-en').textContent = `${fmt(EN[k.a], 2)} / ${fmt(EN[k.b], 2)}`;
+  $('kd-dx').textContent = fmt(dx, 2);
+  $('kd-verdict').textContent = k.v;
+}
+function buildKdChips() {
+  $('kd-chips').innerHTML = KINDS.map((k, i) =>
+    `<button type="button" data-i="${i}" aria-pressed="${i === kdSel}">${k.name}</button>`).join('');
+  [...$('kd-chips').children].forEach(b => b.addEventListener('click', () => { kdSel = +b.dataset.i; buildKdChips(); drawKinds(); }));
+}
+
+/* ===== ② 結合の極性 ===== */
+const BONDS = [
+  ['H', 'H'], ['C', 'H'], ['C', 'Cl'], ['N', 'H'], ['H', 'Cl'], ['O', 'H'], ['H', 'F'], ['Na', 'Cl'],
+];
+let plSel = 4;
+
+function drawPolar() {
+  const [a, b] = BONDS[plSel];
+  const ea = EN[a], eb = EN[b], dx = Math.abs(ea - eb);
+  const richer = eb > ea ? b : a;            // 電子を引きよせる側
+  const L = 270, R = 490, y = 200;
+  const shift = Math.min(1, dx / 2.5) * 62 * (eb > ea ? 1 : -1);
+  const kind = dx < 0.4 ? '無極性の共有結合' : dx < 1.7 ? '極性のある共有結合' : 'イオン結合に近い';
+  let g = halo(`${a} — ${b}`, 380, 46, { size: 20, fill: '#173b75' });
+  // 電気陰性度のものさし
+  g += `<rect x="150" y="332" width="460" height="14" rx="7" fill="#eef2f7"/>`;
+  [[a, ea], [b, eb]].forEach(([s, e], i) => {
+    const px = 150 + (e - 0.8) / 3.4 * 460;
+    g += `<line x1="${px}" y1="326" x2="${px}" y2="352" stroke="${i ? NEG : POS}" stroke-width="3"/>`;
+    g += halo(`${s} ${fmt(e, 2)}`, px, 372, { size: 12, fill: i ? NEG : POS });
+  });
+  g += halo('電気陰性度', 380, 316, { size: 12, fill: INK3 });
+  // 原子と共有電子対
+  const rA = a === 'H' ? 30 : 42, rB = b === 'H' ? 30 : 42;
+  g += ball(L, y, rA, '#f1f5f9', '#94a3b8', a, { size: 19, color: '#334155' });
+  g += ball(R, y, rB, '#f1f5f9', '#94a3b8', b, { size: 19, color: '#334155' });
+  g += `<line x1="${L + rA}" y1="${y}" x2="${R - rB}" y2="${y}" stroke="#94a3b8" stroke-width="4"/>`;
+  const mid = (L + R) / 2 + shift;
+  g += electron(mid, y - 13, 1.05); g += electron(mid, y + 13, 1.05);
+  if (dx >= 0.4) {
+    g += halo(richer === a ? 'δ−' : 'δ＋', L, y - rA - 14, { size: 16, fill: richer === a ? NEG : POS });
+    g += halo(richer === b ? 'δ−' : 'δ＋', R, y - rB - 14, { size: 16, fill: richer === b ? NEG : POS });
+    const d0 = richer === b ? L : R, d1 = richer === b ? R : L;
+    g += dipole(d0, y + 72, d1, y + 72, '#0f766e', 2.6 + dx);
+    g += halo(`Δχ = ${fmt(dx, 2)}`, 380, y + 100, { size: 14, fill: '#0f766e' });
+  } else {
+    g += halo('かたよりなし（Δχ ≒ 0）', 380, y + 84, { size: 14, fill: INK2 });
+  }
+  $('chart-polar').innerHTML = g;
+  $('pl-bond').textContent = `${a} — ${b}`;
+  $('pl-en').textContent = `${fmt(ea, 2)} / ${fmt(eb, 2)}`;
+  $('pl-dx').textContent = fmt(dx, 2);
+  $('pl-kind').textContent = kind;
+  $('pl-verdict').textContent = dx < 0.4
+    ? '同じか近い電気陰性度なので、電子対はまん中にとどまる。'
+    : `電気陰性度の大きい ${richer} 側に電子対が引きよせられ、${richer} が δ−、相手が δ＋ になる。Δχ が大きいほどかたよりも大きい。`;
+}
+function buildPlChips() {
+  $('pl-chips').innerHTML = BONDS.map(([a, b], i) =>
+    `<button type="button" data-i="${i}" aria-pressed="${i === plSel}">${a}–${b}</button>`).join('');
+  [...$('pl-chips').children].forEach(b => b.addEventListener('click', () => { plSel = +b.dataset.i; buildPlChips(); drawPolar(); }));
+}
+
+/* ===== ③ 分子全体の極性 =====
+   各結合の双極子を2Dベクトルで持ち、合計が0かどうかで判定する */
+const MOLS = [
+  { f: 'CO₂', name: '二酸化炭素', shape: '直線形', c: 'C', out: 'O',
+    at: [[-1, 0], [1, 0]], polar: false },
+  { f: 'H₂O', name: '水', shape: '折れ線形', c: 'O', out: 'H',
+    at: [[-0.82, 0.57], [0.82, 0.57]], polar: true, inward: true },
+  { f: 'BF₃', name: '三フッ化ホウ素', shape: '平面三角形', c: 'B', out: 'F',
+    at: [[0, -1], [-0.866, 0.5], [0.866, 0.5]], polar: false },
+  { f: 'NH₃', name: 'アンモニア', shape: '三角錐形', c: 'N', out: 'H',
+    at: [[0, -0.55], [-0.87, 0.62], [0.87, 0.62]], polar: true, inward: true, pyramid: true },
+  { f: 'CCl₄', name: '四塩化炭素', shape: '正四面体形', c: 'C', out: 'Cl',
+    at: [[-0.85, -0.6], [0.85, -0.6], [-0.85, 0.6], [0.85, 0.6]], polar: false },
+  { f: 'CHCl₃', name: 'クロロホルム', shape: '正四面体形（1つだけH）', c: 'C', out: 'Cl',
+    at: [[0.85, -0.6], [-0.85, 0.6], [0.85, 0.6]], extraH: [-0.85, -0.6], polar: true },
+];
+let mlSel = 0, mlSum = true;
+
+function drawMol() {
+  const m = MOLS[mlSel], cx = 350, cy = 215, R = 118;
+  let g = halo(`${m.f}（${m.name}）`, 380, 44, { size: 18, fill: '#173b75' });
+  // 中心原子
+  const pts = m.at.map(([ux, uy]) => [cx + ux * R, cy + uy * R]);
+  pts.forEach(([x, y]) => { g += `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#94a3b8" stroke-width="5"/>`; });
+  if (m.extraH) {
+    const hx = cx + m.extraH[0] * R, hy = cy + m.extraH[1] * R;
+    g += `<line x1="${cx}" y1="${cy}" x2="${hx}" y2="${hy}" stroke="#94a3b8" stroke-width="5"/>`;
+    g += ball(hx, hy, 26, '#f8fafc', '#94a3b8', 'H', { size: 15, color: '#334155' });
+  }
+  pts.forEach(([x, y]) => { g += ball(x, y, 30, '#dcfce7', '#16a34a', m.out, { size: 15, color: '#14532d' }); });
+  g += ball(cx, cy, 36, '#fee2e2', '#dc2626', m.c, { size: 18, color: '#b91c1c' });
+  // 各結合の双極子矢印（電気陰性度の大きい側を向く）
+  let sx = 0, sy = 0;
+  const bondVecs = m.at.map(([ux, uy]) => {
+    const toOut = EN[m.out] > EN[m.c];              // 外側が電子を引く？
+    return [(toOut ? 1 : -1) * ux, (toOut ? 1 : -1) * uy];
+  });
+  bondVecs.forEach(v => { sx += v[0]; sy += v[1]; });
+  if (m.extraH) {  // C–H は C 側がわずかに δ−（EN: C 2.55 > H 2.20）
+    sx += -m.extraH[0] * 0.35; sy += -m.extraH[1] * 0.35;
+  }
+  m.at.forEach(([ux, uy], i) => {
+    const x0 = cx + ux * R * 0.42, y0 = cy + uy * R * 0.42;
+    const v = bondVecs[i], x1 = cx + (ux * 0.42 + v[0] * 0.5) * R, y1 = cy + (uy * 0.42 + v[1] * 0.5) * R;
+    g += dipole(x0, y0, x1, y1, '#0f766e', 3);
+  });
+  const mag = Math.hypot(sx, sy);
+  if (mlSum) {
+    if (mag > 0.05) {
+      g += arrow(cx, cy, cx + sx / mag * 150, cy + sy / mag * 150, HBC, 5);
+      g += halo('合計は残る＝極性分子', 600, 372, { size: 14, fill: HBC, anchor: 'end' });
+    } else {
+      g += ball(cx, cy, 46, 'none', HBC, '', { sw: 3 });
+      g += halo('合計は 0 ＝無極性分子', 600, 372, { size: 14, fill: INK2, anchor: 'end' });
+    }
+  }
+  g += halo(m.shape, 150, 372, { size: 14, fill: INK2 });
+  if (m.pyramid) g += halo('※ 実際は立体（三角錐）なので打ち消さない', 380, 400, { size: 11.5, fill: INK3 });
+  $('chart-mol').innerHTML = g;
+  $('ml-shape').textContent = m.shape;
+  $('ml-bond').textContent = 'あり';
+  $('ml-total').textContent = m.polar ? '極性分子' : '無極性分子';
+  $('ml-verdict').textContent = m.polar
+    ? `結合の極性が形のせいで打ち消されず、合計が残る。だから ${m.f} は極性分子。`
+    : `結合には極性があるが、${m.shape}なので矢印がぴったり打ち消し合う。だから ${m.f} は無極性分子。`;
+  $('ml-sum').textContent = `合計の矢印：${mlSum ? '表示' : '非表示'}`;
+}
+function buildMlChips() {
+  $('ml-chips').innerHTML = MOLS.map((m, i) =>
+    `<button type="button" data-i="${i}" aria-pressed="${i === mlSel}">${m.f}</button>`).join('');
+  [...$('ml-chips').children].forEach(b => b.addEventListener('click', () => { mlSel = +b.dataset.i; buildMlChips(); drawMol(); }));
+}
+
+/* ===== ④ 分子間力 ===== */
+const IMF = [
+  { f: 'CH₄', name: 'メタン', M: 16, polar: false, hb: false, bp: -161.5 },
+  { f: 'CO₂', name: '二酸化炭素', M: 44, polar: false, hb: false, bp: -78.5 },
+  { f: 'I₂', name: 'ヨウ素', M: 254, polar: false, hb: false, bp: 184.3 },
+  { f: 'HCl', name: '塩化水素', M: 36.5, polar: true, hb: false, bp: -85.0 },
+  { f: 'H₂S', name: '硫化水素', M: 34, polar: true, hb: false, bp: -59.6 },
+  { f: 'NH₃', name: 'アンモニア', M: 17, polar: true, hb: true, bp: -33.3 },
+  { f: 'H₂O', name: '水', M: 18, polar: true, hb: true, bp: 100.0 },
+];
+let ifSel = 6;
+
+function drawImf() {
+  const d = IMF[ifSel];
+  // 3つの力の強さ（めやす）：分散力は分子量、双極子は極性、水素結合は有無
+  const disp = Math.min(1, Math.log(d.M) / Math.log(254));
+  const dip = d.polar ? 0.5 : 0, hb = d.hb ? 0.95 : 0;
+  let g = halo(`${d.f}（${d.name}）が2つ近づくと`, 380, 40, { size: 16, fill: '#173b75' });
+  // 2分子を並べる
+  const draw2 = (cx, cy, flip) => {
+    let s = '';
+    if (d.f === 'H₂O' || d.f === 'H₂S') {
+      const c = d.f === 'H₂O' ? 'O' : 'S';
+      s += ball(cx, cy, 32, '#fee2e2', '#dc2626', c, { size: 16, color: '#b91c1c' });
+      [[-0.9, 0.6], [0.9, 0.6]].forEach(([ux, uy]) => {
+        const x = cx + ux * 52, y = cy + uy * 52 * (flip ? -1 : 1);
+        s += `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#94a3b8" stroke-width="4"/>`;
+        s += ball(x, y, 21, '#f8fafc', '#94a3b8', 'H', { size: 13, color: '#334155' });
+      });
+    } else if (d.f === 'NH₃') {
+      s += ball(cx, cy, 32, '#dbeafe', '#2563eb', 'N', { size: 16, color: '#1e40af' });
+      [[-0.95, 0.55], [0.95, 0.55], [0, 0.95]].forEach(([ux, uy]) => {
+        const x = cx + ux * 50, y = cy + uy * 50 * (flip ? -1 : 1);
+        s += `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#94a3b8" stroke-width="4"/>`;
+        s += ball(x, y, 19, '#f8fafc', '#94a3b8', 'H', { size: 12, color: '#334155' });
+      });
+    } else if (d.f === 'HCl') {
+      s += ball(cx - 26, cy, 20, '#f8fafc', '#94a3b8', 'H', { size: 13, color: '#334155' });
+      s += `<line x1="${cx - 26}" y1="${cy}" x2="${cx + 22}" y2="${cy}" stroke="#94a3b8" stroke-width="4"/>`;
+      s += ball(cx + 26, cy, 32, '#dcfce7', '#16a34a', 'Cl', { size: 15, color: '#14532d' });
+      s += halo('δ＋', cx - 26, cy - 34, { size: 12, fill: POS });
+      s += halo('δ−', cx + 26, cy - 44, { size: 12, fill: NEG });
+    } else {
+      s += ball(cx, cy, 40, '#e2e8f0', '#64748b', d.f, { size: 17, color: '#334155' });
+    }
+    return s;
+  };
+  g += draw2(230, 210, false) + draw2(530, 210, true);
+  // 分子間にはたらく力
+  if (d.hb) {
+    g += `<line x1="300" y1="240" x2="470" y2="240" stroke="${HBC}" stroke-width="3.4" stroke-dasharray="8 6"/>`;
+    g += halo('水素結合（強い）', 380, 226, { size: 13.5, fill: HBC });
+  } else if (d.polar) {
+    g += `<line x1="300" y1="215" x2="470" y2="215" stroke="#0f766e" stroke-width="2.6" stroke-dasharray="6 5"/>`;
+    g += halo('双極子間力', 380, 202, { size: 13, fill: '#0f766e' });
+  } else {
+    g += `<line x1="300" y1="215" x2="470" y2="215" stroke="${INK3}" stroke-width="2" stroke-dasharray="3 5"/>`;
+    g += halo('分散力だけ', 380, 202, { size: 13, fill: INK2 });
+  }
+  // 強さのバー
+  const bars = [['分散力', disp, INK3], ['双極子間力', dip, '#0f766e'], ['水素結合', hb, HBC]];
+  bars.forEach(([lab, v, col], i) => {
+    const y = 320 + i * 32;
+    g += halo(lab, 210, y + 5, { size: 12, fill: INK2, anchor: 'end' });
+    g += `<rect x="220" y="${y - 9}" width="330" height="18" rx="9" fill="#eef2f7"/>`;
+    if (v > 0) g += `<rect x="220" y="${y - 9}" width="${330 * v}" height="18" rx="9" fill="${col}" opacity=".85"/>`;
+    else g += halo('はたらかない', 240, y + 5, { size: 11, fill: INK3, anchor: 'start' });
+  });
+  $('chart-imf').innerHTML = g;
+  $('if-m').textContent = d.M;
+  $('if-pol').textContent = d.polar ? '極性分子' : '無極性分子';
+  $('if-hb').textContent = d.hb ? 'あり（H が O・N につく）' : 'なし';
+  $('if-bp').textContent = fmt(d.bp, 1) + ' ℃';
+  $('if-verdict').textContent = d.hb
+    ? `${d.f} は H が ${d.f === 'NH₃' ? 'N' : 'O'} についているので水素結合ができる。同じくらいの分子量の分子より沸点がずっと高い。`
+    : d.polar ? `極性があるので双極子間力もはたらく。ただし水素結合ほど強くはない。`
+      : `無極性なので分散力だけ。分子量が大きいほど分散力は強く、${d.f} の沸点は ${fmt(d.bp, 1)} ℃。`;
+}
+function buildIfChips() {
+  $('if-chips').innerHTML = IMF.map((d, i) =>
+    `<button type="button" data-i="${i}" aria-pressed="${i === ifSel}">${d.f}</button>`).join('');
+  [...$('if-chips').children].forEach(b => b.addEventListener('click', () => { ifSel = +b.dataset.i; buildIfChips(); drawImf(); }));
+}
+
+/* ===== ⑤ 沸点を比べる ===== */
+const HYDRIDE = [
+  { g: '14族', color: '#64748b', hb: false, d: [['CH₄', 16, -161.5], ['SiH₄', 32, -111.9], ['GeH₄', 77, -88.1], ['SnH₄', 123, -52.0]] },
+  { g: '15族', color: '#0f766e', hb: true, d: [['NH₃', 17, -33.3], ['PH₃', 34, -87.7], ['AsH₃', 78, -62.5], ['SbH₃', 125, -18.4]] },
+  { g: '16族', color: '#dc2626', hb: true, d: [['H₂O', 18, 100.0], ['H₂S', 34, -59.6], ['H₂Se', 81, -41.3], ['H₂Te', 130, -2.0]] },
+  { g: '17族', color: '#7c3aed', hb: true, d: [['HF', 20, 19.5], ['HCl', 36.5, -85.0], ['HBr', 81, -66.7], ['HI', 128, -35.4]] },
+];
+const ORGANIC = [
+  { f: 'エタン', sub: 'C₂H₆', M: 30, bp: -88.6, hb: false },
+  { f: 'プロパン', sub: 'C₃H₈', M: 44, bp: -42.1, hb: false },
+  { f: 'ジメチルエーテル', sub: 'C₂H₆O', M: 46, bp: -24.8, hb: false },
+  { f: 'エタノール', sub: 'C₂H₆O', M: 46, bp: 78.4, hb: true },
+];
+let bpKind = 'hydride', bpMark = true;
+
+function drawBp() {
+  // X1 は族ラベル（右端に置く）のぶんを残して 760 に収める
+  const X0 = 92, X1 = bpKind === 'hydride' ? 676 : 720, Y0 = 356, Y1 = 56;
+  let g = '';
+  if (bpKind === 'hydride') {
+    const yMin = -180, yMax = 120;
+    const sy = v => Y0 - (v - yMin) / (yMax - yMin) * (Y0 - Y1);
+    const sx = i => X0 + i * (X1 - X0) / 3;
+    // 目盛
+    for (let v = -150; v <= 100; v += 50) {
+      g += `<line x1="${X0}" y1="${sy(v)}" x2="${X1}" y2="${sy(v)}" stroke="${v === 0 ? '#c8d6e6' : '#eef2f7'}" stroke-width="${v === 0 ? 1.6 : 1}"/>`;
+      g += halo(v, X0 - 12, sy(v) + 4, { size: 11.5, fill: INK3, anchor: 'end', sw: 0 });
+    }
+    ['2', '3', '4', '5'].forEach((p, i) => { g += halo('第' + p + '周期', sx(i), Y0 + 26, { size: 12, fill: INK3 }); });
+    g += halo('沸点 [℃]', 30, 34, { size: 12, fill: INK2, anchor: 'start' });
+    HYDRIDE.forEach(series => {
+      const pts = series.d.map((d, i) => [sx(i), sy(d[2])]);
+      g += `<path d="${pts.map((p, i) => (i ? 'L' : 'M') + p[0] + ' ' + p[1]).join(' ')}" fill="none"
+        stroke="${series.color}" stroke-width="2.8" stroke-linejoin="round" stroke-linecap="round"/>`;
+      series.d.forEach((d, i) => {
+        const anom = bpMark && series.hb && i === 0;
+        g += ball(pts[i][0], pts[i][1], anom ? 9 : 6, series.color, '#fff', '', { sw: anom ? 3 : 2 });
+        g += halo(d[0], pts[i][0], pts[i][1] - (i === 0 ? 20 : 16), { size: 11.5, fill: series.color, sw: 3 });
+      });
+      g += halo(series.g, pts[3][0] + 26, pts[3][1] + 4, { size: 12.5, fill: series.color, anchor: 'start' });
+    });
+    if (bpMark) {
+      // 14族の傾きを第2周期まで伸ばした「予想」
+      const s14 = HYDRIDE[0].d;
+      g += halo('14族だけ規則的（分子量が大きいほど高い）', 380, Y1 - 22, { size: 12.5, fill: INK2 });
+      [[1, 'NH₃'], [2, 'H₂O'], [3, 'HF']].forEach(([k]) => {
+        const s = HYDRIDE[k], x = sx(0), y = sy(s.d[0][2]), y2 = sy(s.d[1][2]);
+        g += `<line x1="${x}" y1="${y2}" x2="${x}" y2="${y + 12}" stroke="${s.color}" stroke-width="1.6" stroke-dasharray="4 4"/>`;
+      });
+      g += halo('この3つだけ跳ね上がる＝水素結合', 250, 96, { size: 13, fill: HBC });
+    }
+  } else {
+    // 棒グラフ（有機化合物）
+    const yMin = -110, yMax = 100;
+    const sy = v => Y0 - (v - yMin) / (yMax - yMin) * (Y0 - Y1);
+    for (let v = -100; v <= 100; v += 50) {
+      g += `<line x1="${X0}" y1="${sy(v)}" x2="${X1}" y2="${sy(v)}" stroke="${v === 0 ? '#c8d6e6' : '#eef2f7'}" stroke-width="${v === 0 ? 1.6 : 1}"/>`;
+      g += halo(v, X0 - 12, sy(v) + 4, { size: 11.5, fill: INK3, anchor: 'end', sw: 0 });
+    }
+    g += halo('沸点 [℃]', 30, 34, { size: 12, fill: INK2, anchor: 'start' });
+    const w = 96, gap = (X1 - X0 - w * 4) / 5;
+    ORGANIC.forEach((d, i) => {
+      const x = X0 + gap + i * (w + gap), y = sy(d.bp), y0 = sy(0);
+      const col = d.hb ? HBC : '#64748b';
+      g += `<rect x="${x}" y="${Math.min(y, y0)}" width="${w}" height="${Math.abs(y0 - y)}" rx="6" fill="${col}" opacity="${d.hb ? .9 : .55}"/>`;
+      g += halo(fmt(d.bp, 1) + '℃', x + w / 2, y + (d.bp >= 0 ? -12 : 20), { size: 12.5, fill: col });
+      g += halo(d.f, x + w / 2, Y0 + 26, { size: 12, fill: INK2 });
+      g += halo(`${d.sub}・M=${d.M}`, x + w / 2, Y0 + 44, { size: 11, fill: INK3 });
+      if (bpMark && d.hb) g += halo('水素結合あり', x + w / 2, sy(d.bp) - 34, { size: 12, fill: HBC });
+    });
+    if (bpMark) {
+      const x3 = X0 + gap + 2 * (w + gap) + w / 2, x4 = X0 + gap + 3 * (w + gap) + w / 2;
+      g += `<path d="M${x3} 88 H${x4}" stroke="${HBC}" stroke-width="2" stroke-dasharray="6 5"/>`;
+      g += halo('同じ C₂H₆O・同じ分子量なのに 103 ℃ の差', (x3 + x4) / 2, 78, { size: 13, fill: HBC });
+    }
+  }
+  $('chart-bp').innerHTML = g;
+  const hyd = bpKind === 'hydride';
+  $('bp-title').textContent = hyd ? '水素化物の沸点' : '有機化合物の沸点';
+  $('bp-eq').innerHTML = hyd
+    ? '分子量が大きい → 分散力が強い → 沸点が高い<br><span class="h">ただし NH₃・H₂O・HF だけ例外</span>'
+    : '<span class="h">－O－H</span> をもつと水素結合ができる<br>分子量が同じでも沸点は大きく変わる';
+  $('bp-verdict').textContent = hyd
+    ? '14族は分子量の順にきれいに並ぶ。ところが15・16・17族は第2周期（NH₃・H₂O・HF）だけ跳ね上がる。分子量では説明できないこのズレが、水素結合がある証拠になる。'
+    : 'ジメチルエーテルとエタノールは分子式も分子量も同じ C₂H₆O。ちがいは －O－H をもつかどうかだけで、沸点は 103 ℃ も変わる。';
+  $('bp-note').textContent = hyd
+    ? 'H₂O の沸点は、16族の傾きから予想すると −70 ℃ くらいになるはず。実際は 100 ℃ で、170 ℃ ほど高い。'
+    : 'エタンとプロパンのように水素結合をもたない分子どうしなら、分子量が大きいほうが沸点は高い（分散力）。';
+  $('bp-mark').textContent = `水素結合の印：${bpMark ? '表示' : '非表示'}`;
+}
+
+/* ===== 配線 ===== */
+const DRAW = { kinds: drawKinds, polar: drawPolar, mol: drawMol, imf: drawImf, bp: drawBp };
+const redrawAll = () => Object.values(DRAW).forEach(fn => fn());
+
+ChemUI.tabs({ onChange: key => DRAW[key]() });
+ChemUI.fullscreen({ onChange: redrawAll });
+
+buildKdChips(); buildPlChips(); buildMlChips(); buildIfChips();
+$('ml-sum').addEventListener('click', () => { mlSum = !mlSum; drawMol(); });
+[...$('bp-kind').children].forEach(b => b.addEventListener('click', () => {
+  bpKind = b.dataset.kind;
+  [...$('bp-kind').children].forEach(x => x.setAttribute('aria-pressed', x === b));
+  drawBp();
+}));
+$('bp-mark').addEventListener('click', () => { bpMark = !bpMark; drawBp(); });
+
+redrawAll();
+</script>
+<script src="site-shell.js"></script>
+</body>
+</html>
