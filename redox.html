@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>酸化還元と電池・電気分解</title>
+<meta name="description" content="酸化数の数え方、電子の受け渡し、酸化還元滴定、イオン化傾向、ダニエル電池、実用電池、電気分解、ファラデーの法則を粒子モデルで1段階ずつ確かめる授業用教材。">
+<meta name="theme-color" content="#2563eb">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="ui.css">
+<link rel="stylesheet" href="print.css" media="print">
+<style>
+  :root{
+    --blue:var(--t-blue); --deep:var(--t-blue-deep); --ink:var(--t-ink); --ink2:var(--t-ink2);
+    --ink3:var(--t-ink3); --bg:var(--t-bg); --card:var(--t-card); --line:var(--t-line);
+    --accent:var(--t-accent); --grid:var(--t-grid); --axis:var(--t-axis);
+    --shadow:var(--t-shadow); --shadow-sm:var(--t-shadow-sm);
+    /* この教材の役割色：酸化＝赤、還元＝青、電子＝黄 */
+    --ox:var(--t-red); --red:#1d4ed8; --elec:#eab308;
+  }
+  .layout{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(290px,.9fr);gap:14px;align-items:start}
+  .chart-card{position:relative;min-width:0;padding:10px 14px 14px;overflow:hidden;border-top:4px solid var(--t-cyan)}
+  .chart-card svg{display:block;width:100%;height:auto}
+  .card h2{margin:0 0 9px;color:var(--deep);font-size:13px;font-weight:850;letter-spacing:.01em}
+  .btn{padding:7px 12px;border:1px solid var(--t-line-strong);border-radius:10px;background:var(--card);color:var(--ink2);font-size:11.5px;font-weight:850;cursor:pointer}
+  .btn:hover{color:var(--blue);border-color:var(--t-blue-hover)}
+  .btn.primary{border-color:var(--t-blue-hover);background:var(--t-blue-tint);color:var(--blue)}
+  .btn:disabled{opacity:.45;cursor:default;color:var(--ink3);border-color:var(--line)}
+  .ctrl{margin-bottom:9px}
+  .eqline{font-size:14px;font-weight:850;color:var(--deep);line-height:1.9;letter-spacing:.01em}
+  .eqline .ox{color:var(--ox)}
+  .eqline .rd{color:var(--red)}
+  .eqline small{font-size:11px;font-weight:800;color:var(--ink3);margin-left:6px}
+  .pill{display:inline-block;margin:0 3px 4px 0;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:850;border:1px solid}
+  .pill.ox{border-color:#fecaca;background:#fef2f2;color:#b91c1c}
+  .pill.rd{border-color:#c7d7fb;background:#eff4ff;color:#1d4ed8}
+  .pill.el{border-color:#fde68a;background:#fffbeb;color:#a16207}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chips button{padding:6px 10px;border:1px solid var(--t-line-strong);border-radius:9px;background:var(--card);color:var(--ink2);font-size:11.5px;font-weight:850;cursor:pointer}
+  .chips button[aria-pressed="true"]{border-color:var(--t-blue-hover);background:var(--t-blue-tint);color:var(--blue)}
+  .note{margin:9px 0 0;color:var(--ink3);font-size:11.5px;line-height:1.65}
+  @media(max-width:1000px){
+    .layout{grid-template-columns:1fr}
+    body.is-fullscreen{height:auto;overflow:auto;display:block}
+    body.is-fullscreen .layout{grid-template-columns:1fr}
+  }
+</style>
+<link rel="stylesheet" href="site-shell.css">
+</head>
+<body>
+<header>
+  <div class="header-row">
+    <div class="title-block">
+      <a class="back-link" href="index.html">← 一覧に戻る</a>
+      <h1>酸化還元と電池・電気分解</h1>
+    </div>
+    <button class="outline-btn site-fullscreen-btn" id="fullscreenBtn" type="button" aria-label="全画面表示"><span class="site-fullscreen-icon" aria-hidden="true">⛶</span><span class="btn-text">全画面表示</span></button>
+  </div>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="学習テーマ">
+    <button type="button" role="tab" aria-selected="true"  data-tab="oxnum">① 酸化数を数える</button>
+    <button type="button" role="tab" aria-selected="false" data-tab="half">② 電子の受け渡し</button>
+    <button type="button" role="tab" aria-selected="false" data-tab="titr">③ 酸化還元滴定</button>
+    <button type="button" role="tab" aria-selected="false" data-tab="ion">④ イオン化傾向</button>
+    <button type="button" role="tab" aria-selected="false" data-tab="cell">⑤ ダニエル電池</button>
+    <button type="button" role="tab" aria-selected="false" data-tab="battery">⑥ 実用電池</button>
+    <button type="button" role="tab" aria-selected="false" data-tab="elys">⑦ 電気分解</button>
+    <button type="button" role="tab" aria-selected="false" data-tab="faraday">⑧ ファラデーの法則</button>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ① 酸化数を数える -->
+  <section class="panel active" id="panel-oxnum">
+    <div class="panel-tools">
+      <button class="btn primary" id="ox-step" type="button">1つずつ確かめる</button>
+      <button class="btn" id="ox-all" type="button">全部出す</button>
+      <button class="btn" id="ox-reset" type="button">最初から</button>
+    </div>
+    <div class="layout">
+      <div class="chart-card" data-label="OXIDATION NUMBER">
+        <svg id="chart-oxnum" viewBox="0 0 760 420" role="img" aria-label="化学式の各原子の酸化数と、その合計"></svg>
+      </div>
+      <div class="side">
+        <div class="card law">
+          <h2>数え方の決まり</h2>
+          <div class="eqline" style="font-size:12.5px">
+            単体の原子＝<b>0</b><br>
+            化合物の H＝<b>+1</b>／O＝<b>−2</b><br>
+            合計＝その粒子の電荷
+          </div>
+        </div>
+        <div class="card">
+          <h2>物質を選ぶ</h2>
+          <div class="chips" id="ox-chips"></div>
+          <div class="readout" style="margin-top:10px">
+            <span class="k">合計</span><span class="v" id="ox-sum">—</span>
+            <span class="k">この粒子の電荷</span><span class="v" id="ox-charge">—</span>
+          </div>
+          <p class="verdict" id="ox-verdict"></p>
+        </div>
+        <div class="card print-only" hidden>
+          <h2>考えてみよう</h2>
+          <p>K₂Cr₂O₇ の Cr の酸化数を、上の決まりから求めなさい。</p>
+          <span class="write-line"></span><span class="write-line"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ② 電子の受け渡し -->
+  <section class="panel" id="panel-half">
+    <div class="panel-tools">
+      <button class="btn primary" id="hf-next" type="button">1段階すすめる</button>
+      <button class="btn" id="hf-reset" type="button">最初から</button>
+    </div>
+    <div class="layout">
+      <div class="chart-card" data-label="PARTICLE MODEL">
+        <svg id="chart-half" viewBox="0 0 760 420" role="img" aria-label="銅と銀イオンのあいだで電子が移動するようす"></svg>
+      </div>
+      <div class="side">
+        <div class="card law">
+          <h2>半反応式</h2>
+          <div class="eqline">
+            <span class="ox">Cu → Cu²⁺ + 2e⁻</span><small>酸化</small><br>
+            <span class="rd">Ag⁺ + e⁻ → Ag</span><small>還元（×2）</small>
+          </div>
+          <div class="eqline" style="margin-top:6px;padding-top:6px;border-top:1px solid var(--line)">
+            Cu + 2Ag⁺ → Cu²⁺ + 2Ag
+          </div>
+        </div>
+        <div class="card">
+          <h2>いま起きていること</h2>
+          <div class="readout">
+            <span class="k">段階</span><span class="v" id="hf-stage">—</span>
+            <span class="k">Cu の酸化数</span><span class="v" id="hf-cu">0</span>
+            <span class="k">Ag の酸化数</span><span class="v" id="hf-ag">+1</span>
+          </div>
+          <p class="verdict" id="hf-verdict"></p>
+          <p class="note">出した電子の数と受け取った電子の数は必ず等しい。だから Ag⁺ は 2 個必要になる。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ③ 酸化還元滴定 -->
+  <section class="panel" id="panel-titr">
+    <div class="panel-tools">
+      <button class="btn primary" id="tt-drop" type="button">1滴</button>
+      <button class="btn" id="tt-ten" type="button">10滴</button>
+      <button class="btn" id="tt-end" type="button">終点まで</button>
+      <button class="btn" id="tt-reset" type="button">最初から</button>
+    </div>
+    <div class="layout">
+      <div class="chart-card" data-label="TITRATION">
+        <svg id="chart-titr" viewBox="0 0 760 420" role="img" aria-label="過マンガン酸カリウム水溶液による滴定のようす"></svg>
+      </div>
+      <div class="side">
+        <div class="card law">
+          <h2>反応</h2>
+          <div class="eqline" style="font-size:12px">
+            <span class="rd">MnO₄⁻ + 8H⁺ + 5e⁻ → Mn²⁺ + 4H₂O</span><br>
+            <span class="ox">H₂O₂ → O₂ + 2H⁺ + 2e⁻</span>
+          </div>
+          <div class="eqline" style="font-size:12px;margin-top:6px;padding-top:6px;border-top:1px solid var(--line)">
+            2MnO₄⁻ + 5H₂O₂ + 6H⁺<br>→ 2Mn²⁺ + 5O₂ + 8H₂O
+          </div>
+        </div>
+        <div class="card">
+          <h2>条件</h2>
+          <div class="ctrl">
+            <label>H₂O₂ の濃度 <span class="val" data-for="tt-conc"></span></label>
+            <!-- 終点が 25 mL ビュレットに収まる範囲（終点 = 濃度 × 200 mL）に制限 -->
+            <input type="range" id="tt-conc" min="0.020" max="0.110" step="0.005" value="0.080" data-unit="mol/L">
+          </div>
+          <div class="readout">
+            <span class="k">滴下量</span><span class="v" id="tt-vol">0.0 mL</span>
+            <span class="k">終点</span><span class="v" id="tt-eq">—</span>
+            <span class="k">流れた電子</span><span class="v" id="tt-e">—</span>
+          </div>
+          <p class="verdict" id="tt-verdict"></p>
+          <p class="note">KMnO₄ 0.0200 mol/L を、H₂O₂ 10.0 mL に滴下する。指示薬は要らない（MnO₄⁻ 自身の赤紫が残ることで終点がわかる）。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ④ イオン化傾向 -->
+  <section class="panel" id="panel-ion">
+    <div class="panel-tools">
+      <button class="btn primary" id="io-run" type="button">入れてみる</button>
+      <button class="btn" id="io-reset" type="button">最初から</button>
+    </div>
+    <div class="layout">
+      <div class="chart-card" data-label="IONIZATION TENDENCY">
+        <svg id="chart-ion" viewBox="0 0 760 420" role="img" aria-label="金属を別の金属イオンの水溶液に入れたときのようす"></svg>
+      </div>
+      <div class="side">
+        <div class="card law">
+          <h2>イオン化傾向</h2>
+          <div class="eqline" style="font-size:12.5px">大 ← Mg Zn Fe Pb Cu Ag → 小</div>
+          <p class="note" style="margin-top:4px">左のものほど陽イオンになりやすい＝溶けやすい。</p>
+        </div>
+        <div class="card">
+          <h2>組み合わせ</h2>
+          <div class="ctrl">
+            <label style="font-size:11.5px;color:var(--ink3);font-weight:800">入れる金属板</label>
+            <div class="chips" id="io-metal"></div>
+          </div>
+          <div class="ctrl">
+            <label style="font-size:11.5px;color:var(--ink3);font-weight:800">水溶液のイオン</label>
+            <div class="chips" id="io-sol"></div>
+          </div>
+          <div class="readout">
+            <span class="k">起電力のめやす</span><span class="v" id="io-emf">—</span>
+          </div>
+          <p class="verdict" id="io-verdict"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑤ ダニエル電池 -->
+  <section class="panel" id="panel-cell">
+    <div class="panel-tools">
+      <button class="btn primary" id="dn-next" type="button">1段階すすめる</button>
+      <button class="btn" id="dn-run" type="button">続けて動かす</button>
+      <button class="btn" id="dn-reset" type="button">最初から</button>
+    </div>
+    <div class="layout">
+      <div class="chart-card" data-label="DANIELL CELL">
+        <svg id="chart-cell" viewBox="0 0 760 420" role="img" aria-label="ダニエル電池で電子とイオンが動くようす"></svg>
+      </div>
+      <div class="side">
+        <div class="card law">
+          <h2>両極で起きること</h2>
+          <div class="eqline" style="font-size:12.5px">
+            <span class="ox">負極 Zn → Zn²⁺ + 2e⁻</span><small>酸化</small><br>
+            <span class="rd">正極 Cu²⁺ + 2e⁻ → Cu</span><small>還元</small>
+          </div>
+        </div>
+        <div class="card">
+          <h2>いま起きていること</h2>
+          <div class="readout">
+            <span class="k">段階</span><span class="v" id="dn-stage">—</span>
+            <span class="k">Zn 板</span><span class="v" id="dn-zn">0 mmol</span>
+            <span class="k">Cu 板</span><span class="v" id="dn-cu">0 mmol</span>
+            <span class="k">起電力</span><span class="v">約 1.10 V</span>
+          </div>
+          <p class="verdict" id="dn-verdict"></p>
+          <p class="note">塩橋がないと、溶液の電気的なかたよりが大きくなって電子が流れ続けられない。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑥ 実用電池 -->
+  <section class="panel" id="panel-battery">
+    <div class="panel-tools">
+      <div class="switch" id="bt-kind" role="group" aria-label="電池の種類">
+        <button type="button" data-kind="lead" aria-pressed="true">鉛蓄電池</button>
+        <button type="button" data-kind="fuel" aria-pressed="false">燃料電池</button>
+      </div>
+      <button class="btn" id="bt-dir" type="button">放電 ⇄ 充電</button>
+    </div>
+    <div class="layout">
+      <div class="chart-card" data-label="PRACTICAL CELL">
+        <svg id="chart-battery" viewBox="0 0 760 420" role="img" aria-label="鉛蓄電池と燃料電池のしくみ"></svg>
+      </div>
+      <div class="side">
+        <div class="card law">
+          <h2 id="bt-title">鉛蓄電池</h2>
+          <div class="eqline" id="bt-eq" style="font-size:12px"></div>
+        </div>
+        <div class="card">
+          <h2>特徴</h2>
+          <div class="readout" id="bt-read"></div>
+          <p class="verdict" id="bt-verdict"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑦ 電気分解 -->
+  <section class="panel" id="panel-elys">
+    <div class="panel-tools">
+      <div class="switch" id="el-kind" role="group" aria-label="電解液の種類">
+        <button type="button" data-kind="cucl2" aria-pressed="true">塩化銅(II)水溶液</button>
+        <button type="button" data-kind="water" aria-pressed="false">水（希硫酸）</button>
+        <button type="button" data-kind="nacl" aria-pressed="false">塩化ナトリウム水溶液</button>
+      </div>
+      <button class="btn primary" id="el-run" type="button">電流を流す</button>
+      <button class="btn" id="el-reset" type="button">止める</button>
+    </div>
+    <div class="layout">
+      <div class="chart-card" data-label="ELECTROLYSIS">
+        <svg id="chart-elys" viewBox="0 0 760 420" role="img" aria-label="電気分解で各電極に起きる変化"></svg>
+      </div>
+      <div class="side">
+        <div class="card law">
+          <h2>両極で起きること</h2>
+          <div class="eqline" id="el-eq" style="font-size:12px"></div>
+        </div>
+        <div class="card">
+          <h2>電池とのちがい</h2>
+          <p class="verdict" id="el-verdict"></p>
+          <p class="note">電池は自分から進む反応で電子を押し出す。電気分解は電源が電子を<b>押し込んで</b>、進まないはずの反応を起こす。どちらも<b>陽極＝酸化・陰極＝還元</b>。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑧ ファラデーの法則 -->
+  <section class="panel" id="panel-faraday">
+    <div class="panel-tools">
+      <div class="switch" id="fd-kind" role="group" aria-label="析出させるもの">
+        <button type="button" data-kind="cu" aria-pressed="true">銅 Cu</button>
+        <button type="button" data-kind="ag" aria-pressed="false">銀 Ag</button>
+        <button type="button" data-kind="h2" aria-pressed="false">水素 H₂</button>
+      </div>
+    </div>
+    <div class="layout">
+      <div class="chart-card" data-label="FARADAY'S LAW">
+        <svg id="chart-faraday" viewBox="0 0 760 420" role="img" aria-label="電気量と析出量の関係"></svg>
+      </div>
+      <div class="side">
+        <div class="card law">
+          <h2>流れをたどる</h2>
+          <div class="eqline" style="font-size:12.5px">
+            Q = I t → n(e⁻) = Q / F<br>
+            → 物質量 = n(e⁻) ÷ 価数
+          </div>
+          <p class="note" style="margin-top:4px">F = 96500 C/mol（電子1 mol がもつ電気量）</p>
+        </div>
+        <div class="card">
+          <h2>条件</h2>
+          <div class="ctrl">
+            <label>電流 <span class="val" data-for="fd-i"></span></label>
+            <input type="range" id="fd-i" min="0.5" max="5" step="0.1" value="2" data-unit="A">
+          </div>
+          <div class="ctrl">
+            <label>時間 <span class="val" data-for="fd-t"></span></label>
+            <!-- step=10 にして 1930 秒（= 電子 0.0400 mol）のようなキリのいい値を作れるようにする -->
+            <input type="range" id="fd-t" min="60" max="3600" step="10" value="1930" data-unit="秒">
+          </div>
+          <div class="readout">
+            <span class="k">電気量 Q</span><span class="v" id="fd-q">—</span>
+            <span class="k">電子 n(e⁻)</span><span class="v" id="fd-ne">—</span>
+            <span class="k">物質量</span><span class="v" id="fd-mol">—</span>
+            <span class="k" id="fd-amt-k">質量</span><span class="v" id="fd-amt">—</span>
+          </div>
+          <p class="verdict" id="fd-verdict"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>大阪女学院中学校・高等学校　Yuto Yamaguchi</footer>
+
+<script src="ui.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const fmt = (x, d) => x.toFixed(d);
+
+/* ===== 共通の描画部品 ===== */
+const INK = '#172033', INK2 = '#526078', INK3 = '#8290a5', LINE = '#d8e1ed';
+const OXC = '#dc2626', RDC = '#1d4ed8', ELC = '#eab308';
+
+function halo(t, x, y, o = {}) {
+  return `<text x="${x}" y="${y}" text-anchor="${o.anchor || 'middle'}" font-size="${o.size || 13}"
+    font-weight="${o.weight || 850}" fill="${o.fill || INK}" stroke="#fff" stroke-width="${o.sw || 3.5}"
+    paint-order="stroke fill">${t}</text>`;
+}
+function ball(x, y, r, fill, stroke, label, o = {}) {
+  const g = `<circle cx="${x}" cy="${y}" r="${r}" fill="${fill}" stroke="${stroke}" stroke-width="${o.sw || 1.6}"/>`;
+  if (!label) return g;
+  return g + `<text x="${x}" y="${y + (o.dy ?? r * 0.34)}" text-anchor="middle" font-size="${o.size || r * 0.85}"
+    font-weight="850" fill="${o.color || '#fff'}">${label}</text>`;
+}
+// 電子（黄色い小球）
+function electron(x, y, s = 1) {
+  return ball(x, y, 8 * s, '#fde047', '#a16207', '−', { size: 11 * s, color: '#713f12', dy: 3.6 * s, sw: 1.4 });
+}
+function arrow(x1, y1, x2, y2, color, w = 2.6) {
+  const dx = x2 - x1, dy = y2 - y1, L = Math.hypot(dx, dy) || 1, ux = dx / L, uy = dy / L;
+  const hx = x2 - ux * 9, hy = y2 - uy * 9, nx = -uy, ny = ux;
+  return `<line x1="${x1}" y1="${y1}" x2="${hx}" y2="${hy}" stroke="${color}" stroke-width="${w}" stroke-linecap="round"/>
+    <polygon points="${x2},${y2} ${hx + nx * 5},${hy + ny * 5} ${hx - nx * 5},${hy - ny * 5}" fill="${color}"/>`;
+}
+function beaker(x, y, w, h, liquid, level = 0.72) {
+  const ly = y + h * (1 - level);
+  return `<rect x="${x}" y="${ly}" width="${w}" height="${h * level}" rx="3" fill="${liquid}"/>
+    <path d="M${x} ${y} V${y + h} H${x + w} V${y}" fill="none" stroke="#7c93ad" stroke-width="3" stroke-linejoin="round"/>`;
+}
+const sup = n => (n > 0 ? '+' : '−') + (Math.abs(n) === 1 ? '' : Math.abs(n));
+
+/* ===== ① 酸化数 ===== */
+const SPECIES = [
+  { f: '水 H₂O', parts: [['H', 2], ['O', 1]], ox: { H: 1, O: -2 }, q: 0 },
+  { f: 'アンモニア NH₃', parts: [['N', 1], ['H', 3]], ox: { N: -3, H: 1 }, q: 0 },
+  { f: '硫酸 H₂SO₄', parts: [['H', 2], ['S', 1], ['O', 4]], ox: { H: 1, S: 6, O: -2 }, q: 0 },
+  { f: '過マンガン酸イオン MnO₄⁻', parts: [['Mn', 1], ['O', 4]], ox: { Mn: 7, O: -2 }, q: -1 },
+  { f: '二クロム酸イオン Cr₂O₇²⁻', parts: [['Cr', 2], ['O', 7]], ox: { Cr: 6, O: -2 }, q: -2 },
+  { f: '硝酸 HNO₃', parts: [['H', 1], ['N', 1], ['O', 3]], ox: { H: 1, N: 5, O: -2 }, q: 0 },
+  { f: '過酸化水素 H₂O₂', parts: [['H', 2], ['O', 2]], ox: { H: 1, O: -1 }, q: 0, note: 'O が −1 の例外' },
+];
+let oxSel = 0, oxStep = 0;
+
+function drawOxnum() {
+  const s = SPECIES[oxSel], n = s.parts.length;
+  const shown = Math.min(oxStep, n);
+  let g = halo(s.f, 380, 52, { size: 17, fill: '#173b75' });
+  // 化学式を大きく並べ、各元素の上に酸化数チップ
+  const W = 118, x0 = 380 - (n - 1) * W / 2;
+  s.parts.forEach(([el, cnt], i) => {
+    const x = x0 + i * W, y = 190, on = i < shown, v = s.ox[el];
+    g += ball(x, y, 40, on ? (v > 0 ? '#fee2e2' : '#dbeafe') : '#eef2f7',
+      on ? (v > 0 ? '#dc2626' : '#1d4ed8') : '#c8d3e0', '', { sw: 2.4 });
+    g += `<text x="${x}" y="${y + 9}" text-anchor="middle" font-size="26" font-weight="850" fill="${INK}">${el}</text>`;
+    if (cnt > 1) g += `<text x="${x + 27}" y="${y + 20}" font-size="16" font-weight="850" fill="${INK2}">${cnt}</text>`;
+    if (on) {
+      g += `<rect x="${x - 26}" y="${y - 78}" width="52" height="26" rx="9" fill="#fff" stroke="${v > 0 ? '#dc2626' : '#1d4ed8'}" stroke-width="2"/>`;
+      g += halo(sup(v).replace('+', '+') , x, y - 59, { size: 15, fill: v > 0 ? '#b91c1c' : '#1d4ed8', sw: 0 });
+      g += halo(`${sup(v)} × ${cnt}`, x, y + 74, { size: 13, fill: INK2 });
+    }
+  });
+  // 合計の式
+  const terms = s.parts.slice(0, shown).map(([el, c]) => `(${sup(s.ox[el])})×${c}`).join(' ＋ ');
+  const sum = s.parts.slice(0, shown).reduce((a, [el, c]) => a + s.ox[el] * c, 0);
+  if (shown) {
+    g += halo(terms + ' ＝ ' + (sum > 0 ? '+' : '') + sum, 380, 320, { size: 16, fill: '#173b75' });
+    if (shown === n) {
+      const ok = sum === s.q;
+      g += halo(ok ? `合計 ${sum > 0 ? '+' : ''}${sum} ＝ 粒子の電荷 ${s.q === 0 ? '0' : sup(s.q)} ✓`
+        : '合計が電荷と合わない', 380, 362, { size: 15, fill: ok ? '#0f766e' : OXC });
+    }
+  } else {
+    g += halo('「1つずつ確かめる」を押す', 380, 320, { size: 14, fill: INK3 });
+  }
+  $('chart-oxnum').innerHTML = g;
+  $('ox-sum').textContent = shown ? (sum > 0 ? '+' : '') + sum : '—';
+  $('ox-charge').textContent = s.q === 0 ? '0' : sup(s.q);
+  $('ox-verdict').textContent = shown === n
+    ? (s.note ? s.note : '合計は必ずその粒子の電荷になる。ここから未知の酸化数も逆算できる。')
+    : '';
+  $('ox-step').disabled = shown === n;
+}
+function buildOxChips() {
+  $('ox-chips').innerHTML = SPECIES.map((s, i) =>
+    `<button type="button" data-i="${i}" aria-pressed="${i === oxSel}">${s.f.split(' ')[1] || s.f}</button>`).join('');
+  [...$('ox-chips').children].forEach(b => b.addEventListener('click', () => {
+    oxSel = +b.dataset.i; oxStep = 0; buildOxChips(); drawOxnum();
+  }));
+}
+
+/* ===== ② 電子の受け渡し ===== */
+let hfStage = 0;
+const HF_TEXT = ['はじめの状態', 'Cu が電子を2個放す', '電子が Ag⁺ へ移る', 'Ag が析出し Cu²⁺ が溶ける'];
+
+function drawHalf() {
+  const st = hfStage;
+  let g = beaker(150, 120, 460, 250, '#eaf2fb', .78);
+  // 銅板（左）
+  const plateH = st >= 3 ? 150 : 180;
+  g += `<rect x="215" y="${130}" width="46" height="${plateH}" rx="4" fill="#e2955c" stroke="#a15c2a" stroke-width="2.5"/>`;
+  g += halo('Cu', 238, 120, { size: 15, fill: '#8a4b1f' });
+  // 銀イオン / 銀
+  const agPos = [[430, 200], [500, 265]];
+  agPos.forEach(([x, y], i) => {
+    if (st >= 3) {
+      g += ball(261 + i * 22, 250 + i * 40, 15, '#e5e7eb', '#6b7280', 'Ag', { size: 12, color: '#374151' });
+    } else {
+      g += ball(x, y, 17, '#f8fafc', '#64748b', 'Ag⁺', { size: 12, color: '#334155' });
+    }
+  });
+  // 電子
+  if (st === 1) { g += electron(285, 200); g += electron(285, 250); }
+  if (st === 2) {
+    g += electron(360, 200); g += electron(390, 250);
+    g += arrow(300, 200, 415, 200, ELC, 2.4);
+    g += arrow(300, 255, 484, 262, ELC, 2.4);
+  }
+  if (st >= 3) {
+    g += ball(330, 190, 17, '#bae6fd', '#0284c7', 'Cu²⁺', { size: 11, color: '#075985' });
+    g += halo('青くなる', 330, 160, { size: 12, fill: '#0369a1' });
+  }
+  // 酸化数の変化
+  g += halo(`Cu：0 ${st >= 3 ? '→ +2' : ''}`, 238, 398, { size: 14, fill: OXC });
+  g += halo(`Ag：+1 ${st >= 3 ? '→ 0' : ''}`, 500, 398, { size: 14, fill: RDC });
+  g += halo(HF_TEXT[st], 380, 88, { size: 16, fill: '#173b75' });
+  $('chart-half').innerHTML = g;
+  $('hf-stage').textContent = `${st + 1} / 4`;
+  $('hf-cu').textContent = st >= 3 ? '0 → +2' : '0';
+  $('hf-ag').textContent = st >= 3 ? '+1 → 0' : '+1';
+  $('hf-verdict').textContent = st >= 3
+    ? '酸化数が増えた Cu が酸化され、減った Ag が還元された。電子を出す＝酸化される。'
+    : (st === 0 ? 'イオン化傾向は Cu > Ag。だから Cu が電子を出す側になる。' : '');
+  $('hf-next').disabled = st >= 3;
+}
+
+/* ===== ③ 酸化還元滴定 ===== */
+let ttV = 0;   // 滴下量 mL
+const TT_KMNO4 = 0.0200, TT_VS = 10.0;
+const ttEq = () => (+$('tt-conc').value) * TT_VS * 2 / (TT_KMNO4 * 5);  // 電子の数を合わせる
+
+function drawTitr() {
+  const veq = ttEq(), over = ttV > veq + 1e-9;
+  let g = '';
+  // ビュレット
+  g += `<rect x="330" y="20" width="34" height="150" rx="4" fill="#f3e8ff" stroke="#7c93ad" stroke-width="2.5"/>`;
+  g += `<rect x="332" y="${22 + 146 * Math.min(1, ttV / 25)}" width="30" height="${146 * (1 - Math.min(1, ttV / 25))}" fill="#a855f7" opacity=".85"/>`;
+  g += halo('KMnO₄ 0.0200 mol/L', 347, 14, { size: 11, fill: INK2 });
+  g += `<path d="M340 170 L347 190 L354 170 Z" fill="#7c93ad"/>`;
+  // 三角フラスコ
+  g += `<path d="M300 230 L340 230 L340 265 L410 375 L230 375 L300 265 Z" fill="${over ? '#f5d0fe' : '#fdfdff'}" stroke="#7c93ad" stroke-width="3" stroke-linejoin="round"/>`;
+  g += halo(`H₂O₂ ${TT_VS} mL`, 320, 400, { size: 12, fill: INK2 });
+  // 落ちる滴
+  if (ttV > 0 && !over) g += ball(347, 205, 6, '#a855f7', '#7e22ce', '');
+  // 目盛グラフ（滴下量）
+  const gx = 470, gw = 250, gy = 60, gh = 300;
+  g += `<rect x="${gx}" y="${gy}" width="${gw}" height="${gh}" rx="8" fill="#fbfdff" stroke="${LINE}"/>`;
+  const maxV = Math.max(25, veq * 1.4);
+  const bh = gh * Math.min(1, ttV / maxV);
+  g += `<rect x="${gx + 40}" y="${gy + gh - bh}" width="60" height="${bh}" rx="4" fill="${over ? '#c026d3' : '#a855f7'}" opacity=".85"/>`;
+  const ey = gy + gh - gh * Math.min(1, veq / maxV);
+  g += `<line x1="${gx + 10}" y1="${ey}" x2="${gx + gw - 10}" y2="${ey}" stroke="${OXC}" stroke-width="2.4" stroke-dasharray="7 5"/>`;
+  g += halo(`終点 ${fmt(veq, 1)} mL`, gx + gw - 12, ey - 8, { size: 12, fill: OXC, anchor: 'end' });
+  g += halo(`滴下量 ${fmt(ttV, 1)} mL`, gx + 70, gy + gh + 24, { size: 13, fill: INK });
+  g += halo(over ? '赤紫が消えない＝終点をこえた' : (ttV > 0 ? '入れた分だけ色が消える' : 'まだ入れていない'),
+    gx + gw / 2, gy - 18, { size: 12.5, fill: over ? '#a21caf' : INK2 });
+  $('chart-titr').innerHTML = g;
+  $('tt-vol').textContent = fmt(ttV, 1) + ' mL';
+  $('tt-eq').textContent = fmt(veq, 1) + ' mL';
+  $('tt-e').textContent = fmt(TT_KMNO4 * Math.min(ttV, veq) / 1000 * 5 * 1000, 3) + ' mmol';
+  $('tt-verdict').innerHTML = over
+    ? `終点をこえた。終点 ${fmt(veq, 1)} mL から<br>c(H₂O₂) = 0.0200 × ${fmt(veq, 1)} × 5 ÷ (10.0 × 2) = <b>${fmt(+$('tt-conc').value, 3)} mol/L</b>`
+    : 'MnO₄⁻ は 5 個、H₂O₂ は 2 個の電子をやりとりする。この数を合わせるのが係数 2 : 5。';
+}
+
+/* ===== ④ イオン化傾向 ===== */
+const METALS = [
+  { s: 'Mg', e: -2.37, c: '#cbd5e1', n: 2 }, { s: 'Zn', e: -0.76, c: '#94a3b8', n: 2 },
+  { s: 'Fe', e: -0.44, c: '#9ca3af', n: 2 }, { s: 'Pb', e: -0.13, c: '#a3a3a3', n: 2 },
+  { s: 'Cu', e: 0.34, c: '#e2955c', n: 2 }, { s: 'Ag', e: 0.80, c: '#e5e7eb', n: 1 },
+];
+let ioM = 1, ioS = 4, ioRun = false;
+
+function drawIon() {
+  const m = METALS[ioM], s = METALS[ioS], react = m.e < s.e;
+  let g = beaker(210, 110, 340, 250, '#eaf2fb', .78);
+  // イオン化列
+  METALS.forEach((x, i) => {
+    const px = 120 + i * 105, on = i === ioM || i === ioS;
+    g += `<rect x="${px - 34}" y="26" width="68" height="30" rx="9" fill="${on ? '#eff4ff' : '#f6f8fb'}" stroke="${on ? '#2563eb' : LINE}" stroke-width="${on ? 2.2 : 1.2}"/>`;
+    g += halo(x.s, px, 46, { size: 14, fill: on ? '#1d4ed8' : INK3, sw: 0 });
+  });
+  g += halo('溶けやすい →→→ 溶けにくい', 380, 76, { size: 11.5, fill: INK3 });
+  // 金属板
+  const plateH = ioRun && react ? 130 : 170;
+  g += `<rect x="255" y="120" width="46" height="${plateH}" rx="4" fill="${m.c}" stroke="#64748b" stroke-width="2.5"/>`;
+  g += halo(m.s, 278, 112, { size: 14, fill: INK2 });
+  // 溶液中のイオン
+  const ionN = ioRun && react ? 2 : 4;
+  for (let i = 0; i < ionN; i++)
+    g += ball(400 + (i % 2) * 70, 190 + Math.floor(i / 2) * 80, 18, '#dbeafe', '#2563eb', s.s + sup(s.n), { size: 11, color: '#1e40af' });
+  if (ioRun && react) {
+    // 析出した金属 と 溶け出したイオン
+    g += ball(310, 300, 15, s.c, '#64748b', s.s, { size: 12, color: '#334155' });
+    g += ball(340, 250, 15, s.c, '#64748b', s.s, { size: 12, color: '#334155' });
+    g += ball(360, 160, 17, '#fee2e2', '#dc2626', m.s + sup(m.n), { size: 11, color: '#b91c1c' });
+    g += arrow(305, 200, 380, 200, ELC, 2.4);
+    g += halo('e⁻', 342, 190, { size: 12, fill: '#a16207' });
+  }
+  g += halo(ioRun ? (react ? `${m.s} が溶け、${s.s} が析出する` : `変化しない（${m.s} は ${s.s} より溶けにくい）`)
+    : `${m.s} 板を ${s.s + sup(s.n)} の水溶液に入れる`, 380, 396, { size: 15, fill: ioRun ? (react ? '#0f766e' : INK2) : INK });
+  $('chart-ion').innerHTML = g;
+  $('io-emf').textContent = react ? fmt(s.e - m.e, 2) + ' V' : '—';
+  $('io-verdict').textContent = !ioRun ? '「入れてみる」を押して確かめる。'
+    : (react ? 'イオン化傾向が大きい金属が電子を出して溶け、小さい金属が析出する。この電位差がそのまま電池の起電力になる。'
+      : 'イオン化傾向が小さい金属は、大きい金属のイオンから電子を奪えないので反応しない。');
+}
+function buildIonChips() {
+  const mk = (host, sel, on) => {
+    $(host).innerHTML = METALS.map((m, i) =>
+      `<button type="button" data-i="${i}" aria-pressed="${i === sel}">${m.s}${host === 'io-sol' ? sup(m.n) : ''}</button>`).join('');
+    [...$(host).children].forEach(b => b.addEventListener('click', () => { on(+b.dataset.i); }));
+  };
+  mk('io-metal', ioM, i => { ioM = i; ioRun = false; buildIonChips(); drawIon(); });
+  mk('io-sol', ioS, i => { ioS = i; ioRun = false; buildIonChips(); drawIon(); });
+}
+
+/* ===== ⑤ ダニエル電池 ===== */
+let dnStage = 0, dnTimer = null;
+const DN_TEXT = ['はじめの状態', 'Zn が電子を出して溶ける', '電子が導線を通って Cu 板へ', 'Cu²⁺ が電子を受け取り析出', '塩橋をイオンが移動してつり合う'];
+
+function drawCell() {
+  const st = dnStage, k = Math.max(0, st - 1);
+  let g = '';
+  // 2つのビーカー
+  g += beaker(70, 150, 260, 210, '#eef6ff', .8);
+  g += beaker(430, 150, 260, 210, '#dbeafe', .8);
+  g += halo('ZnSO₄ 水溶液', 200, 392, { size: 12, fill: INK2 });
+  g += halo('CuSO₄ 水溶液', 560, 392, { size: 12, fill: INK2 });
+  // 塩橋
+  g += `<path d="M250 175 Q380 100 510 175" fill="none" stroke="#c7d2fe" stroke-width="22" stroke-linecap="round"/>`;
+  g += halo('塩橋', 380, 120, { size: 12, fill: '#4f46e5' });
+  // 電極
+  const znH = 170 - k * 8, cuH = 170 + k * 6;
+  g += `<rect x="175" y="160" width="42" height="${znH}" rx="3" fill="#94a3b8" stroke="#475569" stroke-width="2.5"/>`;
+  g += `<rect x="545" y="160" width="42" height="${cuH}" rx="3" fill="#e2955c" stroke="#a15c2a" stroke-width="2.5"/>`;
+  g += halo('Zn（負極）', 196, 150, { size: 13, fill: OXC });
+  g += halo('Cu（正極）', 566, 150, { size: 13, fill: RDC });
+  // 導線と電球
+  g += `<path d="M196 160 V70 H566 V160" fill="none" stroke="#64748b" stroke-width="3"/>`;
+  g += ball(381, 70, 20, '#fef9c3', '#ca8a04', '', { sw: 2.2 });
+  if (st >= 2) g += ball(381, 70, 13, '#fde047', '#eab308', '');
+  // 電子の流れ
+  if (st >= 2) {
+    [250, 330, 430, 510].forEach(x => { g += electron(x, 70, .85); });
+    g += arrow(230, 52, 540, 52, ELC, 2.6);
+    g += halo('e⁻ は 負極 → 正極', 385, 40, { size: 12.5, fill: '#a16207' });
+  }
+  // 溶け出す Zn²⁺ / 析出する Cu
+  if (st >= 1) for (let i = 0; i < 2; i++) g += ball(245 + i * 45, 250 + i * 55, 17, '#fee2e2', '#dc2626', 'Zn²⁺', { size: 10.5, color: '#b91c1c' });
+  if (st >= 3) {
+    g += ball(600, 250, 15, '#e2955c', '#a15c2a', 'Cu', { size: 11, color: '#7c2d12' });
+    g += ball(618, 300, 15, '#e2955c', '#a15c2a', 'Cu', { size: 11, color: '#7c2d12' });
+  }
+  for (let i = 0; i < (st >= 3 ? 1 : 3); i++) g += ball(470 + i * 55, 250 + (i % 2) * 60, 17, '#bfdbfe', '#2563eb', 'Cu²⁺', { size: 10.5, color: '#1e40af' });
+  // 塩橋のイオン移動
+  if (st >= 4) {
+    g += arrow(430, 150, 330, 165, '#4f46e5', 2.2);
+    g += halo('SO₄²⁻', 380, 148, { size: 11, fill: '#4338ca' });
+  }
+  g += halo(DN_TEXT[st], 380, 20, { size: 15, fill: '#173b75' });
+  $('chart-cell').innerHTML = g;
+  $('dn-stage').textContent = `${st + 1} / 5`;
+  $('dn-zn').textContent = `− ${fmt(k * 0.5, 1)} mmol`;
+  $('dn-cu').textContent = `+ ${fmt(k * 0.5, 1)} mmol`;
+  $('dn-verdict').textContent = st === 0 ? 'イオン化傾向 Zn > Cu。Zn のほうが電子を出したがる。'
+    : st >= 4 ? '溶液の電気的なかたよりを塩橋が打ち消すので、電子が流れ続けられる。'
+      : '電子は導線を通る。溶液の中を電子が泳ぐわけではない。';
+  $('dn-next').disabled = st >= 4;
+}
+
+/* ===== ⑥ 実用電池 ===== */
+let btKind = 'lead', btCharge = false;
+
+function drawBattery() {
+  const lead = btKind === 'lead';
+  let g = '';
+  if (lead) {
+    g += beaker(160, 130, 440, 230, '#f1f5f9', .8);
+    g += halo('希硫酸 H₂SO₄', 380, 392, { size: 12, fill: INK2 });
+    const neg = btCharge ? 'PbSO₄ → Pb' : 'Pb → PbSO₄';
+    const pos = btCharge ? 'PbSO₄ → PbO₂' : 'PbO₂ → PbSO₄';
+    g += `<rect x="250" y="140" width="48" height="190" rx="3" fill="#94a3b8" stroke="#475569" stroke-width="2.5"/>`;
+    g += `<rect x="462" y="140" width="48" height="190" rx="3" fill="#78716c" stroke="#44403c" stroke-width="2.5"/>`;
+    g += halo('負極 Pb', 274, 128, { size: 13, fill: OXC });
+    g += halo('正極 PbO₂', 486, 128, { size: 13, fill: RDC });
+    g += halo(neg, 274, 360, { size: 12, fill: INK2 });
+    g += halo(pos, 486, 360, { size: 12, fill: INK2 });
+    g += `<path d="M274 140 V60 H486 V140" fill="none" stroke="#64748b" stroke-width="3"/>`;
+    const dir = btCharge ? -1 : 1;
+    [310, 380, 450].forEach(x => g += electron(x, 60, .85));
+    g += arrow(btCharge ? 470 : 290, 40, btCharge ? 290 : 470, 40, ELC, 2.6);
+    g += halo(btCharge ? '外から電子を押し込む（充電）' : '電子が流れ出る（放電）', 380, 24, { size: 14, fill: btCharge ? '#7c3aed' : '#173b75' });
+  } else {
+    g += `<rect x="290" y="110" width="180" height="240" rx="6" fill="#eef6ff" stroke="#7c93ad" stroke-width="3"/>`;
+    g += `<line x1="380" y1="110" x2="380" y2="350" stroke="#a5b4fc" stroke-width="8"/>`;
+    g += halo('電解質', 380, 372, { size: 12, fill: '#4f46e5' });
+    g += `<rect x="300" y="130" width="26" height="200" rx="3" fill="#cbd5e1" stroke="#475569" stroke-width="2"/>`;
+    g += `<rect x="434" y="130" width="26" height="200" rx="3" fill="#cbd5e1" stroke="#475569" stroke-width="2"/>`;
+    g += halo('負極', 313, 122, { size: 12.5, fill: OXC });
+    g += halo('正極', 447, 122, { size: 12.5, fill: RDC });
+    for (let i = 0; i < 3; i++) g += ball(220, 160 + i * 70, 20, '#dbeafe', '#2563eb', 'H₂', { size: 12, color: '#1e40af' });
+    for (let i = 0; i < 2; i++) g += ball(545, 190 + i * 80, 20, '#fee2e2', '#dc2626', 'O₂', { size: 12, color: '#b91c1c' });
+    g += arrow(245, 200, 295, 200, INK3, 2.2);
+    g += arrow(520, 220, 470, 220, INK3, 2.2);
+    for (let i = 0; i < 2; i++) g += ball(380, 200 + i * 70, 17, '#bae6fd', '#0284c7', 'H⁺', { size: 11, color: '#075985' });
+    g += `<path d="M313 130 V60 H447 V130" fill="none" stroke="#64748b" stroke-width="3"/>`;
+    [340, 400, 430].forEach(x => g += electron(x, 60, .85));
+    g += arrow(330, 40, 440, 40, ELC, 2.6);
+    g += halo('生成物は水だけ', 380, 24, { size: 14, fill: '#0f766e' });
+    g += ball(640, 300, 22, '#dbeafe', '#2563eb', 'H₂O', { size: 11, color: '#1e40af' });
+  }
+  $('chart-battery').innerHTML = g;
+  $('bt-title').textContent = lead ? '鉛蓄電池' : '燃料電池（水素）';
+  $('bt-eq').innerHTML = lead
+    ? `<span class="ox">負極 Pb + SO₄²⁻ → PbSO₄ + 2e⁻</span><br>
+       <span class="rd">正極 PbO₂ + 4H⁺ + SO₄²⁻ + 2e⁻ → PbSO₄ + 2H₂O</span><br>
+       <span style="color:var(--ink3)">充電はこの逆向きに進む</span>`
+    : `<span class="ox">負極 H₂ → 2H⁺ + 2e⁻</span><br>
+       <span class="rd">正極 O₂ + 4H⁺ + 4e⁻ → 2H₂O</span><br>
+       <span style="color:var(--ink3)">全体 2H₂ + O₂ → 2H₂O</span>`;
+  $('bt-read').innerHTML = lead
+    ? `<span class="k">起電力</span><span class="v">約 2.0 V</span>
+       <span class="k">いま</span><span class="v">${btCharge ? '充電' : '放電'}</span>
+       <span class="k">両極とも</span><span class="v">PbSO₄ になる</span>`
+    : `<span class="k">起電力</span><span class="v">約 1.2 V</span>
+       <span class="k">燃料</span><span class="v">H₂ と O₂</span>
+       <span class="k">生成物</span><span class="v">H₂O のみ</span>`;
+  $('bt-verdict').textContent = lead
+    ? (btCharge ? '充電では外部電源が電子を押し込み、PbSO₄ が元の Pb と PbO₂ に戻る。くり返し使えるので二次電池という。'
+      : '放電すると両極とも PbSO₄ になり、硫酸がうすくなる。')
+    : '燃やす代わりに電子を導線に通すので、熱をあまり出さずに電気を取り出せる。';
+  $('bt-dir').disabled = !lead;
+}
+
+/* ===== ⑦ 電気分解 ===== */
+const ELYS = {
+  cucl2: {
+    name: '塩化銅(II)水溶液', liquid: '#cfe8f7',
+    an: '陽極 2Cl⁻ → Cl₂ + 2e⁻', ca: '陰極 Cu²⁺ + 2e⁻ → Cu',
+    anP: { kind: 'gas', label: 'Cl₂', color: '#fef9c3', stroke: '#ca8a04' },
+    caP: { kind: 'solid', label: 'Cu', color: '#e2955c', stroke: '#a15c2a' },
+    v: '陰極には銅が付き、陽極からは塩素が出る。'
+  },
+  water: {
+    name: '水（希硫酸）', liquid: '#eef6ff',
+    an: '陽極 2H₂O → O₂ + 4H⁺ + 4e⁻', ca: '陰極 2H⁺ + 2e⁻ → H₂',
+    anP: { kind: 'gas', label: 'O₂', color: '#fee2e2', stroke: '#dc2626' },
+    caP: { kind: 'gas', label: 'H₂', color: '#dbeafe', stroke: '#2563eb' },
+    v: '水が分解して、陰極に水素・陽極に酸素が 2 : 1 の体積比で出る。'
+  },
+  nacl: {
+    name: '塩化ナトリウム水溶液', liquid: '#f1f5f9',
+    an: '陽極 2Cl⁻ → Cl₂ + 2e⁻', ca: '陰極 2H₂O + 2e⁻ → H₂ + 2OH⁻',
+    anP: { kind: 'gas', label: 'Cl₂', color: '#fef9c3', stroke: '#ca8a04' },
+    caP: { kind: 'gas', label: 'H₂', color: '#dbeafe', stroke: '#2563eb' },
+    v: 'Na⁺ は水より還元されにくいので、Na ではなく H₂ が出る。陰極側は NaOH ができて塩基性になる。'
+  },
+};
+let elKind = 'cucl2', elRun = false;
+
+function drawElys() {
+  const d = ELYS[elKind];
+  let g = beaker(150, 140, 460, 230, d.liquid, .8);
+  g += halo(d.name, 380, 396, { size: 12.5, fill: INK2 });
+  // 電源
+  g += `<rect x="330" y="30" width="100" height="42" rx="8" fill="#fff" stroke="#64748b" stroke-width="2.5"/>`;
+  g += halo('電 源', 380, 57, { size: 14, fill: INK });
+  g += halo('＋', 348, 22, { size: 15, fill: OXC });
+  g += halo('−', 412, 22, { size: 15, fill: RDC });
+  g += `<path d="M350 72 V100 H240 V150" fill="none" stroke="#64748b" stroke-width="3"/>`;
+  g += `<path d="M410 72 V100 H520 V150" fill="none" stroke="#64748b" stroke-width="3"/>`;
+  // 電極
+  g += `<rect x="222" y="150" width="36" height="180" rx="3" fill="#64748b" stroke="#334155" stroke-width="2.5"/>`;
+  g += `<rect x="502" y="150" width="36" height="180" rx="3" fill="#64748b" stroke="#334155" stroke-width="2.5"/>`;
+  g += halo('陽極（酸化）', 240, 140, { size: 12.5, fill: OXC });
+  g += halo('陰極（還元）', 520, 140, { size: 12.5, fill: RDC });
+  if (elRun) {
+    // 電子は電源に引かれて陽極 → 電源 → 陰極
+    [270, 320].forEach(x => g += electron(x, 100, .8));
+    [450, 500].forEach(x => g += electron(x, 100, .8));
+    g += arrow(258, 118, 300, 108, ELC, 2.2);
+    g += arrow(470, 108, 512, 122, ELC, 2.2);
+    // 生成物
+    const put = (p, x) => {
+      if (p.kind === 'gas') {
+        for (let i = 0; i < 3; i++) g += ball(x, 300 - i * 55, 17, p.color, p.stroke, p.label, { size: 11, color: '#334155' });
+      } else {
+        g += `<rect x="${x - 24}" y="150" width="48" height="180" rx="3" fill="${p.color}" stroke="${p.stroke}" stroke-width="2.5"/>`;
+        g += halo(p.label + ' が付く', x, 250, { size: 12, fill: '#7c2d12' });
+      }
+    };
+    put(d.anP, 300); put(d.caP, 460);
+  } else {
+    g += halo('「電流を流す」を押す', 380, 250, { size: 14, fill: INK3 });
+  }
+  $('chart-elys').innerHTML = g;
+  $('el-eq').innerHTML = `<span class="ox">${d.an}</span><br><span class="rd">${d.ca}</span>`;
+  $('el-verdict').textContent = elRun ? d.v : '電源の＋につないだ側が陽極、−につないだ側が陰極。';
+}
+
+/* ===== ⑧ ファラデーの法則 ===== */
+const FD = {
+  cu: { name: '銅', sym: 'Cu', z: 2, M: 63.5, unit: 'g', color: '#e2955c', stroke: '#a15c2a' },
+  ag: { name: '銀', sym: 'Ag', z: 1, M: 108, unit: 'g', color: '#e5e7eb', stroke: '#6b7280' },
+  h2: { name: '水素', sym: 'H₂', z: 2, M: 22.4, unit: 'L', color: '#dbeafe', stroke: '#2563eb' },
+};
+let fdKind = 'cu';
+
+function drawFaraday() {
+  const d = FD[fdKind], I = +$('fd-i').value, t = +$('fd-t').value;
+  const Q = I * t, ne = Q / 96500, mol = ne / d.z, amt = mol * d.M;
+  let g = '';
+  // 流れを4つの箱で
+  const boxes = [
+    ['電流 × 時間', `${fmt(I, 1)} A × ${t} s`, `Q = ${fmt(Q, 0)} C`],
+    ['÷ F', '96500 C/mol', `n(e⁻) = ${fmt(ne, 4)} mol`],
+    ['÷ 価数', `${d.sym} は ${d.z} 価`, `${fmt(mol, 4)} mol`],
+    ['× ' + (d.unit === 'g' ? 'モル質量' : 'モル体積'), `${d.M} ${d.unit}/mol`, `${fmt(amt, 3)} ${d.unit}`],
+  ];
+  boxes.forEach((b, i) => {
+    const x = 40 + i * 178;
+    g += `<rect x="${x}" y="60" width="158" height="110" rx="12" fill="#fbfdff" stroke="${LINE}" stroke-width="1.6"/>`;
+    g += halo(b[0], x + 79, 86, { size: 12, fill: INK3 });
+    g += halo(b[1], x + 79, 110, { size: 12.5, fill: INK2 });
+    g += halo(b[2], x + 79, 142, { size: 15, fill: '#173b75' });
+    if (i < 3) g += arrow(x + 160, 115, x + 176, 115, INK3, 2.2);
+  });
+  // 電極に付く量を絵で
+  const maxAmt = 5 * 3600 / 96500 / d.z * d.M;
+  const frac = Math.min(1, amt / maxAmt);
+  g += beaker(250, 230, 260, 150, '#eaf2fb', .78);
+  g += `<rect x="345" y="240" width="44" height="130" rx="3" fill="#64748b" stroke="#334155" stroke-width="2.5"/>`;
+  if (d.unit === 'g') {
+    g += `<rect x="${345 - 9}" y="240" width="62" height="130" rx="3" fill="${d.color}" stroke="${d.stroke}" stroke-width="2.5" opacity="${.25 + .75 * frac}"/>`;
+    g += halo(`${d.sym} ${fmt(amt, 3)} g`, 367, 310, { size: 13, fill: '#7c2d12' });
+  } else {
+    const n = Math.max(1, Math.round(frac * 5));
+    for (let i = 0; i < n; i++) g += ball(430 + (i % 2) * 46, 350 - Math.floor(i / 2) * 46, 18, d.color, d.stroke, d.sym, { size: 11, color: '#1e40af' });
+    g += halo(`${fmt(amt, 3)} L`, 367, 310, { size: 13, fill: '#1e40af' });
+  }
+  g += halo('電極に出てくる量', 380, 404, { size: 12, fill: INK2 });
+  $('chart-faraday').innerHTML = g;
+  $('fd-q').textContent = fmt(Q, 0) + ' C';
+  $('fd-ne').textContent = fmt(ne, 4) + ' mol';
+  $('fd-mol').textContent = fmt(mol, 4) + ' mol';
+  $('fd-amt-k').textContent = d.unit === 'g' ? '質量' : '体積（標準状態）';
+  $('fd-amt').textContent = fmt(amt, 3) + ' ' + d.unit;
+  $('fd-verdict').textContent = `${d.sym} は ${d.z} 価なので、電子 ${d.z} mol で ${d.sym} が 1 mol できる。電気量を 2 倍にすれば、出てくる量も 2 倍になる。`;
+}
+
+/* ===== 配線 ===== */
+const DRAW = {
+  oxnum: drawOxnum, half: drawHalf, titr: drawTitr, ion: drawIon,
+  cell: drawCell, battery: drawBattery, elys: drawElys, faraday: drawFaraday,
+};
+const redrawAll = () => Object.values(DRAW).forEach(fn => fn());
+
+ChemUI.tabs({ onChange: key => DRAW[key]() });
+ChemUI.fullscreen({ onChange: redrawAll });
+ChemUI.bindRange('tt-conc', { onInput: () => { ttV = 0; drawTitr(); } });
+ChemUI.bindRange('fd-i', { onInput: drawFaraday });
+ChemUI.bindRange('fd-t', { onInput: drawFaraday });
+
+// ①
+buildOxChips();
+$('ox-step').addEventListener('click', () => { oxStep = Math.min(SPECIES[oxSel].parts.length, oxStep + 1); drawOxnum(); });
+$('ox-all').addEventListener('click', () => { oxStep = SPECIES[oxSel].parts.length; drawOxnum(); });
+$('ox-reset').addEventListener('click', () => { oxStep = 0; drawOxnum(); });
+// ②
+$('hf-next').addEventListener('click', () => { hfStage = Math.min(3, hfStage + 1); drawHalf(); });
+$('hf-reset').addEventListener('click', () => { hfStage = 0; drawHalf(); });
+// ③
+$('tt-drop').addEventListener('click', () => { ttV = Math.min(25, ttV + 0.5); drawTitr(); });
+$('tt-ten').addEventListener('click', () => { ttV = Math.min(25, ttV + 5); drawTitr(); });
+$('tt-end').addEventListener('click', () => { ttV = Math.min(25, ttEq() + 0.5); drawTitr(); });
+$('tt-reset').addEventListener('click', () => { ttV = 0; drawTitr(); });
+// ④
+buildIonChips();
+$('io-run').addEventListener('click', () => { ioRun = true; drawIon(); });
+$('io-reset').addEventListener('click', () => { ioRun = false; drawIon(); });
+// ⑤
+$('dn-next').addEventListener('click', () => { dnStage = Math.min(4, dnStage + 1); drawCell(); });
+$('dn-run').addEventListener('click', () => {
+  if (dnTimer) { clearInterval(dnTimer); dnTimer = null; $('dn-run').textContent = '続けて動かす'; return; }
+  $('dn-run').textContent = '止める';
+  dnTimer = setInterval(() => {
+    dnStage = dnStage >= 4 ? 1 : dnStage + 1; drawCell();
+  }, 1100);
+});
+$('dn-reset').addEventListener('click', () => {
+  if (dnTimer) { clearInterval(dnTimer); dnTimer = null; $('dn-run').textContent = '続けて動かす'; }
+  dnStage = 0; drawCell();
+});
+// ⑥
+[...$('bt-kind').children].forEach(b => b.addEventListener('click', () => {
+  btKind = b.dataset.kind; if (btKind === 'fuel') btCharge = false;
+  [...$('bt-kind').children].forEach(x => x.setAttribute('aria-pressed', x === b));
+  drawBattery();
+}));
+$('bt-dir').addEventListener('click', () => { btCharge = !btCharge; drawBattery(); });
+// ⑦
+[...$('el-kind').children].forEach(b => b.addEventListener('click', () => {
+  elKind = b.dataset.kind; elRun = false;
+  [...$('el-kind').children].forEach(x => x.setAttribute('aria-pressed', x === b));
+  drawElys();
+}));
+$('el-run').addEventListener('click', () => { elRun = true; drawElys(); });
+$('el-reset').addEventListener('click', () => { elRun = false; drawElys(); });
+// ⑧
+[...$('fd-kind').children].forEach(b => b.addEventListener('click', () => {
+  fdKind = b.dataset.kind;
+  [...$('fd-kind').children].forEach(x => x.setAttribute('aria-pressed', x === b));
+  drawFaraday();
+}));
+
+redrawAll();
+</script>
+<script src="site-shell.js"></script>
+</body>
+</html>
