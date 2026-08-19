@@ -35,6 +35,9 @@
   .chips button{padding:6px 10px;border:1px solid var(--t-line-strong);border-radius:9px;background:var(--card);color:var(--ink2);font-size:11.5px;font-weight:850;cursor:pointer}
   .chips button[aria-pressed="true"]{border-color:var(--t-blue-hover);background:var(--t-blue-tint);color:var(--blue)}
   .note{margin:9px 0 0;color:var(--ink3);font-size:11.5px;line-height:1.65}
+  /* 色の意味をそろえて示す凡例（reaction-rate.html と同じ作り） */
+  .legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;color:var(--ink2);font-size:10.5px;font-weight:800}
+  .legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:4px;vertical-align:-1px}
   @media(max-width:1000px){
     .layout{grid-template-columns:1fr}
     body.is-fullscreen{height:auto;overflow:auto;display:block}
@@ -76,6 +79,7 @@
         <div class="card law">
           <h2 id="kd-name">—</h2>
           <div class="eqline" id="kd-eq"></div>
+          <div class="legend"><span><i style="background:#fde047"></i>共有電子対・自由電子</span><span><i style="background:var(--pos)"></i>δ＋・陽イオン</span><span><i style="background:var(--neg)"></i>δ−・陰イオン</span></div>
         </div>
         <div class="card">
           <h2>電気陰性度の差</h2>
@@ -108,6 +112,7 @@
             共有電子対が引きよせられる<br>
             <span class="n">δ−</span> ← 電子が多い ／ <span class="p">δ＋</span> ← 電子が少ない
           </div>
+          <div class="legend"><span><i style="background:#fde047"></i>共有電子対</span><span><i style="background:#0f766e"></i>極性の矢印（＋→−）</span></div>
         </div>
         <div class="card">
           <h2>数値</h2>
@@ -141,6 +146,7 @@
             <b>形</b>によって打ち消し合えば<br>
             分子全体では<b>無極性</b>になる
           </div>
+          <div class="legend"><span><i style="background:#0f766e"></i>結合の極性</span><span><i style="background:var(--hb)"></i>合計（分子全体）</span></div>
         </div>
         <div class="card">
           <h2>この分子</h2>
@@ -172,6 +178,7 @@
             <b>双極子間力</b><small>極性分子どうし</small><br>
             <span class="h"><b>水素結合</b></span><small>N・O・F につく H</small>
           </div>
+          <div class="legend"><span><i style="background:#8290a5"></i>分散力</span><span><i style="background:#0f766e"></i>双極子間力</span><span><i style="background:var(--hb)"></i>水素結合</span></div>
         </div>
         <div class="card">
           <h2>この分子にはたらく力</h2>
@@ -205,6 +212,7 @@
         <div class="card law">
           <h2 id="bp-title">水素化物の沸点</h2>
           <div class="eqline" id="bp-eq" style="font-size:12.5px"></div>
+          <div class="legend" id="bp-legend"></div>
         </div>
         <div class="card">
           <h2>読み取り</h2>
@@ -255,6 +263,30 @@ function arrow(x1, y1, x2, y2, color, w = 2.6) {
   return `<line x1="${x1}" y1="${y1}" x2="${hx}" y2="${hy}" stroke="${color}" stroke-width="${w}" stroke-linecap="round"/>
     <polygon points="${x2},${y2} ${hx + nx * 5},${hy + ny * 5} ${hx - nx * 5},${hy - ny * 5}" fill="${color}"/>`;
 }
+// 図の土台。モデルを置く範囲をはっきりさせる（他ページと同じ作り）
+function panel(x, y, w, h, label) {
+  let g = `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="16" fill="#f7fafe" stroke="${LINE}" stroke-width="1.5"/>`;
+  if (label) g += `<text x="${x + 14}" y="${y + 20}" font-size="10.5" font-weight="850" fill="${INK3}" letter-spacing=".08em">${label}</text>`;
+  return g;
+}
+// 電気陰性度の差のものさし。0.4 と 1.7 で結合の呼び名が変わることを示す
+function dxScale(x, y, w, dx) {
+  const MAX = 2.6, px = v => x + Math.min(v, MAX) / MAX * w;
+  let g = `<rect x="${x}" y="${y}" width="${w}" height="16" rx="8" fill="#eef2f7"/>`;
+  const zones = [[0, 0.4, '#e2e8f0', '無極性の共有結合'], [0.4, 1.7, '#bfdbfe', '極性のある共有結合'], [1.7, MAX, '#fecaca', 'イオン結合']];
+  zones.forEach(([a, b, col, name]) => {
+    g += `<rect x="${px(a)}" y="${y}" width="${px(b) - px(a)}" height="16" rx="8" fill="${col}"/>`;
+    g += halo(name, (px(a) + px(b)) / 2, y + 40, { size: 11, fill: INK3, sw: 0 });
+  });
+  [0.4, 1.7].forEach(v => {
+    g += `<line x1="${px(v)}" y1="${y - 5}" x2="${px(v)}" y2="${y + 21}" stroke="#94a3b8" stroke-width="1.6"/>`;
+    g += halo(fmt(v, 1), px(v), y - 11, { size: 10.5, fill: INK3, sw: 0 });
+  });
+  // 現在の結合の位置
+  g += `<polygon points="${px(dx)},${y - 3} ${px(dx) - 7},${y - 17} ${px(dx) + 7},${y - 17}" fill="#0f766e"/>`;
+  g += halo(`Δχ = ${fmt(dx, 2)}`, px(dx), y - 24, { size: 12.5, fill: '#0f766e' });
+  return g;
+}
 // 極性を示す矢印（＋から−へ。根元に十字）
 function dipole(x1, y1, x2, y2, color = '#0f766e', w = 3) {
   const dx = x2 - x1, dy = y2 - y1, L = Math.hypot(dx, dy) || 1, nx = -dy / L, ny = dx / L;
@@ -281,46 +313,51 @@ let kdSel = 0;
 
 function drawKinds() {
   const k = KINDS[kdSel], dx = Math.abs(EN[k.a] - EN[k.b]);
-  let g = halo(k.sub, 380, 42, { size: 17, fill: '#173b75' });
+  const PY = 62, PH = 232;                      // モデルを置く土台の位置
+  let g = panel(40, PY, 680, PH, k.name.toUpperCase ? 'MODEL' : '');
+  g += halo(k.sub, 380, 40, { size: 17, fill: '#173b75' });
   if (k.type === 'metal') {
     // 金属：陽イオンの格子 ＋ 自由電子の海
-    g += `<rect x="180" y="90" width="400" height="250" rx="14" fill="#eef4fb" stroke="#c8d6e6" stroke-width="2"/>`;
-    for (let r = 0; r < 3; r++) for (let c = 0; c < 4; c++)
-      g += ball(240 + c * 100, 140 + r * 90, 26, '#cbd5e1', '#64748b', 'Na⁺', { size: 13, color: '#334155' });
-    const seed = [[205,120],[300,110],[400,175],[500,120],[560,200],[210,235],[330,215],[470,255],[560,300],[260,310],[380,300],[520,180],[290,175],[430,120]];
-    seed.forEach(([x, y]) => { g += electron(x, y, .9); });
-    g += halo('自由電子が全体を動きまわる', 380, 372, { size: 14, fill: '#a16207' });
+    for (let r = 0; r < 2; r++) for (let c = 0; c < 5; c++)
+      g += ball(160 + c * 110, 130 + r * 96, 28, '#cbd5e1', '#64748b', 'Na⁺', { size: 13, color: '#334155' });
+    // 自由電子は陽イオンの「すきま」に置く（球に重ねると Na⁺ の文字が読めなくなる）
+    const seed = [[108,104],[218,96],[330,168],[440,96],[552,168],[668,104],[108,214],[218,240],[330,272],[440,240],[552,272],[668,214],[276,168],[496,168]];
+    seed.forEach(([x, y]) => { g += electron(x, y, .95); });
+    g += halo('価電子が自由電子になり、金属全体を動きまわる', 380, 322, { size: 14, fill: '#a16207' });
   } else {
-    const L = 285, R = 475, y = 215;
-    const rA = k.a === 'H' ? 30 : 44, rB = k.b === 'H' ? 30 : 44;
+    const L = 250, R = 510, y = PY + PH / 2;
+    const rA = k.a === 'H' ? 32 : 46, rB = k.b === 'H' ? 32 : 46;
     if (k.type === 'ion') {
       // 電子が完全に移動：陽イオンは小さく、陰イオンは大きく
-      g += ball(L, y, 30, '#fee2e2', '#dc2626', 'Na⁺', { size: 17, color: '#b91c1c' });
-      g += ball(R, y, 52, '#dbeafe', '#1d4ed8', 'Cl⁻', { size: 19, color: '#1e3a8a' });
-      g += arrow(L + 42, 150, R - 60, 150, ELC, 2.6);
-      g += electron(380, 150, 1);
-      g += halo('電子が完全に移る', 380, 126, { size: 13, fill: '#a16207' });
-      g += halo('静電気の引力', 380, 300, { size: 13, fill: INK2 });
-      g += `<path d="M${L + 32} ${y + 44} Q380 ${y + 78} ${R - 54} ${y + 44}" fill="none" stroke="${INK3}" stroke-width="2" stroke-dasharray="6 5"/>`;
+      g += ball(L, y, 32, '#fee2e2', '#dc2626', 'Na⁺', { size: 17, color: '#b91c1c' });
+      g += ball(R, y, 56, '#dbeafe', '#1d4ed8', 'Cl⁻', { size: 20, color: '#1e3a8a' });
+      g += arrow(L + 44, y - 62, R - 66, y - 62, ELC, 2.6);
+      g += electron(380, y - 62, 1);
+      g += halo('電子が完全に移る', 380, y - 82, { size: 13, fill: '#a16207' });
+      g += `<path d="M${L + 34} ${y + 46} Q380 ${y + 82} ${R - 58} ${y + 46}" fill="none" stroke="${INK3}" stroke-width="2" stroke-dasharray="6 5"/>`;
+      g += halo('静電気の引力で引き合う', 380, y + 100, { size: 13, fill: INK2 });
     } else {
       // 共有：電子対を2個、共有位置を Δχ でずらす
-      const shift = k.type === 'polar' ? 34 : 0, mid = (L + R) / 2 + shift;
+      const shift = k.type === 'polar' ? 38 : 0, mid = (L + R) / 2 + shift;
       g += ball(L, y, rA, k.a === 'H' ? '#f8fafc' : '#dcfce7', k.a === 'H' ? '#94a3b8' : '#16a34a', k.a,
-        { size: 20, color: k.a === 'H' ? '#334155' : '#14532d' });
-      g += ball(R, y, rB, '#dcfce7', '#16a34a', k.b, { size: 20, color: '#14532d' });
+        { size: 21, color: k.a === 'H' ? '#334155' : '#14532d' });
+      g += ball(R, y, rB, '#dcfce7', '#16a34a', k.b, { size: 21, color: '#14532d' });
       g += `<line x1="${L + rA}" y1="${y}" x2="${R - rB}" y2="${y}" stroke="#94a3b8" stroke-width="4"/>`;
-      g += electron(mid, y - 13, 1.05); g += electron(mid, y + 13, 1.05);
-      g += halo('共有電子対', mid, y - 42, { size: 13, fill: '#a16207' });
+      g += electron(mid, y - 14, 1.1); g += electron(mid, y + 14, 1.1);
+      g += halo('共有電子対', mid, y - 46, { size: 13, fill: '#a16207' });
       if (k.type === 'polar') {
-        g += halo('δ＋', L, y - rA - 16, { size: 16, fill: POS });
-        g += halo('δ−', R, y - rB - 16, { size: 16, fill: NEG });
-        g += dipole(L, y + rA + 34, R, y + rB + 34, '#0f766e', 3);
-        g += halo('電子は Cl 側にかたよる', 380, y + 92, { size: 13, fill: '#0f766e' });
+        g += halo('δ＋', L, y - rA - 14, { size: 16, fill: POS });
+        g += halo('δ−', R, y - rB - 14, { size: 16, fill: NEG });
+        g += dipole(L, y + rA + 30, R, y + rB + 30, '#0f766e', 3);
+        g += halo('電子は Cl 側にかたよる', 380, y + 100, { size: 13, fill: '#0f766e' });
       } else {
-        g += halo('まん中で共有＝かたよりなし', 380, y + rA + 52, { size: 13, fill: INK2 });
+        g += halo('まん中で共有＝かたよりなし', 380, y + rA + 54, { size: 13, fill: INK2 });
       }
     }
   }
+  // 下の空きに「電気陰性度の差」のものさしを置き、3種類が地続きであることを示す
+  if (k.type !== 'metal') g += dxScale(120, 352, 520, dx);
+  else g += halo('金属どうしなので電気陰性度の差では表せない', 380, 372, { size: 13, fill: INK3 });
   $('chart-kinds').innerHTML = g;
   $('kd-name').textContent = k.name;
   $('kd-eq').innerHTML = k.eq;
@@ -345,20 +382,24 @@ function drawPolar() {
   const [a, b] = BONDS[plSel];
   const ea = EN[a], eb = EN[b], dx = Math.abs(ea - eb);
   const richer = eb > ea ? b : a;            // 電子を引きよせる側
-  const L = 270, R = 490, y = 200;
-  const shift = Math.min(1, dx / 2.5) * 62 * (eb > ea ? 1 : -1);
+  const PY = 62, PH = 214, y = PY + PH / 2;
+  const L = 250, R = 510;
+  const shift = Math.min(1, dx / 2.5) * 66 * (eb > ea ? 1 : -1);
   const kind = dx < 0.4 ? '無極性の共有結合' : dx < 1.7 ? '極性のある共有結合' : 'イオン結合に近い';
-  let g = halo(`${a} — ${b}`, 380, 46, { size: 20, fill: '#173b75' });
-  // 電気陰性度のものさし
-  g += `<rect x="150" y="332" width="460" height="14" rx="7" fill="#eef2f7"/>`;
-  [[a, ea], [b, eb]].forEach(([s, e], i) => {
-    const px = 150 + (e - 0.8) / 3.4 * 460;
-    g += `<line x1="${px}" y1="326" x2="${px}" y2="352" stroke="${i ? NEG : POS}" stroke-width="3"/>`;
-    g += halo(`${s} ${fmt(e, 2)}`, px, 372, { size: 12, fill: i ? NEG : POS });
+  let g = panel(40, PY, 680, PH, 'MODEL');
+  g += halo(`${a} — ${b}`, 380, 42, { size: 20, fill: '#173b75' });
+  // 電気陰性度そのものの位置（0.8〜4.0）を、①と同じ形のものさしの下に添える
+  // 同じ元素どうし（H–H など）は目盛が重なるので1つにまとめて書く
+  const same = Math.abs(ea - eb) < 1e-9;
+  (same ? [[`${a}＝${b}`, ea, 2]] : [[a, ea, 0], [b, eb, 1]]).forEach(([s, e, i]) => {
+    const px = 120 + (e - 0.8) / 3.4 * 520;
+    g += `<line x1="${px}" y1="296" x2="${px}" y2="312" stroke="${i === 1 ? NEG : i === 0 ? POS : INK2}" stroke-width="3"/>`;
+    g += halo(`${s} ${fmt(e, 2)}`, px, 291, { size: 11.5, fill: i === 1 ? NEG : i === 0 ? POS : INK2 });
   });
-  g += halo('電気陰性度', 380, 316, { size: 12, fill: INK3 });
+  g += `<line x1="120" y1="312" x2="640" y2="312" stroke="${LINE}" stroke-width="1.5"/>`;
+  g += halo('電気陰性度', 92, 306, { size: 11, fill: INK3, anchor: 'end', sw: 0 });
   // 原子と共有電子対
-  const rA = a === 'H' ? 30 : 42, rB = b === 'H' ? 30 : 42;
+  const rA = a === 'H' ? 32 : 44, rB = b === 'H' ? 32 : 44;
   g += ball(L, y, rA, '#f1f5f9', '#94a3b8', a, { size: 19, color: '#334155' });
   g += ball(R, y, rB, '#f1f5f9', '#94a3b8', b, { size: 19, color: '#334155' });
   g += `<line x1="${L + rA}" y1="${y}" x2="${R - rB}" y2="${y}" stroke="#94a3b8" stroke-width="4"/>`;
@@ -368,11 +409,12 @@ function drawPolar() {
     g += halo(richer === a ? 'δ−' : 'δ＋', L, y - rA - 14, { size: 16, fill: richer === a ? NEG : POS });
     g += halo(richer === b ? 'δ−' : 'δ＋', R, y - rB - 14, { size: 16, fill: richer === b ? NEG : POS });
     const d0 = richer === b ? L : R, d1 = richer === b ? R : L;
-    g += dipole(d0, y + 72, d1, y + 72, '#0f766e', 2.6 + dx);
-    g += halo(`Δχ = ${fmt(dx, 2)}`, 380, y + 100, { size: 14, fill: '#0f766e' });
+    g += dipole(d0, y + 64, d1, y + 64, '#0f766e', 2.6 + dx);
+    g += halo(`電子は ${richer} 側へ`, 380, y + 92, { size: 13, fill: '#0f766e' });
   } else {
-    g += halo('かたよりなし（Δχ ≒ 0）', 380, y + 84, { size: 14, fill: INK2 });
+    g += halo('かたよりなし', 380, y + 78, { size: 14, fill: INK2 });
   }
+  g += dxScale(120, 352, 520, dx);   // ①と同じものさしで、結合の呼び名の境目を示す
   $('chart-polar').innerHTML = g;
   $('pl-bond').textContent = `${a} — ${b}`;
   $('pl-en').textContent = `${fmt(ea, 2)} / ${fmt(eb, 2)}`;
@@ -407,8 +449,9 @@ const MOLS = [
 let mlSel = 0, mlSum = true;
 
 function drawMol() {
-  const m = MOLS[mlSel], cx = 350, cy = 215, R = 118;
-  let g = halo(`${m.f}（${m.name}）`, 380, 44, { size: 18, fill: '#173b75' });
+  const m = MOLS[mlSel], cx = 380, cy = 218, R = 132;
+  let g = panel(40, 62, 680, 290, 'MODEL');
+  g += halo(`${m.f}（${m.name}）`, 380, 42, { size: 18, fill: '#173b75' });
   // 中心原子
   const pts = m.at.map(([ux, uy]) => [cx + ux * R, cy + uy * R]);
   pts.forEach(([x, y]) => { g += `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#94a3b8" stroke-width="5"/>`; });
@@ -437,15 +480,15 @@ function drawMol() {
   const mag = Math.hypot(sx, sy);
   if (mlSum) {
     if (mag > 0.05) {
-      g += arrow(cx, cy, cx + sx / mag * 150, cy + sy / mag * 150, HBC, 5);
-      g += halo('合計は残る＝極性分子', 600, 372, { size: 14, fill: HBC, anchor: 'end' });
+      g += arrow(cx, cy, cx + sx / mag * 158, cy + sy / mag * 158, HBC, 5);
+      g += halo('合計は残る ＝ 極性分子', 620, 382, { size: 14, fill: HBC, anchor: 'end' });
     } else {
-      g += ball(cx, cy, 46, 'none', HBC, '', { sw: 3 });
-      g += halo('合計は 0 ＝無極性分子', 600, 372, { size: 14, fill: INK2, anchor: 'end' });
+      g += ball(cx, cy, 48, 'none', HBC, '', { sw: 3 });
+      g += halo('合計は 0 ＝ 無極性分子', 620, 382, { size: 14, fill: INK2, anchor: 'end' });
     }
   }
-  g += halo(m.shape, 150, 372, { size: 14, fill: INK2 });
-  if (m.pyramid) g += halo('※ 実際は立体（三角錐）なので打ち消さない', 380, 400, { size: 11.5, fill: INK3 });
+  g += halo(m.shape, 140, 382, { size: 14, fill: INK2 });
+  if (m.pyramid) g += halo('※ 実際は立体（三角錐）なので打ち消さない', 380, 406, { size: 11.5, fill: INK3 });
   $('chart-mol').innerHTML = g;
   $('ml-shape').textContent = m.shape;
   $('ml-bond').textContent = 'あり';
@@ -478,7 +521,8 @@ function drawImf() {
   // 3つの力の強さ（めやす）：分散力は分子量、双極子は極性、水素結合は有無
   const disp = Math.min(1, Math.log(d.M) / Math.log(254));
   const dip = d.polar ? 0.5 : 0, hb = d.hb ? 0.95 : 0;
-  let g = halo(`${d.f}（${d.name}）が2つ近づくと`, 380, 40, { size: 16, fill: '#173b75' });
+  let g = panel(40, 62, 680, 210, 'MODEL');
+  g += halo(`${d.f}（${d.name}）が2つ近づくと`, 380, 40, { size: 16, fill: '#173b75' });
   // 2分子を並べる
   const draw2 = (cx, cy, flip) => {
     let s = '';
@@ -563,7 +607,7 @@ let bpKind = 'hydride', bpMark = true;
 function drawBp() {
   // X1 は族ラベル（右端に置く）のぶんを残して 760 に収める
   const X0 = 92, X1 = bpKind === 'hydride' ? 676 : 720, Y0 = 356, Y1 = 56;
-  let g = '';
+  let g = panel(X0 - 22, Y1 - 26, X1 - X0 + 66, Y0 - Y1 + 74, '');
   if (bpKind === 'hydride') {
     const yMin = -180, yMax = 120;
     const sy = v => Y0 - (v - yMin) / (yMax - yMin) * (Y0 - Y1);
@@ -575,6 +619,15 @@ function drawBp() {
     }
     ['2', '3', '4', '5'].forEach((p, i) => { g += halo('第' + p + '周期', sx(i), Y0 + 26, { size: 12, fill: INK3 }); });
     g += halo('沸点 [℃]', 30, 34, { size: 12, fill: INK2, anchor: 'start' });
+    // ラベルは近い点どうしでぶつかるので、置いた場所を覚えて空いている側へ逃がす
+    const placed = [];
+    const putLabel = (t, x, y, color) => {
+      const cand = [-18, 20, -32, 34, -46, 48];
+      let dy = cand.find(d => !placed.some(p => Math.abs(p.x - x) < 44 && Math.abs(p.y - (y + d)) < 15));
+      if (dy === undefined) dy = -18;
+      placed.push({ x, y: y + dy });
+      return halo(t, x, y + dy, { size: 11.5, fill: color, sw: 3 });
+    };
     HYDRIDE.forEach(series => {
       const pts = series.d.map((d, i) => [sx(i), sy(d[2])]);
       g += `<path d="${pts.map((p, i) => (i ? 'L' : 'M') + p[0] + ' ' + p[1]).join(' ')}" fill="none"
@@ -582,7 +635,7 @@ function drawBp() {
       series.d.forEach((d, i) => {
         const anom = bpMark && series.hb && i === 0;
         g += ball(pts[i][0], pts[i][1], anom ? 9 : 6, series.color, '#fff', '', { sw: anom ? 3 : 2 });
-        g += halo(d[0], pts[i][0], pts[i][1] - (i === 0 ? 20 : 16), { size: 11.5, fill: series.color, sw: 3 });
+        g += putLabel(d[0], pts[i][0], pts[i][1], series.color);
       });
       g += halo(series.g, pts[3][0] + 26, pts[3][1] + 4, { size: 12.5, fill: series.color, anchor: 'start' });
     });
@@ -613,12 +666,13 @@ function drawBp() {
       g += halo(fmt(d.bp, 1) + '℃', x + w / 2, y + (d.bp >= 0 ? -12 : 20), { size: 12.5, fill: col });
       g += halo(d.f, x + w / 2, Y0 + 26, { size: 12, fill: INK2 });
       g += halo(`${d.sub}・M=${d.M}`, x + w / 2, Y0 + 44, { size: 11, fill: INK3 });
-      if (bpMark && d.hb) g += halo('水素結合あり', x + w / 2, sy(d.bp) - 34, { size: 12, fill: HBC });
+      // 棒の中に置く（上に出すと注釈とぶつかる）
+      if (bpMark && d.hb) g += halo('水素結合あり', x + w / 2, sy(d.bp) + 28, { size: 12, fill: '#fff', sw: 0 });
     });
     if (bpMark) {
       const x3 = X0 + gap + 2 * (w + gap) + w / 2, x4 = X0 + gap + 3 * (w + gap) + w / 2;
-      g += `<path d="M${x3} 88 H${x4}" stroke="${HBC}" stroke-width="2" stroke-dasharray="6 5"/>`;
-      g += halo('同じ C₂H₆O・同じ分子量なのに 103 ℃ の差', (x3 + x4) / 2, 78, { size: 13, fill: HBC });
+      g += `<path d="M${x3} 54 H${x4}" stroke="${HBC}" stroke-width="2" stroke-dasharray="6 5"/>`;
+      g += halo('同じ C₂H₆O・同じ分子量なのに 103 ℃ の差', (x3 + x4) / 2, 44, { size: 13, fill: HBC });
     }
   }
   $('chart-bp').innerHTML = g;
@@ -634,6 +688,9 @@ function drawBp() {
     ? 'H₂O の沸点は、16族の傾きから予想すると −70 ℃ くらいになるはず。実際は 100 ℃ で、170 ℃ ほど高い。'
     : 'エタンとプロパンのように水素結合をもたない分子どうしなら、分子量が大きいほうが沸点は高い（分散力）。';
   $('bp-mark').textContent = `水素結合の印：${bpMark ? '表示' : '非表示'}`;
+  $('bp-legend').innerHTML = hyd
+    ? HYDRIDE.map(s => `<span><i style="background:${s.color}"></i>${s.g}</span>`).join('')
+    : `<span><i style="background:#64748b"></i>水素結合なし</span><span><i style="background:${HBC}"></i>水素結合あり</span>`;
 }
 
 /* ===== 配線 ===== */
